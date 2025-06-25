@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>HL7 Yeeter</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .chevron {
+            transition: transform 0.2s ease-in-out;
+        }
+
+        #tooltip {
+            position: absolute;
+            display: none;
+            padding: 10px;
+            background-color: #1f2937;
+            border: 1px solid #4b5563;
+            color: white;
+            border-radius: 8px;
+            pointer-events: none;
+            z-index: 100;
+            max-width: 450px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
+        }
+
+        #tooltip .tooltip-title {
+            font-weight: bold;
+            color: #60a5fa;
+            margin-bottom: 4px;
+        }
+
+        #tooltip .tooltip-desc {
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            color: #d1d5db;
+        }
+
+        .value-cell:hover {
+            background-color: #374151;
+            cursor: pointer;
+        }
+
+        .value-cell input {
+            background: transparent;
+            border: 1px solid #60a5fa;
+            color: #a7f3d0;
+            width: 100%;
+            font-family: monospace;
+            padding: 1px;
+        }
+
+        .peer:checked~.peer-checked\:bg-indigo-600 {
+            background-color: #4f46e5;
+        }
+
+        .peer:checked~.peer-checked\:translate-x-full {
+            transform: translateX(100%);
+        }
+
+        #input-container {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background-color: #111827;
+            padding-bottom: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.4);
+        }
+    </style>
+</head>
+
+<body class="bg-gray-900 text-gray-200 font-sans">
+    <div id="tooltip">
+        <div id="tooltip-title" class="tooltip-title"></div>
+        <div id="tooltip-desc" class="tooltip-desc"></div>
+    </div>
+    <div class="container mx-auto p-8 max-w-7xl">
+        <div class="flex items-center gap-4 mb-6">
+            <h1 class="text-4xl font-bold">HL7 Yeeter</h1>
+            <span class="text-4xl">🚀</span>
+        </div>
+        <div class="flex flex-col gap-8">
+            <div id="input-container">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                    <div class="md:col-span-2">
+                        <label for="host" class="block text-sm font-medium text-gray-400">Host</label>
+                        <input type="text" id="host" value="host.docker.internal"
+                            class="mt-1 block w-full bg-gray-800 border-gray-700 rounded-md shadow-sm p-2">
+                    </div>
+                    <div>
+                        <label for="port" class="block text-sm font-medium text-gray-400">Port</label>
+                        <input type="number" id="port" value="2575"
+                            class="mt-1 block w-full bg-gray-800 border-gray-700 rounded-md shadow-sm p-2">
+                    </div>
+                </div>
+                <div>
+                    <label for="hl7-message" class="block text-sm font-medium text-gray-400">HL7 Message (Paste your
+                        dumb shit here)</label>
+                    <textarea id="hl7-message" rows="10"
+                        class="mt-1 block w-full bg-gray-800 border-gray-700 rounded-md shadow-sm p-2 font-mono"></textarea>
+                </div>
+            </div>
+
+            <div>
+                <div class="flex justify-between items-center mb-1">
+                    <label class="block text-sm font-medium text-gray-400">Live Parser</label>
+                    <label for="show-empty-toggle" class="flex items-center cursor-pointer">
+                        <span class="mr-3 text-sm font-medium text-gray-400">Show Empty Fields</span>
+                        <div class="relative">
+                            <input type="checkbox" id="show-empty-toggle" class="sr-only peer" checked>
+                            <div class="w-11 h-6 bg-gray-600 rounded-full peer peer-checked:bg-indigo-600"></div>
+                            <div
+                                class="absolute left-1 top-1 bg-white border-gray-300 border rounded-full h-4 w-4 transition-transform peer-checked:translate-x-full">
+                            </div>
+                        </div>
+                    </label>
+                </div>
+                <div id="parser-output" class="mt-1 border border-gray-700 rounded-md bg-gray-800 space-y-1 p-1">
+                    <div class="text-gray-500 p-4">Start typing or paste an HL7 message to see it parsed here...</div>
+                </div>
+            </div>
+            <div>
+                <button id="send-btn"
+                    class="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-md flex items-center justify-center text-lg">
+                    <span id="btn-text">YEET IT</span>
+                    <svg id="spinner" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white hidden"
+                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                        </circle>
+                        <path class="opacity-75" fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                        </path>
+                    </svg>
+                </button>
+                <div id="response" class="mt-4 p-4 bg-gray-800 rounded-md hidden">
+                    <h3 class="font-bold text-lg mb-2" id="response-status"></h3>
+                    <p id="response-message" class="text-sm"></p>
+                    <pre id="response-ack" class="text-xs bg-gray-900 p-2 mt-2 rounded-md overflow-x-auto"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // --- GLOBAL STATE & DOM ELEMENTS ---
+        let messageState = [];
+        let isEditing = false; // Prevent multiple cells from being edited at once.
+        const tooltip = document.getElementById('tooltip');
+        const tooltipTitle = document.getElementById('tooltip-title');
+        const tooltipDesc = document.getElementById('tooltip-desc');
+        const messageTextarea = document.getElementById('hl7-message');
+        const parserOutputDiv = document.getElementById('parser-output');
+        const showEmptyToggle = document.getElementById('show-empty-toggle');
+        let debounceTimer;
+
+        // --- THE MAGIC REBUILDER ---
+        // This function takes our glorious JavaScript state and shits it back out into a raw HL7 string.
+        // It's unaffected by the show/hide toggle because it reads the pure data state. Smart, right?
+        function rebuildHl7Message() {
+            if (!messageState.length) return "";
+
+            return messageState.map(segment => {
+                if (segment.name === 'MSH') {
+                    // Find max index to preserve trailing empties
+                    const maxIndex = Math.max(0, ...segment.fields.map(f => f.index));
+                    const fields = new Array(maxIndex + 1).fill('');
+                    segment.fields.forEach(field => {
+                        // MSH.1 and MSH.2 are special
+                        if (field.index === 1) fields[0] = field.value; // MSH.1 (should be the field separator, usually '|')
+                        else if (field.index === 2) fields[1] = field.value; // MSH.2 (encoding chars)
+                        else if (field.index > 2) fields[field.index - 1] = field.value; // MSH.3+ is off by one
+                    });
+                    // The segment output should be: 'MSH' + <field separator> + fields.join(<field separator>)
+                    const fieldSep = fields[0] || '|';
+                    // Do NOT double the field separator after 'MSH'
+                    return 'MSH' + fieldSep + fields.slice(1).join(fieldSep);
+                } else {
+                    // Normal segments: first field is always segment name
+                    const maxIndex = Math.max(0, ...segment.fields.map(f => f.index));
+                    const fields = new Array(maxIndex + 1).fill('');
+                    fields[0] = segment.name;
+                    segment.fields.forEach(field => {
+                        fields[field.index] = field.value;
+                    });
+                    return fields.join('|');
+                }
+            }).join('\r');
+        }
+
+        // --- CORE RENDER/PARSE FUNCTIONS ---
+        function renderAccordion(segments) {
+            const showEmpty = showEmptyToggle.checked;
+            parserOutputDiv.innerHTML = '';
+            if (!segments || segments.length === 0) {
+                parserOutputDiv.innerHTML = `<div class="text-gray-500 p-4">Parsed, but got no segments. Is the message empty or just garbage?</div>`;
+                return;
+            }
+
+            segments.forEach((segment, segmentIndex) => {
+                const accordionItem = document.createElement('div');
+                accordionItem.className = 'bg-gray-800 rounded-md';
+                const header = document.createElement('div');
+                header.className = 'flex justify-between items-center p-3 cursor-pointer bg-gray-700 hover:bg-gray-600 rounded-md';
+                header.innerHTML = `<span class="font-bold text-white">${segment.name}</span><svg class="chevron h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>`;
+                const content = document.createElement('div');
+                content.className = 'hidden p-2';
+                const table = document.createElement('table');
+                table.className = 'w-full text-left font-mono text-sm';
+                const thead = table.createTHead();
+                thead.className = 'text-gray-400 text-xs uppercase';
+                const headerRow = thead.insertRow();
+                // **** ADDED 'DATA TYPE' TO THE HEADERS ****
+                const headers = { 'ID': 'w-20', 'Name': 'w-1/4', 'Data Type': 'w-48', 'Length': 'w-16', 'Value': 'w-auto' };
+                for (const [text, widthClass] of Object.entries(headers)) {
+                    const th = document.createElement('th');
+                    th.className = `py-2 px-2 ${widthClass}`;
+                    th.textContent = text;
+                    headerRow.appendChild(th);
+                }
+                const tbody = table.createTBody();
+
+                tbody.addEventListener('mouseover', e => {
+                    const row = e.target.closest('tr');
+                    if (row && row.dataset.description) {
+                        tooltipTitle.textContent = row.dataset.title || 'Field';
+                        tooltipDesc.textContent = row.dataset.description;
+                        tooltip.style.display = 'block';
+                    }
+                });
+                tbody.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
+
+                let hasVisibleFields = false;
+                segment.fields.forEach((field, fieldIndex) => {
+                    const isFieldEmpty = !field.value || field.value.trim() === '';
+                    if (showEmpty || !isFieldEmpty) {
+                        hasVisibleFields = true;
+                        const row = tbody.insertRow();
+                        row.className = "hover:bg-gray-700/50 border-b border-gray-700/50";
+                        row.dataset.segmentIndex = segmentIndex;
+                        row.dataset.fieldIndex = fieldIndex;
+                        row.dataset.title = field.name || field.field_id;
+                        row.dataset.description = field.description || 'No description available.';
+
+                        row.insertCell().outerHTML = `<td class="p-2 text-gray-500 align-top">${field.field_id}</td>`;
+                        row.insertCell().outerHTML = `<td class="p-2 text-gray-300 align-top">${field.name}</td>`;
+                        // **** ADDED THE NEW CELL FOR DATA TYPE ****
+                        row.insertCell().outerHTML = `<td class="p-2 text-cyan-400 align-top text-xs">${field.data_type}</td>`;
+                        row.insertCell().outerHTML = `<td class="p-2 text-gray-400 align-top">${field.length}</td>`;
+
+                        const valueCell = row.insertCell();
+                        valueCell.className = 'p-2 text-green-300 break-words align-top value-cell';
+                        valueCell.innerHTML = !isFieldEmpty ? field.value : `<span class="text-gray-600"><empty></span>`;
+                    }
+                });
+
+                if (hasVisibleFields) {
+                    content.appendChild(table);
+                    accordionItem.appendChild(header);
+                    accordionItem.appendChild(content);
+                    parserOutputDiv.appendChild(accordionItem);
+
+                    header.addEventListener('click', () => {
+                        content.classList.toggle('hidden');
+                        header.querySelector('.chevron').classList.toggle('rotate-180');
+                    });
+                }
+            });
+        }
+
+
+        function renderParseError(message) {
+            parserOutputDiv.innerHTML = `<div class="bg-red-900/50 border border-red-700 text-red-300 p-4 rounded-md font-mono">${message}</div>`;
+        }
+
+
+        // --- EVENT LISTENERS ---
+        // Parse the message on input
+        messageTextarea.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            parserOutputDiv.innerHTML = `<div class="text-gray-500 p-4">Parsing...</div>`;
+            debounceTimer = setTimeout(async () => {
+                const message = messageTextarea.value;
+                if (!message.trim()) {
+                    parserOutputDiv.innerHTML = `<div class="text-gray-500 p-4">Start typing or paste an HL7 message to see it parsed here...</div>`;
+                    messageState = []; // Clear state if textarea is empty
+                    return;
+                }
+                try {
+                    const response = await fetch('/parse_hl7', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message }) });
+                    const result = await response.json();
+                    if (response.ok && result.status === 'success') {
+                        messageState = result.data;
+                        renderAccordion(messageState);
+                    } else {
+                        messageState = []; // Clear state on error
+                        renderParseError(result.message || `Server shat the bed with status ${response.status}`);
+                    }
+                } catch (error) {
+                    messageState = []; // Clear state on error
+                    renderParseError('Network error connecting to parser. Is the Flask app running, genius?');
+                }
+            }, 300);
+        });
+
+        // Event listener for our new shiny toggle
+        showEmptyToggle.addEventListener('change', () => {
+            // Only re-render if we actually have something parsed
+            if (messageState && messageState.length > 0) {
+                renderAccordion(messageState);
+            }
+        });
+
+        // The mighty listener for editing values.
+        parserOutputDiv.addEventListener('click', e => {
+            if (isEditing) return; // Don't do shit if we're already editing.
+
+            const targetCell = e.target.closest('.value-cell');
+            if (!targetCell) return;
+
+            isEditing = true;
+            const row = targetCell.closest('tr');
+            const { segmentIndex, fieldIndex } = row.dataset;
+
+            // This is a bit of a hack. Since we might be hiding fields, the DOM index doesn't map to the array index.
+            // We need to find the actual field in our messageState based on the data- attributes.
+            const fieldToEdit = messageState[segmentIndex].fields[fieldIndex];
+
+            const originalValue = fieldToEdit.value;
+            targetCell.innerHTML = `<input type="text" value="${originalValue}" class="p-1 w-full bg-gray-600 text-white rounded font-mono">`;
+            const input = targetCell.querySelector('input');
+            input.focus();
+            input.select();
+
+            const saveChanges = () => {
+                const newValue = input.value;
+                fieldToEdit.value = newValue; // Update the central state
+
+                // Re-render the cell.
+                const isFieldEmpty = !newValue || newValue.trim() === '';
+                targetCell.innerHTML = !isFieldEmpty ? newValue : `<span class="text-gray-600"><empty></span>`;
+
+                // Rebuild the whole damn message and update the textarea
+                messageTextarea.value = rebuildHl7Message();
+                isEditing = false;
+            };
+
+            input.addEventListener('blur', saveChanges);
+            input.addEventListener('keydown', e => {
+                if (e.key === 'Enter') {
+                    e.preventDefault(); // Stop the form from submitting, just in case
+                    saveChanges();
+                } else if (e.key === 'Escape') {
+                    const isFieldEmpty = !originalValue || originalValue.trim() === '';
+                    targetCell.innerHTML = !isFieldEmpty ? originalValue : `<span class="text-gray-600"><empty></span>`;
+                    isEditing = false;
+                }
+            });
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (tooltip.style.display === 'block') {
+                tooltip.style.left = `${e.pageX + 15}px`;
+                tooltip.style.top = `${e.pageY + 15}px`;
+            }
+        });
+
+        document.getElementById('send-btn').addEventListener('click', async () => {
+            // This beautiful monstrosity is unchanged. Still works.
+            const sendBtn = document.getElementById('send-btn');
+            const btnText = document.getElementById('btn-text');
+            const spinner = document.getElementById('spinner');
+            const responseDiv = document.getElementById('response');
+            const responseStatus = document.getElementById('response-status');
+            const responseMessage = document.getElementById('response-message');
+            const responseAck = document.getElementById('response-ack');
+
+            btnText.textContent = 'YEETING...';
+            spinner.classList.remove('hidden');
+            sendBtn.disabled = true;
+            responseDiv.classList.add('hidden');
+
+            const payload = {
+                host: document.getElementById('host').value,
+                port: document.getElementById('port').value,
+                message: document.getElementById('hl7-message').value
+            };
+
+            try {
+                const response = await fetch('/send_hl7', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+
+                responseStatus.textContent = response.ok ? '✅ Success' : '❌ Error';
+                responseStatus.className = `font-bold text-lg mb-2 ${response.ok ? 'text-green-400' : 'text-red-400'}`;
+                responseMessage.textContent = result.message;
+
+                if (result.ack) {
+                    responseAck.textContent = result.ack;
+                    responseAck.classList.remove('hidden');
+                } else {
+                    responseAck.classList.add('hidden');
+                }
+                responseDiv.classList.remove('hidden');
+            } catch (error) {
+                responseStatus.textContent = '❌ Network Fart';
+                responseStatus.className = 'font-bold text-lg mb-2 text-red-400';
+                responseMessage.textContent = 'Could not connect to the backend to send the message. Check your console, maybe.';
+                responseAck.classList.add('hidden');
+                responseDiv.classList.remove('hidden');
+            } finally {
+                btnText.textContent = 'YEET IT AGAIN';
+                spinner.classList.add('hidden');
+                sendBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+
+</html>
