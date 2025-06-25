@@ -11,6 +11,9 @@
         .chevron {
             transition: transform 0.2s ease-in-out;
         }
+        .rotate-180 { /* I'm adding this to the style block for clarity */
+            transform: rotate(180deg);
+        }
 
         #tooltip {
             position: absolute;
@@ -50,6 +53,17 @@
             width: 100%;
             font-family: monospace;
             padding: 1px;
+        }
+
+        .value-cell.dragging {
+            opacity: 0.4;
+            cursor: grabbing;
+            background-color: #4338ca;
+        }
+
+        .value-cell.drag-over {
+            outline: 2px dashed #60a5fa;
+            background-color: #312e81;
         }
 
         .peer:checked~.peer-checked\:bg-indigo-600 {
@@ -145,7 +159,7 @@
     <script>
         // --- GLOBAL STATE & DOM ELEMENTS ---
         let messageState = [];
-        let isEditing = false; // Prevent multiple cells from being edited at once.
+        let isEditing = false;
         const tooltip = document.getElementById('tooltip');
         const tooltipTitle = document.getElementById('tooltip-title');
         const tooltipDesc = document.getElementById('tooltip-desc');
@@ -154,29 +168,45 @@
         const showEmptyToggle = document.getElementById('show-empty-toggle');
         let debounceTimer;
 
+        // --- ACCORDION STATE MANAGEMENT - The New Hotness ---
+        // This genius function checks which accordions are open right now.
+        function getOpenAccordionStates() {
+            const openStates = new Set();
+            parserOutputDiv.querySelectorAll('.accordion-item').forEach(item => {
+                const content = item.querySelector('.accordion-content');
+                if (content && !content.classList.contains('hidden')) {
+                    openStates.add(item.dataset.segmentName);
+                }
+            });
+            return openStates;
+        }
+
+        // And this one puts them back the way they were. Fucking magic.
+        function applyAccordionStates(openStates) {
+            parserOutputDiv.querySelectorAll('.accordion-item').forEach(item => {
+                if (openStates.has(item.dataset.segmentName)) {
+                    item.querySelector('.accordion-content').classList.remove('hidden');
+                    item.querySelector('.chevron').classList.add('rotate-180');
+                }
+            });
+        }
+
         // --- THE MAGIC REBUILDER ---
-        // This function takes our glorious JavaScript state and shits it back out into a raw HL7 string.
-        // It's unaffected by the show/hide toggle because it reads the pure data state. Smart, right?
         function rebuildHl7Message() {
             if (!messageState.length) return "";
 
             return messageState.map(segment => {
                 if (segment.name === 'MSH') {
-                    // Find max index to preserve trailing empties
                     const maxIndex = Math.max(0, ...segment.fields.map(f => f.index));
                     const fields = new Array(maxIndex + 1).fill('');
                     segment.fields.forEach(field => {
-                        // MSH.1 and MSH.2 are special
-                        if (field.index === 1) fields[0] = field.value; // MSH.1 (should be the field separator, usually '|')
-                        else if (field.index === 2) fields[1] = field.value; // MSH.2 (encoding chars)
-                        else if (field.index > 2) fields[field.index - 1] = field.value; // MSH.3+ is off by one
+                        if (field.index === 1) fields[0] = field.value;
+                        else if (field.index === 2) fields[1] = field.value;
+                        else if (field.index > 2) fields[field.index - 1] = field.value;
                     });
-                    // The segment output should be: 'MSH' + <field separator> + fields.join(<field separator>)
                     const fieldSep = fields[0] || '|';
-                    // Do NOT double the field separator after 'MSH'
                     return 'MSH' + fieldSep + fields.slice(1).join(fieldSep);
                 } else {
-                    // Normal segments: first field is always segment name
                     const maxIndex = Math.max(0, ...segment.fields.map(f => f.index));
                     const fields = new Array(maxIndex + 1).fill('');
                     fields[0] = segment.name;
@@ -199,18 +229,21 @@
 
             segments.forEach((segment, segmentIndex) => {
                 const accordionItem = document.createElement('div');
-                accordionItem.className = 'bg-gray-800 rounded-md';
+                // Added classes and data-attribute to identify this thing
+                accordionItem.className = 'bg-gray-800 rounded-md accordion-item';
+                accordionItem.dataset.segmentName = segment.name;
+
                 const header = document.createElement('div');
                 header.className = 'flex justify-between items-center p-3 cursor-pointer bg-gray-700 hover:bg-gray-600 rounded-md';
                 header.innerHTML = `<span class="font-bold text-white">${segment.name}</span><svg class="chevron h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>`;
                 const content = document.createElement('div');
-                content.className = 'hidden p-2';
+                // Added a class to identify this too
+                content.className = 'hidden p-2 accordion-content';
                 const table = document.createElement('table');
                 table.className = 'w-full text-left font-mono text-sm';
                 const thead = table.createTHead();
                 thead.className = 'text-gray-400 text-xs uppercase';
                 const headerRow = thead.insertRow();
-                // **** ADDED 'DATA TYPE' TO THE HEADERS ****
                 const headers = { 'ID': 'w-20', 'Name': 'w-1/4', 'Data Type': 'w-48', 'Length': 'w-16', 'Value': 'w-auto' };
                 for (const [text, widthClass] of Object.entries(headers)) {
                     const th = document.createElement('th');
@@ -244,12 +277,12 @@
 
                         row.insertCell().outerHTML = `<td class="p-2 text-gray-500 align-top">${field.field_id}</td>`;
                         row.insertCell().outerHTML = `<td class="p-2 text-gray-300 align-top">${field.name}</td>`;
-                        // **** ADDED THE NEW CELL FOR DATA TYPE ****
                         row.insertCell().outerHTML = `<td class="p-2 text-cyan-400 align-top text-xs">${field.data_type}</td>`;
                         row.insertCell().outerHTML = `<td class="p-2 text-gray-400 align-top">${field.length}</td>`;
 
                         const valueCell = row.insertCell();
                         valueCell.className = 'p-2 text-green-300 break-words align-top value-cell';
+                        valueCell.draggable = true;
                         valueCell.innerHTML = !isFieldEmpty ? field.value : `<span class="text-gray-600"><empty></span>`;
                     }
                 });
@@ -268,14 +301,11 @@
             });
         }
 
-
         function renderParseError(message) {
             parserOutputDiv.innerHTML = `<div class="bg-red-900/50 border border-red-700 text-red-300 p-4 rounded-md font-mono">${message}</div>`;
         }
 
-
         // --- EVENT LISTENERS ---
-        // Parse the message on input
         messageTextarea.addEventListener('input', () => {
             clearTimeout(debounceTimer);
             parserOutputDiv.innerHTML = `<div class="text-gray-500 p-4">Parsing...</div>`;
@@ -283,7 +313,7 @@
                 const message = messageTextarea.value;
                 if (!message.trim()) {
                     parserOutputDiv.innerHTML = `<div class="text-gray-500 p-4">Start typing or paste an HL7 message to see it parsed here...</div>`;
-                    messageState = []; // Clear state if textarea is empty
+                    messageState = [];
                     return;
                 }
                 try {
@@ -293,37 +323,34 @@
                         messageState = result.data;
                         renderAccordion(messageState);
                     } else {
-                        messageState = []; // Clear state on error
+                        messageState = [];
                         renderParseError(result.message || `Server shat the bed with status ${response.status}`);
                     }
                 } catch (error) {
-                    messageState = []; // Clear state on error
+                    messageState = [];
                     renderParseError('Network error connecting to parser. Is the Flask app running, genius?');
                 }
             }, 300);
         });
 
-        // Event listener for our new shiny toggle
         showEmptyToggle.addEventListener('change', () => {
-            // Only re-render if we actually have something parsed
             if (messageState && messageState.length > 0) {
+                // Apply the same fucking logic here so the toggle doesn't collapse everything
+                const openStates = getOpenAccordionStates();
                 renderAccordion(messageState);
+                applyAccordionStates(openStates);
             }
         });
 
-        // The mighty listener for editing values.
         parserOutputDiv.addEventListener('click', e => {
-            if (isEditing) return; // Don't do shit if we're already editing.
-
+            if (isEditing) return;
             const targetCell = e.target.closest('.value-cell');
-            if (!targetCell) return;
+            if (!targetCell || e.target.closest('.accordion-item') === null) return;
+            if (targetCell.classList.contains('dragging')) return;
 
             isEditing = true;
             const row = targetCell.closest('tr');
             const { segmentIndex, fieldIndex } = row.dataset;
-
-            // This is a bit of a hack. Since we might be hiding fields, the DOM index doesn't map to the array index.
-            // We need to find the actual field in our messageState based on the data- attributes.
             const fieldToEdit = messageState[segmentIndex].fields[fieldIndex];
 
             const originalValue = fieldToEdit.value;
@@ -334,28 +361,85 @@
 
             const saveChanges = () => {
                 const newValue = input.value;
-                fieldToEdit.value = newValue; // Update the central state
-
-                // Re-render the cell.
+                fieldToEdit.value = newValue;
                 const isFieldEmpty = !newValue || newValue.trim() === '';
                 targetCell.innerHTML = !isFieldEmpty ? newValue : `<span class="text-gray-600"><empty></span>`;
-
-                // Rebuild the whole damn message and update the textarea
                 messageTextarea.value = rebuildHl7Message();
                 isEditing = false;
             };
 
             input.addEventListener('blur', saveChanges);
             input.addEventListener('keydown', e => {
-                if (e.key === 'Enter') {
-                    e.preventDefault(); // Stop the form from submitting, just in case
-                    saveChanges();
-                } else if (e.key === 'Escape') {
+                if (e.key === 'Enter') e.preventDefault(), saveChanges();
+                else if (e.key === 'Escape') {
                     const isFieldEmpty = !originalValue || originalValue.trim() === '';
                     targetCell.innerHTML = !isFieldEmpty ? originalValue : `<span class="text-gray-600"><empty></span>`;
                     isEditing = false;
                 }
             });
+        });
+
+        let draggedElementData = null;
+        parserOutputDiv.addEventListener('dragstart', e => {
+            const targetCell = e.target.closest('.value-cell');
+            if (!targetCell) return;
+            const row = targetCell.closest('tr');
+            if (!row || e.target.tagName === 'INPUT') { e.preventDefault(); return; }
+            draggedElementData = { segmentIndex: row.dataset.segmentIndex, fieldIndex: row.dataset.fieldIndex };
+            e.dataTransfer.effectAllowed = 'move';
+            setTimeout(() => targetCell.classList.add('dragging'), 0);
+        });
+
+        parserOutputDiv.addEventListener('dragend', e => {
+            document.querySelectorAll('.dragging').forEach(el => el.classList.remove('dragging'));
+            document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+            draggedElementData = null;
+        });
+
+        parserOutputDiv.addEventListener('dragover', e => {
+            e.preventDefault();
+            const targetCell = e.target.closest('.value-cell');
+            const targetRow = e.target.closest('tr');
+            if(targetRow && targetRow.dataset.segmentIndex == draggedElementData.segmentIndex && targetRow.dataset.fieldIndex == draggedElementData.fieldIndex) return;
+            if (targetCell) targetCell.classList.add('drag-over');
+        });
+
+        parserOutputDiv.addEventListener('dragleave', e => {
+            const targetCell = e.target.closest('.value-cell');
+            if (targetCell) targetCell.classList.remove('drag-over');
+        });
+
+        parserOutputDiv.addEventListener('drop', e => {
+            e.preventDefault();
+            const targetCell = e.target.closest('.value-cell');
+            if (!targetCell || !draggedElementData) return;
+
+            targetCell.classList.remove('drag-over');
+            const targetRow = targetCell.closest('tr');
+            if (!targetRow) return;
+
+            const sourceInfo = draggedElementData;
+            const destinationInfo = { segmentIndex: targetRow.dataset.segmentIndex, fieldIndex: targetRow.dataset.fieldIndex };
+
+            if (sourceInfo.segmentIndex === destinationInfo.segmentIndex && sourceInfo.fieldIndex === destinationInfo.fieldIndex) return;
+
+            // ---- THE BIG CHANGE IS RIGHT HERE ----
+            // 1. Remember what was open
+            const openStates = getOpenAccordionStates();
+
+            // 2. Do the data-fucking we did before
+            const sourceField = messageState[sourceInfo.segmentIndex].fields[sourceInfo.fieldIndex];
+            const destField = messageState[destinationInfo.segmentIndex].fields[destinationInfo.fieldIndex];
+            const valueToMove = sourceField.value;
+            destField.value = valueToMove;
+            sourceField.value = '';
+
+            // 3. Update the textarea and re-render the accordion
+            messageTextarea.value = rebuildHl7Message();
+            renderAccordion(messageState);
+
+            // 4. PUT IT BACK THE WAY YOU FOUND IT, YOU ANIMAL
+            applyAccordionStates(openStates);
         });
 
         document.addEventListener('mousemove', (e) => {
@@ -366,7 +450,6 @@
         });
 
         document.getElementById('send-btn').addEventListener('click', async () => {
-            // This beautiful monstrosity is unchanged. Still works.
             const sendBtn = document.getElementById('send-btn');
             const btnText = document.getElementById('btn-text');
             const spinner = document.getElementById('spinner');
@@ -387,17 +470,11 @@
             };
 
             try {
-                const response = await fetch('/send_hl7', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
+                const response = await fetch('/send_hl7', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 const result = await response.json();
-
                 responseStatus.textContent = response.ok ? '✅ Success' : '❌ Error';
                 responseStatus.className = `font-bold text-lg mb-2 ${response.ok ? 'text-green-400' : 'text-red-400'}`;
                 responseMessage.textContent = result.message;
-
                 if (result.ack) {
                     responseAck.textContent = result.ack;
                     responseAck.classList.remove('hidden');
