@@ -1,14 +1,15 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { parseHl7, sendHl7 } from '../api/mllp';
-import { rebuildHl7Message } from '../utils/hl7';
+import { rebuildHl7Message, stripCommentsAndBlankLines } from '../utils/hl7'; // <-- IMPORT THE NEW FUNCTION
 import ConnectionInputs from './ConnectionInputs';
 import ParserOutput from './ParserOutput';
 import SendButton from './SendButton';
 import ResponseDisplay from './ResponseDisplay';
 import Tooltip from './Tooltip';
+import MessageTemplates from './MessageTemplates';
 
 const HL7Parser = () => {
-    // All state and handlers remain the same. No logic changes here.
+    // All state and handlers remain the same.
     const [host, setHost] = useState('localhost');
     const [port, setPort] = useState('5001');
     const [hl7Message, setHl7Message] = useState('');
@@ -25,6 +26,7 @@ const HL7Parser = () => {
     const scrollRef = useRef(0);
     const debounceTimerRef = useRef(null);
 
+    // All useEffects and most handlers are unchanged
     useEffect(() => {
         if (!hl7Message.trim()) {
             setSegments([]);
@@ -103,6 +105,13 @@ const HL7Parser = () => {
         setTimeout(() => setIsCopied(false), 2000);
     };
 
+    // --- HANDLER FOR THE NEW STRIP BUTTON ---
+    const handleStrip = () => {
+        if (!hl7Message) return;
+        const cleanedMessage = stripCommentsAndBlankLines(hl7Message);
+        setHl7Message(cleanedMessage);
+    };
+
     const handleSend = async () => {
         setIsSending(true);
         setResponse(null);
@@ -120,6 +129,10 @@ const HL7Parser = () => {
     const handleMouseMove = (e) => {
         if(tooltipContent) setTooltipPos({ x: e.pageX, y: e.pageY });
     };
+    
+    const handleTemplateSelect = (message) => {
+        setHl7Message(message);
+    };
 
     return (
         <div onMouseMove={handleMouseMove}>
@@ -128,67 +141,89 @@ const HL7Parser = () => {
                 <h1 className="text-4xl font-bold">HL7 Yeeter</h1>
                 <span className="text-4xl">🚀</span>
             </div>
-            <div className="flex flex-col gap-8">
-                <div id="input-container">
-                    {/* --- THE ONLY CHANGE IN THIS FILE IS RIGHT HERE --- */}
-                    {/* --- WE ARE NOW PASSING THE PROPS DOWN --- */}
-                    <ConnectionInputs 
-                        host={host} 
-                        setHost={setHost} 
-                        port={port} 
-                        setPort={setPort}
-                        isSending={isSending}
-                        handleSend={handleSend}
-                    />
-                    <div>
-                        <div className="flex justify-between items-center mb-1">
-                            <label htmlFor="hl7-message" className="block text-sm font-medium text-gray-400">HL7 Message (Paste your dumb shit here)</label>
-                            <button
-                                onClick={handleCopy}
-                                disabled={!hl7Message}
-                                title={isCopied ? "Copied!" : "Copy to clipboard"}
-                                className="p-1.5 bg-gray-700 rounded-md hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
-                            >
-                                {isCopied ? (
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                                    </svg>
-                                ) : (
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                                    </svg>
-                                )}
-                            </button>
-                        </div>
-                        <textarea
-                            id="hl7-message"
-                            rows="10"
-                            className="mt-1 block w-full bg-gray-800 border-gray-700 rounded-md shadow-sm p-2 font-mono"
-                            value={hl7Message}
-                            onChange={(e) => setHl7Message(e.target.value)}
-                        />
-                    </div>
+
+            <div className="flex flex-col md:flex-row gap-8">
+                
+                <div className="w-full md:w-1/4 lg:w-1/5">
+                    <MessageTemplates onTemplateSelect={handleTemplateSelect} />
                 </div>
+                
+                <div className="w-full md:w-3/4 lg:w-4/5">
+                    <div className="flex flex-col gap-8">
+                        <div id="input-container">
+                            <ConnectionInputs 
+                                host={host} 
+                                setHost={setHost} 
+                                port={port} 
+                                setPort={setPort}
+                                isSending={isSending}
+                                handleSend={handleSend}
+                            />
+                            <div>
+                                <div className="flex justify-between items-center mb-1">
+                                    <label htmlFor="hl7-message" className="block text-sm font-medium text-gray-400">HL7 Message (Paste your dumb shit here)</label>
+                                    {/* --- NEW BUTTON GROUP --- */}
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={handleStrip}
+                                            disabled={!hl7Message}
+                                            title="Strip comments & blank lines"
+                                            className="p-1.5 bg-gray-700 rounded-md hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors"
+                                        >
+                                            {/* The Broom Icon */}
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 11a1 1 0 011-1h12a1 1 0 110 2H6a1 1 0 01-1-1z" />
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 11v10a2 2 0 01-2 2H7a2 2 0 01-2-2V11m14 0-4-4m-4 4L7 7" />
+                                            </svg>
+                                        </button>
+                                        <button
+                                            onClick={handleCopy}
+                                            disabled={!hl7Message}
+                                            title={isCopied ? "Copied!" : "Copy to clipboard"}
+                                            className="p-1.5 bg-gray-700 rounded-md hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                                        >
+                                            {isCopied ? (
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                                </svg>
+                                            ) : (
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                                </svg>
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
+                                <textarea
+                                    id="hl7-message"
+                                    rows="10"
+                                    className="mt-1 block w-full bg-gray-800 border-gray-700 rounded-md shadow-sm p-2 font-mono"
+                                    value={hl7Message}
+                                    onChange={(e) => setHl7Message(e.target.value)}
+                                />
+                            </div>
+                        </div>
 
-                <ParserOutput
-                    isProcessing={isProcessing}
-                    segments={segments}
-                    error={error}
-                    showEmpty={showEmpty}
-                    setShowEmpty={setShowEmpty}
-                    onFieldMove={handleFieldMove}
-                    onFieldUpdate={handleFieldUpdate}
-                    setTooltipContent={setTooltipContent}
-                />
+                        <ParserOutput
+                            isProcessing={isProcessing}
+                            segments={segments}
+                            error={error}
+                            showEmpty={showEmpty}
+                            setShowEmpty={setShowEmpty}
+                            onFieldMove={handleFieldMove}
+                            onFieldUpdate={handleFieldUpdate}
+                            setTooltipContent={setTooltipContent}
+                        />
 
-                <div>
-                    {/* --- THIS IS THE ORIGINAL BIG BUTTON. IT NOW HAS CUSTOM CLASSES. --- */}
-                    <SendButton 
-                        isSending={isSending} 
-                        onClick={handleSend} 
-                        className="w-full text-lg py-3 px-4"
-                    />
-                    {response && <ResponseDisplay response={response} />}
+                        <div>
+                            <SendButton 
+                                isSending={isSending} 
+                                onClick={handleSend} 
+                                className="w-full text-lg py-3 px-4"
+                            />
+                            {response && <ResponseDisplay response={response} />}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

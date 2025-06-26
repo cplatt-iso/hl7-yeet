@@ -1502,5 +1502,2740 @@
       "optionality": "Optional",
       "repeatability": "Not repeatable"
     }
+  },
+  "PV1": {
+    "1": {
+      "field_id": "PV1.1",
+      "name": "Set ID - PV1",
+      "description": "This field contains the number that identifies this transaction. For the first occurrence of the segment, the sequence number shall be one, for the second occurrence, the sequence number shall be two, etc.",
+      "length": "4",
+      "data_type": "SI - Sequence ID",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "PV1.2",
+      "name": "Patient Class",
+      "description": "This field is used by systems to categorize patients by site. It does not have a consistent industry-wide definition. It is subject to site-specific variations. Refer to User-defined Table 0004 - Patient Class for suggested values.",
+      "length": "1",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "PV1.3",
+      "name": "Assigned Patient Location",
+      "description": "This field contains the patients initial assigned location or the location to which the patient is being moved. The first component may be the nursing station for inpatient locations, or clinic or department, for locations other than inpatient. For canceling a transaction or discharging a patient, the current location (after the cancellation event or before the discharge event) should be in this field. If a value exists in the fifth component (location status), it supersedes the value in PV1-40 - Bed Status.",
+      "length": "80",
+      "data_type": "PL - Person Location",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "PV1.4",
+      "name": "Admission Type",
+      "description": "This field indicates the circumstances under which the patient was or will be admitted. Refer to User-defined Table 0007 - Admission Type for suggested values. In the US, it is recommended to report the UB92 FL 19 Type of Admission in this field.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "PV1.5",
+      "name": "Preadmit Number",
+      "description": "This field uniquely identifies the patients pre-admit account. Some systems will continue to use the pre-admit number as the billing number after the patient has been admitted. For backward compatibility, a ST data type can be sent; however HL7 recommends use of the CX data type, like the account number, for new implementations. The assigning authority and identifier type codes are strongly recommended for all CX data types.",
+      "length": "250",
+      "data_type": "CX - Extended Composite ID with Check Digit",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "PV1.6",
+      "name": "Prior Patient Location",
+      "description": "This field contains the prior patient location if the patient is being transferred. The old location is null if the patient is new. If a value exists in the fifth component (location status), it supersedes the value in PV1-40 - Bed Status.",
+      "length": "80",
+      "data_type": "PL - Person Location",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "PV1.7",
+      "name": "Attending Doctor",
+      "description": "This field contains the attending physician information. Multiple names and identifiers for the same physician may be sent. The field sequences are not used to indicate multiple attending doctors. The legal name must be sent in the first sequence. If the legal name is not sent, then a repeat delimiter must be sent in the first sequence. Depending on local agreements, either ID or the name may be absent in this field. Refer to User-defined Table 0010 - Physician ID for suggested values.",
+      "length": "250",
+      "data_type": "XCN - Extended Composite ID Number and Name for Persons",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "8": {
+      "field_id": "PV1.8",
+      "name": "Referring Doctor",
+      "description": "This field contains the referring physician information. Multiple names and identifiers for the same physician may be sent. The field sequences are not used to indicate multiple referring doctors. The legal name must be sent in the first sequence. If the legal name is not sent, then a repeat delimiter must be sent in the first sequence. Depending on local agreements, either the ID or the name may be absent from this field. Refer to User-defined Table 0010 - Physician ID for suggested values.",
+      "length": "250",
+      "data_type": "XCN - Extended Composite ID Number and Name for Persons",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "9": {
+      "field_id": "PV1.9",
+      "name": "Consulting Doctor",
+      "description": "From V2.4 onward, this field has been retained for backward compatibility only. It is recommended to use the ROL - Role segment for consulting physicians instead. This field contains the consulting physician information. The field sequences are used to indicate multiple consulting doctors. Depending on local agreements, either the ID or the name may be absent from this field. Refer to User-defined Table 0010 - Physician ID for suggested values.",
+      "length": "250",
+      "data_type": "XCN - Extended Composite ID Number and Name for Persons",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "10": {
+      "field_id": "PV1.10",
+      "name": "Hospital Service",
+      "description": "This field contains the treatment or type of surgery that the patient is scheduled to receive. It is a required field with trigger events A01 (admit/visit notification), A02 (transfer a patient), A14 (pending admit), A15 (pending transfer). Refer to User-defined Table 0069 - Hospital Service for suggested values.",
+      "length": "3",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "PV1.11",
+      "name": "Temporary Location",
+      "description": "This field contains a location other than the assigned location required for a temporary period of time (e.g., OR, operating theatre, etc.). If a value exists in the fifth component (location status), it supersedes the value in PV1-40 - Bed Status.",
+      "length": "80",
+      "data_type": "PL - Person Location",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "PV1.12",
+      "name": "Preadmit Test Indicator",
+      "description": "This field indicates whether the patient must have pre-admission testing done in order to be admitted. Refer to User-defined Table 0087 - Pre-Admit Test Indicator for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "PV1.13",
+      "name": "Re-admission Indicator",
+      "description": "This field indicates that a patient is being re-admitted to the healthcare facility and gives the circumstances. We suggest using R for readmission or else null. Refer to User-defined Table 0092 - Re-Admission Indicator for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "PV1.14",
+      "name": "Admit Source",
+      "description": "This field indicates where the patient was admitted. Refer to User-defined Table 0023 - Admit Source for suggested values. In the US, this field is used on UB92 FL20 Source of Admission. The UB codes listed as examples are not an exhaustive or current list; refer to a UB specification for additional information.",
+      "length": "6",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "15": {
+      "field_id": "PV1.15",
+      "name": "Ambulatory Status",
+      "description": "This field indicates any permanent or transient handicapped conditions. Refer to User-defined Table 0009 - Ambulatory Status for suggested entries.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "16": {
+      "field_id": "PV1.16",
+      "name": "VIP Indicator",
+      "description": "This field identifies the type of VIP. Refer to User-defined Table 0099 - VIP Indicator for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "17": {
+      "field_id": "PV1.17",
+      "name": "Admitting Doctor",
+      "description": "This field contains the admitting physician information. Multiple names and identifiers for the same physician may be sent. The field sequences are not used to indicate multiple admitting doctors. The legal name must be sent in the first sequence. If the legal name is not sent, then a repeat delimiter must be sent in the first sequence. By local agreement, the name or ID may be absent in this field. Refer to User-defined Table 0010 - Physician ID for suggested values.",
+      "length": "250",
+      "data_type": "XCN - Extended Composite ID Number and Name for Persons",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "18": {
+      "field_id": "PV1.18",
+      "name": "Patient Type",
+      "description": "This field contains site-specific values that identify the patient type. Refer to User-defined Table 0018 - Patient Type for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "19": {
+      "field_id": "PV1.19",
+      "name": "Visit Number",
+      "description": "For backward compatibility, a NM data type may be sent, but HL7 recommends that new implementations use the CX data type. This field contains the unique number assigned to each patient visit. The assigning authority and identifier type code are strongly recommended for all CX data types.",
+      "length": "250",
+      "data_type": "CX - Extended Composite ID with Check Digit",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "20": {
+      "field_id": "PV1.20",
+      "name": "Financial Class",
+      "description": "This field contains the financial class(es) assigned to the patient for the purpose of identifying sources of reimbursement. Refer to User-defined Table 0064 - Financial Class for suggested values.",
+      "length": "50",
+      "data_type": "FC - Financial Class",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "21": {
+      "field_id": "PV1.21",
+      "name": "Charge Price Indicator",
+      "description": "This field contains the code used to determine which price schedule is to be used for room and bed charges. Refer to User-defined Table 0032 - Charge/Price Indicator for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "22": {
+      "field_id": "PV1.22",
+      "name": "Courtesy Code",
+      "description": "This field indicates whether the patient will be extended certain special courtesies. Refer to User-defined Table 0045 - Courtesy Code for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "23": {
+      "field_id": "PV1.23",
+      "name": "Credit Rating",
+      "description": "This field contains the user-defined code to determine past credit experience. Refer to User-defined Table 0046 - Credit Rating for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "24": {
+      "field_id": "PV1.24",
+      "name": "Contract Code",
+      "description": "This field identifies the type of contract entered into by the healthcare facility and the guarantor for the purpose of settling outstanding account balances. Refer to User-defined Table 0044 - Contract Code for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "25": {
+      "field_id": "PV1.25",
+      "name": "Contract Effective Date",
+      "description": "This field contains the date that the contract is to start or started.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "26": {
+      "field_id": "PV1.26",
+      "name": "Contract Amount",
+      "description": "This field contains the amount to be paid by the guarantor each period according to the contract.",
+      "length": "12",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "27": {
+      "field_id": "PV1.27",
+      "name": "Contract Period",
+      "description": "This field specifies the duration of the contract for user-defined periods.",
+      "length": "3",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "28": {
+      "field_id": "PV1.28",
+      "name": "Interest Code",
+      "description": "This field indicates the amount of interest that will be charged the guarantor on any outstanding amounts. Refer to User-defined Table 0073 - Interest Rate Code for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "29": {
+      "field_id": "PV1.29",
+      "name": "Transfer to Bad Debt Code",
+      "description": "This field indicates that the account was transferred to bad debts and gives the reason. Refer to User-defined Table 0110 - Transfer to Bad Debt Code for suggested values.",
+      "length": "4",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "30": {
+      "field_id": "PV1.30",
+      "name": "Transfer to Bad Debt Date",
+      "description": "This field contains the date that the account was transferred to a bad debt status.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "31": {
+      "field_id": "PV1.31",
+      "name": "Bad Debt Agency Code",
+      "description": "This field can be used as a ST type for backward compatibility. This field uniquely identifies the bad debt agency to which the account was transferred. This code is site defined. One possible implementation would be to edit against a table such as User-defined Table 0021 - Bad Debt Agency Code ; however, this is not required.",
+      "length": "10",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "32": {
+      "field_id": "PV1.32",
+      "name": "Bad Debt Transfer Amount",
+      "description": "This field contains the amount that was transferred to a bad debt status.",
+      "length": "12",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "33": {
+      "field_id": "PV1.33",
+      "name": "Bad Debt Recovery Amount",
+      "description": "This field contains the amount recovered from the guarantor on the account.",
+      "length": "12",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "34": {
+      "field_id": "PV1.34",
+      "name": "Delete Account Indicator",
+      "description": "This field indicates that the account was deleted from the file and gives the reason. Refer to User-defined Table 0111 - Delete Account Code for suggested values.",
+      "length": "1",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "35": {
+      "field_id": "PV1.35",
+      "name": "Delete Account Date",
+      "description": "This field contains the date that the account was deleted from the file.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "36": {
+      "field_id": "PV1.36",
+      "name": "Discharge Disposition",
+      "description": "This field contains the disposition of the patient at time of discharge (i.e., discharged to home, expired, etc.). Refer to User-defined Table 0112 - Discharge Disposition for suggested values. In the US, this field is used on UB92 FL22. The UB codes listed as examples are not an exhaustive or current list; refer to a UB specification for additional information.",
+      "length": "3",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "37": {
+      "field_id": "PV1.37",
+      "name": "Discharged to Location",
+      "description": "This field indicates the healthcare facility to which the patient was discharged and the date. Refer to User-defined Table 0113 - Discharged to Location for suggested values.",
+      "length": "47",
+      "data_type": "DLD - Discharge Location and Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "38": {
+      "field_id": "PV1.38",
+      "name": "Diet Type",
+      "description": "This field indicates a special diet type for a patient. Refer to User-defined Table 0114 - Diet Type for suggested values.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "39": {
+      "field_id": "PV1.39",
+      "name": "Servicing Facility",
+      "description": "This field is used in a multiple facility environment to indicate the healthcare facility with which this visit is associated. Refer to User-defined Table 0115 - Servicing Facility for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "40": {
+      "field_id": "PV1.40",
+      "name": "Bed Status",
+      "description": "This field has been retained for backward compatibility only . The information is now held in the fifth component of the PL datatype in PV1-3. This field contains the status of the bed. Refer to User-defined Table 0116 - Bed Status for suggested values.",
+      "length": "1",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Not repeatable"
+    },
+    "41": {
+      "field_id": "PV1.41",
+      "name": "Account Status",
+      "description": "This field contains the account status. Refer to User-defined Table 0117 - Account Status for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "42": {
+      "field_id": "PV1.42",
+      "name": "Pending Location",
+      "description": "This field indicates the point of care, room, bed, healthcare facility ID, and bed status to which the patient may be moved. The first component may be the nursing station for inpatient locations, or the clinic, department, or home for locations other than inpatient. If a value exists in the fifth component (location status), it supersedes the value in PV1-40 - Bed Status.",
+      "length": "80",
+      "data_type": "PL - Person Location",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "43": {
+      "field_id": "PV1.43",
+      "name": "Prior Temporary Location",
+      "description": "This field is used to reflect the patients temporary location (such as the operating room/theatre or x-ray) prior to a transfer from a temporary location to an actual location, or from a temporary location to another temporary location. The first component may be the nursing station for inpatient locations, or the clinic, department, or home for locations other than inpatient.",
+      "length": "80",
+      "data_type": "PL - Person Location",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "44": {
+      "field_id": "PV1.44",
+      "name": "Admit Date/Time",
+      "description": "This field contains the admit date/time. It is to be used if the event date/time is different than the admit date and time, i.e., a retroactive update. This field is also used to reflect the date/time of an outpatient/emergency patient registration.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "45": {
+      "field_id": "PV1.45",
+      "name": "Discharge Date/Time",
+      "description": "This field contains the discharge date/time. It is to be used if the event date/time is different than the discharge date and time, that is, a retroactive update. This field is also used to reflect the date/time of an outpatient/emergency patient discharge.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "46": {
+      "field_id": "PV1.46",
+      "name": "Current Patient Balance",
+      "description": "This field contains the visit balance due.",
+      "length": "12",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "47": {
+      "field_id": "PV1.47",
+      "name": "Total Charges",
+      "description": "This field contains the total visit charges.",
+      "length": "12",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "48": {
+      "field_id": "PV1.48",
+      "name": "Total Adjustments",
+      "description": "This field contains the total adjustments for visit.",
+      "length": "12",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "49": {
+      "field_id": "PV1.49",
+      "name": "Total Payments",
+      "description": "This field contains the total payments for visit.",
+      "length": "12",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "50": {
+      "field_id": "PV1.50",
+      "name": "Alternate Visit ID",
+      "description": "This field contains the alternative, temporary, or pending optional visit ID number to be used if needed. Refer to HL7 Table 0061 - Check Digit Scheme for valid values. Refer to HL7 Table 0203 - Identifier Type for valid values. The assigning authority and identifier type codes are strongly recommended for all CX data types.",
+      "length": "250",
+      "data_type": "CX - Extended Composite ID with Check Digit",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "51": {
+      "field_id": "PV1.51",
+      "name": "Visit Indicator",
+      "description": "This field specifies the level on which data are being sent. It is the indicator used to send data at two levels, visit and account. HL7 recommends sending an A or no value when the data in the message are at the account level, or V to indicate that the data sent in the message are at the visit level. Refer to User-defined Table 0326 - Visit Indicator for suggested values.",
+      "length": "1",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "52": {
+      "field_id": "PV1.52",
+      "name": "Other Healthcare Provider",
+      "description": "From V2.4 onward, this field has been retained for backward compatibility only. Use the ROL-Role Segment to communicate providers not specified elsewhere. This field contains the other healthcare providers (e.g. nurse care practitioner, midwife, physician assistant). Multiple healthcare providers can be sent. Depending on local agreements, either the ID or the name may be absent from this field. Use values in User-defined Table 0010 - Physician ID for first component.",
+      "length": "250",
+      "data_type": "XCN - Extended Composite ID Number and Name for Persons",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Repeatable indefinitely"
+    }
+  },
+  "NTE": {
+    "1": {
+      "field_id": "NTE.1",
+      "name": "Set ID - NTE",
+      "description": "This field may be used where multiple NTE segments are included in a message. Their numbering must be described in the application message definition.",
+      "length": "4",
+      "data_type": "SI - Sequence ID",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "NTE.2",
+      "name": "Source of Comment",
+      "description": "This field is used when source of comment must be identified. This table may be extended locally during implementation. Refer to HL7 Table 0105 - Source of comment for valid values.",
+      "length": "8",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "NTE.3",
+      "name": "Comment",
+      "description": "This field contains the comment contained in the segment.\n\nNote: As of v2.2, this field uses the FT rather than a TX data type. Since there is no difference between an FT data type without any embedded formatting commands, and a TX data type, this change is compatible with the previous version.",
+      "length": "65536",
+      "data_type": "FT - Formatted Text Data",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "4": {
+      "field_id": "NTE.4",
+      "name": "Comment Type",
+      "description": "This field contains a value to identify the type of comment text being sent in the specific comment record. Refer to User-Defined Table 0364 - Comment Type for suggested values.\n\nNote: A field already exists on the NTE record that identifies the Sources of Comment (e.g., ancillary, placer, other). However some applications need to support other types of comment text (e.g., instructions, reason, remarks, etc.). A separate NTE segment can be used for each type of comment (e.g., instructions are on one NTE and remarks on another NTE)",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  },
+  "DG1": {
+    "1": {
+      "field_id": "DG1.1",
+      "name": "Set ID - DG1",
+      "description": "This field contains the number that identifies this transaction. For the first occurrence of the segment the sequence number shall be 1, for the second occurrence it shall be 2, etc.",
+      "length": "4",
+      "data_type": "SI - Sequence ID",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "DG1.2",
+      "name": "Diagnosis Coding Method",
+      "description": "As of Version 2.3, this field has been retained for backward compatibility only. Use the components of DG1-3 - Diagnosis Code - DG1 instead of this field. When used for backward compatibility, ICD9 is the recommended coding methodology. Refer to User-defined Table 0053 - Diagnosis Coding Method for suggested values.",
+      "length": "2",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "DG1.3",
+      "name": "Diagnosis Code - DG1",
+      "description": "Use this field instead of DG1-2 - Diagnosis Coding Method and DG1-4 - Diagnosis Description, which have been retained, as of Version 2.3, for backward compatibility only. DG1-3 - Diagnosis Code - DG1contains the diagnosis code assigned to this diagnosis. Refer to User-defined Table 0051 - Diagnosis Code for suggested values. This field is a CE data type for compatibility with clinical and ancillary systems.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "DG1.4",
+      "name": "Diagnosis Description",
+      "description": "As of Version 2.3, this field has been retained for backward compatibility only. Use the components of DG1-3 - Diagnosis Code - DG1 field instead of this field. When used for backward compatibility, DG1-4 - Diagnosis Description contains a description that best describes the diagnosis.",
+      "length": "40",
+      "data_type": "ST - String Data",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "DG1.5",
+      "name": "Diagnosis Date/Time",
+      "description": "This field contains the date/time that the diagnosis was determined.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "DG1.6",
+      "name": "Diagnosis Type",
+      "description": "This field contains a code that identifies the type of diagnosis being sent. Refer to User-defined Table 0052 - Diagnosis Type for suggested values. This field should no longer be used to indicate DRG because the DRG fields have moved to the new DRG segment.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "DG1.7",
+      "name": "Major Diagnostic Category",
+      "description": "As of Version 2.3, this field has been retained for backward compatibility only. This field should only be used in a master file transaction. Refer to User-defined Table 0118 - Major Diagnostic Category for suggested values.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "DG1.8",
+      "name": "Diagnostic Related Group",
+      "description": "As of Version 2.3, this field has been retained for backward compatibility only. This field has moved to the new DRG segment. It contains the DRG for the transaction. Interim DRGs could be determined for an encounter. Refer to User-defined Table 0055 - Diagnosis Related Group for suggested values.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "DG1.9",
+      "name": "DRG Approval Indicator",
+      "description": "As of Version 2.3, this field has been retained for backward compatibility only. This field has moved to the new DRG segment. This field indicates if the DRG has been approved by a reviewing entity. Refer to HL7 Table 0136 - Yes/no Indicator for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "DG1.10",
+      "name": "DRG Grouper Review Code",
+      "description": "As of Version 2.3, this field has been retained for backward compatibility only. This field has moved to the new DRG segment. Refer to User-defined Table 0056 - DRG Grouper Review Code for suggested values. This code indicates that the grouper results have been reviewed and approved.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "DG1.11",
+      "name": "Outlier Type",
+      "description": "As of Version 2.3, this field has been retained for backward compatibility only. This field has moved to the new DRG segment. When used for backward compatibility, this field contains the type of outlier (i.e. period of care beyond DRG-standard stay in facility) that has been paid. Refer to User-defined Table 0083 - Outlier Type for suggested values.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "DG1.12",
+      "name": "Outlier Days",
+      "description": "As of Version 2.3, this field has been retained for backward compatibility only. This field has moved to the new DRG segment. When used for backward compatibility, this field contains the number of days that have been approved for an outlier payment.",
+      "length": "3",
+      "data_type": "NM - Numeric",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "DG1.13",
+      "name": "Outlier Cost",
+      "description": "As of Version 2.3, this field has been retained for backward compatibility only. This field has moved to the new DRG segment. When used for backward compatibility, this field contains the amount of money that has been approved for an outlier payment.",
+      "length": "12",
+      "data_type": "CP - Composite Price",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "DG1.14",
+      "name": "Grouper Version And Type",
+      "description": "As of Version 2.3, this field has been retained for backward compatibility only. This field has moved to the new DRG segment; refer to the field definition in Section 6.5.3.1. When used for backward compatibility, this field contains the grouper version and type.",
+      "length": "4",
+      "data_type": "ST - String Data",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Not repeatable"
+    },
+    "15": {
+      "field_id": "DG1.15",
+      "name": "Diagnosis Priority",
+      "description": "This field contains the number that identifies the significance or priority of the diagnosis code. Refer to HL7 Table 0359 - Diagnosis Priority for suggested values.",
+      "length": "2",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "16": {
+      "field_id": "DG1.16",
+      "name": "Diagnosing Clinician",
+      "description": "This field contains the individual responsible for generating the diagnosis information. Multiple names and identifiers for the same person may be sent in this field, not multiple diagnosing clinicians. The legal name is assumed to be in the first repetition. When the legal name is not sent, a repeat delimiter must be sent first for the first repetition.",
+      "length": "250",
+      "data_type": "XCN - Extended Composite ID Number and Name for Persons",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "17": {
+      "field_id": "DG1.17",
+      "name": "Diagnosis Classification",
+      "description": "This field indicates if the patient information is for a diagnosis or a non-diagnosis code. Refer to User-defined Table 0228 - Diagnosis Classification for suggested values.",
+      "length": "3",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "18": {
+      "field_id": "DG1.18",
+      "name": "Confidential Indicator",
+      "description": "This field indicates whether the diagnosis is confidential. Refer to HL7 table 0136 - Yes/no Indicator for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "19": {
+      "field_id": "DG1.19",
+      "name": "Attestation Date/Time",
+      "description": "This field contains the time stamp that indicates the date and time that the attestation was signed.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "20": {
+      "field_id": "DG1.20",
+      "name": "Diagnosis Identifier",
+      "description": "This field contains a value that uniquely identifies a single diagnosis for an encounter. It is unique across all segments and messages for an encounter. This field is required in all implementations employing Update Diagnosis/Procedures (P12) messages.",
+      "length": "427",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "21": {
+      "field_id": "DG1.21",
+      "name": "Diagnosis Action Code",
+      "description": "No description found.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    }
+  },
+  "PR1": {
+    "1": {
+      "field_id": "PR1.1",
+      "name": "Set ID - PR1",
+      "description": "This field contains the number that identifies this transaction. For the first occurrence of the segment the sequence number shall be 1, for the second occurrence it shall be 2, etc.",
+      "length": "4",
+      "data_type": "SI - Sequence ID",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "PR1.2",
+      "name": "Procedure Coding Method",
+      "description": "As of Version 2.3, this field has been retained for backward compatibility only . Use the components of PR1-3 - Procedure Code instead of this field.",
+      "length": "3",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "PR1.3",
+      "name": "Procedure Code",
+      "description": "Use this field instead of PR1-2 - Procedure Coding Method and PR1-4 - Procedure Description . Those two fields have been retained for backward compatibility only. This field contains a unique identifier assigned to the procedure. Refer to User-defined Table 0088 - Procedure Code for suggested values. This field is a CE data type for compatibility with clinical and ancillary systems.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "PR1.4",
+      "name": "Procedure Description",
+      "description": "As of Version 2.3, this field has been retained for backward compatibility only . Use the components of PR1-3 - Procedure Code instead of this field. The field contains a text description that describes the procedure.",
+      "length": "40",
+      "data_type": "ST - String Data",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "PR1.5",
+      "name": "Procedure Date/Time",
+      "description": "This field contains the date/time that the procedure was performed.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "PR1.6",
+      "name": "Procedure Functional Type",
+      "description": "This field contains the optional code that further defines the type of procedure. Refer to User-defined Table 0230 - Procedure Functional Type for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "PR1.7",
+      "name": "Procedure Minutes",
+      "description": "This field indicates the length of time in whole minutes that the procedure took to complete.",
+      "length": "4",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "PR1.8",
+      "name": "Anesthesiologist",
+      "description": "HL7 has introduced the ROL segment to report a wide range of practitioner roles related to a single procedure. When using trigger events introduced in HL7 Version 2.3, it is recommended that the ROL segment be used to report all practitioner roles related to the procedure.",
+      "length": "250",
+      "data_type": "XCN - Extended Composite ID Number and Name for Persons",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "9": {
+      "field_id": "PR1.9",
+      "name": "Anesthesia Code",
+      "description": "This field contains a unique identifier of the anesthesia used during the procedure. Refer to User-defined Table 0019 - Anesthesia Code for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "PR1.10",
+      "name": "Anesthesia Minutes",
+      "description": "This field contains the length of time in minutes that the anesthesia was administered.",
+      "length": "4",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "PR1.11",
+      "name": "Surgeon",
+      "description": "HL7 has introduced the ROL segment to report a wide range of practitioner roles related to a single procedure. When using trigger events introduced in HL7 Version 2.3, it is recommended that the ROL segment be used to report all practitioner roles related to the procedure.",
+      "length": "250",
+      "data_type": "XCN - Extended Composite ID Number and Name for Persons",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "12": {
+      "field_id": "PR1.12",
+      "name": "Procedure Practitioner",
+      "description": "HL7 has introduced the ROL segment to report a wide range of practitioner roles related to a single procedure. When using trigger events introduced in HL7 Version 2.3, it is recommended that the ROL segment be used to report all practitioner roles related to the procedure.",
+      "length": "250",
+      "data_type": "XCN - Extended Composite ID Number and Name for Persons",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "13": {
+      "field_id": "PR1.13",
+      "name": "Consent Code",
+      "description": "This field contains the type of consent that was obtained for permission to treat the patient. Refer to User-defined Table 0059 - Consent Code for suggested values.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "PR1.14",
+      "name": "Procedure Priority",
+      "description": "This field contains a number that identifies the significance or priority of the procedure code. Refer to HL7 Table 0418 - Procedure Priority for valid values.",
+      "length": "2",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "15": {
+      "field_id": "PR1.15",
+      "name": "Associated Diagnosis Code",
+      "description": "This field contains the diagnosis that is the primary reason this procedure was performed, e.g. in the US, Medicare wants to know for which diagnosis this procedure is submitted for inclusion on CMS 1500 form. Refer to User-defined Table 0051 - Diagnosis Code for suggested values.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "16": {
+      "field_id": "PR1.16",
+      "name": "Procedure Code Modifier",
+      "description": "This field contains the procedure code modifier to the procedure code reported in field 3, when applicable. Procedure code modifiers are defined by regulatory agencies such as CMS and the AMA. Multiple modifiers may be reported. Refer to User-defined Table 0340 - Procedure Code Modifier for suggested values.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "17": {
+      "field_id": "PR1.17",
+      "name": "Procedure DRG Type",
+      "description": "This field indicates a procedures priority ranking relative to its DRG. Refer to User-defined Table 0416 - Procedure DRG Type for suggested values.",
+      "length": "20",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "18": {
+      "field_id": "PR1.18",
+      "name": "Tissue Type Code",
+      "description": "Code representing type of tissue removed from a patient during this procedure. Refer to User-defined Table 0417 - Tissue Type Code for suggested values.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "19": {
+      "field_id": "PR1.19",
+      "name": "Procedure Identifier",
+      "description": "This field contains a value that uniquely identifies a single procedure for an encounter. It is unique across all segments and messages for an encounter. This field is required in all implementations employing Update Diagnosis/Procedures (P12) messages.",
+      "length": "427",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "20": {
+      "field_id": "PR1.20",
+      "name": "Procedure Action Code",
+      "description": "This field defines the action to be taken for this procedure. Refer to HL7 Table 0206 - Segment Action Code for valid values. This field is required for the Update Diagnosis/Procedures (P12) message. In all other events it is optional.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    }
+  },
+  "AL1": {
+    "1": {
+      "field_id": "AL1.1",
+      "name": "Set ID - AL1",
+      "description": "This field contains the number that identifies this transaction. For the first occurrence of the segment, the sequence number shall be one, for the second occurrence, the sequence number shall be two, etc.",
+      "length": "4",
+      "data_type": "SI - Sequence ID",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "AL1.2",
+      "name": "Allergen Type Code",
+      "description": "This field indicates a general allergy category (drug, food, pollen, etc.). Refer to User-defined Table 0127 - Allergen Type for suggested values.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "AL1.3",
+      "name": "Allergen Code/Mnemonic/Description",
+      "description": "This field uniquely identifies a particular allergen. This element may conform to some external, standard coding system (that must be identified), or it may conform to local, largely textual or mnemonic descriptions.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "AL1.4",
+      "name": "Allergy Severity Code",
+      "description": "This field indicates the general severity of the allergy. Refer to User-defined Table 0128 - Allergy Severity for suggested values.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "AL1.5",
+      "name": "Allergy Reaction Code",
+      "description": "This field identifies the specific allergic reaction that was documented. This element may conform to some external, standard coding system, or it may conform to a local, largely textual or mnemonic descriptions (e.g., convulsions, sneeze, rash, etc.).",
+      "length": "15",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "6": {
+      "field_id": "AL1.6",
+      "name": "Identification Date",
+      "description": "From V2.4 onward, this field has been retained for backward compatibility only. This field contains the date that the allergy was identified.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Not repeatable"
+    }
+  },
+  "RXA": {
+    "1": {
+      "field_id": "RXA.1",
+      "name": "Give Sub-ID Counter",
+      "description": "Use this field if matching this RXA segment to its corresponding RXG segment. If the two applications are not matching RXG and RXA segments, this field's value is zero (0).",
+      "length": "4",
+      "data_type": "NM - Numeric",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "RXA.2",
+      "name": "Administration Sub-ID Counter",
+      "description": "This field starts with 1 the first time that medication/treatment is administered for this order. Increments by one with each additional administration the medication/treatment.",
+      "length": "4",
+      "data_type": "NM - Numeric",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "RXA.3",
+      "name": "Date/Time Start of Administration",
+      "description": "If the order is for a continuous administration (such as an IV), and the rate is changed at a certain time after the start, an RAS message can be issued to record the change. For such an RAS message, this field records the time the rate was changed to the new value recorded in the RXA-12-administered per (time unit) of the same message.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "RXA.4",
+      "name": "Date/Time End of Administration",
+      "description": "If null, the date/time of RXA-3-Date/Time Start of Administration is assumed.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "RXA.5",
+      "name": "Administered Code",
+      "description": "This field contains the identifier of the medical substance/treatment administered. It is equivalent to OBR-4-universal service ID in function. If the substance administered is a vaccine, CVX codes may be used to code this field (see HL7 Table 0292 - Vaccines Administered ).",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "RXA.6",
+      "name": "Administered Amount",
+      "description": "This field contains the amount administered.",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "RXA.7",
+      "name": "Administered Units",
+      "description": "This field is conditional because it is required if the administered amount code does not imply units. This field must be in simple units that reflect the actual quantity of the substance administered. It does not include compound units.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "RXA.8",
+      "name": "Administered Dosage Form",
+      "description": "The dosage form indicates the manner in which the medication/treatment is aggregated for dispensing, e.g., tablets, capsules, suppositories. In some cases, this information is implied by the dispense/give code in RXA-5-Administered Code. Use this field when the administered code does not specify the dosage form.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "RXA.9",
+      "name": "Administration Notes",
+      "description": "This field contains notes from the provider administering the medication/treatment. If coded, requires a user-defined table. If free text (describing a custom IV, mixture, or salve, for example) place a null in the first component and the text in the second, e.g., |^this is a free text administration note| .",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "10": {
+      "field_id": "RXA.10",
+      "name": "Administering Provider",
+      "description": "This field contains the provider ID of the person administering the pharmaceutical/treatment.",
+      "length": "250",
+      "data_type": "XCN - Extended Composite ID Number and Name for Persons",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "11": {
+      "field_id": "RXA.11",
+      "name": "Administered-at Location",
+      "description": "The first component contains the inpatient or outpatient location at which the drug or treatment was administered (if applicable). The default (null) value is the current census location for the patient. Site-specific table. The first eight components have the same form as the first eight components of PV1-3-assigned patient location. The final eight components replace the ninth component of PV1-3-assigned patient location and represent the full address specification.",
+      "length": "200",
+      "data_type": "LA2 - Location with Address Variation 2",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "RXA.12",
+      "name": "Administered Per (Time Unit)",
+      "description": "This field contains the rate at which this medication/treatment was administered as calculated by using RXA-6-administered amount and RXA-7-administered units. This field is conditional because it is required when a treatment is administered continuously at a prescribed rate, e.g., certain IV solutions.",
+      "length": "20",
+      "data_type": "ST - String Data",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "RXA.13",
+      "name": "Administered Strength",
+      "description": "Use when RXA-5-Administered Code does not specify the strength. This is the numeric part of the strength, used in combination with RXA-14-Administered Strength Units.",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "RXA.14",
+      "name": "Administered Strength Units",
+      "description": "Use when RXA-5-Administered Code does not specify the strength. This is the unit of the strength, used in combination with RXA-13-Administered Strength.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "15": {
+      "field_id": "RXA.15",
+      "name": "Substance Lot Number",
+      "description": "This field contains the lot number of the medical substance administered.",
+      "length": "20",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "16": {
+      "field_id": "RXA.16",
+      "name": "Substance Expiration Date",
+      "description": "This field contains the expiration date of the medical substance administered.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "17": {
+      "field_id": "RXA.17",
+      "name": "Substance Manufacturer Name",
+      "description": "This field contains the manufacturer of the medical substance administered.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "18": {
+      "field_id": "RXA.18",
+      "name": "Substance/Treatment Refusal Reason",
+      "description": "This field contains the reason the patient refused the medical substance/treatment. Any entry in the field indicates that the patient did not take the substance.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "19": {
+      "field_id": "RXA.19",
+      "name": "Indication",
+      "description": "This field contains the identifier of the condition or problem for which the drug/treatment was prescribed. May repeat if multiple indications are relevant.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "20": {
+      "field_id": "RXA.20",
+      "name": "Completion Status",
+      "description": "Status of treatment administration event. Refer to HL7 Table 0322 - Completion Status for valid values.",
+      "length": "2",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "21": {
+      "field_id": "RXA.21",
+      "name": "Action Code - RXA",
+      "description": "Status of record. The information in this field enables the use of the RXA in the vaccine messages, where a method of correcting vaccination information transmitted with incorrect patient identifying information is needed. Refer To HL7 Table 0323 - Action Code for valid values.",
+      "length": "2",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "22": {
+      "field_id": "RXA.22",
+      "name": "System Entry Date/Time",
+      "description": "Date/time the administration information was entered into the source system. This field is used to detect instances where treatment administration information is inadvertently entered multiple times by providing a unique identification field. Under usual circumstances, this field would be provided automatically by the computer system rather than being entered by a person.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "23": {
+      "field_id": "RXA.23",
+      "name": "Administered Drug Strength Volume",
+      "description": "This numeric field defines the volume measurement in which the drug strength concentration is contained.",
+      "length": "5",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "24": {
+      "field_id": "RXA.24",
+      "name": "Administered Drug Strength Volume Units",
+      "description": "This field indicates the volumetric unit associated with RXA-23 Administered Drug Strength Volume.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "25": {
+      "field_id": "RXA.25",
+      "name": "Administered Barcode Identifier",
+      "description": "This field contains the pharmacy system's assigned barcode number for the give occurrence. For IV orders, many pharmacy systems generate a barcode number to identify a specific bag/bottle of the order. This number can be an instance identifier; unique for the patient, drug combination, and schedule instance or it may be just a drug identifier.",
+      "length": "60",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "26": {
+      "field_id": "RXA.26",
+      "name": "Pharmacy Order Type",
+      "description": "The Pharmacy Order Type field defines the general category of pharmacy order which may be used to determine the processing path the order will take. Refer to HL7 Table 0480 Pharmacy Order Types for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  },
+  "RXR": {
+    "1": {
+      "field_id": "RXR.1",
+      "name": "Route",
+      "description": "This field is the route of administration.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "RXR.2",
+      "name": "Administration Site",
+      "description": "This field contains the site of the administration route. When using a post-coordinated code table in this field, RXR-6 Administration Site may be used to modify the meaning of this field.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "RXR.3",
+      "name": "Administration Device",
+      "description": "This field contains the mechanical device used to aid in the administration of the drug or other treatment. Common examples are IV-sets of different types. Refer to User-defined Table 0164 - Administration device for valid entries.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "RXR.4",
+      "name": "Administration Method",
+      "description": "This field identifies the specific method requested for the administration of the drug or treatment to the patient. Refer To User-defined Table 0165 - Administration Method for valid values.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "RXR.5",
+      "name": "Routing Instruction",
+      "description": "This field provides instruction on administration routing, especially in cases where more than one route of administration is possible. A typical case would be designating which IV line should be used when more than one IV line is a possible route for injection.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "RXR.6",
+      "name": "Administration Site Modifier",
+      "description": "This field contains a modifier which modifies the meaning of RXR-2 Administration Site.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  },
+  "SPM": {
+    "1": {
+      "field_id": "SPM.1",
+      "name": "Set ID - SPM",
+      "description": "This field contains the sequence number. This field is used to identify SPM segment instances in message structures where the SPM segment repeats.",
+      "length": "4",
+      "data_type": "SI - Sequence ID",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "SPM.2",
+      "name": "Specimen ID",
+      "description": "This field contains a unique identifier for the specimen as referenced by the Placer application, the Filler application, or both.",
+      "length": "80",
+      "data_type": "EIP - Entity Identifier Pair",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "SPM.3",
+      "name": "Specimen Parent IDs",
+      "description": "This field contains the identifiers for the specimen or specimens that contributed to the specimen that is described by the segment instance.",
+      "length": "80",
+      "data_type": "EIP - Entity Identifier Pair",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "4": {
+      "field_id": "SPM.4",
+      "name": "Specimen Type",
+      "description": "This field describes the precise nature of the entity that will be the source material for the observation.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "SPM.5",
+      "name": "Specimen Type Modifier",
+      "description": "This field contains modifying or qualifying description(s) about the specimen type",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "6": {
+      "field_id": "SPM.6",
+      "name": "Specimen Additives",
+      "description": "This field identifies any additives introduced to the specimen before or at the time of collection. These additives may be introduced in order to preserve, maintain or enhance the particular nature or component of the specimen. Refer to HL7 Table 0371 - Additive for valid values.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "7": {
+      "field_id": "SPM.7",
+      "name": "Specimen Collection Method",
+      "description": "Describes the procedure or process by which the specimen was collected.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "SPM.8",
+      "name": "Specimen Source Site",
+      "description": "specifies the source from which the specimen was obtained. For example, in the case where a liver biopsy is obtained via a percutaneous needle, the source would be liver.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "SPM.9",
+      "name": "Specimen Source Site Modifier",
+      "description": "This field contains modifying or qualifying description(s) about the specimen source site",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "10": {
+      "field_id": "SPM.10",
+      "name": "Specimen Collection Site",
+      "description": "This field differs from SPM-8-Specimen Source Site in those cases where the source site must be approached via a particular site (e.g., anatomic location). For example, in the case where a liver biopsy is obtained via a percutaneous needle, the collection site would be the point of entry of the needle. For venous blood collected from the left radial vein, the collection site could be antecubital fossa.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "SPM.11",
+      "name": "Specimen Role",
+      "description": "This field indicates the role of the sample. Refer to User-defined Table 0369 \u2013 Specimen role for suggested values. Each of these values is normally identifiable by the systems and its components and can influence processing and data management related to the specimen.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "12": {
+      "field_id": "SPM.12",
+      "name": "Specimen Collection Amount",
+      "description": "This field specifies the volume or mass of the collected specimen. For laboratory tests, the collection volume is the volume of a specimen. Specifically, units should be expressed in the ISO Standard unit abbreviations (ISO-2955, 1977). This is a results-only field except when the placer or a party has already drawn the specimen.",
+      "length": "20",
+      "data_type": "CQ - Composite Quantity with Units",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "SPM.13",
+      "name": "Grouped Specimen Count",
+      "description": "This field refers to the number of individual specimens of a particular type represented by this instance of a specimen. The use of this field is restricted to specimens upon which all specimen related attributes are identical. This field would only be valued if the specimen role attribute has the value G.",
+      "length": "6",
+      "data_type": "NM - Numeric",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "SPM.14",
+      "name": "Specimen Description",
+      "description": "This is a text field that allows additional information specifically about the specimen to be sent in the message",
+      "length": "250",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "15": {
+      "field_id": "SPM.15",
+      "name": "Specimen Handling Code",
+      "description": "This describes how the specimen and/or container need to be handled from the time of collection through the initiation of testing. As this field is not required, no assumptions can be made as to meaning when this field is not populated.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "16": {
+      "field_id": "SPM.16",
+      "name": "Specimen Risk Code",
+      "description": "This field contains any known or suspected specimen hazards, e.g., exceptionally infectious agent or blood from a hepatitis patient. Either code and/or text may be absent. However, the code is always placed in the first component position and any free text in the second component. Thus, a component delimiter must precede free text without a code. Refer to User-defined Table 0489 - Risk Codes for suggested entries",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "17": {
+      "field_id": "SPM.17",
+      "name": "Specimen Collection Date/Time",
+      "description": "The date and time when the specimen was acquired from the source. The use of the Date Range data type allows for description of specimens collected over a period of time, for example, 24-hour urine collection. For specimens collected at a point in time, only the first component (start date/time) will be populated.",
+      "length": "26",
+      "data_type": "DR - Date/Time Range",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "18": {
+      "field_id": "SPM.18",
+      "name": "Specimen Received Date/Time",
+      "description": "The specimen received date/time is the time that the specimen is received at the diagnostic service. The actual time that is recorded is based on how specimen receipt is managed and may correspond to the time the sample is logged in. This is fundamentally different from SPM-xx Specimen Collection date/time.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "19": {
+      "field_id": "SPM.19",
+      "name": "Specimen Expiration Date/Time",
+      "description": "This field is the date and time the specimen can no longer be used for the purpose implied by the order. For example, in the Blood Banking environment the specimen can no longer be used for pre-transfusion compatibility testing. The specimen segment will include an SPM-21-Specimen Reject Reason of 'EX' indicating 'Expired' for message instances created after this date and time.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "20": {
+      "field_id": "SPM.20",
+      "name": "Specimen Availability",
+      "description": "This describes whether the specimen, as it exists, is currently available to use in an analysis. Refer to HL7 Table 0136 Yes/No Indicator for valid values",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "21": {
+      "field_id": "SPM.21",
+      "name": "Specimen Reject Reason",
+      "description": "This describes one or more reasons the specimen is rejected for the specified observation/result/analysis. Refer to HL7 Table 0490 - Specimen Reject Reason for valid values.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "22": {
+      "field_id": "SPM.22",
+      "name": "Specimen Quality",
+      "description": "The degree or grade of excellence of the specimen at receipt. The filler populates this attribute. Refer to User-defined Table 0491 - Specimen Quality for suggested entries.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "23": {
+      "field_id": "SPM.23",
+      "name": "Specimen Appropriateness",
+      "description": "The suitability of the specimen for the particular planned use as determined by the filler. Refer to User-defined Table 0492 - Specimen Appropriateness for suggested entries.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "24": {
+      "field_id": "SPM.24",
+      "name": "Specimen Condition",
+      "description": "A mode or state of being that describes the nature of the specimen. Refer to User-defined Table 0493 - Specimen Condition for suggested entries.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "25": {
+      "field_id": "SPM.25",
+      "name": "Specimen Current Quantity",
+      "description": "This attributes contains the amount of specimen that currently exists or is available for use in further testing.",
+      "length": "20",
+      "data_type": "CQ - Composite Quantity with Units",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "26": {
+      "field_id": "SPM.26",
+      "name": "Number of Specimen Containers",
+      "description": "This field identifies the number of containers for a given sample. For sample receipt verification purposes; may be different from the total number of samples that accompany the order.",
+      "length": "4",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "27": {
+      "field_id": "SPM.27",
+      "name": "Container Type",
+      "description": "The container in or on which a specimen is transported",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "28": {
+      "field_id": "SPM.28",
+      "name": "Container Condition",
+      "description": "In chain of custody cases where specimens are moved from lab to lab, the status of the container that the specimen is shipped in must be recorded at each receipt. If the container is compromised in any way (seal broken, container cracked or leaking, etc) then this needs to be recorded for legal reasons.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "29": {
+      "field_id": "SPM.29",
+      "name": "Specimen Child Role",
+      "description": "For child specimens, this field identifies the relationship between this specimen and the parent specimen. If this field is populated, then SPM-3-Specimen Parent ID must be populated. This field differs from SPM-15-Specimen Role in that this field refers to the role of this specimen relative to a parent role rather than the role of this specimen to the ordered service.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  },
+  "EVN": {
+    "1": {
+      "field_id": "EVN.1",
+      "name": "Event Type Code",
+      "description": "This field has been retained for backward compatibility only. We recommend using the second component (trigger event) of MSH-9 - Message Type to transmit event type code information. This field contains the events corresponding to the trigger events described in this section, e.g., admission, transfer, or registration. Refer to HL7 Table 0003 - Event type for valid values.",
+      "length": "3",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "EVN.2",
+      "name": "Recorded Date/Time",
+      "description": "Most systems will default to the system date/time when the transaction was entered, but they should also permit an override.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "EVN.3",
+      "name": "Date/Time Planned Event",
+      "description": "This field contains the date/time that the event is planned. We recommend that PV2-8 - Expected Admit Date/Time , PV2-9 - Expected Discharge Date/Time or PV2-47 - Expected LOA Return date/time be used whenever possible.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "EVN.4",
+      "name": "Event Reason Code",
+      "description": "This field contains the reason for this event. Refer to User-defined Table 0062 - Event Reason for suggested values.",
+      "length": "3",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "EVN.5",
+      "name": "Operator ID",
+      "description": "This field identifies the individual responsible for triggering the event. Refer to User-defined Table 0188 - Operator ID for suggested values.",
+      "length": "250",
+      "data_type": "XCN - Extended Composite ID Number and Name for Persons",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "6": {
+      "field_id": "EVN.6",
+      "name": "Event Occurred",
+      "description": "This field contains the date/time that the event actually occurred. For example, on a transfer (A02 transfer a patient), this field would contain the date/time the patient was actually transferred. On a cancellation event, this field should contain the date/time that the event being cancelled occurred.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "EVN.7",
+      "name": "Event Facility",
+      "description": "This field identifies the actual facility where the event occurred as differentiated from the sending facility (MSH-4). It would be the facility at which the Operator (EVN-5) has entered the event.",
+      "length": "241",
+      "data_type": "HD - Hierarchic Designator",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  },
+  "PD1": {
+    "1": {
+      "field_id": "PD1.1",
+      "name": "Living Dependency",
+      "description": "This field identifies specific living conditions (e.g., spouse dependent on patient, walk-up) that are relevant to an evaluation of the patients healthcare needs. This information can be used for discharge planning. This field repeats because, for example, spouse dependent and medical supervision required can apply at the same time. Refer to User-defined Table 0223 - Living Dependency for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "2": {
+      "field_id": "PD1.2",
+      "name": "Living Arrangement",
+      "description": "This field identifies the situation in which the patient lives at his residential address. Examples might include Alone, Family, Relatives, Institution, etc. Refer to User-defined Table 0220 - Living Arrangement for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "PD1.3",
+      "name": "Patient Primary Facility",
+      "description": "This field contains the name and identifier that specifies the primary care healthcare facility selected by the patient at the time of enrolment in an HMO Insurance Plan. Multiple names and identifiers are allowed for the same facility. The legal name of the healthcare facility must be sent in the first sequence. If the legal name of the facility is not sent, then the repeat delimiter must be sent in the first sequence. Refer to User-defined Table 0204 - Organizational Name Type for suggested values.",
+      "length": "250",
+      "data_type": "XON - Extended Composite Name and Identification Number for Organizations",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "4": {
+      "field_id": "PD1.4",
+      "name": "Patient Primary Care Provider Name and ID No.",
+      "description": "This field is retained for backward compatibility only. The ROL segment is now used to convey more complete information about the primary care provider. This field contained the provider name and ID of the primary care provider. Multiple names are allowed for the same person. The legal name must be sent in the first sequence. If the legal name is not sent, then the repeat delimiter must be sent in the first sequence.",
+      "length": "250",
+      "data_type": "XCN - Extended Composite ID Number and Name for Persons",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "5": {
+      "field_id": "PD1.5",
+      "name": "Student Indicator",
+      "description": "This field indicates if the patient is currently a student or not, and whether the patient is a full-time or a part-time student. This field does not indicate the students degree level (high school, college, elementary) or the students field of study (accounting, engineering, etc.). Refer to User-defined Table 0231 - Student Status for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "PD1.6",
+      "name": "Handicap",
+      "description": "This field indicates the nature of the patients permanent handicapped condition (e.g., deaf, blind). A handicapped condition is defined as a physical or mental disability that is permanent. Transient handicapped conditions should be sent in the ambulatory status. Refer to User-defined Table 0295 - Handicap for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "PD1.7",
+      "name": "Living Will Code",
+      "description": "This field indicates whether or not the patient has a living will and, if so, whether a copy of the living will is on file at the healthcare facility. If the patient does not have a living will, the value of this field indicates whether the patient was provided information on living wills. Refer to User-defined Table 0315 - Living Will Code for suggested values. See also PV2-43 - Living Will Code.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "PD1.8",
+      "name": "Organ Donor Code",
+      "description": "This field indicates whether the patient wants to donate his/her organs and whether an organ donor card or similar documentation is on file with the healthcare organization. Refer to User-defined Table 0316 - Organ Donor Code for suggested values. See also PV2-44 - Organ donor Code .",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "PD1.9",
+      "name": "Separate Bill",
+      "description": "This field specifies that charges for this patient are to be billed separately from other patient bills with the same guarantor. (This bill is now a patient bill rather than a guarantor bill.) Refer to HL7 Table 0136 - Yes/no Indicator for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "PD1.10",
+      "name": "Duplicate Patient",
+      "description": "This field indicates that a patient is the same as, or a duplicate of, another patient found on the sending system. The intent is to be informational only and no action is required by the receiver. Include the patient identifier if the sender knows an identifier for the patient. The assigning authority and identifier type code are strongly recommended for all CX data types.",
+      "length": "250",
+      "data_type": "CX - Extended Composite ID with Check Digit",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "11": {
+      "field_id": "PD1.11",
+      "name": "Publicity Code",
+      "description": "This field contains a user-defined code indicating what level of publicity is allowed (e.g., No Publicity, Family Only) for the patient. Refer to User-defined Table 0215 - Publicity Code for suggested values. Refer to PV2-21 - Visit Publicity Code for visit level code.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "PD1.12",
+      "name": "Protection Indicator",
+      "description": "This field identifies the patients protection that determines, in turn, whether access to information about this person should be kept from users who do not have adequate authority for the patient. Refer to HL7 Table 0136 - Yes/no Indicator for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "PD1.13",
+      "name": "Protection Indicator Effective Date",
+      "description": "This field indicates the effective date for PD1-12 - Protection Indicator.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "PD1.14",
+      "name": "Place of Worship",
+      "description": "The patients place of worship. For example, the patient attends the First Baptist Church of Atlanta.",
+      "length": "250",
+      "data_type": "XON - Extended Composite Name and Identification Number for Organizations",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "15": {
+      "field_id": "PD1.15",
+      "name": "Advance Directive Code",
+      "description": "This field indicates the patients instructions to the healthcare facility. Refer to User-defined Table 0435 - Advance Directive Code for suggested values. See also PV2-45 - Advance Directive Code .",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "16": {
+      "field_id": "PD1.16",
+      "name": "Immunization Registry Status",
+      "description": "This field identifies the registry status of the patient. The field may be used to indicate the changed status of a once active patient in a registry, such as an immunization registry. Refer to User-defined Table 0441 - Immunization Registry Status for suggested values.",
+      "length": "1",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "17": {
+      "field_id": "PD1.17",
+      "name": "Immunization Registry Status Effective Date",
+      "description": "This field indicates the effective date for the registry status reported in PD1-16 - Immunization Registry Status .",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "18": {
+      "field_id": "PD1.18",
+      "name": "Publicity Code Effective Date",
+      "description": "This is the effective date for PD1-11 - Publicity Code.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "19": {
+      "field_id": "PD1.19",
+      "name": "Military Branch",
+      "description": "This field is defined by CMS or other regulatory agencies. Refer to User-defined Table 0140 - Military Service for suggested values.",
+      "length": "5",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "20": {
+      "field_id": "PD1.20",
+      "name": "Military Rank/Grade",
+      "description": "This user-defined field identifies the military rank/grade of the patient. Refer to User-defined Table 0141 - Military Rank/Grade for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "21": {
+      "field_id": "PD1.21",
+      "name": "Military Status",
+      "description": "This field is defined by CMS or other regulatory agencies. Refer to User-defined Table 0142 - Military Status for suggested values.",
+      "length": "3",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  },
+  "PV2": {
+    "1": {
+      "field_id": "PV2.1",
+      "name": "Prior Pending Location",
+      "description": "This field is required for cancel pending transfer (A26) messages. In all other events it is optional.",
+      "length": "80",
+      "data_type": "PL - Person Location",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "PV2.2",
+      "name": "Accommodation Code",
+      "description": "This field indicates the specific patient accommodations for this visit. Refer to User-defined Table 0129 - Accommodation Code for suggested values.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "PV2.3",
+      "name": "Admit Reason",
+      "description": "This field contains the short description of the reason for patient admission.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "PV2.4",
+      "name": "Transfer Reason",
+      "description": "This field contains the short description of the reason for a patient location change.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "PV2.5",
+      "name": "Patient Valuables",
+      "description": "This field contains the short description of patient valuables checked in during admission.",
+      "length": "25",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "6": {
+      "field_id": "PV2.6",
+      "name": "Patient Valuables Location",
+      "description": "This field indicates the location of the patients valuables.",
+      "length": "25",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "PV2.7",
+      "name": "Visit User Code",
+      "description": "This field further categorizes a patients visit with respect to an individual institutions needs, and is expected to be site-specific. Refer to User-defined Table 0130 - Visit User Code for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "8": {
+      "field_id": "PV2.8",
+      "name": "Expected Admit Date/Time",
+      "description": "This field contains the date and time that the patient is expected to be admitted. This field is also used to reflect the date/time of an outpatient/emergency patient registration.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "PV2.9",
+      "name": "Expected Discharge Date/Time",
+      "description": "This field contains the date and time that the patient is expected to be discharged. This is a non-event related date used by ancillaries to determine more accurately the projected workloads. This field is also used to reflect the anticipated discharge date/time of an outpatient/emergency patient, or an inpatient.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "PV2.10",
+      "name": "Estimated Length of Inpatient Stay",
+      "description": "This field specifies the estimated days of inpatient stays.",
+      "length": "3",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "PV2.11",
+      "name": "Actual Length of Inpatient Stay",
+      "description": "This field contains the actual days of inpatient stays. The actual length of the inpatient stay may not be calculated from the admission and discharge dates because of possible leaves of absence.",
+      "length": "3",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "PV2.12",
+      "name": "Visit Description",
+      "description": "This field contains a brief user-defined description of the visit.",
+      "length": "50",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "PV2.13",
+      "name": "Referral Source Code",
+      "description": "This field contains the name and the identification numbers of the person or organization that made the referral. This person/organization is not the same as the referring doctor. For example, Joe Smith referred me to the Clinic (or to Dr. Jones at the Clinic).",
+      "length": "250",
+      "data_type": "XCN - Extended Composite ID Number and Name for Persons",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "14": {
+      "field_id": "PV2.14",
+      "name": "Previous Service Date",
+      "description": "This field contains the date of previous service for the same recurring condition. This may be a required field for billing certain illnesses (e.g., accident related) to a third party.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "15": {
+      "field_id": "PV2.15",
+      "name": "Employment Illness Related Indicator",
+      "description": "This field specifies whether a patients illness was job-related. Refer to HL7 Table 0136 - Yes/no Indicator for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "16": {
+      "field_id": "PV2.16",
+      "name": "Purge Status Code",
+      "description": "This field contains the purge status code for the account. It is used by the application program to determine purge processing. Refer to User-defined Table 0213 - Purge Status Code for suggested values.",
+      "length": "1",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "17": {
+      "field_id": "PV2.17",
+      "name": "Purge Status Date",
+      "description": "This field contains the date on which the data will be purged from the system.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "18": {
+      "field_id": "PV2.18",
+      "name": "Special Program Code",
+      "description": "This field designates the specific health insurance program for a visit required for healthcare reimbursement. Refer to User-defined Table 0214 - Special Program Codes for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "19": {
+      "field_id": "PV2.19",
+      "name": "Retention Indicator",
+      "description": "This field allows the user to control the financial and demographic purge processes at the visit. It is used to preserve demographic and financial data on specific, high priority visits. Refer to HL7 Table 0136 - Yes/no Indicator for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "20": {
+      "field_id": "PV2.20",
+      "name": "Expected Number of Insurance Plans",
+      "description": "This field contains the number of insurance plans that may provide coverage for this visit.",
+      "length": "1",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "21": {
+      "field_id": "PV2.21",
+      "name": "Visit Publicity Code",
+      "description": "This field contains a user-defined code indicating what level of publicity is allowed for a specific visit. Refer to User-defined Table 0215 - Publicity Code for suggested values. Refer to PD1-11 - Publicity Code for the patient level publicity code.",
+      "length": "1",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "22": {
+      "field_id": "PV2.22",
+      "name": "Visit Protection Indicator",
+      "description": "This field identifies the persons protection that determines, in turn, whether access to information about this person should be kept from users who do not have adequate authority for a specific visit. Refer to HL7 Table 0136 - Yes/no Indicator for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "23": {
+      "field_id": "PV2.23",
+      "name": "Clinic Organization Name",
+      "description": "This field contains the organization name or sub-unit and identifier that is associated with the (visit) episode of care. For example, the Allergy or Oncology Clinic within the healthcare facility might be named.",
+      "length": "250",
+      "data_type": "XON - Extended Composite Name and Identification Number for Organizations",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "24": {
+      "field_id": "PV2.24",
+      "name": "Patient Status Code",
+      "description": "This field indicates the status of the episode of care. Refer to User-defined Table 0216 - Patient Status for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "25": {
+      "field_id": "PV2.25",
+      "name": "Visit Priority Code",
+      "description": "This field contains the priority of the visit. Refer to User-defined Table 0217 - Visit Priority Code for suggested values.",
+      "length": "1",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "26": {
+      "field_id": "PV2.26",
+      "name": "Previous Treatment Date",
+      "description": "This field contains the date that the patient last had treatment for any condition prior to this visit. In the case of a prior hospital visit, it is likely to be the previous discharge date.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "27": {
+      "field_id": "PV2.27",
+      "name": "Expected Discharge Disposition",
+      "description": "This field describes what the patients disposition is expected to be at the end of the visit. Refer to User-defined Table 0112 - Discharge Disposition for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "28": {
+      "field_id": "PV2.28",
+      "name": "Signature on File Date",
+      "description": "This field contains the date on which a signature was obtained for insurance billing purposes.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "29": {
+      "field_id": "PV2.29",
+      "name": "First Similar Illness Date",
+      "description": "This field is used to determine if the patient has a pre-existing condition.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "30": {
+      "field_id": "PV2.30",
+      "name": "Patient Charge Adjustment Code",
+      "description": "This field contains a user-defined code that indicates which adjustments should be made to this patients charges. Refer to User-defined Table 0218 - Charge Adjustment for suggested values. This field is the same as GT1-26 - Guarantor Charge Adjustment Code.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "31": {
+      "field_id": "PV2.31",
+      "name": "Recurring Service Code",
+      "description": "This field indicates whether the treatment is continuous. Refer to User-defined Table 0219 - Recurring Service for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "32": {
+      "field_id": "PV2.32",
+      "name": "Billing Media Code",
+      "description": "This field indicates if the account is to be rejected from tape billing. Refer to HL7 Table 0136 - Yes/no Indicator for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "33": {
+      "field_id": "PV2.33",
+      "name": "Expected Surgery Date and Time",
+      "description": "This field contains the date and time on which the surgery is expected to occur.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "34": {
+      "field_id": "PV2.34",
+      "name": "Military Partnership Code",
+      "description": "This field indicates that a military healthcare facility has contracted with a non-military healthcare facility for the use of its services. Refer to HL7 Table 0136 - Yes/no Indicator for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "35": {
+      "field_id": "PV2.35",
+      "name": "Military Non-Availability Code",
+      "description": "This field indicates whether a patient has permission to use a non-military healthcare facility for treatment. Refer to HL7 Table 0136 - Yes/no Indicator for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "36": {
+      "field_id": "PV2.36",
+      "name": "Newborn Baby Indicator",
+      "description": "This field indicates whether the patient is a baby. Refer to HL7 Table 0136 - Yes/no Indicator for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "37": {
+      "field_id": "PV2.37",
+      "name": "Baby Detained Indicator",
+      "description": "This field indicates if the baby is detained after the mothers discharge. Refer to HL7 Table 0136 - Yes/no Indicator for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "38": {
+      "field_id": "PV2.38",
+      "name": "Mode of Arrival Code",
+      "description": "Identifies how the patient was brought to the healthcare facility. Refer to User-defined Table 0430 - Mode of Arrival Code for suggested values.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "39": {
+      "field_id": "PV2.39",
+      "name": "Recreational Drug Use Code",
+      "description": "This field indicates what recreational drugs the patient uses. It is used for the purpose of room assignment. Refer to User-defined Table 0431 - Recreational Drug Use Code for suggested values.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "40": {
+      "field_id": "PV2.40",
+      "name": "Admission Level of Care Code",
+      "description": "This field indicates the acuity level assigned to the patient at the time of admission. Refer to User-defined Table 0432 - Admission Level of Care Code for suggested values.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "41": {
+      "field_id": "PV2.41",
+      "name": "Precaution Code",
+      "description": "This field indicates non-clinical precautions that need to be taken with the patient. Refer to User-defined Table 0433 - Precaution Code for suggested values.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "42": {
+      "field_id": "PV2.42",
+      "name": "Patient Condition Code",
+      "description": "This field indicates the patients current medical condition for the purpose of communicating to non-medical outside parties, e.g. family, employer, religious minister, media, etc. Refer to User-defined Table 0434 - Patient Condition Code for suggested values.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "43": {
+      "field_id": "PV2.43",
+      "name": "Living Will Code",
+      "description": "This field indicates whether or not the patient has a living will and, if so, whether a copy of the living will is on file at the healthcare facility. If the patient does not have a living will, the value of this field indicates whether the patient was provided information on living wills. Refer to User-defined Table 0315 - Living Will Code for suggested values. See also PD1-7 - Living Will.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "44": {
+      "field_id": "PV2.44",
+      "name": "Organ Donor Code",
+      "description": "This field indicate whether the patient wants to donate his/her organs and whether an organ donor card or similar documentation is on file with the healthcare organization. Refer to User-defined Table 0316 - Organ Donor Code for suggested values. See also PD1-8 - Organ Donor.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "45": {
+      "field_id": "PV2.45",
+      "name": "Advance Directive Code",
+      "description": "This field indicates the patients instructions to the healthcare facility. Refer to User-defined Table 0435 - Advance Directive Code for suggested values. See also PD1-15 - Advance Directive Code.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "46": {
+      "field_id": "PV2.46",
+      "name": "Patient Status Effective Date",
+      "description": "This field indicates the effective date for PV2-24 - Patient Status.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "47": {
+      "field_id": "PV2.47",
+      "name": "Expected LOA Return Date/Time",
+      "description": "This field is conditionally required for A21 - Patient goes on LOA. It may be populated in A22 - Patient returns from LOA as well as in the A53 - Cancel LOA for a patient and the A54 - Cancel patient returns from LOA triggers. This field contains the date/time that the patient is expected to return from LOA.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "48": {
+      "field_id": "PV2.48",
+      "name": "Expected Pre-admission Testing Date/Time",
+      "description": "This field contains the date/time that the patient is expected for pre-admission testing.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "49": {
+      "field_id": "PV2.49",
+      "name": "Notify Clergy Code",
+      "description": "This field allows the user to indicate whether the clergy should be notified. Refer to User-defined Table 0534 - Notify Clergy Code for suggested values.",
+      "length": "20",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    }
+  },
+  "IN1": {
+    "1": {
+      "field_id": "IN1.1",
+      "name": "Set ID - IN1",
+      "description": "IN1-1 - set ID - IN1 contains the number that identifies this transaction. For the first occurrence the sequence number shall be 1, for the second occurrence it shall be 2, etc. The Set ID in the IN1 segment is used to aggregate the grouping of insurance segments. For example, a patient with two insurance plans would have two groupings of insurance segments. IN1, IN2, and IN3 segments for Insurance Plan A with set ID 1, followed by IN1, IN2, and IN3 segments for Insurance Plan B, with set ID 2. There is no set ID in the IN2 segment because it is contained in the IN1, IN2, IN3 grouping, and is therefore not needed. The set ID in the IN3 segment is provided because there can be multiple repetitions of the IN3 segment if there are multiple certifications for the same insurance plan, e.g., IN1 (Set ID 1), IN2, IN3 (Set ID 1), IN3 (Set ID 2), IN3 (Set ID 3)",
+      "length": "4",
+      "data_type": "SI - Sequence ID",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "IN1.2",
+      "name": "Insurance Plan ID",
+      "description": "This field contains a unique identifier for the insurance plan. Refer to User-defined Table 0072 - Insurance Plan ID for suggested values. To eliminate a plan, the plan could be sent with null values in each subsequent element. If the respective systems can support it, a null value can be sent in the plan field.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "IN1.3",
+      "name": "Insurance Company ID",
+      "description": "This field contains unique identifiers for the insurance company. The assigning authority and identifier type code are strongly recommended for all CX data types.",
+      "length": "250",
+      "data_type": "CX - Extended Composite ID with Check Digit",
+      "optionality": "Required",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "4": {
+      "field_id": "IN1.4",
+      "name": "Insurance Company Name",
+      "description": "This field contains the name of the insurance company. Multiple names for the same insurance company may be sent in this field. The legal name is assumed to be in the first repetition. When the legal name is not sent, a repeat delimiter must be sent first for the first repetition.",
+      "length": "250",
+      "data_type": "XON - Extended Composite Name and Identification Number for Organizations",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "5": {
+      "field_id": "IN1.5",
+      "name": "Insurance Company Address",
+      "description": "This field contains the address of the insurance company. Multiple addresses for the same insurance company may be sent in this field. The mailing address is assumed to be in the first repetition. When the mailing address is not sent, a repeat delimiter must be sent first for the first repetition.",
+      "length": "250",
+      "data_type": "XAD - Extended Address",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "6": {
+      "field_id": "IN1.6",
+      "name": "Insurance Co Contact Person",
+      "description": "This field contains the name of the person who should be contacted at the insurance company. Multiple names for the same contact person may be sent in this field. The legal name is assumed to be in the first repetition. When the legal name is not sent, a repeat delimiter must be sent first for the first repetition.",
+      "length": "250",
+      "data_type": "XPN - Extended Person Name",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "7": {
+      "field_id": "IN1.7",
+      "name": "Insurance Co Phone Number",
+      "description": "This field contains the phone number of the insurance company. Multiple phone numbers for the same insurance company may be sent in this field. The primary phone number is assumed to be in the first repetition. When the primary phone number is not sent, a repeat delimiter must be sent first for the first repetition.",
+      "length": "250",
+      "data_type": "XTN - Extended Telecommunication Number",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "8": {
+      "field_id": "IN1.8",
+      "name": "Group Number",
+      "description": "This field contains the group number of the insureds insurance.",
+      "length": "12",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "IN1.9",
+      "name": "Group Name",
+      "description": "This field contains the group name of the insureds insurance.",
+      "length": "250",
+      "data_type": "XON - Extended Composite Name and Identification Number for Organizations",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "10": {
+      "field_id": "IN1.10",
+      "name": "Insured's Group Emp ID",
+      "description": "This field holds the group employer ID for the insureds insurance. The assigning authority and identifier type code are strongly recommended for all CX data types.",
+      "length": "250",
+      "data_type": "CX - Extended Composite ID with Check Digit",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "11": {
+      "field_id": "IN1.11",
+      "name": "Insured's Group Emp Name",
+      "description": "This field contains the name of the employer that provides the employees insurance. Multiple names for the same employer may be sent in this sequence. The legal name must be sent first. When the legal name is not sent, a repeat delimiter must be sent first for the first repetition.",
+      "length": "250",
+      "data_type": "XON - Extended Composite Name and Identification Number for Organizations",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "12": {
+      "field_id": "IN1.12",
+      "name": "Plan Effective Date",
+      "description": "This field contains the date that the insurance goes into effect.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "IN1.13",
+      "name": "Plan Expiration Date",
+      "description": "This field indicates the last date of service that the insurance will cover or be responsible for.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "IN1.14",
+      "name": "Authorization Information",
+      "description": "Based on the type of insurance, some coverage plans require that an authorization number or code be obtained prior to all non-emergency admissions, and within 48 hours of an emergency admission. Insurance billing would not be permitted without this number. The date and source of authorization are the components of this field.",
+      "length": "239",
+      "data_type": "AUI - Authorization Information",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "15": {
+      "field_id": "IN1.15",
+      "name": "Plan Type",
+      "description": "This field contains the coding structure that identifies the various plan types, for example, Medicare, Medicaid, Blue Cross, HMO, etc. Refer to User-defined Table 0086 - Plan ID for suggested values.",
+      "length": "3",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "16": {
+      "field_id": "IN1.16",
+      "name": "Name Of Insured",
+      "description": "This field contains the name of the insured person. The insured is the person who has an agreement with the insurance company to provide healthcare services to persons covered by the insurance policy. Multiple names for the same insured person may be sent in this field. The legal name is assumed to be in the first repetition. When the legal name is not sent, a repeat delimiter must be sent first for the first repetition.",
+      "length": "250",
+      "data_type": "XPN - Extended Person Name",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "17": {
+      "field_id": "IN1.17",
+      "name": "Insured's Relationship To Patient",
+      "description": "This field indicates the insureds relationship to the patient. Refer to User-defined Table 0063 - Relationship for suggested values.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "18": {
+      "field_id": "IN1.18",
+      "name": "Insured's Date Of Birth",
+      "description": "This field contains the date of birth of the insured.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "19": {
+      "field_id": "IN1.19",
+      "name": "Insured's Address",
+      "description": "This field contains the address of the insured person. The insured is the person who has an agreement with the insurance company to provide healthcare services to persons covered by an insurance policy. Multiple addresses for the same insured person may be in this field. The mailing address must be sent in the first repetition. When the legal name is not sent, a repeat delimiter must be sent first for the first repetition.",
+      "length": "250",
+      "data_type": "XAD - Extended Address",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "20": {
+      "field_id": "IN1.20",
+      "name": "Assignment Of Benefits",
+      "description": "This field indicates whether the insured agreed to assign the insurance benefits to the healthcare provider. If so, the insurance will pay the provider directly. Refer to User-defined Table 0135 - Assignment of Benefits for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "21": {
+      "field_id": "IN1.21",
+      "name": "Coordination Of Benefits",
+      "description": "This field indicates whether this insurance works in conjunction with other insurance plans, or if it provides independent coverage and payment of benefits regardless of other insurance that might be available to the patient. Refer to User-defined Table 0173 - Coordination of Benefits for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "22": {
+      "field_id": "IN1.22",
+      "name": "Coord Of Ben. Priority",
+      "description": "If the insurance works in conjunction with other insurance plans, this field contains priority sequence. Values are: 1, 2, 3, etc.",
+      "length": "2",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "23": {
+      "field_id": "IN1.23",
+      "name": "Notice Of Admission Flag",
+      "description": "This field indicates whether the insurance company requires a written notice of admission from the healthcare provider. Refer to HL7 table 0136 - Yes/no Indicator for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "24": {
+      "field_id": "IN1.24",
+      "name": "Notice Of Admission Date",
+      "description": "If a notice is required, this field indicates the date that it was sent.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "25": {
+      "field_id": "IN1.25",
+      "name": "Report Of Eligibility Flag",
+      "description": "This field indicates whether this insurance carrier sends a report that indicates that the patient is eligible for benefits and whether it identifies those benefits. Refer to HL7 table 0136 - Yes/no Indicator for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "26": {
+      "field_id": "IN1.26",
+      "name": "Report Of Eligibility Date",
+      "description": "This field indicates whether a report of eligibility (ROE) was received, and also indicates the date that it was received.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "27": {
+      "field_id": "IN1.27",
+      "name": "Release Information Code",
+      "description": "This field indicates whether the healthcare provider can release information about the patient, and what information can be released. Refer to User-defined Table 0093 - Release Information for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "28": {
+      "field_id": "IN1.28",
+      "name": "Pre-Admit Cert (PAC)",
+      "description": "This field contains the pre-admission certification code. If the admission must be certified before the admission, this is the code associated with the admission.",
+      "length": "15",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "29": {
+      "field_id": "IN1.29",
+      "name": "Verification Date/Time",
+      "description": "This field contains the date/time that the healthcare provider verified that the patient has the indicated benefits.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "30": {
+      "field_id": "IN1.30",
+      "name": "Verification By",
+      "description": "Refers to the person who verified the benefits. Multiple names for the same insured person may be sent in this field. The legal name is assumed to be in the first repetition. When the legal name is not sent, a repeat delimiter must be sent first for the first repetition.",
+      "length": "250",
+      "data_type": "XCN - Extended Composite ID Number and Name for Persons",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "31": {
+      "field_id": "IN1.31",
+      "name": "Type Of Agreement Code",
+      "description": "This field is used to further identify an insurance plan. Refer to User-defined Table 0098 - Type of Agreement for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "32": {
+      "field_id": "IN1.32",
+      "name": "Billing Status",
+      "description": "This field indicates whether the particular insurance has been billed and, if so, the type of bill. Refer to User-defined Table 0022 - Billing Status for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "33": {
+      "field_id": "IN1.33",
+      "name": "Lifetime Reserve Days",
+      "description": "This field contains the number of days left for a certain service to be provided or covered under an insurance policy.",
+      "length": "4",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "34": {
+      "field_id": "IN1.34",
+      "name": "Delay Before L.R. Day",
+      "description": "This field indicates the delay before lifetime reserve days.",
+      "length": "4",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "35": {
+      "field_id": "IN1.35",
+      "name": "Company Plan Code",
+      "description": "This field contains optional information to further define the data in IN1-3 - Insurance Company ID . Refer to User-defined Table 0042 - Company Plan Code for suggested values. This table contains codes used to identify an insurance company plan uniquely.",
+      "length": "8",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "36": {
+      "field_id": "IN1.36",
+      "name": "Policy Number",
+      "description": "This field contains the individual policy number of the insured to uniquely identify this patients plan. For special types of insurance numbers, there are also special fields in the IN2 segment for Medicaid, Medicare, Champus (i.e., IN2-6 - Medicare Health Ins Card Number, IN2-8 - Medicaid Case Number, IN2-10 - Military ID Number). But we recommend that this field (IN1-36 - Policy Number) be filled even when the patients insurance number is also passed in one of these other fields.",
+      "length": "15",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "37": {
+      "field_id": "IN1.37",
+      "name": "Policy Deductible",
+      "description": "This field contains the amount specified by the insurance plan that is the responsibility of the guarantor (i.e. deductible, excess, etc.).",
+      "length": "12",
+      "data_type": "CP - Composite Price",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "38": {
+      "field_id": "IN1.38",
+      "name": "Policy Limit - Amount",
+      "description": "As of Version 2.3, this field has been retained for backward compatibility only. Use IN2-29 - Policy Type/Amount instead of this field. This field contains the maximum amount that the insurance policy will pay. In some cases, the limit may be for a single encounter.",
+      "length": "12",
+      "data_type": "CP - Composite Price",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Not repeatable"
+    },
+    "39": {
+      "field_id": "IN1.39",
+      "name": "Policy Limit - Days",
+      "description": "This field contains the maximum number of days that the insurance policy will cover.",
+      "length": "4",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "40": {
+      "field_id": "IN1.40",
+      "name": "Room Rate - Semi-Private",
+      "description": "As of Version 2.3, this field has been retained for backward compatibility only. Use IN2-28 - Room Coverage Type/Amount instead of this field. When used for backward compatibility, IN1-40 - Room Rate Semi-Private contains the average room rate that the policy covers.",
+      "length": "12",
+      "data_type": "CP - Composite Price",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Not repeatable"
+    },
+    "41": {
+      "field_id": "IN1.41",
+      "name": "Room Rate - Private",
+      "description": "As of Version 2.3, this field has been retained for backward compatibility only. Use IN2-28 - Room Coverage Type/Amount instead of this field . When used for backward compatibility IN1-41 - Room Rate - Private contains the maximum private room rate that the policy covers.",
+      "length": "12",
+      "data_type": "CP - Composite Price",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Not repeatable"
+    },
+    "42": {
+      "field_id": "IN1.42",
+      "name": "Insured's Employment Status",
+      "description": "This field holds the employment status of the insured. Refer to User-defined Table 0066 - Employment Status for suggested values. This field contains UB92 field 64. For this field element, values from the US CMS UB92 and others are used.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "43": {
+      "field_id": "IN1.43",
+      "name": "Insured's Administrative Sex",
+      "description": "This field contains the gender of the insured. Refer to User-defined Table 0001 - Administrative Sex for suggested values.",
+      "length": "1",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "44": {
+      "field_id": "IN1.44",
+      "name": "Insured's Employer's Address",
+      "description": "This field contains the address of the insured employees employer. Multiple addresses for the same employer may be sent in this field. The mailing address must be sent first. When the mailing address is not sent, a repeat delimiter must be sent first for the first repetition.",
+      "length": "250",
+      "data_type": "XAD - Extended Address",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "45": {
+      "field_id": "IN1.45",
+      "name": "Verification Status",
+      "description": "This field contains the status of this patients relationship with this insurance carrier.",
+      "length": "2",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "46": {
+      "field_id": "IN1.46",
+      "name": "Prior Insurance Plan ID",
+      "description": "This field uniquely identifies the prior insurance plan when the plan ID changes. Refer to User-defined Table 0072 - Insurance Plan ID for suggested values.",
+      "length": "8",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "47": {
+      "field_id": "IN1.47",
+      "name": "Coverage Type",
+      "description": "This field contains the coding structure that identifies the type of insurance coverage, or what types of services are covered for the purposes of a billing system. For example, a physician billing system will only want to receive insurance information for plans that cover physician/professional charges. Refer to User-defined Table 0309 - Coverage Type for suggested values.",
+      "length": "3",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "48": {
+      "field_id": "IN1.48",
+      "name": "Handicap",
+      "description": "This field contains a code to describe the insureds disability. Refer to User-defined Table 0295 - Handicap for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "49": {
+      "field_id": "IN1.49",
+      "name": "Insured's ID Number",
+      "description": "This data element contains a healthcare institutions identifiers for the insured. The assigning authority and identifier type code are strongly recommended for all CX data types.",
+      "length": "250",
+      "data_type": "CX - Extended Composite ID with Check Digit",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "50": {
+      "field_id": "IN1.50",
+      "name": "Signature Code",
+      "description": "This field contains the code to indicate how the patient/subscriber authorization signature was obtained and how it is being retained by the provider. Refer to User-defined Table 0535 - Signature Codefor suggested values.",
+      "length": "1",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "51": {
+      "field_id": "IN1.51",
+      "name": "Signature Code Date",
+      "description": "The date the patient/subscriber authorization signature was obtained.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "52": {
+      "field_id": "IN1.52",
+      "name": "Insured's Birth Place",
+      "description": "This field contains the description of the insureds birth place, for example St. Francis Community Hospital of Lower South Side. The actual address is reported in IN1-19 - Insureds Address with an identifier of N.",
+      "length": "250",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "53": {
+      "field_id": "IN1.53",
+      "name": "VIP Indicator",
+      "description": "This field identifies the type of VIP for the insured. Refer to User-defined Table 0099 - VIP indicator for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  },
+  "MRG": {
+    "1": {
+      "field_id": "MRG.1",
+      "name": "Prior Patient Identifier List",
+      "description": "This field contains the prior patient identifier list. This field contains a list of potential old numbers to match. Only one old number can be merged with one new number in a transaction. Refer to HL7 Table 0061 - Check Digit Scheme for valid values. The assigning authority and identifier type code are strongly recommended for all CX data types.",
+      "length": "250",
+      "data_type": "CX - Extended Composite ID with Check Digit",
+      "optionality": "Required",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "2": {
+      "field_id": "MRG.2",
+      "name": "Prior Alternate Patient ID",
+      "description": "This field has been retained for backward compatibility only. Use MRG-1 - Prior Patient Identifier List for all patient identifiers. This field contains the prior alternate patient identifier. Refer to HL7 Table 0061 - Check Digit Scheme for valid values. The assigning authority and identifier type code are strongly recommended for all CX data types.",
+      "length": "250",
+      "data_type": "CX - Extended Composite ID with Check Digit",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "3": {
+      "field_id": "MRG.3",
+      "name": "Prior Patient Account Number",
+      "description": "This field contains the prior patient account number. Refer to HL7 Table 0061 - Check Digit Scheme for valid values. The assigning authority and identifier type code are strongly recommended for all CX data types.",
+      "length": "250",
+      "data_type": "CX - Extended Composite ID with Check Digit",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "MRG.4",
+      "name": "Prior Patient ID",
+      "description": "This field has been retained for backward compatibility only. Use MRG-1 - Prior Patient Identifier List for all patient identifiers. This field contains the prior patient identifier. Refer to HL7 Table 0061 - Check Digit Scheme for valid values. The assigning authority and identifier type code are strongly recommended for all CX data types.",
+      "length": "250",
+      "data_type": "CX - Extended Composite ID with Check Digit",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "MRG.5",
+      "name": "Prior Visit Number",
+      "description": "This field contains the prior visit number. Refer to HL7 Table 0061 - Check Digit Scheme for valid values. The assigning authority and identifier type code are strongly recommended for all CX data types.",
+      "length": "250",
+      "data_type": "CX - Extended Composite ID with Check Digit",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "MRG.6",
+      "name": "Prior Alternate Visit ID",
+      "description": "This field contains the prior alternate visit number. Refer to HL7 Table 0061 - Check Digit Scheme for valid values. The assigning authority and identifier type code are strongly recommended for all CX data types.",
+      "length": "250",
+      "data_type": "CX - Extended Composite ID with Check Digit",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "MRG.7",
+      "name": "Prior Patient Name",
+      "description": "This field contains the prior name of the patient. This field is not used to change a patient name. Refer to HL7 Table 0200 - Name Type for valid values.",
+      "length": "250",
+      "data_type": "XPN - Extended Person Name",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    }
   }
 }

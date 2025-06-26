@@ -107,7 +107,7 @@ def main():
             # segments_to_scrape = get_all_segment_names(page)
             
             # For testing, we'll just run with a few segments.
-            segments_to_scrape = ["MSH", "PID", "ORC", "OBR", "OBX"]
+            segments_to_scrape = ["MSH", "PID", "ORC", "OBR", "OBX", "PV1", "OBX", "NTE", "DG1", "PR1", "AL1", "RXA", "RXR", "SPM", "EVN", "PD1", "PV1", "PV2", "IN1", "MRG"]
 
             for seg in segments_to_scrape:
                 all_results[seg] = scrape_segment(page, seg)

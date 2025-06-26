@@ -1,3 +1,28 @@
+import { faker } from '@faker-js/faker';
+
+// --- NEW STRIPPER UTILITY FUNCTION ---
+export const stripCommentsAndBlankLines = (message) => {
+    if (!message) return '';
+
+    const commentPrefixes = ['//', '#', '---'];
+    // Split on any kind of newline, because the world is a messy place
+    const lines = message.split(/\r?\n/);
+
+    const validLines = lines.filter(line => {
+        const trimmed = line.trim();
+        if (!trimmed) {
+            // It's a blank line, fuck it
+            return false;
+        }
+        // Return true only if the line does NOT start with any of our comment prefixes
+        return !commentPrefixes.some(prefix => trimmed.startsWith(prefix));
+    });
+
+    // Rejoin with the proper HL7 delimiter (carriage return)
+    return validLines.join('\r');
+};
+
+// This function remains unchanged
 export function rebuildHl7Message(segments) {
     if (!segments || !segments.length) return "";
 
