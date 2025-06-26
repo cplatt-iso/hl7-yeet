@@ -8,7 +8,7 @@ const ParserOutput = ({ isProcessing, segments, error, showEmpty, setShowEmpty, 
     const content = (
         <>
             {error && error !== 'Parsing...' && <div className="text-red-400 p-4">{error}</div>}
-            {(!error || error === 'Parsing...') && segments.length === 0 && <div className="text-gray-500 p-4">Start typing or paste an HL7 message...</div>}
+            {(!error || error === 'Parsing...') && segments.length === 0 && <div className="text-gray-500 p-4">Waiting to parse... go on, do something</div>}
             {(!error || error === 'Parsing...') && segments.length > 0 && segments.map((segment, index) => (
                 <AccordionItem
                     key={`${segment.name}-${index}`}
@@ -26,7 +26,7 @@ const ParserOutput = ({ isProcessing, segments, error, showEmpty, setShowEmpty, 
     return (
         <div>
             <div className="flex justify-between items-center mb-1">
-                <label className="block text-sm font-medium text-gray-400">Live Parser</label>
+                <label className="block text-sm font-medium text-gray-400">Live Parser | Drag to move | Double click to edit</label>
                 <label htmlFor="show-empty-toggle" className="flex items-center cursor-pointer">
                     <span className="mr-3 text-sm font-medium text-gray-400">Show Empty Fields</span>
                     <div className="relative">

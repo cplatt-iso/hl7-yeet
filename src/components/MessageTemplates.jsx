@@ -24,7 +24,7 @@ const MessageTemplates = ({ onTemplateSelect }) => {
     
     return (
         <div className="flex flex-col space-y-3 p-4 bg-gray-800 rounded-md border border-gray-700 h-fit">
-            <h3 className="text-lg font-bold text-gray-300 border-b border-gray-600 pb-2 mb-2">Message Templates</h3>
+            <h3 className="text-lg font-bold text-gray-300 border-b border-gray-600 pb-2 mb-2">Faker Templates</h3>
             {templates.map(template => (
                 <button
                     key={template.name}

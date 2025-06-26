@@ -111,7 +111,7 @@
                 </div>
                 <div>
                     <label for="hl7-message" class="block text-sm font-medium text-gray-400">HL7 Message (Paste your
-                        dumb shit here)</label>
+                        message or fake one by clicking a faker template)</label>
                     <textarea id="hl7-message" rows="10"
                         class="mt-1 block w-full bg-gray-800 border-gray-700 rounded-md shadow-sm p-2 font-mono"></textarea>
                 </div>
@@ -119,7 +119,7 @@
 
             <div>
                 <div class="flex justify-between items-center mb-1">
-                    <label class="block text-sm font-medium text-gray-400">Live Parser</label>
+                    <label class="block text-sm font-medium text-gray-400">Live Parser | Drag to move | Double click to</label>
                     <label for="show-empty-toggle" class="flex items-center cursor-pointer">
                         <span class="mr-3 text-sm font-medium text-gray-400">Show Empty Fields</span>
                         <div class="relative">
@@ -312,7 +312,7 @@
             debounceTimer = setTimeout(async () => {
                 const message = messageTextarea.value;
                 if (!message.trim()) {
-                    parserOutputDiv.innerHTML = `<div class="text-gray-500 p-4">Start typing or paste an HL7 message to see it parsed here...</div>`;
+                    parserOutputDiv.innerHTML = `<div class="text-gray-500 p-4">Waiting to parse... go on, do something</div>`;
                     messageState = [];
                     return;
                 }

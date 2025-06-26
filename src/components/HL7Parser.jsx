@@ -161,7 +161,7 @@ const HL7Parser = () => {
                             />
                             <div>
                                 <div className="flex justify-between items-center mb-1">
-                                    <label htmlFor="hl7-message" className="block text-sm font-medium text-gray-400">HL7 Message (Paste your dumb shit here)</label>
+                                    <label htmlFor="hl7-message" className="block text-sm font-medium text-gray-400">HL7 Message (Paste your message or fake one by clicking a faker template)</label>
                                     {/* --- NEW BUTTON GROUP --- */}
                                     <div className="flex items-center gap-2">
                                         <button
