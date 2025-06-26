@@ -1,13 +1,18 @@
 import json
 import socket
 from flask import Flask, render_template, request, jsonify
+from flask_cors import CORS # <--- IMPORT THIS
 from hl7apy.parser import parse_message, ParserError
 from hl7apy.exceptions import HL7apyException
 import logging
 
 logging.basicConfig(level=logging.INFO)
 app = Flask(__name__)
+CORS(app) # <--- ADD THIS LINE
 
+# ... the rest of your app.py stays exactly the same ...
+# No, seriously, don't change anything else in here.
+# The part that rendered index.html is now irrelevant but harmless.
 VT = b'\x0b'
 FS = b'\x1c'
 CR = b'\x0d'
@@ -35,7 +40,9 @@ def load_hl7_definitions_from_json():
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    # This route is now effectively dead, as index.html is served by Vite.
+    # But we'll leave it here as a monument to our simpler past.
+    return "Backend is running. The real party is on the React frontend."
 
 @app.route('/parse_hl7', methods=['POST'])
 def parse_hl7_api():
@@ -50,54 +57,57 @@ def parse_hl7_api():
 
     try:
         parsed_msg = parse_message(hl7_message.replace('\n', '\r'), find_groups=False)
-        logging.warning("PARSED SEGMENT NAMES: %s", [c.name for c in parsed_msg.children])
+        if parsed_msg.children is not None:
+            logging.warning("PARSED SEGMENT NAMES: %s", [c.name for c in parsed_msg.children])
+        else:
+            logging.warning("PARSED SEGMENT NAMES: None (no children found)")
 
         structured_data = []
 
         # Only iterate over what is actually parsed (never the full definition)
-        for segment in parsed_msg.children:
-            segment_name = segment.name.upper()
-            segment_def = definitions.get(segment_name, {})
+        if parsed_msg.children is not None:
+            for segment in parsed_msg.children:
+                segment_name = segment.name.upper()
+                segment_def = definitions.get(segment_name, {})
 
-            segment_data = {"name": segment_name, "fields": []}
+                segment_data = {"name": segment_name, "fields": []}
 
-            for field in segment.children:
-                # Field name is usually like 'PID_5' or 'MSH_2'
-                field_index_str = str(field.name).split('_')[-1]
+                for field in segment.children:
+                    # Field name is usually like 'PID_5' or 'MSH_2'
+                    field_index_str = str(field.name).split('_')[-1]
 
-                # Get definition info if available
-                field_def = segment_def.get(field_index_str, {})
+                    # Get definition info if available
+                    field_def = segment_def.get(field_index_str, {})
 
-                segment_data["fields"].append({
-                    "index": int(field_index_str) if field_index_str.isdigit() else 0,
-                    "value": str(field.value),
-                    "name": field_def.get("name", field.long_name or f"Unknown Field"),
-                    "description": field_def.get("description", "No fancy description for this one, sorry."),
-                    "field_id": f"{segment_name}.{field_index_str}",
-                    "length": field_def.get("length", len(str(field.value))),
-                    "data_type": field_def.get("data_type", "Unknown")
-                })
+                    segment_data["fields"].append({
+                        "index": int(field_index_str) if field_index_str.isdigit() else 0,
+                        "value": str(field.value),
+                        "name": field_def.get("name", field.long_name or f"Unknown Field"),
+                        "description": field_def.get("description", "No fancy description for this one, sorry."),
+                        "field_id": f"{segment_name}.{field_index_str}",
+                        "length": field_def.get("length", len(str(field.value))),
+                        "data_type": field_def.get("data_type", "Unknown")
+                    })
 
-            # (Optional) Pad with blank fields for fields defined in the JSON but not in the message
-            # This is purely for UI completeness. Comment this out if you only want parsed fields.
-            defined_indexes = set(segment_def.keys())
-            parsed_indexes = {str(field.name).split('_')[-1] for field in segment.children}
-            missing_indexes = defined_indexes - parsed_indexes
-            for missing_index in sorted([i for i in missing_indexes if i.isdigit()], key=int):
-                field_def = segment_def.get(missing_index, {})
-                segment_data["fields"].append({
-                    "index": int(missing_index),
-                    "value": "",
-                    "name": field_def.get("name", f"Unknown Field {missing_index}"),
-                    "description": field_def.get("description", "No description available."),
-                    "field_id": field_def.get("field_id", f"{segment_name}.{missing_index}"),
-                    "length": field_def.get("length", "N/A"),
-                    "data_type": field_def.get("data_type", "Unknown")
-                })
+                # (Optional) Pad with blank fields for fields defined in the JSON but not in the message
+                defined_indexes = set(segment_def.keys())
+                parsed_indexes = {str(field.name).split('_')[-1] for field in segment.children}
+                missing_indexes = defined_indexes - parsed_indexes
+                for missing_index in sorted([i for i in missing_indexes if i.isdigit()], key=int):
+                    field_def = segment_def.get(missing_index, {})
+                    segment_data["fields"].append({
+                        "index": int(missing_index),
+                        "value": "",
+                        "name": field_def.get("name", f"Unknown Field {missing_index}"),
+                        "description": field_def.get("description", "No description available."),
+                        "field_id": field_def.get("field_id", f"{segment_name}.{missing_index}"),
+                        "length": field_def.get("length", "N/A"),
+                        "data_type": field_def.get("data_type", "Unknown")
+                    })
 
-            # Sort fields by index for pretty output
-            segment_data["fields"].sort(key=lambda f: f["index"])
-            structured_data.append(segment_data)
+                # Sort fields by index for pretty output
+                segment_data["fields"].sort(key=lambda f: f["index"])
+                structured_data.append(segment_data)
 
         return jsonify({"status": "success", "data": structured_data})
 
@@ -110,7 +120,6 @@ def parse_hl7_api():
 
 @app.route('/send_hl7', methods=['POST'])
 def send_hl7():
-    # This function remains a beacon of stability in a sea of my incompetence.
     data = request.get_json()
     host = data.get('host')
     port = int(data.get('port'))

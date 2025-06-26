@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+.chevron {
+    transition: transform 0.2s ease-in-out;
+}
+.rotate-180 {
+    transform: rotate(180deg);
+}
+
+.value-cell:hover {
+    background-color: #374151;
+    cursor: pointer;
+}
+
+.value-cell.draggable-value:not(.dragging) {
+    cursor: grab;
+}
+
+.value-cell input {
+    background: transparent;
+    border: 1px solid #60a5fa;
+    color: #a7f3d0;
+    width: 100%;
+    font-family: monospace;
+    padding: 1px;
+}
+
+.value-cell.dragging {
+    opacity: 0.4;
+    cursor: grabbing;
+    background-color: #4338ca;
+}
+
+.value-cell.drag-over {
+    outline: 2px dashed #60a5fa;
+    background-color: #312e81;
+}
+
+#input-container {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background-color: #111827;
+    padding-bottom: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.4);
+}
+@keyframes yeet-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+}
+
+.animate-yeet-pulse {
+  animation: yeet-pulse 1.5s ease-in-out infinite;
+}
