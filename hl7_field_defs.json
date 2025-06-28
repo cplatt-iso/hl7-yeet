@@ -4237,5 +4237,708 @@
       "optionality": "Optional",
       "repeatability": "Repeatable indefinitely"
     }
+  },
+  "AIS": {
+    "1": {
+      "field_id": "AIS.1",
+      "name": "Set ID - AIS",
+      "description": "This field contains a number that uniquely identifies the information represented by this segment in this transaction for the purposes of addition, change or deletion.",
+      "length": "4",
+      "data_type": "SI - Sequence ID",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "AIS.2",
+      "name": "Segment Action Code",
+      "description": "This field contains the action to be taken when updating or modifying information in this segment from previously sent interface transactions. Refer to HL7 Table 0206 - Segment action code for valid values.\n\nThis field is conditionally required. It is required for all updating or modifying trigger events.",
+      "length": "3",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "AIS.3",
+      "name": "Universal Service Identifier",
+      "description": "This field contains an identifier code for a service to be scheduled. This field may contain a universal service identifier describing the observation/test/battery/procedure or other activity that is to be performed during the requested appointment, similar to the universal service identifier defined for the OBR segment. This code can be based on local and/or universal codes. The use of universal codes is recommended.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "AIS.4",
+      "name": "Start Date/Time",
+      "description": "This field contains the date and time this service needs for the appointment. This field allows the application to identify that the service is required for the appointment at a different time than the appointment's start date/time\n\nThis field is conditionally required. If a value for AIS-5-Start date/time offset is not provided, then a value is required for this field. To specify that there is no difference between the appointment's start date/time and the resource's start date/time either replicate the appointment's start date/time into this field, or specify an offset of zero (0) in AIS-5-Start date/time offset and any valid time unit code in AIS-6-Start date/time offset units",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "AIS.5",
+      "name": "Start Date/Time Offset",
+      "description": "This field contains the offset this service needs for the appointment, expressed in units of time relative to the scheduled start date/time. This field allows the application to identify that the service is required for the appointment at a different time than the appointment's start date/time. The first component contains the offset amount. An offset of zero (0), or an unvalued field indicates that the service is required at the start date/time of the appointment.\n\nA positive offset (an unsigned or positive number) indicates that the service is required after the appointment's start date/time. Specifying a negative offset indicates that the service is required prior to the specified start date/time of the appointment. Negative offsets are allowed, and sites should clearly define the effect of a negative offset on the appointment's start date/time.\n\nThis field is conditionally required. If a value for AIS-5-Start date/time offset is not provided, then a value is required for this field. To specify that there is no difference between the appointment's start date/time and the resource's start date/time either replicate the appointment's start date/time into this field, or specify an offset of zero (0) in AIS-5-Start date/time offset and any valid time unit code in AIS-6-Start date/time offset units",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "AIS.6",
+      "name": "Start Date/Time Offset Units",
+      "description": "This field contains a code describing the units of time used for expressing the start date/time offset. This field should be valued according to the recommendations in Chapters 2 and 7. If this field is not valued, the ISO base unit of seconds (code s) will be assumed.\n\nThis field is conditionally required. If a value for AIS-5-Start date/time offset is provided, then a value is required for this field.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "AIS.7",
+      "name": "Duration",
+      "description": "This field contains the duration for which the resource is requested/scheduled for this appointment, if different from the overall duration of the requested/scheduled appointment. This field indicates to the application that a resource is required for a different amount of time than the appointment's overall duration. An unvalued duration indicates that the resource is required from its start date/time offset (specified in the previous two fields) until the end of the appointment. If no start date/time offset is specified, then the resource is required for the full duration of the appointment.\n\nThis field must be a positive, non-zero number. A negative number or zero (0) is nonsensical in the context of a duration.",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "AIS.8",
+      "name": "Duration Units",
+      "description": "This field contains a code describing the units of time used for expressing the duration. If this field is not valued, the ISO base unit of seconds (code s) will be assumed",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "AIS.9",
+      "name": "Allow Substitution Code",
+      "description": "This field contains a code indicating whether the identified resource can be substituted with an equivalent resource by the filler application. Refer to User-Defined Table 0279 - Allow Substitution Codes For suggested codes.\n\nThis field is conditionally required. It is required for all request messages. It is optional for all unsolicited transactions, and for all query messages",
+      "length": "10",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "AIS.10",
+      "name": "Filler Status Code",
+      "description": "This field contains a code that describes the requested/scheduled status of the resource or activity, from the point of view of the filler application. Refer to User-Defined Table 0278 - Filler Status Codes for suggested codes.\n\nThis is a conditionally required field. Because the information contained in this field is only appropriate in transactions originating from a filler application, it is required for those messages. This includes all unsolicited transactions originating from a filler application, as well as all response messages originating from a filler application. This field is optional for all transactions originating from placer, querying and auxiliary applications. It is recommended that this field be left unvalued in transactions originating from applications other than the filler application",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "AIS.11",
+      "name": "Placer Supplemental Service Information",
+      "description": "This field contains supplemental service and/or logistical information sent from the placer system to the filler system for the universal procedure code reported in field AIS-3. This field will be used to provide scheduling information detail that is not available in other, specific fields in the AIS segment. Multiple supplemental service information elements may be reported. Refer to User-defined Table 0411 - Supplemental service information values for possible values.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "12": {
+      "field_id": "AIS.12",
+      "name": "Filler Supplemental Service Information",
+      "description": "This field contains supplemental service and/or logistical information sent from the filler system to the placer system for the procedure code reported in field AIS-3. This field will be used to report scheduling information details that is not available in other, specific fields in the AIS segment. Typically it will reflect the same information as was sent to the filler system in AIS-11-Placer supplemental information unless the scheduling was modified in which case the filler system will report what was actually performed using this field. Multiple supplemental service information elements may be reported. Refer to User-defined Table 0411 - Supplemental service information values for possible values.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    }
+  },
+  "AIG": {
+    "1": {
+      "field_id": "AIG.1",
+      "name": "Set ID - AIG",
+      "description": "This field contains a number that uniquely identifies the information represented by this segment in this transaction for the purposes of addition, change or deletion.",
+      "length": "4",
+      "data_type": "SI - Sequence ID",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "AIG.2",
+      "name": "Segment Action Code",
+      "description": "This field contains the action to be taken when updating or modifying information in this segment from previously sent interface transactions. Refer to HL7 Table 0206 - Segment action code for valid values.\n\nThis field is conditionally required. It is required for all updating or modifying trigger events.",
+      "length": "3",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "AIG.3",
+      "name": "Resource ID",
+      "description": "This field contains the ID number and name of the resource being requested or scheduled for an appointment. This field is used to identify a specific resource being requested, or a specific resource that has been scheduled for an appointment. If the specific resource is not known but the type of resource is, AIG-4-resource type is used to identify the type of resource required or scheduled.\n\nAt a minimum, the ID number component should be supplied to identify either the specific resource being requested or the specific resource that has been scheduled. For inter-enterprise communications, for which a shared ID number may not be available, the minimum components required to uniquely identify a resource may be defined by site-specific negotiations.\n\nThis field is conditionally required for this segment. In new schedule request messages, it is required if the request asks that a specific resource be scheduled. For all other request messages, the specific resource",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "AIG.4",
+      "name": "Resource Type",
+      "description": "This field identifies the role of the resource requested/scheduled for this appointment. For requests, if a specific resource is not identified in AIG-3-Resource ID, then this field identifies the type of resource that should be scheduled by the filler application. At a minimum, the type of the identifier component should be valued.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "AIG.5",
+      "name": "Resource Group",
+      "description": "This field identifies the requested resource as a member of the indicated group. If, in a Schedule Request Message (SRM), no specific resource is requested, but a resource type is requested, this field can be used to further qualify the type of resource being requested.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "6": {
+      "field_id": "AIG.6",
+      "name": "Resource Quantity",
+      "description": "This field contains the quantity of the specified resource or resource type identified in either or both of the preceding two fields. If it is not valued, this field defaults to a value of one (1).",
+      "length": "5",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "AIG.7",
+      "name": "Resource Quantity Units",
+      "description": "This field contains the units of the resource requested, whose quantity is given in the preceding field. If this field is not valued, the unit of each (code \"ea\") will be assumed.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "AIG.8",
+      "name": "Start Date/Time",
+      "description": "This field contains the date and time this service needs for the appointment. This field allows the application to identify that the service is required for the appointment at a different time than the appointment's start date/time\n\nThis field is conditionally required. If a value for AIG-9-Start date/time offset is not provided, then a value is required for this field. To specify that there is no difference between the appointment's start date/time and the resource's start date/time either replicate the appointment's start date/time into this field, or specify an offset of zero (0) in AIG-9-Start date/time offset and any valid time unit code in AIG-10-Start date/time offset units.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "AIG.9",
+      "name": "Start Date/Time Offset",
+      "description": "This field contains the offset that this resource needs for the appointment, expressed in units of time relative to the scheduled start date/time. This field indicates to the application that the resource is required for the appointment at a different time than the appointment's start date/time. The first component indicates the offset amount. An offset of zero (0), or an unvalued field, indicates that the resource is required at the start date/time of the appointment.\n\nA positive offset (an unsigned or positive number) indicates that the resource is required after the appointment's start date/time. Specifying a negative offset indicates that the resource is required prior to the specified start date/time of the appointment. Negative offsets are allowed, and sites should clearly define the effect of a negative offset on the appointment's start date/time.\n\nThis field is conditionally required. If a value for AIG-8-Start date/time is not provided, then a value is required for this field. To specify that there is no difference between the appointment's start date/time and the resource's start date/time either replicate the appointment's start date/time into this field, or specify an offset of zero (0) in AIG-9-Start date/time offset and any valid time unit code in AIG10-Start date/time offset units.",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "AIG.10",
+      "name": "Start Date/Time Offset Units",
+      "description": "This field contains a code describing the units of time used for expressing AIG-9-Start date/time offset. If this field is not valued, the ISO base unit of seconds (code \"s\") will be assumed.\n\nThis field is conditionally required. If a value for AIG-9-Start date/time offset is provided, then a value is required for this field.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "AIG.11",
+      "name": "Duration",
+      "description": "This field contains the duration for which the resource is requested/scheduled for this appointment, if it is different than the overall duration of the requested/scheduled appointment. This field indicates to the application that a resource is required for a different amount of time than the appointment's overall duration. An unvalued duration indicates that the resource is required from its start date/time offset (specified in the previous two fields) until the end of the appointment. If no start date/time offset is specified, then the resource is required for the full duration of the appointment.\n\nThis field must be a positive, non-zero number. A negative number or zero (0) is nonsensical in the context of a duration.",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "AIG.12",
+      "name": "Duration Units",
+      "description": "This field contains a code describing the units of time used for expressing the AIG-11-Duration field. If this field is not valued, the ISO base unit of seconds (code \"s\") will be assumed.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "AIG.13",
+      "name": "Allow Substitution Code",
+      "description": "This field contains a code indicating whether the identified resource can be substituted with an equivalent resource by the filler application. Refer to User-Defined Table 0279 - Allow Substitution Codes for suggested codes.\n\nThis field is conditionally required. It is required for all request messages. It is optional for all unsolicited transactions, and for all query messages.",
+      "length": "10",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "AIG.14",
+      "name": "Filler Status Code",
+      "description": "This field contains a code that describes the requested/scheduled status of scheduling resource or activity, from the point of view of the filler application. Refer to User-Defined Table 0278 - Filler Status Codes for suggested codes.\n\nThis is a conditionally required field. Because the information contained in this field is only appropriate in transactions originating from a filler application, it is required for those messages. This includes all unsolicited transactions originating from a filler application, as well as all response messages originating from a filler application. This field is optional for all transactions originating from placer, querying and auxiliary applications. It is recommended that this field be left unvalued in transactions originating from applications other than the filler application.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    }
+  },
+  "AIL": {
+    "1": {
+      "field_id": "AIL.1",
+      "name": "Set ID - AIL",
+      "description": "This field contains a number that uniquely identifies the information represented by this segment in this transaction for the purposes of addition, change or deletion.",
+      "length": "4",
+      "data_type": "SI - Sequence ID",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "AIL.2",
+      "name": "Segment Action Code",
+      "description": "This field contains the action to be taken when updating or modifying information in this segment from previously sent interface transactions. Refer to HL7 Table 0206 - Segment action code for valid values.\n\nThis field is conditionally required. It is required for all updating or modifying trigger events",
+      "length": "3",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "AIL.3",
+      "name": "Location Resource ID",
+      "description": "This field contains a coded identification of the location being requested or scheduled for an appointment. This field is used to identify a specific location being requested, or a specific location that has been scheduled for an appointment. If the specific location is not known but the type of location is, AIL-4-Location type-AIL is used to identify the type of location required or scheduled. This field is conditionally required for this segment. In new schedule request messages, it is required if the request asks that a specific location be scheduled. For all other request messages, the specific location should be identified if the information is available (either because a specific location was initially requested, or because the filler application returned the coded identification of the specific location that has been scheduled).\n\nThis field is repeating in order to accommodate both local and enterprise-wide identifiers.\n\nThis field is required for all unsolicited transactions from the filler application. It is optional for all query transactions.",
+      "length": "80",
+      "data_type": "PL - Person Location",
+      "optionality": "Conditional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "4": {
+      "field_id": "AIL.4",
+      "name": "Location Type-AIL",
+      "description": "This field identifies the type of the location requested/scheduled for this appointment. For all messages, this field is conditionally required if a specific location is not identified in AIL-3-Location resource ID. Refer to HL7 Table 0305 - Person location type for suggested values.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "AIL.5",
+      "name": "Location Group",
+      "description": "This field identifies the requested resource as a member of the indicated group. If, in a Schedule Request Message (SRM), no specific location is requested, but a location type is requested, AIL-5-Location group can be used to further qualify the type of resource being requested.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "AIL.6",
+      "name": "Start Date/Time",
+      "description": "This field contains the date and time this service needs for the appointment. This field allows the application to identify that the service is required for the appointment at a different time than the appointment's start date/time\n\nThis field is conditionally required. If a value for AIL-7-Start date/time offset is not provided, then a value is required for this field. To specify that there is no difference between the appointment's start date/time and the resource's start date/time either replicate the appointment's start date/time into this field, or specify an offset of zero (0) in AIL-7-Start date/time offset and any valid time unit code in AIL-8-Start date/time offset units.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "AIL.7",
+      "name": "Start Date/Time Offset",
+      "description": "This field contains the offset this resource needs for the appointment, expressed in units of time relative to the scheduled start date/time. This field indicates to the application that the resource is required for the appointment at a different time than the appointment's start date/time. The first component contains the offset amount. An offset of zero (0), or an unvalued field, indicates that the resource is required at the start date/time of the appointment.\n\nA positive offset (an unsigned or positive number) indicates that the resource is required after the appointment's start date/time. Specifying a negative offset indicates that the resource is required prior to the specified start date/time of the appointment. Negative offsets are allowed, and sites should clearly define the effect of a negative offset on the appointment's start date/time.\n\nThis field is conditionally required. If a value for AIL-6-Start date/time is not provided, then a value is required for this field. To specify that there is no difference between the appointment's start date/time and the resource's start date/time either replicate the appointment's start date/time into this field, or specify an offset of zero (0) in AIL-7-Start date/time offset and any valid time unit code in AIL-8-Start date/time offset units",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "AIL.8",
+      "name": "Start Date/Time Offset Units",
+      "description": "This field contains a code describing the units of time used for expressing the AIL-7-Start date/time offset field. If this field is not valued, the ISO base unit of seconds (code \"s\") will be assumed.\n\nThis field is conditionally required. If a value for AIL-7-Start date/time offset is provided, then a value is required for this field",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "AIL.9",
+      "name": "Duration",
+      "description": "This field contains the duration for which the resource is requested/scheduled for this appointment, if it is different than the overall duration of the requested/scheduled appointment. This field indicates to the application that a resource is required for a different amount of time than the appointment's overall duration. An unvalued duration indicates that the resource is required from its start date/time offset (specified in the previous two fields) until the end of the appointment. If no start date/time offset is specified, then the resource is required for the full duration of the appointment.\n\nThis field must be a positive, non-zero number. A negative number or zero (0) is nonsensical in the context of a duration",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "AIL.10",
+      "name": "Duration Units",
+      "description": "This field contains a code describing the units of time used associated with AIL-9-Duration. If this field is not valued, the ISO base unit of seconds (code \"s\") will be assumed.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "AIL.11",
+      "name": "Allow Substitution Code",
+      "description": "This field contains a code indicating whether the identified location can be replaced with an equivalent substitute location by the filler application. Refer to User-Defined Table 0279 - Allow Substitution Codes for suggested codes.\n\nThis field is conditionally required. It is required for all request messages. It is optional for all unsolicited transactions, and for all query messages",
+      "length": "10",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "AIL.12",
+      "name": "Filler Status Code",
+      "description": "This field contains a code that describes the requested/scheduled status of the location, from the point of view of the filler application. Refer to User-Defined Table 0278 - Filler Status Codes for suggested codes.\n\nThis is a conditionally required field. Because the information contained in this field is only appropriate in transactions originating from a filler application, it is required for those messages. This includes all unsolicited transactions originating from a filler application, as well as all response messages originating from a filler application. This field is optional for all transactions originating from placer, querying and auxiliary applications. It is recommended that this field be left unvalued in transactions originating from applications other than the filler application",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    }
+  },
+  "AIP": {
+    "1": {
+      "field_id": "AIP.1",
+      "name": "Set ID - AIP",
+      "description": "This field contains a number that uniquely identifies the information represented by this segment in this transaction for the purposes of addition, change or deletion.",
+      "length": "4",
+      "data_type": "SI - Sequence ID",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "AIP.2",
+      "name": "Segment Action Code",
+      "description": "This field contains the action to be taken when updating or modifying information in this segment from previously sent interface transactions. Refer to HL7 Table 0206 - Segment action code.\n\nThis field is conditionally required. It is required for all updating or modifying trigger events",
+      "length": "3",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "AIP.3",
+      "name": "Personnel Resource ID",
+      "description": "This field contains the ID number and name of the person being requested or scheduled for an appointment. This field is used to identify a specific person being requested, or a specific person who has been scheduled as a resource for an appointment. If the specific person is not known, but the type of resource is, AIP-4-Resource type is used to identify the type of personnel resource required or scheduled. At a minimum, the ID number component should be supplied to identify either the specific person being requested or the specific person who has been scheduled. For inter-enterprise communications, for which a shared ID number may not be available, the minimum components needed to uniquely identify a person may be defined by site-specific negotiations.\n\nThis field is conditionally required for this segment. In new schedule request messages, it is required if the request asks that a specific person be scheduled. For all other request messages, the specific person should be identified if the information is available (either because a specific person was initially requested, or because the filler application returned the ID of the specific person who has been scheduled).\n\nThis field is required for all unsolicited transactions from the filler application. This field is optional for all query transactions",
+      "length": "250",
+      "data_type": "XCN - Extended Composite ID Number and Name for Persons",
+      "optionality": "Conditional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "4": {
+      "field_id": "AIP.4",
+      "name": "Resource Type",
+      "description": "This field identifies the type of the personnel requested/scheduled for an appointment. For all messages, this field is conditionally required if a specific location is not identified in AIP-3-Personnel resource ID. Refer to HL7 Table 0182 - Staff type.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "AIP.5",
+      "name": "Resource Group",
+      "description": "This field identifies the requested resource as a member of the indicated group. If, in a Schedule Request Message (SRM), no specific resource is requested, but an AIP-4-Resource type is requested, the AIP-5-Resource group field can be used to further qualify the type of resource being requested.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "AIP.6",
+      "name": "Start Date/Time",
+      "description": "This field contains the date and time this service needs for the appointment. This field allows the application to identify that the service is required for the appointment at a different time than the appointment's start date/time.\n\nThis field is conditionally required. If a value for AIP-7-Start date/time offset is not provided, then a value is required for this field. To specify that there is no difference between the appointment's start date/time and the resource's start date/time either replicate the appointment's start date/time into this field, or specify an offset of zero (0) in AIP-7-Start date/time offset and any valid time unit code in AIP-8-Start date/time offset units",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "AIP.7",
+      "name": "Start Date/Time Offset",
+      "description": "This field contains the offset this resource needs for the appointment, expressed in units of time relative to the scheduled start date/time. This field indicates to the application that the resource is required for the appointment at a different time than the appointment's start date/time. The first component contains the offset amount. An offset of zero (0), or an unvalued field, indicates that the resource is required at the start date/time of the appointment.\n\nA positive offset (an unsigned or positive number) indicates that the resource is required after the appointment's start date/time. Specifying a negative offset indicates that the resource is required prior to the specified start date/time of the appointment. Negative offsets are allowed, and sites should clearly define the effect of a negative offset on the appointment's start date/time.\n\nThis field is conditionally required. If a value for AIP-6-Start date/time is not provided, then a value is required for this field. To specify that there is no difference between the appointment's start date/time and the resource's start date/time either replicate the appointment's start date/time into this field, or specify an offset of zero (0) in AIP-7-Start date/time offset and any valid time unit code in AIP-8-Start date/time offset units",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "AIP.8",
+      "name": "Start Date/Time Offset Units",
+      "description": "This field contains a code describing the units of time used for expressing AIP-7-Start date/time offset. If this field is not valued, the ISO base unit of seconds (code \"s\") is assumed.\n\nThis field is conditionally required. If a value for AIP-7-Start date/time offset is provided, then a value is required for this field",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "AIP.9",
+      "name": "Duration",
+      "description": "This field contains the duration for which the resource is requested/scheduled for an appointment, if different from the overall duration of the requested/scheduled appointment. This field indicates to the application that a resource is required for a different amount of time than the appointment's overall duration. An unvalued duration indicates that the resource is required from its start date/time offset (specified in the previous two fields) until the end of the appointment. If no start date/time offset is specified, then the resource is required for the full duration of the appointment.\n\nThis field must be a positive, non-zero number. A negative number or zero (0) is nonsensical in the context of a duration",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "AIP.10",
+      "name": "Duration Units",
+      "description": "This field contains a code describing the units of time used associated with AIP-9-Duration. If this field is not valued, the ISO base unit of seconds (code \"s\") will be assumed.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "AIP.11",
+      "name": "Allow Substitution Code",
+      "description": "This field contains a code indicating whether the identified personnel resource can be replaced with an equivalent substitute personnel resource by the filler application. Refer to User-Defined Table 0279 - Allow Substitution Codes for suggested codes.\n\nThis field is conditionally required. It is required for all request messages. It is optional for all unsolicited transactions, and for all query messages",
+      "length": "10",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "AIP.12",
+      "name": "Filler Status Code",
+      "description": "This field contains a code that describes the requested/scheduled status of the personnel resource, from the point of view of the filler application. Refer to User-Defined Table 0278 - Filler Status Codes for suggested codes.\n\nThis field is conditionally required. It should not be valued in any request transactions from the placer application to the filler application. It is required for all transactions from the filler application. It is optional for query transactions.\n\nThis is a conditionally required field. Because the information contained in this field is only appropriate in transactions originating from a filler application, it is required for those messages. This includes all unsolicited transactions originating from a filler application, as well as all response messages originating from a filler application. This field is optional for all transactions originating from placer, querying and auxiliary applications. It is recommended that this field be left unvalued in transactions originating from applications other than the filler application",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    }
+  },
+  "SCH": {
+    "1": {
+      "field_id": "SCH.1",
+      "name": "Placer Appointment ID",
+      "description": "This field contains the placer application's permanent identifier for the appointment request (and the scheduled appointment itself, when it has been confirmed as a booked slot by the filler application). This is a composite field.\n\nThe first component is a string that identifies an individual appointment request, or a booked appointment. It is assigned by the placer application, and identifies an appointment request, and the subsequent scheduled appointment, uniquely among all such requests and/or booked appointments from a particular requesting application. If SCH-1-Placer appointment ID identifies a parent of a repeating schedule request, then the individual child scheduled appointments can be uniquely identified either by a new SCH-1-Placer appointment ID or by SCH-23-Parent placer appointment ID plus an SCH-3-Occurrence number.\n\nIf a schedule request originates from a placer it MUST have a placer appointment ID. If the filler sends responses, it may use the placer appointment ID and/or assign a filler appointment ID (which it would echo back to the placer to enable the placer application to associate the two). If the placer appointment ID is not present, the filler appointment ID must be present and vice versa.",
+      "length": "75",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "SCH.2",
+      "name": "Filler Appointment ID",
+      "description": "This field contains the filler application's permanent identifier for the appointment request (and the scheduled appointment itself, when it has been confirmed as a booked slot by the filler application). This is a composite field.\n\nThe first component is a string of up to fifteen characters that identifies an individual appointment request, or a booked appointment. It is assigned by the filler application, and identifies an appointment request, and the subsequent scheduled appointment, uniquely among all such requests and/or booked appointments from a particular processing application. If SCH-2-Filler appointment ID identifies a parent of a repeating schedule request, then the individual child scheduled appointments can be uniquely identified either by a new SCH-2-Filler appointment ID or by SCH-25-Parent filler appointment ID plus an SCH-3-Occurrence number.",
+      "length": "75",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "SCH.3",
+      "name": "Occurrence Number",
+      "description": "This field is used in conjunction with SCH-1-Placer appointment ID and/or SCH-2-Filler appointment ID to uniquely identify an individual occurrence (a child) of a parent repeating schedule appointment.\n\nThis field is conditionally required. If the transaction using this segment is intended to apply only to one occurrence of a repeating appointment, and an occurrence number is required to uniquely identify the child appointment (that is, the child does not have a separate and unique SCH-1-Placer appointment ID or SCH2-Filler appointment ID), then this field is required.",
+      "length": "5",
+      "data_type": "NM - Numeric",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "SCH.4",
+      "name": "Placer Group Number",
+      "description": "This field allows a placer application to group sets of appointment requests together, and subsequently to identify the group.",
+      "length": "22",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "SCH.5",
+      "name": "Schedule ID",
+      "description": "This field contains an identifier code for the schedule in which this appointment is (or will be) booked. This field is provided for instances in which filler applications maintain multiple schedules, and when a particular resource or set of resources is controlled by more than one of those schedules.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "SCH.6",
+      "name": "Event Reason",
+      "description": "This field contains an identifier code for the reason that the notification event was triggered. This field may contain a code describing the cancel reason, the delete reason, the discontinue reason, the add reason, the block reason or any other code describing the reason that a specific event will occur.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "SCH.7",
+      "name": "Appointment Reason",
+      "description": "This field contains an identifier code for the reason that the appointment is to take place. This field may contain a Universal Service ID describing the observation/test/battery/procedure or other activity that is to take place during the requested appointment, similar to the Universal Service ID defined for the OBR segment. It may also contain a site-specific code describing a pre-defined set of reasons that an appointment may be set to occur. This code can be based on local and/or universal codes. The use of universal codes is recommended. Refer to User-Defined Table 0276 - Appointment Reason Code s for suggested codes.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "SCH.8",
+      "name": "Appointment Type",
+      "description": "This field contains the identifier code for the type of appointment. Refer to User-Defined Table 0277 - Appointment Type Codes for suggested codes.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "SCH.9",
+      "name": "Appointment Duration",
+      "description": "As of Version 2.5, this field is retained for backward compatibility only. Refer to the TQ1 segment.\n\nThis field specifies the amount of time requested and allotted for the appointment. In cases of repeating appointments, this field describes the duration of one instance of the appointment. If this field is unvalued, then the institution's standard duration for the type of appointment requested will be assumed.",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "SCH.10",
+      "name": "Appointment Duration Units",
+      "description": "As of Version 2.5, this field is retained for backward compatibility only. Refer to the TQ1 segment.\n\nThis field contains a code describing the units of time used for expressing the ARQ-9-Appointment duration field. If this component is not valued, the ISO base unit of seconds (code \"s\") is assumed.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "SCH.11",
+      "name": "Appointment Timing Quantity",
+      "description": "As of Version 2.5, this field is retained for backward compatibility only. Refer to the TQ1 segment.\n\nThis field contains the scheduled appointment's timing and quantity, as scheduled by the filler application. The TQ1 segment fully describes the components and the appropriate data values for the components of this field.",
+      "length": "200",
+      "data_type": "TQ - Timing Quantity",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "12": {
+      "field_id": "SCH.12",
+      "name": "Placer Contact Person",
+      "description": "This field identifies the person responsible for requesting the scheduling of a requested appointment. Most often, this person will be the same person responsible for executing the appointment.",
+      "length": "250",
+      "data_type": "XCN - Extended Composite ID Number and Name for Persons",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "13": {
+      "field_id": "SCH.13",
+      "name": "Placer Contact Phone Number",
+      "description": "This field contains the phone number used to contact the SCH-12-Placer contact person.",
+      "length": "250",
+      "data_type": "XTN - Extended Telecommunication Number",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "SCH.14",
+      "name": "Placer Contact Address",
+      "description": "This field contains the address used to contact the SCH-12-Placer contact person.",
+      "length": "250",
+      "data_type": "XAD - Extended Address",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "15": {
+      "field_id": "SCH.15",
+      "name": "Placer Contact Location",
+      "description": "This field contains a code that identifies the location of the SCH-12-Placer contact person.",
+      "length": "80",
+      "data_type": "PL - Person Location",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "16": {
+      "field_id": "SCH.16",
+      "name": "Filler Contact Person",
+      "description": "This field identifies the person responsible for the scheduling of the requested appointment. Most often, this person will be the same person responsible for maintaining the schedule and for reviewing appointment requests.",
+      "length": "250",
+      "data_type": "XCN - Extended Composite ID Number and Name for Persons",
+      "optionality": "Required",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "17": {
+      "field_id": "SCH.17",
+      "name": "Filler Contact Phone Number",
+      "description": "This field contains the phone number used to contact the SCH-16-Filler contact person.",
+      "length": "250",
+      "data_type": "XTN - Extended Telecommunication Number",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "18": {
+      "field_id": "SCH.18",
+      "name": "Filler Contact Address",
+      "description": "This field contains the address used to contact the SCH-16-Filler contact person.",
+      "length": "250",
+      "data_type": "XAD - Extended Address",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "19": {
+      "field_id": "SCH.19",
+      "name": "Filler Contact Location",
+      "description": "This field contains a code that identifies the location of the SCH-16-Filler Contact Person.",
+      "length": "80",
+      "data_type": "PL - Person Location",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "20": {
+      "field_id": "SCH.20",
+      "name": "Entered By Person",
+      "description": "This field identifies the person responsible for entering the request for the scheduling of an appointment. It is included to provide an audit trail of persons responsible for the request. This person may be someone other than the placer contact person, who is responsible for entering orders and requests.",
+      "length": "250",
+      "data_type": "XCN - Extended Composite ID Number and Name for Persons",
+      "optionality": "Required",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "21": {
+      "field_id": "SCH.21",
+      "name": "Entered By Phone Number",
+      "description": "This field contains the phone number used to contact the ARQ-19-Entered by person.",
+      "length": "250",
+      "data_type": "XTN - Extended Telecommunication Number",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "22": {
+      "field_id": "SCH.22",
+      "name": "Entered By Location",
+      "description": "This field contains a code that identifies the location of the entered by person.",
+      "length": "80",
+      "data_type": "PL - Person Location",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "23": {
+      "field_id": "SCH.23",
+      "name": "Parent Placer Appointment ID",
+      "description": "This field relates a child to its parent, when a parent-child relationship exists. It contains the placer application's permanent identifier for the parent of the appointment request. This is a composite field.",
+      "length": "75",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "24": {
+      "field_id": "SCH.24",
+      "name": "Parent Filler Appointment ID",
+      "description": "This field relates a child to its parent, when a parent-child relationship exists. It contains the filler application's permanent identifier for the parent of the appointment request. This is a composite field.\n\nThe first component is a string that identifies the parent appointment request. It is assigned by the filler application, and it identifies an appointment request uniquely among all such requests on a particular processing application.\n\nThis is a conditionally required field. On initial messages where a filler has not yet assigned a filler appointment ID, this field should not contain a value. In all other subsequent messages, where a filler application has assigned a filler appointment ID, this field is required.",
+      "length": "75",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "25": {
+      "field_id": "SCH.25",
+      "name": "Filler Status Code",
+      "description": "This field contains a code describing the status of the appointment with respect to the filler application. Refer to User-Defined Table 0278 - Filler Status Codes for suggested codes.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "26": {
+      "field_id": "SCH.26",
+      "name": "Placer Order Number",
+      "description": "This field is the placer application's order number for the order associated with this scheduling filler application response.\n\nThis field is described in detail in Section 4.5.1.2. It is an optional field, but if a Placer order number is present, then a Filler order number (Section 10.6.2.27) must also be present. Both this field and the Filler order number below may have been sent as part of the appointment request in the ARQ segment or they may be assigned by the scheduling filler application only.",
+      "length": "22",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Conditional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "27": {
+      "field_id": "SCH.27",
+      "name": "Filler Order Number",
+      "description": "This field is the order number assigned by the filler application for the order associated with this scheduling filler response.\n\nThis field is described in detail in Section 4.5.1.3. It is conditionally mandatory depending on the presence of the Placer order number (Section 10.6.2.26). This conditionally mandatory requirement addresses the concern that a Scheduling system cannot and should not create or fill an order. Therefore, an order must have been accepted by the order filler application before scheduling the resources associated with that order.",
+      "length": "22",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Conditional",
+      "repeatability": "Repeatable indefinitely"
+    }
   }
 }

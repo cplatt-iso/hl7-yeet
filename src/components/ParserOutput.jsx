@@ -26,7 +26,7 @@ const ParserOutput = ({ isProcessing, segments, error, showEmpty, setShowEmpty, 
     return (
         <div>
             <div className="flex justify-between items-center mb-1">
-                <label className="block text-sm font-medium text-gray-400">Live Parser | Drag to move | Double click to edit</label>
+                <label className="block text-sm font-medium text-gray-400">Live hl7appy Parser | Drag to move | Double click to edit</label>
                 <label htmlFor="show-empty-toggle" className="flex items-center cursor-pointer">
                     <span className="mr-3 text-sm font-medium text-gray-400">Show Empty Fields</span>
                     <div className="relative">

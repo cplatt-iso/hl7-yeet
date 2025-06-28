@@ -58,3 +58,15 @@
 .animate-yeet-pulse {
   animation: yeet-pulse 1.5s ease-in-out infinite;
 }
+
+@keyframes blinker {
+  50% {
+    opacity: 0;
+  }
+}
+
+.blinking-cursor {
+  animation: blinker 1s step-start infinite;
+  font-weight: bold;
+  margin-left: 4px;
+}
