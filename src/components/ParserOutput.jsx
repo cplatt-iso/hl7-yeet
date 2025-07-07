@@ -1,52 +1,59 @@
 import React from 'react';
 import AccordionItem from './AccordionItem';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 import YeetLoader from './YeetLoader';
 
-const ParserOutput = ({ isProcessing, segments, error, showEmpty, setShowEmpty, onFieldMove, onFieldUpdate, setTooltipContent }) => {
+// Adding showTooltips to the props list to pass it down
+const ParserOutput = ({ isProcessing, segments, error, showEmpty, setShowEmpty, onFieldMove, onFieldUpdate, setTooltipContent, showTooltips }) => {
     
-    // Determine the content to show inside the container
-    const content = (
-        <>
-            {error && error !== 'Parsing...' && <div className="text-red-400 p-4">{error}</div>}
-            {(!error || error === 'Parsing...') && segments.length === 0 && <div className="text-gray-500 p-4">Waiting to parse... go on, do something</div>}
-            {(!error || error === 'Parsing...') && segments.length > 0 && segments.map((segment, index) => (
-                <AccordionItem
-                    key={`${segment.name}-${index}`}
-                    segment={segment}
-                    segmentIndex={index}
-                    showEmpty={showEmpty}
-                    onFieldMove={onFieldMove}
-                    onFieldUpdate={onFieldUpdate}
-                    setTooltipContent={setTooltipContent}
-                />
-            ))}
-        </>
-    );
+    const handleToggleEmpty = () => {
+        setShowEmpty(!showEmpty);
+    };
+
+    if (error) {
+        return <div className="p-4 bg-red-900/50 text-red-300 rounded-md">{error}</div>;
+    }
+
+    if (!segments.length && !isProcessing) {
+        return (
+            <div className="p-4 text-center text-gray-500 border-2 border-dashed border-gray-700 rounded-md">
+                No message parsed yet. Paste something in the box above, ya dingus.
+            </div>
+        );
+    }
 
     return (
-        <div>
-            <div className="flex justify-between items-center mb-1">
-                <label className="block text-sm font-medium text-gray-400">Live hl7appy Parser | Drag to move | Double click to edit</label>
-                <label htmlFor="show-empty-toggle" className="flex items-center cursor-pointer">
-                    <span className="mr-3 text-sm font-medium text-gray-400">Show Empty Fields</span>
-                    <div className="relative">
-                        <input type="checkbox" id="show-empty-toggle" className="sr-only peer" checked={showEmpty} onChange={() => setShowEmpty(!showEmpty)} />
-                        <div className="w-11 h-6 bg-gray-600 rounded-full peer peer-checked:bg-indigo-600"></div>
-                        <div className="absolute left-1 top-1 bg-white border-gray-300 border rounded-full h-4 w-4 transition-transform peer-checked:translate-x-full">
-                        </div>
-                    </div>
-                </label>
-            </div>
-            <div id="parser-output" className="relative mt-1 border border-gray-700 rounded-md bg-gray-800 space-y-1 p-1 min-h-[200px]">
-                {/* The YeetLoader is an overlay */}
-                {isProcessing && <YeetLoader />}
-
-                {/* The content underneath is ALWAYS rendered to maintain page height.
-                    We just make it invisible when processing. This is the key to fixing the scroll jump. */}
-                <div className={isProcessing ? 'invisible' : ''}>
-                    {content}
+        <div className="relative">
+            {isProcessing && <YeetLoader />}
+            <div className="flex justify-end items-center mb-2">
+                <div className="flex items-center">
+                    <input 
+                        type="checkbox" 
+                        id="show-empty" 
+                        checked={showEmpty} 
+                        onChange={handleToggleEmpty}
+                        className="h-4 w-4 rounded border-gray-600 bg-gray-700 text-indigo-600 focus:ring-indigo-500"
+                    />
+                    <label htmlFor="show-empty" className="ml-2 text-sm text-gray-300">Show Empty Fields</label>
                 </div>
             </div>
+            <DndProvider backend={HTML5Backend}>
+                <div className={`space-y-2 transition-opacity duration-300 ${isProcessing ? 'opacity-30' : 'opacity-100'}`}>
+                    {segments.map((segment, index) => (
+                        <AccordionItem
+                            key={`${segment.name}-${index}`}
+                            segment={segment}
+                            segmentIndex={index}
+                            showEmpty={showEmpty}
+                            onFieldMove={onFieldMove}
+                            onFieldUpdate={onFieldUpdate}
+                            setTooltipContent={setTooltipContent}
+                            showTooltips={showTooltips} // <-- PASS IT DOWN
+                        />
+                    ))}
+                </div>
+            </DndProvider>
         </div>
     );
 };

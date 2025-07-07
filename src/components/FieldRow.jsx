@@ -1,73 +1,89 @@
 import React, { useState } from 'react';
+import { useDrag, useDrop } from 'react-dnd';
 
-const FieldRow = ({ field, segmentIndex, fieldIndex, onFieldMove, onFieldUpdate, setTooltipContent }) => {
+const ItemTypes = {
+    FIELD: 'field'
+};
+
+// We now accept 'showTooltips' to conditionally show the definitions
+const FieldRow = ({ field, segmentIndex, fieldIndex, onFieldMove, onFieldUpdate, setTooltipContent, showTooltips }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editValue, setEditValue] = useState(field.value);
-
-    // This effect ensures our local edit state updates if the prop from above changes
-    // (e.g., from another drag/drop operation)
-    React.useEffect(() => {
-        setEditValue(field.value);
-    }, [field.value]);
-
+    
     const handleDoubleClick = () => {
         setIsEditing(true);
+        setEditValue(field.value);
     };
 
     const handleBlur = () => {
+        setIsEditing(false);
         if (editValue !== field.value) {
             onFieldUpdate(segmentIndex, fieldIndex, editValue);
         }
-        setIsEditing(false);
     };
-
+    
     const handleKeyDown = (e) => {
         if (e.key === 'Enter') {
+            e.preventDefault();
             handleBlur();
         } else if (e.key === 'Escape') {
-            setEditValue(field.value); // Revert
             setIsEditing(false);
         }
     };
-    
-    const handleDragStart = (e) => {
-        e.dataTransfer.setData('application/json', JSON.stringify({ segmentIndex, fieldIndex }));
-        e.dataTransfer.effectAllowed = 'move';
-        setTimeout(() => e.target.closest('.value-cell').classList.add('dragging'), 0);
-    };
-    const handleDragEnd = (e) => {
-        const cell = e.target.closest('.value-cell') || document.querySelector('.dragging');
-        if (cell) cell.classList.remove('dragging');
-    }
-    const handleDragOver = (e) => e.preventDefault();
-    const handleDragEnter = (e) => e.currentTarget.classList.add('drag-over');
-    const handleDragLeave = (e) => e.currentTarget.classList.remove('drag-over');
 
-    const handleDrop = (e) => {
-        e.preventDefault();
-        e.currentTarget.classList.remove('drag-over');
-        const source = JSON.parse(e.dataTransfer.getData('application/json'));
-        const destination = { segmentIndex, fieldIndex };
-        if (source.segmentIndex === destination.segmentIndex && source.fieldIndex === destination.fieldIndex) return;
-        onFieldMove(source, destination);
+    const handleMouseEnter = () => {
+        // ONLY show tooltip if the setting is enabled
+        if (showTooltips) {
+            setTooltipContent({
+                title: field.name,
+                body: field.description
+            });
+        }
     };
+
+    const handleMouseLeave = () => {
+        // ALWAYS clear tooltip on leave
+        setTooltipContent(null);
+    };
+    
+    // --- Drag-and-Drop Logic ---
+    const originalIndex = { segmentIndex, fieldIndex };
+    const [{ isDragging }, drag] = useDrag(() => ({
+        type: ItemTypes.FIELD,
+        item: { type: ItemTypes.FIELD, source: originalIndex, value: field.value },
+        canDrag: () => field.value && field.value.trim() !== '',
+        collect: (monitor) => ({
+            isDragging: monitor.isDragging(),
+        }),
+    }), [segmentIndex, fieldIndex, field.value]);
+
+    const [, drop] = useDrop(() => ({
+        accept: ItemTypes.FIELD,
+        drop: (item) => {
+            if (item.source.segmentIndex !== segmentIndex || item.source.fieldIndex !== fieldIndex) {
+                onFieldMove(item.source, { segmentIndex, fieldIndex });
+            }
+        },
+        collect: (monitor) => ({
+            isOver: monitor.isOver(),
+            canDrop: monitor.canDrop(),
+        }),
+    }), [segmentIndex, fieldIndex, onFieldMove]);
+
 
     return (
         <tr
-            onMouseEnter={() => setTooltipContent({ title: field.name || field.field_id, description: field.description })}
-            onMouseLeave={() => setTooltipContent(null)}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
         >
-            <td className="p-2 text-gray-500 align-top">{field.field_id}</td>
-            <td className="p-2 text-gray-300 align-top">{field.name}</td>
-            <td className="p-2 text-cyan-400 align-top text-xs">{field.data_type}</td>
-            <td className="p-2 text-gray-400 align-top">{field.length}</td>
-            <td
-                className="p-2 text-green-300 break-words align-top value-cell draggable-value"
+            <td className="py-1 px-2 text-gray-500">{field.field_id}</td>
+            <td className="py-1 px-2 text-gray-300">{field.name}</td>
+            <td className="py-1 px-2 text-indigo-300">{field.data_type}</td>
+            <td className="py-1 px-2 text-yellow-300">{field.length}</td>
+            <td 
+                ref={drop}
+                className="py-1 px-2 value-cell"
                 onDoubleClick={handleDoubleClick}
-                onDrop={handleDrop}
-                onDragOver={handleDragOver}
-                onDragEnter={handleDragEnter}
-                onDragLeave={handleDragLeave}
             >
                 {isEditing ? (
                     <input
@@ -79,13 +95,11 @@ const FieldRow = ({ field, segmentIndex, fieldIndex, onFieldMove, onFieldUpdate,
                         autoFocus
                     />
                 ) : (
-                    <div 
-                        draggable={!isEditing && field.value && field.value.trim() !== ''} 
-                        onDragStart={handleDragStart} 
-                        onDragEnd={handleDragEnd}
-                        className="w-full h-full"
+                    <div
+                        ref={drag}
+                        className={`w-full h-full ${isDragging ? 'dragging' : ''} ${field.value ? 'draggable-value' : ''}`}
                     >
-                        {field.value ? field.value : <span className="text-gray-600">&lt;empty&gt;</span>}
+                        {field.value || <span className="text-gray-600">""</span>}
                     </div>
                 )}
             </td>
@@ -93,5 +107,4 @@ const FieldRow = ({ field, segmentIndex, fieldIndex, onFieldMove, onFieldUpdate,
     );
 };
 
-// --- AND ANOTHER MAGIC SHIELD ---
-export default React.memo(FieldRow);
+export default FieldRow;

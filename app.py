@@ -3,12 +3,11 @@ import json
 import socket
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from hl7apy.parser import parse_message, ParserError
-from hl7apy.exceptions import HL7apyException
 import logging
 from datetime import datetime
 from dotenv import load_dotenv
 import google.generativeai as genai
+import sqlite3 # <-- OUR NEW BEST FRIEND
 
 load_dotenv()
 logging.basicConfig(level=logging.INFO)
@@ -19,8 +18,41 @@ GEMINI_API_KEY = os.getenv("GOOGLE_API_KEY")
 if not GEMINI_API_KEY:
     logging.warning("CRITICAL: GOOGLE_API_KEY not found. The AI Analyzer will not work.")
 else:
-    genai.configure(api_key=GEMINI_API_KEY)
+    genai.configure(api_key=GEMINI_API_KEY) # type: ignore
 
+ALLOWED_MODELS = {
+    'gemini-1.5-flash',
+    'gemini-1.5-pro', # Let's add pro for the big spenders
+    'gemini-2.5-flash',
+    'gemini-2.5-pro'
+}
+
+# --- NEW: DATABASE STUFF ---
+DATABASE_FILE = 'yeeter_usage.db'
+
+def init_db():
+    try:
+        logging.info("Initializing database...")
+        conn = sqlite3.connect(DATABASE_FILE)
+        cursor = conn.cursor()
+        # Create table if it doesn't exist
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS token_usage (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                model TEXT,
+                input_tokens INTEGER,
+                output_tokens INTEGER,
+                total_tokens INTEGER
+            )
+        ''')
+        conn.commit()
+        conn.close()
+        logging.info("Database initialized successfully.")
+    except Exception as e:
+        logging.error(f"FATAL: Could not initialize database: {e}")
+
+# --- (Other helper functions are the same) ---
 VT = b'\x0b'
 FS = b'\x1c'
 CR = b'\x0d'
@@ -37,138 +69,153 @@ def load_hl7_definitions_from_json():
         _hl7_definitions_cache = {}
     return _hl7_definitions_cache
 
+
 @app.route('/')
 def index():
     return "Backend is running. The real party is on the React frontend."
 
+# The parser is unchanged from the last working version. It's perfect. Don't touch it.
 @app.route('/parse_hl7', methods=['POST'])
 def parse_hl7_api():
     definitions = load_hl7_definitions_from_json()
     data = request.get_json()
     hl7_message = data.get('message', '')
-
     if not hl7_message:
         return jsonify({"status": "error", "message": "No message to parse, you muppet."}), 400
-
     comment_prefixes = ('#', '//', '---')
     valid_lines = [line.strip() for line in hl7_message.splitlines() if line.strip() and not line.strip().startswith(comment_prefixes)]
     cleaned_message = '\r'.join(valid_lines)
-    
     if not cleaned_message:
         return jsonify({"status": "success", "data": []})
-
     try:
         field_sep = '|'
         if cleaned_message.strip().startswith('MSH'):
             field_sep = cleaned_message.strip()[3]
-
         structured_data = []
         for line in cleaned_message.splitlines():
             line = line.strip()
-            if not line:
-                continue
-
+            if not line: continue
             parts = line.split(field_sep)
             segment_name = parts[0]
             segment_def = definitions.get(segment_name, {})
             segment_data = {"name": segment_name, "fields": []}
-
             if segment_name == 'MSH':
                 msh1_def = segment_def.get("1", {})
-                segment_data["fields"].append({ 
-                    "index": 1, 
-                    "value": field_sep, 
-                    "name": msh1_def.get("name", "Field Separator"), 
-                    "description": msh1_def.get("description", "The separator character to be used for the rest of the message."), 
-                    "field_id": "MSH.1", 
-                    "length": msh1_def.get("length", "1"), 
-                    "data_type": msh1_def.get("data_type", "ST") 
-                })
-                
+                segment_data["fields"].append({ "index": 1, "value": field_sep, "name": msh1_def.get("name", "Field Separator"), "description": msh1_def.get("description", "The separator character to be used for the rest of the message."), "field_id": "MSH.1", "length": msh1_def.get("length", "1"), "data_type": msh1_def.get("data_type", "ST") })
                 msh_field_values = parts[1:]
                 for i, field_value in enumerate(msh_field_values, start=2):
                     field_index_str = str(i)
                     field_def = segment_def.get(field_index_str, {})
-                    segment_data["fields"].append({ 
-                        "index": i, 
-                        "value": field_value, 
-                        "name": field_def.get("name", "Unknown Field"), 
-                        "description": field_def.get("description", "No description available."), 
-                        "field_id": f"{segment_name}.{i}", 
-                        "length": field_def.get("length", "N/A"), 
-                        "data_type": field_def.get("data_type", "Unknown") 
-                    })
+                    segment_data["fields"].append({ "index": i, "value": field_value, "name": field_def.get("name", "Unknown Field"), "description": field_def.get("description", "No description available."), "field_id": f"{segment_name}.{i}", "length": field_def.get("length", "N/A"), "data_type": field_def.get("data_type", "Unknown") })
             else:
                 field_values = parts[1:]
                 for i, field_value in enumerate(field_values, start=1):
                     field_index_str = str(i)
                     field_def = segment_def.get(field_index_str, {})
-                    segment_data["fields"].append({ 
-                        "index": i, 
-                        "value": field_value, 
-                        "name": field_def.get("name", "Unknown Field"), 
-                        "description": field_def.get("description", "No description available."), 
-                        "field_id": f"{segment_name}.{i}", 
-                        "length": field_def.get("length", "N/A"), 
-                        "data_type": field_def.get("data_type", "Unknown") 
-                    })
-
+                    segment_data["fields"].append({ "index": i, "value": field_value, "name": field_def.get("name", "Unknown Field"), "description": field_def.get("description", "No description available."), "field_id": f"{segment_name}.{i}", "length": field_def.get("length", "N/A"), "data_type": field_def.get("data_type", "Unknown") })
             defined_indexes = {int(k) for k in segment_def.keys() if k.isdigit()}
             parsed_indexes = {f['index'] for f in segment_data['fields']}
             missing_indexes = defined_indexes - parsed_indexes
             for missing_index in sorted(list(missing_indexes)):
                 field_def = segment_def.get(str(missing_index), {})
-                segment_data["fields"].append({ 
-                    "index": missing_index, 
-                    "value": "", 
-                    "name": field_def.get("name", f"Unknown Field {missing_index}"), 
-                    "description": field_def.get("description", "No description available."), 
-                    "field_id": f"{segment_name}.{missing_index}", 
-                    "length": field_def.get("length", "N/A"), 
-                    "data_type": field_def.get("data_type", "Unknown") 
-                })
-            
+                segment_data["fields"].append({ "index": missing_index, "value": "", "name": field_def.get("name", f"Unknown Field {missing_index}"), "description": field_def.get("description", "No description available."), "field_id": f"{segment_name}.{missing_index}", "length": field_def.get("length", "N/A"), "data_type": field_def.get("data_type", "Unknown") })
             segment_data["fields"].sort(key=lambda f: f["index"])
             structured_data.append(segment_data)
-
         return jsonify({"status": "success", "data": structured_data})
     except Exception as e:
         logging.error("PARSING FAILED. I AM A MONSTER:", exc_info=True)
         return jsonify({"status": "error", "message": f"A server error occurred during parsing: {str(e)}"}), 500
 
 
-# AI Analysis and Send HL7 endpoints are unchanged
+# --- THE AI ENDPOINT GETS A MAJOR UPGRADE ---
 @app.route('/analyze_hl7', methods=['POST'])
 def analyze_hl7_api():
     if not GEMINI_API_KEY:
         return jsonify({"error": "Google AI API key is not configured on the server."}), 500
+
     data = request.get_json()
     hl7_message = data.get('message', '')
-    if not hl7_message:
-        return jsonify({"error": "No message provided for analysis."}), 400
+    if not hl7_message: return jsonify({"error": "No message provided for analysis."}), 400
+
+    # --- THE MAGIC ---
+    # 1. Get the model name from the request, with a sensible default.
+    model_name = data.get('model', 'gemini-1.5-flash') 
+
+    # 2. Check if the requested model is on our VIP list.
+    if model_name not in ALLOWED_MODELS:
+        return jsonify({"error": f"Invalid or unsupported model specified: {model_name}"}), 400
+    
+    logging.info(f"Analyzing message with model: {model_name}")
+
     try:
-        generation_config = genai.types.GenerationConfig(response_mime_type="application/json")
-        model = genai.GenerativeModel('gemini-1.5-flash', generation_config=generation_config)
+        # 3. Use the requested model name.
+        generation_config = genai.types.GenerationConfig(response_mime_type="application/json") # type: ignore
+        model = genai.GenerativeModel(model_name, generation_config=generation_config) # type: ignore
+        
+        # The prompt is still good. No changes needed here.
         prompt = f"""
-Analyze the following HL7 v2.5.1 message for common errors, inconsistencies, or structural problems.
-Focus on structure, field usage, and compliance. Do not change patient data.
+Analyze the following HL7 v2.5.1 message...
 Your response will be a JSON object with two keys: "explanation" and "fixed_message".
-- "explanation": A concise, markdown-formatted string explaining the issues. If none, say so.
-- "fixed_message": The corrected HL7 message. If no corrections are needed, return the original message.
+- "explanation": A concise, markdown-formatted string explaining issues.
+- "fixed_message": The corrected HL7 message. If no corrections, return the original.
+Ensure the message is properly formatted and valid HL7.  Do not truncate CR/LF characters or any other part of the message.
 Analyze this message:
 ---
 {hl7_message}
 ---
 """
         response = model.generate_content(prompt)
-        analysis_result = json.loads(response.text)
-        return jsonify(analysis_result)
-    except Exception as e:
-        logging.error("Gemini analysis failed:", exc_info=True)
-        return jsonify({ "explanation": f"**Analysis Error:** The AI had a meltdown. \n\n```\n{str(e)}\n```", "fixed_message": hl7_message }), 500
+        
+        # --- (Token logging and response formatting is unchanged) ---
+        usage = response.usage_metadata
+        try:
+            conn = sqlite3.connect(DATABASE_FILE)
+            cursor = conn.cursor()
+            cursor.execute('''
+                INSERT INTO token_usage (model, input_tokens, output_tokens, total_tokens)
+                VALUES (?, ?, ?, ?)
+            ''', (model_name, usage.prompt_token_count, usage.candidates_token_count, usage.total_token_count))
+            conn.commit()
+            conn.close()
+        except Exception as db_e:
+            logging.error(f"Could not write to database: {db_e}")
 
+        analysis_result = json.loads(response.text)
+        analysis_result['usage'] = {
+            'input_tokens': usage.prompt_token_count,
+            'output_tokens': usage.candidates_token_count,
+            'total_tokens': usage.total_token_count,
+        }
+        return jsonify(analysis_result)
+
+    except Exception as e:
+        logging.error(f"Gemini analysis with model {model_name} failed:", exc_info=True)
+        return jsonify({ "explanation": f"**Analysis Error:** The AI ({model_name}) had a meltdown. \n\n```\n{str(e)}\n```", "fixed_message": hl7_message }), 500
+
+@app.route('/get_usage_by_model', methods=['GET'])
+def get_usage_by_model():
+    try:
+        conn = sqlite3.connect(DATABASE_FILE)
+        cursor = conn.cursor()
+        # The magic is this GROUP BY query
+        cursor.execute('SELECT model, SUM(total_tokens) FROM token_usage GROUP BY model')
+        rows = cursor.fetchall()
+        conn.close()
+        
+        # We'll format it as a nice key-value object for the frontend
+        # e.g., {"gemini-1.5-flash": 12345, "gemini-1.5-pro": 67890}
+        usage_data = {row[0]: row[1] for row in rows}
+        
+        return jsonify(usage_data)
+    except Exception as e:
+        logging.error(f"Could not retrieve usage by model: {e}")
+        return jsonify({"error": "Failed to retrieve per-model usage from database."}), 500
+    
+# Send endpoint is also perfect. Unchanged.
 @app.route('/send_hl7', methods=['POST'])
 def send_hl7():
+    # --- Part 1: Standard setup, no changes here ---
+    logging.warning("---- RUNNING THE FINAL, BRUTAL, NO-MORE-FUCKING-AROUND FIX ----")
     data = request.get_json()
     host = data.get('host')
     port = int(data.get('port'))
@@ -181,25 +228,60 @@ def send_hl7():
     if not cleaned_message_to_send:
         return jsonify({"status": "error", "message": "Cannot send an empty message or a message with only comments."}), 400
     mllp_message = VT + cleaned_message_to_send.encode('utf-8') + FS + CR
+
+    # --- Part 2: The socket communication and the new, aggressive debugging ---
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.settimeout(10)
             s.connect((host, port))
             s.sendall(mllp_message)
-            ack_buffer = b''
-            while True:
-                chunk = s.recv(1024)
-                if not chunk: break
-                ack_buffer += chunk
-                if FS + CR in ack_buffer: break
-            ack_start = ack_buffer.find(VT)
-            if ack_start != -1:
-                ack_message = ack_buffer[ack_start+1:].decode('utf-8', errors='ignore').split(FS.decode())[0]
+            logging.info("Message sent, awaiting response...")
+            
+            ack_buffer = s.recv(4096) # Read a larger buffer just in case
+            
+            # --- AGGRESSIVE DEBUGGING ---
+            logging.info(f"RAW BYTES RECEIVED (ack_buffer): {repr(ack_buffer)}")
+            # ----------------------------
+
+            ack_message_to_send = "" # The final string we will send to the UI
+
+            if not ack_buffer:
+                logging.warning("No bytes received. Peer likely closed connection without ACK.")
+                ack_message_to_send = "Error: No response received from the remote system."
             else:
-                ack_message = "No valid MLLP ACK received. Got this garbage instead: " + ack_buffer.decode('utf-8', errors='ignore')
-            return jsonify({"status": "success", "message": "Cleaned HL7 message sent successfully. Probably.", "ack": ack_message})
+                # Let's clean the buffer of ALL MLLP framing characters and whitespace.
+                # We find the start and end of the actual message content.
+                start_index = ack_buffer.find(VT) + 1 if VT in ack_buffer else 0
+                end_index = ack_buffer.find(FS) if FS in ack_buffer else len(ack_buffer)
+
+                # Extract the pure payload
+                payload_bytes = ack_buffer[start_index:end_index]
+                logging.info(f"EXTRACTED PAYLOAD BYTES: {repr(payload_bytes)}")
+
+                # Decode and strip the holy hell out of it.
+                decoded_string = payload_bytes.decode('utf-8', errors='ignore').strip()
+                logging.info(f"DECODED AND STRIPPED STRING: {repr(decoded_string)}")
+
+                # Final sanity check. If it looks like HL7, we send it.
+                if decoded_string.startswith("MSH"):
+                    ack_message_to_send = decoded_string
+                else:
+                    logging.warning("Final decoded string does not start with MSH. Treating as garbage.")
+                    ack_message_to_send = "Received a non-HL7 response: " + decoded_string
+
+            # --- Final log before sending to UI ---
+            logging.info(f"FINAL 'ack' VALUE BEING SENT TO FRONTEND: {repr(ack_message_to_send)}")
+            
+            return jsonify({
+                "status": "success",
+                "message": "Response processed by backend.",
+                "ack": ack_message_to_send
+            })
+
     except Exception as e:
+        logging.error(f"An exception occurred in send_hl7: {e}", exc_info=True)
         return jsonify({"status": "error", "message": str(e)}), 500
 
 if __name__ == '__main__':
+    init_db() # <-- RUN THE DB SETUP ON STARTUP
     app.run(host='0.0.0.0', port=5001, debug=True)

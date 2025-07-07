@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import FieldRow from './FieldRow';
 
-const AccordionItem = ({ segment, segmentIndex, showEmpty, onFieldMove, onFieldUpdate, setTooltipContent }) => {
+// Add 'showTooltips' to the props you're expecting
+const AccordionItem = ({ segment, segmentIndex, showEmpty, onFieldMove, onFieldUpdate, setTooltipContent, showTooltips }) => {
     const [isOpen, setIsOpen] = useState(true);
 
     const visibleFields = segment.fields.filter(field => showEmpty || (field.value && field.value.trim() !== ''));
@@ -44,6 +45,7 @@ const AccordionItem = ({ segment, segmentIndex, showEmpty, onFieldMove, onFieldU
                                         onFieldMove={onFieldMove}
                                         onFieldUpdate={onFieldUpdate}
                                         setTooltipContent={setTooltipContent}
+                                        showTooltips={showTooltips} // <-- THE MISSING GODDAMN PIECE
                                     />
                                 );
                             })}
@@ -55,6 +57,4 @@ const AccordionItem = ({ segment, segmentIndex, showEmpty, onFieldMove, onFieldU
     );
 };
 
-// --- THE MAGIC SHIELD ---
-// This tells React: "Don't re-render me unless my props actually change."
 export default React.memo(AccordionItem);
