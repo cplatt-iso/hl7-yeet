@@ -4,18 +4,23 @@
 // In prod, NGINX's proxy will catch '/api'.
 const API_URL = ''; // THIS IS THE KEY
 
+// A helper to handle errors consistently, because we're professionals.
+const handleResponse = async (response) => {
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: response.statusText }));
+        throw new Error(errorData.error || errorData.message || `Server responded with ${response.status}`);
+    }
+    return response.json();
+};
+
 export const parseHl7 = async (message) => {
-    // We now add `/api` to EVERY request.
     const response = await fetch(`${API_URL}/api/parse_hl7`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message }),
     });
-    const result = await response.json();
-    if (!response.ok) {
-        throw new Error(result.message || `Server error: ${response.status}`);
-    }
-    return result.data;
+    const result = await handleResponse(response);
+    return result.data; // The parser endpoint has a 'data' key
 };
 
 export const sendHl7 = async (host, port, message) => {
@@ -25,47 +30,25 @@ export const sendHl7 = async (host, port, message) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
     });
-    const result = await response.json();
-    if (!response.ok) {
-        throw new Error(result.message || `Server error: ${response.status}`);
-    }
-    return result;
+    return handleResponse(response);
 };
 
 export const analyzeHl7 = async (message, modelName) => {
-    const response = await fetch('http://localhost:5001/analyze_hl7', {
+    const response = await fetch(`${API_URL}/api/analyze_hl7`, { // <-- CORRECTED
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        // Pass both the message and the selected model
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message, model: modelName }), 
     });
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: response.statusText }));
-        throw new Error(errorData.error || errorData.message || 'Failed to analyze message');
-    }
-    return response.json();
+    return handleResponse(response);
 };
 
 export const getUsageByModel = async () => {
-    const response = await fetch('http://localhost:5001/get_usage_by_model');
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: response.statusText }));
-        throw new Error(errorData.error || errorData.message || 'Failed to fetch model usage');
-    }
-    return response.json();
+    const response = await fetch(`${API_URL}/api/get_usage_by_model`); // <-- CORRECTED
+    return handleResponse(response);
 };
 
 export const getTotalUsage = async () => {
-    const response = await fetch(`${API_URL}/api/get_total_token_usage`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-    });
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: 'Failed to fetch total usage' }));
-        throw new Error(errorData.message || 'An unknown error occurred.');
-    }
-    const data = await response.json();
+    const response = await fetch(`${API_URL}/api/get_total_token_usage`); // <-- CORRECTED (and simplified)
+    const data = await handleResponse(response);
     return data.total_usage;
 };

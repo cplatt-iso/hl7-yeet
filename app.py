@@ -7,7 +7,7 @@ import logging
 from datetime import datetime
 from dotenv import load_dotenv
 import google.generativeai as genai
-import sqlite3 # <-- OUR NEW BEST FRIEND
+import sqlite3
 
 load_dotenv()
 logging.basicConfig(level=logging.INFO)
@@ -22,12 +22,11 @@ else:
 
 ALLOWED_MODELS = {
     'gemini-1.5-flash',
-    'gemini-1.5-pro', # Let's add pro for the big spenders
+    'gemini-1.5-pro',
     'gemini-2.5-flash',
     'gemini-2.5-pro'
 }
 
-# --- NEW: DATABASE STUFF ---
 DATABASE_FILE = 'yeeter_usage.db'
 
 def init_db():
@@ -35,7 +34,6 @@ def init_db():
         logging.info("Initializing database...")
         conn = sqlite3.connect(DATABASE_FILE)
         cursor = conn.cursor()
-        # Create table if it doesn't exist
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS token_usage (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -52,7 +50,6 @@ def init_db():
     except Exception as e:
         logging.error(f"FATAL: Could not initialize database: {e}")
 
-# --- (Other helper functions are the same) ---
 VT = b'\x0b'
 FS = b'\x1c'
 CR = b'\x0d'
@@ -74,7 +71,6 @@ def load_hl7_definitions_from_json():
 def index():
     return "Backend is running. The real party is on the React frontend."
 
-# The parser is unchanged from the last working version. It's perfect. Don't touch it.
 @app.route('/parse_hl7', methods=['POST'])
 def parse_hl7_api():
     definitions = load_hl7_definitions_from_json()
@@ -126,8 +122,6 @@ def parse_hl7_api():
         logging.error("PARSING FAILED. I AM A MONSTER:", exc_info=True)
         return jsonify({"status": "error", "message": f"A server error occurred during parsing: {str(e)}"}), 500
 
-
-# --- THE AI ENDPOINT GETS A MAJOR UPGRADE ---
 @app.route('/analyze_hl7', methods=['POST'])
 def analyze_hl7_api():
     if not GEMINI_API_KEY:
@@ -137,22 +131,15 @@ def analyze_hl7_api():
     hl7_message = data.get('message', '')
     if not hl7_message: return jsonify({"error": "No message provided for analysis."}), 400
 
-    # --- THE MAGIC ---
-    # 1. Get the model name from the request, with a sensible default.
     model_name = data.get('model', 'gemini-1.5-flash') 
-
-    # 2. Check if the requested model is on our VIP list.
     if model_name not in ALLOWED_MODELS:
         return jsonify({"error": f"Invalid or unsupported model specified: {model_name}"}), 400
     
     logging.info(f"Analyzing message with model: {model_name}")
 
     try:
-        # 3. Use the requested model name.
         generation_config = genai.types.GenerationConfig(response_mime_type="application/json") # type: ignore
         model = genai.GenerativeModel(model_name, generation_config=generation_config) # type: ignore
-        
-        # The prompt is still good. No changes needed here.
         prompt = f"""
 Analyze the following HL7 v2.5.1 message...
 Your response will be a JSON object with two keys: "explanation" and "fixed_message".
@@ -166,7 +153,6 @@ Analyze this message:
 """
         response = model.generate_content(prompt)
         
-        # --- (Token logging and response formatting is unchanged) ---
         usage = response.usage_metadata
         try:
             conn = sqlite3.connect(DATABASE_FILE)
@@ -192,30 +178,36 @@ Analyze this message:
         logging.error(f"Gemini analysis with model {model_name} failed:", exc_info=True)
         return jsonify({ "explanation": f"**Analysis Error:** The AI ({model_name}) had a meltdown. \n\n```\n{str(e)}\n```", "fixed_message": hl7_message }), 500
 
+@app.route('/get_total_token_usage', methods=['GET'])
+def get_total_token_usage():
+    try:
+        conn = sqlite3.connect(DATABASE_FILE)
+        cursor = conn.cursor()
+        cursor.execute('SELECT SUM(total_tokens) FROM token_usage')
+        row = cursor.fetchone()
+        conn.close()
+        total_usage = row[0] if row and row[0] is not None else 0
+        return jsonify({"total_usage": total_usage})
+    except Exception as e:
+        logging.error(f"Could not retrieve total token usage: {e}")
+        return jsonify({"error": "Failed to retrieve total token usage from database."}), 500
+
 @app.route('/get_usage_by_model', methods=['GET'])
 def get_usage_by_model():
     try:
         conn = sqlite3.connect(DATABASE_FILE)
         cursor = conn.cursor()
-        # The magic is this GROUP BY query
         cursor.execute('SELECT model, SUM(total_tokens) FROM token_usage GROUP BY model')
         rows = cursor.fetchall()
         conn.close()
-        
-        # We'll format it as a nice key-value object for the frontend
-        # e.g., {"gemini-1.5-flash": 12345, "gemini-1.5-pro": 67890}
         usage_data = {row[0]: row[1] for row in rows}
-        
         return jsonify(usage_data)
     except Exception as e:
         logging.error(f"Could not retrieve usage by model: {e}")
         return jsonify({"error": "Failed to retrieve per-model usage from database."}), 500
-    
-# Send endpoint is also perfect. Unchanged.
+
 @app.route('/send_hl7', methods=['POST'])
 def send_hl7():
-    # --- Part 1: Standard setup, no changes here ---
-    logging.warning("---- RUNNING THE FINAL, BRUTAL, NO-MORE-FUCKING-AROUND FIX ----")
     data = request.get_json()
     host = data.get('host')
     port = int(data.get('port'))
@@ -229,7 +221,6 @@ def send_hl7():
         return jsonify({"status": "error", "message": "Cannot send an empty message or a message with only comments."}), 400
     mllp_message = VT + cleaned_message_to_send.encode('utf-8') + FS + CR
 
-    # --- Part 2: The socket communication and the new, aggressive debugging ---
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.settimeout(10)
@@ -237,39 +228,29 @@ def send_hl7():
             s.sendall(mllp_message)
             logging.info("Message sent, awaiting response...")
             
-            ack_buffer = s.recv(4096) # Read a larger buffer just in case
-            
-            # --- AGGRESSIVE DEBUGGING ---
+            ack_buffer = s.recv(4096)
             logging.info(f"RAW BYTES RECEIVED (ack_buffer): {repr(ack_buffer)}")
-            # ----------------------------
-
-            ack_message_to_send = "" # The final string we will send to the UI
-
+            
+            ack_message_to_send = ""
             if not ack_buffer:
                 logging.warning("No bytes received. Peer likely closed connection without ACK.")
                 ack_message_to_send = "Error: No response received from the remote system."
             else:
-                # Let's clean the buffer of ALL MLLP framing characters and whitespace.
-                # We find the start and end of the actual message content.
                 start_index = ack_buffer.find(VT) + 1 if VT in ack_buffer else 0
                 end_index = ack_buffer.find(FS) if FS in ack_buffer else len(ack_buffer)
 
-                # Extract the pure payload
                 payload_bytes = ack_buffer[start_index:end_index]
                 logging.info(f"EXTRACTED PAYLOAD BYTES: {repr(payload_bytes)}")
 
-                # Decode and strip the holy hell out of it.
                 decoded_string = payload_bytes.decode('utf-8', errors='ignore').strip()
                 logging.info(f"DECODED AND STRIPPED STRING: {repr(decoded_string)}")
 
-                # Final sanity check. If it looks like HL7, we send it.
                 if decoded_string.startswith("MSH"):
                     ack_message_to_send = decoded_string
                 else:
                     logging.warning("Final decoded string does not start with MSH. Treating as garbage.")
                     ack_message_to_send = "Received a non-HL7 response: " + decoded_string
 
-            # --- Final log before sending to UI ---
             logging.info(f"FINAL 'ack' VALUE BEING SENT TO FRONTEND: {repr(ack_message_to_send)}")
             
             return jsonify({
@@ -283,5 +264,5 @@ def send_hl7():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 if __name__ == '__main__':
-    init_db() # <-- RUN THE DB SETUP ON STARTUP
+    init_db()
     app.run(host='0.0.0.0', port=5001, debug=True)
