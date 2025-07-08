@@ -1,0 +1,43 @@
+{
+  "segment_id": "CDO",
+  "short_description": "Cumulative Dosage",
+  "description": "The Cumulative Dosage segment allows for the communication of cumulative dosage limits that administrations against this medication order should stay within. As part of one of the pharmacy messages, one may want to indicate one or more limits that apply, e.g., limit for the duration of the order, lifetime limit, or weekly limit",
+  "fields": {
+    "1": {
+      "field_id": "CDO.1",
+      "name": "Set ID \u2013 CDO",
+      "description": "For the first cumulative dose specification transmitted, the sequence number shall be 1; for the second cumulative dose, it shall be 2; and so on",
+      "length": "0",
+      "data_type": "SI - Sequence Id",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "CDO.2",
+      "name": "Action Code",
+      "description": "The Action Code indicates whether the cumulative dosage segment is intended to be added, deleted, updated, or did not change. If the field is not valued in any CDO segments for the order, the segments are considered to have been sent in snapshot mode. If some but not all CDO segments for the order do not have the action code valued, the default value is Add. Refer to HL7 Table 0206 - Segment Action Code in Chapter 2C, Code Tables, for valid values",
+      "length": "0",
+      "data_type": "ID - Coded Value For Hl7 Defined Tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "CDO.3",
+      "name": "Cumulative Dosage Limit",
+      "description": "The Cumulative Dosage indicates the total dosage that may be administered within the scope of this order or within the interval indicated in CDO-4 Cumulative Dosage Time Interval, if supplied.",
+      "length": "0",
+      "data_type": "CQ - Composite Quantity With Units",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "CDO.4",
+      "name": "Cumulative Dosage Limit Time Interval",
+      "description": "The Cumulative Dosage Time Interval indicates the interval over which the cumulative dosage in CDO-3 Cumulative Dosage Limit is measured. If this field is not valued, the Cumulative Dosage Limit applies to the scope of the order.\n\nRefer to HL7 Table 924 \u2013 Cumulative Dosage Limit UoM in Chapter 2C, Code Tables, for a list of suggested values, including applicable values from UCUM",
+      "length": "0",
+      "data_type": "CQ - Composite Quantity With Units",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

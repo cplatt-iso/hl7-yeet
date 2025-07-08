@@ -1,0 +1,133 @@
+{
+  "segment_id": "TCC",
+  "short_description": "Test Code Configuration",
+  "description": "The test (e.g., analyte) code configuration segment is the data necessary to maintain and transmit information concerning the test entity codes that are being used throughout the \"automated system.\"",
+  "fields": {
+    "1": {
+      "field_id": "TCC.1",
+      "name": "Universal Service Identifier",
+      "description": "This field identifies the test code that information is being transmitted about. The alternate elements represent the test code identifier that has been assigned by the manufacturer to this particular test code.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "TCC.10",
+      "name": "Automatic Repeat Allowed",
+      "description": "This field identifies whether or not automatic repeat testing is to be initiated on specimens for this particular test code. Refer to HL7 Table 0136 -Yes/no indicator for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "TCC.11",
+      "name": "Automatic Reflex Allowed",
+      "description": "This field identifies whether or not automatic or manual reflex testing is to be initiated on specimens for this particular test code. Refer to HL7 Table 0136 -Yes/no indicator for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "TCC.12",
+      "name": "Equipment Dynamic Range",
+      "description": "This is the range over which the equipment can produce results.",
+      "length": "20",
+      "data_type": "SN - Structured Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "TCC.13",
+      "name": "Units",
+      "description": "This field is the units that have a data type of CE. The default coding system for the units codes consists of the ISO+ abbreviation for a single case unit (ISO 2955-83) plus extensions, that do not collide with ISO abbreviations. We designate this coding system as ISO+. The ISO+ abbreviations are the codes for the default coding system. Consequently, when ISO+ units are being used, only ISO+ abbreviations need be sent, and the contents of the units field will be backward compatible to HL7 Version 2.1.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "TCC.14",
+      "name": "Processing Type",
+      "description": "This field identifies the processing type that applies to this test code. If this attribute is omitted, then regular production is the default. Refer to HL7 Table 0388 - Processing type for valid values.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "TCC.2",
+      "name": "Test Application Identifier",
+      "description": "This field identifies the test application code assigned by the manufacturer of the equipment or reagents and associated with performing of the particular test specified by the Universal Test Identifier.",
+      "length": "80",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "TCC.3",
+      "name": "Specimen Source",
+      "description": "This field is the site where the specimen should be obtained or where the service should be performed.\n\nAs of version 2.5 this field is deprecated and retained for backward compatibility. This field is conditional, meaning that, in case where the SPM segment is used in a message together with the SAC, this field should be ignored. The reader is referred to the SPM Specimen segment.",
+      "length": "300",
+      "data_type": "SPS - Specimen Source",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "TCC.4",
+      "name": "Auto-Dilution Factor Default",
+      "description": "This field is the value that is to be used as the default factor for automatically diluting a specimen by an instrument for this particular test code. (See examples in definition of \"Dilution factor\" (SAC-29) in the \"Specimen Container Detail Segment\".).",
+      "length": "20",
+      "data_type": "SN - Structured Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "TCC.5",
+      "name": "Rerun Dilution Factor Default",
+      "description": "This field is the value that is to be used as the default factor for automatically diluting a specimen in case of rerun for this particular test code.",
+      "length": "20",
+      "data_type": "SN - Structured Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "TCC.6",
+      "name": "Pre-Dilution Factor Default",
+      "description": "This field is the value that is to be used as the default factor for a specimen that is delivered to the laboratory automation system as pre-diluted for this particular test code.",
+      "length": "20",
+      "data_type": "SN - Structured Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "TCC.7",
+      "name": "Endogenous Content of Pre-Dilution Diluent",
+      "description": "This field represents a baseline value for the measured test that is inherently contained in the diluent. In the calculation of the actual result for the measured test, this baseline value is normally considered.",
+      "length": "20",
+      "data_type": "SN - Structured Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "TCC.8",
+      "name": "Inventory Limits Warning Level",
+      "description": "This field is the value that is to be used as the threshold for initiating inventory warning-level messages.",
+      "length": "10",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "TCC.9",
+      "name": "Automatic Rerun Allowed",
+      "description": "This field identifies whether or not automatic reruns are to be initiated on specimens for this particular test code. Refer to HL7 Table 0136 -Yes/no indicator for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

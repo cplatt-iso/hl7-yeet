@@ -1,0 +1,61 @@
+{
+  "segment_id": "LRL",
+  "short_description": "Location Relationship",
+  "description": "The LRL segment is used to identify one location\u2019s relationship to another location, the nearest lab, pharmacy, etc.",
+  "fields": {
+    "1": {
+      "field_id": "LRL.1",
+      "name": "Primary Key Value - LRL",
+      "description": "This field contains the institutions identification code for the location. The identifying key value. This field has the same components as the patient location fields in the PV1 segment (except that bed status is not included here). At least the first component of this field is required. The contents of this field must exactly match the content of its preceding MFE ( MFE-4 - Primary Key Value - MFE ), its preceding LOC ( LOC-1 - Primary Key Value - LOC ), and its preceding LDP (LDP-1 - Primary Key Value - LDP).",
+      "length": "200",
+      "data_type": "PL - Person Location",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "LRL.2",
+      "name": "Segment Action Code",
+      "description": "This field indicates whether this repetition of the segment is being added, changed or deleted. The action code adds a validation check to indicate, from the point of view of the sending system, whether this repetition of a segment is being added, changed or deleted. This and the following field are used to implement the \"unique key\" mode of updating repeating segments. Refer to HL7 Table 0206 - Segment action code for valid values.",
+      "length": "3",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "LRL.3",
+      "name": "Segment Unique Key",
+      "description": "This field contains a unique identifier for one of the multiple repetitions of this segment, to be used in conjunction with the preceding field. Each of the repetitions of the segment will be uniquely identified by this unique key field for the purposes of updates.",
+      "length": "80",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "LRL.4",
+      "name": "Location Relationship ID",
+      "description": "This field contains an identifier code to show WHICH relationship is being communicated with this segment. Refer to User-defined Table 0325 - Location relationship ID for suggested values.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "LRL.5",
+      "name": "Organizational Location Relationship Value",
+      "description": "This field is conditional on the value of LRL-4 - Location Relationship ID. When LRL-4 -Location Relationship ID contains \"RX\"- Nearest Pharmacy, \"RX2\"- Other Pharmacy, \"LAB\"- Nearest Lab, \"LB2\"- Other Lab, or \"DTY\"- Dietary, this field holds that organizations extended name i.e., the value of this field is conditional on the value of LRL-4 - Location Relationship ID . For example, for an inpatient location, this could be an in-house department ID code using only the third component of this data type. For an outpatient location, this could be the nearest external pharmacy.",
+      "length": "250",
+      "data_type": "XON - Extended Composite Name and Identification Number for Organizations",
+      "optionality": "Conditional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "6": {
+      "field_id": "LRL.6",
+      "name": "Patient Location Relationship Value",
+      "description": "This field is conditional on the value of LRL-4 - Location Relationship ID. When LRL-4 -Location Relationship ID contains \"ALI\"- Location aliases or \"PAR\"- Parent location this field holds the value of the associated patient location.",
+      "length": "80",
+      "data_type": "PL - Person Location",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

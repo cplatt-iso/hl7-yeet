@@ -1,0 +1,133 @@
+{
+  "segment_id": "ROL",
+  "short_description": "Role",
+  "description": "The role segment contains the data necessary to add, update, correct, and delete from the record persons involved, as well as their functional involvement with the activity being transmitted.\n\nIn general, the ROL segment is used to describe a person playing a particular role within the context of the message. In PM, for example, in the Grant Certificate/Permission message (B07), the ROL segment is used to describe the roles a person may perform pertinent to the certificate in the message.\n\nThe positional location of the ROL segment in ADT and Finance messages indicates the relationship. When the segment is used following the IN3 segment, and the role-ROL value is PP or FHCP, the PP or FHCP is related to the health plan. When the segment is used following the PID segment, and the role-ROL value is PP or FHCP, the PP or FHCP is related to the person. When the segment is used following the PV2 segment, and the role-ROL value is PCP or FHCP, the PP or FHCP is related to the patient visit.",
+  "fields": {
+    "1": {
+      "field_id": "ROL.1",
+      "name": "Role Instance Id",
+      "description": "This field contains a unique identifier of the specific role record.\n\nConditionality Rule: This field is required when used in Patient Care and Personnel Management messages. The field is optional when used in ADT and Finance messages.",
+      "length": "0",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "ROL.10",
+      "name": "Organization Unit Type",
+      "description": "This field identifies the environment in which the provider acts in the role specified in ROL-3. The provider environment is not the specialty for the provider. The specialty information for the provider is defined in the PRA segment. This attribute is included in the ROL segment to allow communication of this data when the provider information may not have been communicated previously in a master file. Refer to User-defined Table 0406 - Organization Unit Type. This field is included in this segment to support international requirements, and is not intended as a master file update.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "ROL.11",
+      "name": "Office/Home Address/Birthplace",
+      "description": "This field contains addresses associated with the role.\n\nThis field correlates to STF-11 Office/Home Address. When ROL and STF are both present in a message, the corresponding entries (i.e., repetitions with the same Address Type) for this field may be valued the same. If they are different, the ROL entry reflects the office/home address of the person in the role.\n\nThis field is included in this segment to support international requirements and to communicate this information in non-master file messages (e.g., encounters and orders) where STF may not be present. This field is not intended as a master file update when used in non-master file messages.",
+      "length": "0",
+      "data_type": "XAD - Extended Address",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "12": {
+      "field_id": "ROL.12",
+      "name": "Phone",
+      "description": "This field contains telecommunication numbers associated with the role.\n\nThis field correlates to STF-10 Phone. When ROL and STF are both present in a message, the corresponding entries (i.e., repetitions with the same Telecommunication Use Type) for this field may be valued the same. If they are different, the ROL entry reflects the telephone number of the person in the role.\n\nThis field is included in this segment to support international requirements and to communicate this information in non-master file messages (e.g., encounters and orders) where STF may not be present. This field is not intended as a master file update when used in non-master file messages.",
+      "length": "0",
+      "data_type": "XTN - Extended Telecommunication Number",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "13": {
+      "field_id": "ROL.13",
+      "name": "Person's Location",
+      "description": "This field specifies the physical location (e.g., nurse station, ancillary service location, clinic, or floor) of the person in the role, as identified in ROL-4-role person.\n\nIf ROL-11 is populated with an Address Type of S (Service Location) and ROL-13 is also populated, then the two must describe the same physical location.",
+      "length": "0",
+      "data_type": "PL - Person Location",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "ROL.14",
+      "name": "Organization",
+      "description": "The organizational affiliation of the individual playing the role.",
+      "length": "0",
+      "data_type": "XON - Extended Composite Name And Identification Number For Organizations",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "ROL.2",
+      "name": "Action Code",
+      "description": "The action code field gives the intent of the problem or goal. Refer to HL7 Table 0287 - Problem/Goal Action Code for valid values.\n\n*The UNCHANGED action code is used to signify to the applications programs that this particular segment includes no information to be modified. It is supplied in order to identify the correct record for which the following modification is intended.",
+      "length": "2",
+      "data_type": "ID - Coded Value For Hl7 Defined Tables",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "ROL.3",
+      "name": "Role-rol",
+      "description": "This field indicates the functional involvement with the activity being transmitted (e.g., Case Manager, Evaluator, Transcriber, Nurse Care Practitioner, Midwife, Physician Assistant, etc.). Refer to User-defined table 0443 - Provider role for valid values. When the ROL segment is used in conjunction with the Attending, Referring, or Admitting physician in the PV1 segment, the HL7 specified table values must be used. Additional site negotiated values are allowed.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "ROL.4",
+      "name": "Role Person",
+      "description": "This field contains the identity of the person who is assuming the role that is being transmitted. This field correlates to STF-2 Staff ID Code and STF-3 Staff Name. If both STF and ROL are present in the same message, populating this field is optional. If this field is populated, then it must be populated with the same values as the correlated field.",
+      "length": "0",
+      "data_type": "XCN - Extended Composite Id Number And Name For Persons",
+      "optionality": "Required",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "5": {
+      "field_id": "ROL.5",
+      "name": "Role Begin Date/Time",
+      "description": "This field contains the date/time when the role began.",
+      "length": "0",
+      "data_type": "DTM - Date/time",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "ROL.6",
+      "name": "Role End Date/Time",
+      "description": "This field contains the date/time when the role ended.",
+      "length": "0",
+      "data_type": "DTM - Date/time",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "ROL.7",
+      "name": "Role Duration",
+      "description": "This field contains the qualitative length of time for performance of a role (e.g., until the next assessment, four days, until discharge, etc.).",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "ROL.8",
+      "name": "Role Action Reason",
+      "description": "This field indicates the reason why the person is assuming (or changing) the role (e.g., shift change, new primary nurse, etc.).",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "ROL.9",
+      "name": "Provider Type",
+      "description": "This field contains a code identifying the provider type. This attribute correlates to the following master file attribute: STF-4 Staff Type. Coded values from the correlated master file table are used; the user defined master file table is used as the coding system for this attribute. For example, if you are using values from STF-2 Staff Type, the coding system would be HL70182 which is the table number for the user defined Staff Type table. This field is included in this segment to support international requirements. When ROL is used in an encounter message, it is not intended as a master file update.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    }
+  }
+}

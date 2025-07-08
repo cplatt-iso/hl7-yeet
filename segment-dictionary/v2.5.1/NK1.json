@@ -1,0 +1,358 @@
+{
+  "segment_id": "NK1",
+  "short_description": "Next of Kin / Associated Parties",
+  "description": "The NK1 segment contains information about the patients other related parties. Any associated parties may be identified. Utilizing NK1-1 - set ID, multiple NK1 segments can be sent to patient accounts.",
+  "fields": {
+    "1": {
+      "field_id": "NK1.1",
+      "name": "Set ID - NK1",
+      "description": "This field contains the number that identifies this transaction. For the first occurrence of the segment, the sequence number shall be one, for the second occurrence, the sequence number shall be two, etc.",
+      "length": "4",
+      "data_type": "SI - Sequence ID",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "NK1.10",
+      "name": "Next of Kin / Associated Parties Job Title",
+      "description": "This field contains the title of the next of kin/associated parties at their place of employment. However, if the contact role is the patients employer, this field contains the title of the patient at their place of employment.",
+      "length": "60",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "NK1.11",
+      "name": "Next of Kin / Associated Parties Job Code/Class",
+      "description": "This field contains the employers job code and the employee classification used for the next of kin/associated parties at their place of employment. However, if the contact role is the patients employer, this field contains the job code/class of the patient at their place of employment. Refer to User-defined Table 0327 - Job Code and User-defined Table 0328 - Employee Classification for suggested values.",
+      "length": "20",
+      "data_type": "JCC - Job Code/Class",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "NK1.12",
+      "name": "Next of Kin / Associated Parties Employee Number",
+      "description": "For backward compatibility, the ST data type can be sent; however HL7 recommends that the CX data type be used for new implementations. This field contains the number that the employer assigns to the employee that is acting as next of kin/associated parties. However, if the contact role is the patients employer, this field contains the employee number of the patient at their place of employment. The assigning authority and identifier type codes are strongly recommended for all CX data types.",
+      "length": "250",
+      "data_type": "CX - Extended Composite ID with Check Digit",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "NK1.13",
+      "name": "Organization Name - NK1",
+      "description": "This field contains the name of the organization that serves as a next of kin/associated party or as the next of kin of the patient. This field may also be used to communicate the name of the organization at which the associated party works. Multiple names for the same organization may be sent. If multiple names are sent, the legal name must be sent in the first sequence. If the legal name is not sent, then a repeat delimiter must be sent in the first sequence.",
+      "length": "250",
+      "data_type": "XON - Extended Composite Name and Identification Number for Organizations",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "14": {
+      "field_id": "NK1.14",
+      "name": "Marital Status",
+      "description": "This field contains the next of kin/associated partys marital status. Refer to User-defined Table 0002 - Marital Status for suggested values.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "15": {
+      "field_id": "NK1.15",
+      "name": "Administrative Sex",
+      "description": "This field contains the next of kin/associated partys sex. Refer to User-defined Table 0001 - Administrative Sex for suggested values.",
+      "length": "1",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "16": {
+      "field_id": "NK1.16",
+      "name": "Date/Time of Birth",
+      "description": "This field contains the next of kin/associated partys birth date and time.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "17": {
+      "field_id": "NK1.17",
+      "name": "Living Dependency",
+      "description": "This field identifies specific living conditions (e.g., spouse dependent on patient, walk-up) that are relevant to an evaluation of the patients healthcare needs. This information can be used for discharge planning. Examples might include Spouse Dependent, Medical Supervision Required, Small Children Dependent. This field repeats because, for example, spouse dependent and medical supervision required can apply at the same time. Refer to User-defined Table 0223 - Living Dependency for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "18": {
+      "field_id": "NK1.18",
+      "name": "Ambulatory Status",
+      "description": "This field identifies the transient rate of mobility for the next of kin/associated party. Refer to User-defined Table 0009 - Ambulatory Status for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "19": {
+      "field_id": "NK1.19",
+      "name": "Citizenship",
+      "description": "This field contains the code to identify the next of kin/associated partys citizenship. HL7 recommends using ISO 3166 as the suggested values in User-defined Table 0171 - Citizenship .",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "2": {
+      "field_id": "NK1.2",
+      "name": "NK Name",
+      "description": "This field contains the name of the next of kin or associated party. Multiple names for the same person are allowed, but the legal name must be sent in the first sequence. If the legal name is not sent, then the repeat delimiter must be sent in the first sequence. Refer to HL7 Table 0200 - Name Type for valid values.",
+      "length": "250",
+      "data_type": "XPN - Extended Person Name",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "20": {
+      "field_id": "NK1.20",
+      "name": "Primary Language",
+      "description": "This field identifies the next of kin/associated partys primary speaking language. HL7 recommends using ISO 639 as the suggested values in User-defined Table 0296 - Language .",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "21": {
+      "field_id": "NK1.21",
+      "name": "Living Arrangement",
+      "description": "This field identifies the situation that the associated party lives in at his/her residential address. Refer to User-defined Table 0220 - Living Arrangement for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "22": {
+      "field_id": "NK1.22",
+      "name": "Publicity Code",
+      "description": "This field indicates what level of publicity is allowed (e.g., No Publicity, Family Only) for the next of kin/associated party. Refer to User-defined Table 0215 - Publicity Code for suggested values.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "23": {
+      "field_id": "NK1.23",
+      "name": "Protection Indicator",
+      "description": "This field identifies that next of kin/associated partys protection that determines, in turn, whether access to information about this person should be kept from users who do not have adequate authority. Refer to HL7 Table 0136 - Yes/no Indicator for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "24": {
+      "field_id": "NK1.24",
+      "name": "Student Indicator",
+      "description": "This field identifies whether the next of kin/associated party is currently a student or not, and whether the next of kin/associated party is a full- or a part-time student. This field does not indicate the degree (high school, college) of the student or the field of study. Refer to User-defined Table 0231 - Student Status for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "25": {
+      "field_id": "NK1.25",
+      "name": "Religion",
+      "description": "This field indicates the type of religion practiced by the next of kin/associated party. Refer to User-defined Table 0006 - Religion for suggested values.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "26": {
+      "field_id": "NK1.26",
+      "name": "Mother's Maiden Name",
+      "description": "This field indicates the maiden name of the next of kin/associated partys mother.",
+      "length": "250",
+      "data_type": "XPN - Extended Person Name",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "27": {
+      "field_id": "NK1.27",
+      "name": "Nationality",
+      "description": "This field identifies the nation or national group to which the next of kin/associated party belongs. This information may be different than the persons citizenship in countries in which multiple nationalities are recognized (e.g., Spain: Basque, Catalan, etc.). Refer to User-defined Table 0212 - Nationality for suggested values.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "28": {
+      "field_id": "NK1.28",
+      "name": "Ethnic Group",
+      "description": "This field contains the next of kin/associated partys ethnic group. Refer to User-defined Table 0189 - Ethnic Group for suggested values. The second triplet of the CE data type for ethnic group (alternate identifier, alternate text, and name of alternate coding system) is reserved for governmentally assigned codes. In the US, a current use is to report ethnicity in line with US federal standards for Hispanic origin.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "29": {
+      "field_id": "NK1.29",
+      "name": "Contact Reason",
+      "description": "This field identifies how the contact should be used (e.g., contact employer if patient is unable to work). Refer to User-defined Table 0222 - Contact Reason for suggested values.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "3": {
+      "field_id": "NK1.3",
+      "name": "Relationship",
+      "description": "This field contains the actual personal relationship that the next of kin/associated party has to the patient. Refer to User-defined Table 0063 - Relationship for suggested values.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "30": {
+      "field_id": "NK1.30",
+      "name": "Contact Person's Name",
+      "description": "This field contains the names of the people to contact, depending on the value of the relationship defined in NK1-3 - Relationship. This field is typically needed when the NK1 is an organization. The legal name should be sent first in the sequence. Refer to HL7 Table 0200 - Name Type for valid values.",
+      "length": "250",
+      "data_type": "XPN - Extended Person Name",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "31": {
+      "field_id": "NK1.31",
+      "name": "Contact Person's Telephone Number",
+      "description": "This field contains the telephone numbers of the contact person depending on the value of the relationship defined in NK1-3 - Relationship. This field is typically needed when the NK1 is an organization. The primary telephone number must be sent in the first sequence. If the primary telephone number is not sent, then a repeat delimiter must be sent in the first sequence. Refer to HL7 Table 0201 -Telecommunication Use Code and HL7 Table 0202 - Telecommunication Equipment Type for valid values.",
+      "length": "250",
+      "data_type": "XTN - Extended Telecommunication Number",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "32": {
+      "field_id": "NK1.32",
+      "name": "Contact Person's Address",
+      "description": "This field contains the addresses of the contact person depending on the value of the relationship defined in NK1-3 - Relationship. This field is typically used when the NK1 is an organization. When multiple addresses are sent, the mailing address must be sent first in the sequence.",
+      "length": "250",
+      "data_type": "XAD - Extended Address",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "33": {
+      "field_id": "NK1.33",
+      "name": "Next of Kin/Associated Party's Identifiers",
+      "description": "This field contains the identifiers for the next of kin/associated party, for example, Social Security Number, drivers license, etc. The assigning authority and identifier type code are strongly recommended for all CX data types.",
+      "length": "250",
+      "data_type": "CX - Extended Composite ID with Check Digit",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "34": {
+      "field_id": "NK1.34",
+      "name": "Job Status",
+      "description": "This field identifies the next of kin/associated partys job status. Refer to User-defined Table 0311 - Job Status for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "35": {
+      "field_id": "NK1.35",
+      "name": "Race",
+      "description": "This field identifies the race of the next of kin/associated party. Refer to User-defined Table 0005 - Race for suggested values. The second triplet of the CE data type for race (alternate identifier, alternate text, and name of alternate coding system) is reserved for governmentally assigned codes.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "36": {
+      "field_id": "NK1.36",
+      "name": "Handicap",
+      "description": "This field contains the code that describes an associated partys disability. Refer to User-defined Table 0295 - Handicap for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "37": {
+      "field_id": "NK1.37",
+      "name": "Contact Person Social Security Number",
+      "description": "In the US, this field contains the contact persons social security number. This number may also be a RR retirement number. For the Social Security number of the associated party, see NK1-33 - Next of Kin/Associated Partys identifiers.",
+      "length": "16",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "38": {
+      "field_id": "NK1.38",
+      "name": "Next of Kin Birth Place",
+      "description": "This field indicates the location of the next-of-kins birth, for example St. Francis Community Hospital of Lower South Side. The actual address is reported in NK1-4 - Address with an identifier of N.",
+      "length": "250",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "39": {
+      "field_id": "NK1.39",
+      "name": "VIP Indicator",
+      "description": "This field identifies the type of VIP for the next-of-kin. Refer to User-defined Table 0099 - VIP Indicator .",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "NK1.4",
+      "name": "Address",
+      "description": "This field contains the address of the next of kin/associated party. Multiple addresses are allowed for the same person. The mailing address must be sent in the first sequence. If the mailing address is not sent, then the repeat delimiter must be sent in the first sequence.",
+      "length": "250",
+      "data_type": "XAD - Extended Address",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "5": {
+      "field_id": "NK1.5",
+      "name": "Phone Number",
+      "description": "This field contains the telephone number of the next of kin/associated party. Multiple phone numbers are allowed for the same person. The primary telephone number must be sent in the first sequence. If the primary telephone number is not sent, then the repeat delimiter must be sent in the first sequence. Refer to HL7 Table 0201 - Telecommunication Use Code and HL7 Table 0202 - Telecommunication Equipment Type for valid values.",
+      "length": "250",
+      "data_type": "XTN - Extended Telecommunication Number",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "6": {
+      "field_id": "NK1.6",
+      "name": "Business Phone Number",
+      "description": "This field contains the business telephone number of the next of kin/associated party. Multiple phone numbers are allowed for the same person. The primary business telephone number must be sent in the first sequence. If the primary business telephone number is not sent, then the repeat delimiter must be sent in the first sequence. Refer to HL7 Table 0201 - Telecommunication Use Code and HL7 Table 0202 - Telecommunication Equipment Type for valid values.",
+      "length": "250",
+      "data_type": "XTN - Extended Telecommunication Number",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "7": {
+      "field_id": "NK1.7",
+      "name": "Contact Role",
+      "description": "This field indicates the specific relationship role. Refer to User-defined Table 0131 - Contact Role for suggested values. This field specifies the role that the next of kin/associated parties plays with regard to the patient.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "NK1.8",
+      "name": "Start Date",
+      "description": "This field contains the start date of the contact role.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "NK1.9",
+      "name": "End Date",
+      "description": "This field contains the end date of the contact role.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { io } from 'socket.io-client';
-import { parseHl7, sendHl7, analyzeHl7, getTotalUsage, getUsageByModel } from '../api/mllp';
-import { startListenerApi, stopListenerApi } from '../api/listener'; // You will need to create this file
+import { parseHl7, sendHl7, analyzeHl7, getTotalUsage, getUsageByModel, getSupportedVersions } from '../api/mllp';
+import { startListenerApi, stopListenerApi } from '../api/listener';
 import { rebuildHl7Message, stripCommentsAndBlankLines } from '../utils/hl7';
 
 import ConnectionInputs from './ConnectionInputs';
@@ -13,11 +13,9 @@ import MessageTemplates from './MessageTemplates';
 import AnalysisPanel from './AnalysisPanel';
 import SettingsPanel from './SettingsPanel';
 import DiffModal from './DiffModal';
-
 import ListenerPanel from './ListenerPanel';
 import ListenerOutput from './ListenerOutput';
 
-// --- THE MAIN COMPONENT, RESTRUCTURED ---
 const HL7Parser = () => {
     // --- STATE MANAGEMENT ---
     const [activeTab, setActiveTab] = useState('sender');
@@ -38,12 +36,18 @@ const HL7Parser = () => {
     const [isDiffModalOpen, setIsDiffModalOpen] = useState(false);
     const [originalMessageForDiff, setOriginalMessageForDiff] = useState('');
     const [newMessageForDiff, setNewMessageForDiff] = useState('');
+
+    // AI & Settings State
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [analysisResult, setAnalysisResult] = useState(null);
     const [totalTokenUsage, setTotalTokenUsage] = useState(0);
     const [showTooltips, setShowTooltips] = useState(true);
     const [selectedModel, setSelectedModel] = useState('gemini-1.5-flash');
     const [modelUsage, setModelUsage] = useState({});
+
+    // --- NEW: HL7 Versioning State ---
+    const [supportedVersions, setSupportedVersions] = useState([]);
+    const [selectedHl7Version, setSelectedHl7Version] = useState('v2.5.1');
 
     // Listener State
     const [listenerPort, setListenerPort] = useState('5002');
@@ -56,71 +60,65 @@ const HL7Parser = () => {
     const scrollRef = useRef(0);
     const debounceTimerRef = useRef(null);
 
-    const handleClearListener = () => {
-        setReceivedMessages([]);
-    };
-
-    const handleLoadIntoParser = (messageToLoad) => {
-        setHl7Message(messageToLoad);
-        setActiveTab('sender');
-    };
-
-    // --- EFFECT FOR WEBSOCKETS ---
+    // --- EFFECT FOR WEBSOCKETS (Listener) ---
     useEffect(() => {
-        // Ensure you have a proxy in vite.config.js for this to work smoothly
-        // The target should be your backend, e.g., 'http://localhost:5001'
         const socket = io(import.meta.env.VITE_API_URL || 'http://localhost:5001');
         socketRef.current = socket;
-
         socket.on('connect', () => console.log('Socket.IO Client Connected'));
         socket.on('disconnect', () => console.log('Socket.IO Client Disconnected'));
-
         socket.on('listener_status', (data) => {
-            console.log('Listener status update:', data);
             setListenerStatus(data.status);
             setIsListening(data.status === 'listening');
         });
-
         socket.on('incoming_message', (data) => {
             setReceivedMessages(prev => [data, ...prev]);
         });
-
         return () => {
             socket.disconnect();
         };
     }, []);
 
-    // --- DATA FETCHING & PARSING EFFECTS (UNCHANGED) ---
+    // --- DATA FETCHING ON LOAD ---
     useEffect(() => {
         const fetchInitialData = async () => {
             try {
-                const total = await getTotalUsage();
+                const [total, byModel, versions] = await Promise.all([
+                    getTotalUsage(),
+                    getUsageByModel(),
+                    getSupportedVersions()
+                ]);
                 setTotalTokenUsage(total);
-                const byModel = await getUsageByModel();
                 setModelUsage(byModel);
+                setSupportedVersions(versions);
+                // Default to the first (likely latest) version if available
+                if (versions.length > 0) {
+                    setSelectedHl7Version(versions[0]);
+                }
             } catch (error) {
-                console.error("Couldn't fetch initial usage data:", error);
+                console.error("Couldn't fetch initial data:", error);
+                // Handle error gracefully, maybe show a toast
             }
         };
         fetchInitialData();
     }, []);
 
+    // --- PARSING EFFECT (NOW DEPENDS ON HL7 VERSION) ---
     useEffect(() => {
-        if (activeTab !== 'sender') return;
-        if (!hl7Message.trim()) {
+        if (activeTab !== 'sender' || !hl7Message.trim()) {
             setSegments([]);
             setError('');
             return;
         }
         const handler = setTimeout(() => {
             setIsProcessing(true);
-            parseHl7(hl7Message)
+            // Pass the selected HL7 version to the parser
+            parseHl7(hl7Message, selectedHl7Version)
                 .then(data => { setSegments(data); setError(''); })
                 .catch(err => { setSegments([]); setError(err.message); })
                 .finally(() => { setIsProcessing(false); });
         }, 500);
         return () => clearTimeout(handler);
-    }, [hl7Message, activeTab]);
+    }, [hl7Message, selectedHl7Version, activeTab]);
 
     useEffect(() => {
         if (scrollRef.current > 0) {
@@ -150,24 +148,44 @@ const HL7Parser = () => {
     };
 
     const handleStartListener = async () => {
-        try {
-            await startListenerApi(listenerPort);
-        } catch (error) {
-            console.error("API Error starting listener:", error);
-            setListenerStatus('error');
-        }
+        try { await startListenerApi(listenerPort); } catch (error) { console.error("API Error starting listener:", error); setListenerStatus('error'); }
     };
 
     const handleStopListener = async () => {
+        try { await stopListenerApi(); } catch (error) { console.error("API Error stopping listener:", error); setListenerStatus('error'); }
+    };
+
+    const handleClearListener = () => {
+        setReceivedMessages([]);
+    };
+
+    const handleLoadIntoParser = (messageToLoad) => {
+        setHl7Message(messageToLoad);
+        setActiveTab('sender');
+    };
+
+    const handleAnalyze = async () => {
+        if (!hl7Message || isAnalyzing) return;
+        setOriginalMessageForDiff(hl7Message);
+        setIsAnalyzing(true);
+        setAnalysisResult(null);
         try {
-            await stopListenerApi();
-        } catch (error) {
-            console.error("API Error stopping listener:", error);
-            setListenerStatus('error');
+            // Pass the selected HL7 version to the analyzer
+            const result = await analyzeHl7(hl7Message, selectedModel, selectedHl7Version);
+            setAnalysisResult(result);
+            if (result.usage?.total_tokens) {
+                const tokens = result.usage.total_tokens;
+                setTotalTokenUsage(pt => pt + tokens);
+                setModelUsage(pu => ({ ...pu, [selectedModel]: (pu[selectedModel] || 0) + tokens }));
+            }
+        } catch (e) {
+            setAnalysisResult({ explanation: `**Error:** ${e.message}` });
+        } finally {
+            setIsAnalyzing(false);
         }
     };
 
-    // All your existing handlers are here, unchanged
+    // Other handlers remain largely the same
     const handleFieldMove = useCallback((source, destination) => { handleFieldInteraction((cs) => cs.map((s, si) => (si === source.segmentIndex || si === destination.segmentIndex) ? { ...s, fields: s.fields.map((f, fi) => (si === source.segmentIndex && fi === source.fieldIndex) ? { ...f, value: '' } : (si === destination.segmentIndex && fi === destination.fieldIndex) ? { ...f, value: cs[source.segmentIndex].fields[source.fieldIndex].value } : f) } : s)); }, [segments, updateHl7MessageText]);
     const handleFieldUpdate = useCallback((segmentIndex, fieldIndex, newValue) => { handleFieldInteraction((cs) => cs.map((s, si) => (si === segmentIndex) ? { ...s, fields: s.fields.map((f, fi) => (fi === fieldIndex) ? { ...f, value: newValue } : f) } : s)); }, [segments, updateHl7MessageText]);
     const handleCopy = async () => { if (!hl7Message || isCopied) return; await navigator.clipboard.writeText(hl7Message); setIsCopied(true); setTimeout(() => setIsCopied(false), 2000); };
@@ -175,7 +193,6 @@ const HL7Parser = () => {
     const handleClear = () => { setHl7Message(''); };
     const handleSend = async () => { setIsSending(true); setResponse(null); try { const result = await sendHl7(host, port, rebuildHl7Message(segments)); setResponse({ success: true, ...result }); } catch (e) { setResponse({ success: false, message: e.message }); } finally { setIsSending(false); } };
     const handleTemplateSelect = (message) => { setHl7Message(message); setActiveTab('sender'); };
-    const handleAnalyze = async () => { if (!hl7Message || isAnalyzing) return; setOriginalMessageForDiff(hl7Message); setIsAnalyzing(true); setAnalysisResult(null); try { const result = await analyzeHl7(hl7Message, selectedModel); setAnalysisResult(result); if (result.usage?.total_tokens) { const tokens = result.usage.total_tokens; setTotalTokenUsage(pt => pt + tokens); setModelUsage(pu => ({ ...pu, [selectedModel]: (pu[selectedModel] || 0) + tokens })); } } catch (e) { setAnalysisResult({ explanation: `**Error:** ${e.message}` }); } finally { setIsAnalyzing(false); } };
     const handleShowDiff = (fixedMessage) => { setNewMessageForDiff(fixedMessage); setIsDiffModalOpen(true); };
     const handleConfirmFix = () => { setHl7Message(newMessageForDiff); setIsDiffModalOpen(false); setAnalysisResult(null); };
     const handleMouseMove = (e) => { if (tooltipContent) setTooltipPos({ x: e.pageX, y: e.pageY }); };
@@ -184,8 +201,8 @@ const HL7Parser = () => {
         <button
             onClick={() => setActiveTab(name)}
             className={`px-6 py-2 text-sm font-medium rounded-t-lg transition-colors border-b-2 ${activeTab === name
-                ? 'border-indigo-500 text-white'
-                : 'border-transparent text-gray-400 hover:border-gray-500 hover:text-gray-200'
+                    ? 'border-indigo-500 text-white'
+                    : 'border-transparent text-gray-400 hover:border-gray-500 hover:text-gray-200'
                 }`}
         >
             {label}
@@ -212,7 +229,15 @@ const HL7Parser = () => {
                     <div className="flex flex-col md:flex-row gap-8">
                         <div className="w-full md:w-1/4 lg:w-1/5 flex flex-col gap-8">
                             <MessageTemplates onTemplateSelect={handleTemplateSelect} />
-                            <SettingsPanel showTooltips={showTooltips} setShowTooltips={setShowTooltips} selectedModel={selectedModel} setSelectedModel={setSelectedModel} />
+                            <SettingsPanel
+                                showTooltips={showTooltips}
+                                setShowTooltips={setShowTooltips}
+                                selectedModel={selectedModel}
+                                setSelectedModel={setSelectedModel}
+                                supportedHl7Versions={supportedVersions}
+                                selectedHl7Version={selectedHl7Version}
+                                setSelectedHl7Version={setSelectedHl7Version}
+                            />
                         </div>
                         <div className={`w-full ${analysisResult || isAnalyzing ? 'md:w-2/4 lg:w-2/5' : 'md:w-3/4 lg:w-4/5'} transition-all duration-300`}>
                             <div className="flex flex-col gap-8">
@@ -249,19 +274,8 @@ const HL7Parser = () => {
                 )}
                 {activeTab === 'listener' && (
                     <div>
-                        <ListenerPanel
-                            port={listenerPort}
-                            setPort={setListenerPort}
-                            isListening={isListening}
-                            status={listenerStatus}
-                            onStart={handleStartListener}
-                            onStop={handleStopListener}
-                        />
-                        <ListenerOutput
-                            messages={receivedMessages}
-                            onClear={handleClearListener}
-                            onLoadIntoParser={handleLoadIntoParser}
-                        />
+                        <ListenerPanel port={listenerPort} setPort={setListenerPort} isListening={isListening} status={listenerStatus} onStart={handleStartListener} onStop={handleStopListener} />
+                        <ListenerOutput messages={receivedMessages} onClear={handleClearListener} onLoadIntoParser={handleLoadIntoParser} />
                     </div>
                 )}
             </div>

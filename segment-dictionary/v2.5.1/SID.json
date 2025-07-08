@@ -1,0 +1,43 @@
+{
+  "segment_id": "SID",
+  "short_description": "Substance Identifier",
+  "description": "The Substance Identifier segment contains data necessary to identify the substance (e.g., reagents) used in the production of analytical test results. The combination of these fields must uniquely identify the substance, i.e., depending on the manufacturer all or some fields are required (this is the reason the optionality is 'C' (conditional)). If the analysis requires multiple substances, this segment is repeated for each substance. The segment(s) should be attached to the TCD segment.\n\nAnother purpose of this segment is to transfer the control manufacturer, lot, etc. information for control specimens. In this case the SID segment should be attached to the SAC segment describing the container with the control specimen.",
+  "fields": {
+    "1": {
+      "field_id": "SID.1",
+      "name": "Application / Method Identifier",
+      "description": "This field identifies the application / method used for the analysis.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "SID.2",
+      "name": "Substance Lot Number",
+      "description": "This field specifies the lot number assigned by the manufacturer during production of the substance.",
+      "length": "20",
+      "data_type": "ST - String Data",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "SID.3",
+      "name": "Substance Container Identifier",
+      "description": "This field specifies the container assigned by the manufacturer during production of the substance. This identifier should be unique within specific lot of specific application / method.",
+      "length": "200",
+      "data_type": "ST - String Data",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "SID.4",
+      "name": "Substance Manufacturer Identifier",
+      "description": "This field identifies the manufacturer of this substance. Refer to User-defined Table 0451 - Manufacturer identifier for suggested values.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

@@ -57,7 +57,7 @@ const ParserOutput = ({ isProcessing, segments, error, showEmpty, setShowEmpty, 
                 {/* --- MASTER-DETAIL LAYOUT --- */}
                 <div className="flex gap-4">
                     {/* --- LEFT PANEL: The Navigator --- */}
-                    <div className="w-1/4 flex-shrink-0 bg-gray-900/50 p-2 rounded-md border border-gray-700/50">
+                    <div className="w-48 flex-shrink-0 bg-gray-900/50 p-2 rounded-md border border-gray-700/50">
                         <div className="flex flex-col space-y-1">
                             {segments.map((segment, index) => (
                                 <button

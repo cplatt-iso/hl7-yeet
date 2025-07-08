@@ -1,0 +1,79 @@
+{
+  "segment_id": "SCP",
+  "short_description": "Sterilizer Configuration (anti-microbial Devices)",
+  "description": "The sterilization configuration segment contains information specific to configuration of a sterilizer or washer for processing sterilization or decontamination loads.",
+  "fields": {
+    "1": {
+      "field_id": "SCP.1",
+      "name": "Number Of Decontamination/Sterilization Devices",
+      "description": "The number of decontamination/sterilization devices recognized by the instrument-tracking system. The decontamination/sterilization device(s) would configure itself based on the data in this message.",
+      "length": "0",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "SCP.2",
+      "name": "Labor Calculation Type",
+      "description": "The method at which labor is calculated for use in tracking employee productivity. Refer to User-defined Table 0651 \u2013Labor Calculation Type in Chapter 2C, Code Tables, for suggested values.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "SCP.3",
+      "name": "Date Format",
+      "description": "The format of the date that is used to record date parameters of a decontamination/sterilization instance. Refer to User-defined Table 0653 \u2013 Date Format in Chapter 2C, Code Tables, for suggested values.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "SCP.4",
+      "name": "Device Number",
+      "description": "The number of the device (e.g., 01).",
+      "length": "0",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "SCP.5",
+      "name": "Device Name",
+      "description": "The name of the device associated with the device number in SCP-4 (e.g., VAC)",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "SCP.6",
+      "name": "Device Model Name",
+      "description": "The manufacturer's designated model name.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "SCP.7",
+      "name": "Device Type",
+      "description": "The type of device, such as a steam sterilizer or gas sterilizer. Refer to User-defined Table 0657 \u2013 Device Type in Chapter 2C, Code Tables, for suggested values.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "SCP.8",
+      "name": "Lot Control",
+      "description": "A code assigned to a device to indicate if the sterilization load is built in the sub-sterile area adjacent to an Operating Room or the Central Processing Department (Central Supply). Refer to User-defined Table 0659 \u2013 Lot Control in Chapter 2C, Code Tables, for suggested values.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

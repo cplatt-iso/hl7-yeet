@@ -1,0 +1,250 @@
+{
+  "segment_id": "SCH",
+  "short_description": "Scheduling Activity Information",
+  "description": "The SCH segment contains general information about the scheduled appointment.",
+  "fields": {
+    "1": {
+      "field_id": "SCH.1",
+      "name": "Placer Appointment ID",
+      "description": "This field contains the placer application's permanent identifier for the appointment request (and the scheduled appointment itself, when it has been confirmed as a booked slot by the filler application). This is a composite field.\n\nThe first component is a string that identifies an individual appointment request, or a booked appointment. It is assigned by the placer application, and identifies an appointment request, and the subsequent scheduled appointment, uniquely among all such requests and/or booked appointments from a particular requesting application. If SCH-1-Placer appointment ID identifies a parent of a repeating schedule request, then the individual child scheduled appointments can be uniquely identified either by a new SCH-1-Placer appointment ID or by SCH-23-Parent placer appointment ID plus an SCH-3-Occurrence number.\n\nIf a schedule request originates from a placer it MUST have a placer appointment ID. If the filler sends responses, it may use the placer appointment ID and/or assign a filler appointment ID (which it would echo back to the placer to enable the placer application to associate the two). If the placer appointment ID is not present, the filler appointment ID must be present and vice versa.",
+      "length": "75",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "SCH.10",
+      "name": "Appointment Duration Units",
+      "description": "As of Version 2.5, this field is retained for backward compatibility only. Refer to the TQ1 segment.\n\nThis field contains a code describing the units of time used for expressing the ARQ-9-Appointment duration field. If this component is not valued, the ISO base unit of seconds (code \"s\") is assumed.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "SCH.11",
+      "name": "Appointment Timing Quantity",
+      "description": "As of Version 2.5, this field is retained for backward compatibility only. Refer to the TQ1 segment.\n\nThis field contains the scheduled appointment's timing and quantity, as scheduled by the filler application. The TQ1 segment fully describes the components and the appropriate data values for the components of this field.",
+      "length": "200",
+      "data_type": "TQ - Timing Quantity",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "12": {
+      "field_id": "SCH.12",
+      "name": "Placer Contact Person",
+      "description": "This field identifies the person responsible for requesting the scheduling of a requested appointment. Most often, this person will be the same person responsible for executing the appointment.",
+      "length": "250",
+      "data_type": "XCN - Extended Composite ID Number and Name for Persons",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "13": {
+      "field_id": "SCH.13",
+      "name": "Placer Contact Phone Number",
+      "description": "This field contains the phone number used to contact the SCH-12-Placer contact person.",
+      "length": "250",
+      "data_type": "XTN - Extended Telecommunication Number",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "SCH.14",
+      "name": "Placer Contact Address",
+      "description": "This field contains the address used to contact the SCH-12-Placer contact person.",
+      "length": "250",
+      "data_type": "XAD - Extended Address",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "15": {
+      "field_id": "SCH.15",
+      "name": "Placer Contact Location",
+      "description": "This field contains a code that identifies the location of the SCH-12-Placer contact person.",
+      "length": "80",
+      "data_type": "PL - Person Location",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "16": {
+      "field_id": "SCH.16",
+      "name": "Filler Contact Person",
+      "description": "This field identifies the person responsible for the scheduling of the requested appointment. Most often, this person will be the same person responsible for maintaining the schedule and for reviewing appointment requests.",
+      "length": "250",
+      "data_type": "XCN - Extended Composite ID Number and Name for Persons",
+      "optionality": "Required",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "17": {
+      "field_id": "SCH.17",
+      "name": "Filler Contact Phone Number",
+      "description": "This field contains the phone number used to contact the SCH-16-Filler contact person.",
+      "length": "250",
+      "data_type": "XTN - Extended Telecommunication Number",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "18": {
+      "field_id": "SCH.18",
+      "name": "Filler Contact Address",
+      "description": "This field contains the address used to contact the SCH-16-Filler contact person.",
+      "length": "250",
+      "data_type": "XAD - Extended Address",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "19": {
+      "field_id": "SCH.19",
+      "name": "Filler Contact Location",
+      "description": "This field contains a code that identifies the location of the SCH-16-Filler Contact Person.",
+      "length": "80",
+      "data_type": "PL - Person Location",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "SCH.2",
+      "name": "Filler Appointment ID",
+      "description": "This field contains the filler application's permanent identifier for the appointment request (and the scheduled appointment itself, when it has been confirmed as a booked slot by the filler application). This is a composite field.\n\nThe first component is a string of up to fifteen characters that identifies an individual appointment request, or a booked appointment. It is assigned by the filler application, and identifies an appointment request, and the subsequent scheduled appointment, uniquely among all such requests and/or booked appointments from a particular processing application. If SCH-2-Filler appointment ID identifies a parent of a repeating schedule request, then the individual child scheduled appointments can be uniquely identified either by a new SCH-2-Filler appointment ID or by SCH-25-Parent filler appointment ID plus an SCH-3-Occurrence number.",
+      "length": "75",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "20": {
+      "field_id": "SCH.20",
+      "name": "Entered By Person",
+      "description": "This field identifies the person responsible for entering the request for the scheduling of an appointment. It is included to provide an audit trail of persons responsible for the request. This person may be someone other than the placer contact person, who is responsible for entering orders and requests.",
+      "length": "250",
+      "data_type": "XCN - Extended Composite ID Number and Name for Persons",
+      "optionality": "Required",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "21": {
+      "field_id": "SCH.21",
+      "name": "Entered By Phone Number",
+      "description": "This field contains the phone number used to contact the ARQ-19-Entered by person.",
+      "length": "250",
+      "data_type": "XTN - Extended Telecommunication Number",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "22": {
+      "field_id": "SCH.22",
+      "name": "Entered By Location",
+      "description": "This field contains a code that identifies the location of the entered by person.",
+      "length": "80",
+      "data_type": "PL - Person Location",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "23": {
+      "field_id": "SCH.23",
+      "name": "Parent Placer Appointment ID",
+      "description": "This field relates a child to its parent, when a parent-child relationship exists. It contains the placer application's permanent identifier for the parent of the appointment request. This is a composite field.",
+      "length": "75",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "24": {
+      "field_id": "SCH.24",
+      "name": "Parent Filler Appointment ID",
+      "description": "This field relates a child to its parent, when a parent-child relationship exists. It contains the filler application's permanent identifier for the parent of the appointment request. This is a composite field.\n\nThe first component is a string that identifies the parent appointment request. It is assigned by the filler application, and it identifies an appointment request uniquely among all such requests on a particular processing application.\n\nThis is a conditionally required field. On initial messages where a filler has not yet assigned a filler appointment ID, this field should not contain a value. In all other subsequent messages, where a filler application has assigned a filler appointment ID, this field is required.",
+      "length": "75",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "25": {
+      "field_id": "SCH.25",
+      "name": "Filler Status Code",
+      "description": "This field contains a code describing the status of the appointment with respect to the filler application. Refer to User-Defined Table 0278 - Filler Status Codes for suggested codes.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "26": {
+      "field_id": "SCH.26",
+      "name": "Placer Order Number",
+      "description": "This field is the placer application's order number for the order associated with this scheduling filler application response.\n\nThis field is described in detail in Section 4.5.1.2. It is an optional field, but if a Placer order number is present, then a Filler order number (Section 10.6.2.27) must also be present. Both this field and the Filler order number below may have been sent as part of the appointment request in the ARQ segment or they may be assigned by the scheduling filler application only.",
+      "length": "22",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Conditional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "27": {
+      "field_id": "SCH.27",
+      "name": "Filler Order Number",
+      "description": "This field is the order number assigned by the filler application for the order associated with this scheduling filler response.\n\nThis field is described in detail in Section 4.5.1.3. It is conditionally mandatory depending on the presence of the Placer order number (Section 10.6.2.26). This conditionally mandatory requirement addresses the concern that a Scheduling system cannot and should not create or fill an order. Therefore, an order must have been accepted by the order filler application before scheduling the resources associated with that order.",
+      "length": "22",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Conditional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "3": {
+      "field_id": "SCH.3",
+      "name": "Occurrence Number",
+      "description": "This field is used in conjunction with SCH-1-Placer appointment ID and/or SCH-2-Filler appointment ID to uniquely identify an individual occurrence (a child) of a parent repeating schedule appointment.\n\nThis field is conditionally required. If the transaction using this segment is intended to apply only to one occurrence of a repeating appointment, and an occurrence number is required to uniquely identify the child appointment (that is, the child does not have a separate and unique SCH-1-Placer appointment ID or SCH2-Filler appointment ID), then this field is required.",
+      "length": "5",
+      "data_type": "NM - Numeric",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "SCH.4",
+      "name": "Placer Group Number",
+      "description": "This field allows a placer application to group sets of appointment requests together, and subsequently to identify the group.",
+      "length": "22",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "SCH.5",
+      "name": "Schedule ID",
+      "description": "This field contains an identifier code for the schedule in which this appointment is (or will be) booked. This field is provided for instances in which filler applications maintain multiple schedules, and when a particular resource or set of resources is controlled by more than one of those schedules.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "SCH.6",
+      "name": "Event Reason",
+      "description": "This field contains an identifier code for the reason that the notification event was triggered. This field may contain a code describing the cancel reason, the delete reason, the discontinue reason, the add reason, the block reason or any other code describing the reason that a specific event will occur.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "SCH.7",
+      "name": "Appointment Reason",
+      "description": "This field contains an identifier code for the reason that the appointment is to take place. This field may contain a Universal Service ID describing the observation/test/battery/procedure or other activity that is to take place during the requested appointment, similar to the Universal Service ID defined for the OBR segment. It may also contain a site-specific code describing a pre-defined set of reasons that an appointment may be set to occur. This code can be based on local and/or universal codes. The use of universal codes is recommended. Refer to User-Defined Table 0276 - Appointment Reason Code s for suggested codes.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "SCH.8",
+      "name": "Appointment Type",
+      "description": "This field contains the identifier code for the type of appointment. Refer to User-Defined Table 0277 - Appointment Type Codes for suggested codes.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "SCH.9",
+      "name": "Appointment Duration",
+      "description": "As of Version 2.5, this field is retained for backward compatibility only. Refer to the TQ1 segment.\n\nThis field specifies the amount of time requested and allotted for the appointment. In cases of repeating appointments, this field describes the duration of one instance of the appointment. If this field is unvalued, then the institution's standard duration for the type of appointment requested will be assumed.",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

@@ -1,0 +1,133 @@
+{
+  "segment_id": "AIG",
+  "short_description": "General Resource",
+  "description": "The AIG segment contains information about various kinds of resources (other than those with specifically defined segments in this chapter) that can be scheduled. Resources included in a transaction using this segment are assumed to be controlled by a schedule on a schedule filler application. Resources not controlled by a schedule are not identified on a schedule request using this segment. Resources described by this segment are general kinds of resources, such as equipment, that are identified with a simple identification code.",
+  "fields": {
+    "1": {
+      "field_id": "AIG.1",
+      "name": "Set ID - AIG",
+      "description": "This field contains a number that uniquely identifies the information represented by this segment in this transaction for the purposes of addition, change or deletion.",
+      "length": "4",
+      "data_type": "SI - Sequence ID",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "AIG.10",
+      "name": "Start Date/Time Offset Units",
+      "description": "This field contains a code describing the units of time used for expressing AIG-9-Start date/time offset. If this field is not valued, the ISO base unit of seconds (code \"s\") will be assumed.\n\nThis field is conditionally required. If a value for AIG-9-Start date/time offset is provided, then a value is required for this field.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "AIG.11",
+      "name": "Duration",
+      "description": "This field contains the duration for which the resource is requested/scheduled for this appointment, if it is different than the overall duration of the requested/scheduled appointment. This field indicates to the application that a resource is required for a different amount of time than the appointment's overall duration. An unvalued duration indicates that the resource is required from its start date/time offset (specified in the previous two fields) until the end of the appointment. If no start date/time offset is specified, then the resource is required for the full duration of the appointment.\n\nThis field must be a positive, non-zero number. A negative number or zero (0) is nonsensical in the context of a duration.",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "AIG.12",
+      "name": "Duration Units",
+      "description": "This field contains a code describing the units of time used for expressing the AIG-11-Duration field. If this field is not valued, the ISO base unit of seconds (code \"s\") will be assumed.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "AIG.13",
+      "name": "Allow Substitution Code",
+      "description": "This field contains a code indicating whether the identified resource can be substituted with an equivalent resource by the filler application. Refer to User-Defined Table 0279 - Allow Substitution Codes for suggested codes.\n\nThis field is conditionally required. It is required for all request messages. It is optional for all unsolicited transactions, and for all query messages.",
+      "length": "10",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "AIG.14",
+      "name": "Filler Status Code",
+      "description": "This field contains a code that describes the requested/scheduled status of scheduling resource or activity, from the point of view of the filler application. Refer to User-Defined Table 0278 - Filler Status Codes for suggested codes.\n\nThis is a conditionally required field. Because the information contained in this field is only appropriate in transactions originating from a filler application, it is required for those messages. This includes all unsolicited transactions originating from a filler application, as well as all response messages originating from a filler application. This field is optional for all transactions originating from placer, querying and auxiliary applications. It is recommended that this field be left unvalued in transactions originating from applications other than the filler application.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "AIG.2",
+      "name": "Segment Action Code",
+      "description": "This field contains the action to be taken when updating or modifying information in this segment from previously sent interface transactions. Refer to HL7 Table 0206 - Segment action code for valid values.\n\nThis field is conditionally required. It is required for all updating or modifying trigger events.",
+      "length": "3",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "AIG.3",
+      "name": "Resource ID",
+      "description": "This field contains the ID number and name of the resource being requested or scheduled for an appointment. This field is used to identify a specific resource being requested, or a specific resource that has been scheduled for an appointment. If the specific resource is not known but the type of resource is, AIG-4-resource type is used to identify the type of resource required or scheduled.\n\nAt a minimum, the ID number component should be supplied to identify either the specific resource being requested or the specific resource that has been scheduled. For inter-enterprise communications, for which a shared ID number may not be available, the minimum components required to uniquely identify a resource may be defined by site-specific negotiations.\n\nThis field is conditionally required for this segment. In new schedule request messages, it is required if the request asks that a specific resource be scheduled. For all other request messages, the specific resource",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "AIG.4",
+      "name": "Resource Type",
+      "description": "This field identifies the role of the resource requested/scheduled for this appointment. For requests, if a specific resource is not identified in AIG-3-Resource ID, then this field identifies the type of resource that should be scheduled by the filler application. At a minimum, the type of the identifier component should be valued.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "AIG.5",
+      "name": "Resource Group",
+      "description": "This field identifies the requested resource as a member of the indicated group. If, in a Schedule Request Message (SRM), no specific resource is requested, but a resource type is requested, this field can be used to further qualify the type of resource being requested.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "6": {
+      "field_id": "AIG.6",
+      "name": "Resource Quantity",
+      "description": "This field contains the quantity of the specified resource or resource type identified in either or both of the preceding two fields. If it is not valued, this field defaults to a value of one (1).",
+      "length": "5",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "AIG.7",
+      "name": "Resource Quantity Units",
+      "description": "This field contains the units of the resource requested, whose quantity is given in the preceding field. If this field is not valued, the unit of each (code \"ea\") will be assumed.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "AIG.8",
+      "name": "Start Date/Time",
+      "description": "This field contains the date and time this service needs for the appointment. This field allows the application to identify that the service is required for the appointment at a different time than the appointment's start date/time\n\nThis field is conditionally required. If a value for AIG-9-Start date/time offset is not provided, then a value is required for this field. To specify that there is no difference between the appointment's start date/time and the resource's start date/time either replicate the appointment's start date/time into this field, or specify an offset of zero (0) in AIG-9-Start date/time offset and any valid time unit code in AIG-10-Start date/time offset units.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "AIG.9",
+      "name": "Start Date/Time Offset",
+      "description": "This field contains the offset that this resource needs for the appointment, expressed in units of time relative to the scheduled start date/time. This field indicates to the application that the resource is required for the appointment at a different time than the appointment's start date/time. The first component indicates the offset amount. An offset of zero (0), or an unvalued field, indicates that the resource is required at the start date/time of the appointment.\n\nA positive offset (an unsigned or positive number) indicates that the resource is required after the appointment's start date/time. Specifying a negative offset indicates that the resource is required prior to the specified start date/time of the appointment. Negative offsets are allowed, and sites should clearly define the effect of a negative offset on the appointment's start date/time.\n\nThis field is conditionally required. If a value for AIG-8-Start date/time is not provided, then a value is required for this field. To specify that there is no difference between the appointment's start date/time and the resource's start date/time either replicate the appointment's start date/time into this field, or specify an offset of zero (0) in AIG-9-Start date/time offset and any valid time unit code in AIG10-Start date/time offset units.",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

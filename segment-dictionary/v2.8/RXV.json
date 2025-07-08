@@ -1,0 +1,205 @@
+{
+  "segment_id": "RXV",
+  "short_description": "Pharmacy/Treatment Infusion",
+  "description": "The RXV segment details the pharmacy or treatment application\u2019s encoding of specific infusion order parameters",
+  "fields": {
+    "1": {
+      "field_id": "RXV.1",
+      "name": "Set ID - RXV",
+      "description": "For the first timing specification transmitted, the sequence number shall be 1; for the second timing specification, it shall be 2; and so on",
+      "length": "0",
+      "data_type": "SI - Sequence Id",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "RXV.10",
+      "name": "PCA Dose Amount Volume",
+      "description": "This field defines the volume measurement for the ordered PCA amount volume. For example, if the ordered bolus is 5 ml, this field contains the value of 5",
+      "length": "0",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "RXV.11",
+      "name": "PCA Dose Amount Volume Units",
+      "description": "This field indicates the amount units associated with the PCA dose volume. The preferred coding system is MDC; UCUM are also acceptable.\nExamples:\n263890^MDC_DIM_MILLI_G^MDC\nmg^milligram^UCUM",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "RXV.12",
+      "name": "Max Dose Amount",
+      "description": "This field contains the order\u2019s maximum dose amount. For example, if the ordered bolus is 50 mg, this field contains the value of 50.",
+      "length": "0",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "RXV.13",
+      "name": "Max Dose Amount Units",
+      "description": "This field indicates the amount units associated with the maximum dose volume. The preferred coding system is MDC; UCUM are also acceptable.\nExamples:\n263890^MDC_DIM_MILLI_G^MDC\nmg^milligram^UCUM",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "RXV.14",
+      "name": "Max Dose Amount Volume",
+      "description": "This field defines the volume measurement for the ordered max dose amount. For example, if the ordered bolus is 5 ml, this field contains the value of 5.",
+      "length": "0",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "15": {
+      "field_id": "RXV.15",
+      "name": "Max Dose Amount Volume Units",
+      "description": "This field indicates the amount units associated with the maximum dose volume. The preferred coding system is MDC; UCUM are also acceptable.\nExamples:\n263890^MDC_DIM_MILLI_G^MDC\nmg^milligram^UCUM",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "16": {
+      "field_id": "RXV.16",
+      "name": "Max Dose per Time",
+      "description": "This field contains the time unit expression of the lock out parameter. For example, if the ordered max dose per time is 4 hours, this field format is \"4^h&hours&UCUM\".",
+      "length": "0",
+      "data_type": "CQ - Composite Quantity With Units",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "17": {
+      "field_id": "RXV.17",
+      "name": "Lockout Interval",
+      "description": "This field contains the length of time that must expire between deliveries of PCA doses. For example, if the ordered max dose per time is 10 minutes, this field format is \"10^min&minute&UCUM\".",
+      "length": "0",
+      "data_type": "CQ - Composite Quantity With Units",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "18": {
+      "field_id": "RXV.18",
+      "name": "Syringe Manufacturer",
+      "description": "This field contains the manufacturer of the syringe containing the ordered medication",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "19": {
+      "field_id": "RXV.19",
+      "name": "Syringe Model Number",
+      "description": "This field contains the model number of the syringe containing the ordered medication",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "RXV.2",
+      "name": "Bolus Type",
+      "description": "This field identifies the type of bolus being ordered. See HL7 Defined Table 0917 \u2013 Bolus Type in Chapter 2C, Code Tables, for example values",
+      "length": "1",
+      "data_type": "ID - Coded Value For Hl7 Defined Tables",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "20": {
+      "field_id": "RXV.20",
+      "name": "Syringe Size",
+      "description": "This field contains the syringe\u2019s numeric total volume size.",
+      "length": "0",
+      "data_type": "NM - Numeric",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "21": {
+      "field_id": "RXV.21",
+      "name": "Syringe Size Units",
+      "description": "This field indicates the amount units associated with the syringe size. The preferred coding system is MDC; UCUM are also acceptable",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "22": {
+      "field_id": "RXV.22",
+      "name": "Action Code",
+      "description": "The intended handling by the receiver of the infusion order is represented by this segment. Refer to HL7 Table 0206 \u2013 Segment Action Code in Chapter 2C, Code Tables, for valid values.",
+      "length": "0",
+      "data_type": "ID - Coded Value For Hl7 Defined Tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "RXV.3",
+      "name": "Bolus Dose Amount",
+      "description": "This field contains the ordered bolus amount. For example, if the ordered bolus is 50 mg, this field contains the value of 50",
+      "length": "0",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "RXV.4",
+      "name": "Bolus Dose Amount Units",
+      "description": "This field indicates the amount units associated with the bolus dose amount. The preferred coding system is MDC; UCUM are also acceptable.\nExamples:\n263890^MDC_DIM_MILLI_G^MDC\nmg^milligram^UCUM",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "RXV.5",
+      "name": "Bolus Dose Volume",
+      "description": "This field defines the volume measurement for the ordered bolus amount. For example, if the ordered bolus is 5 ml, this field contains the value of 5.",
+      "length": "0",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "RXV.6",
+      "name": "Bolus Dose Volume Units",
+      "description": "This field indicates the amount units associated with the bolus dose volume. The preferred coding system is MDC; UCUM are also acceptable.\nExamples:\n263890^MDC_DIM_MILLI_G^MDC\nmg^milligram^UCUM",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "RXV.7",
+      "name": "PCA Type",
+      "description": "This field identifies the type of bolus being ordered. See HL7 Defined Table 0918 \u2013 PCA Type in Chapter 2C, Code Tables, for example values",
+      "length": "0",
+      "data_type": "ID - Coded Value For Hl7 Defined Tables",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "RXV.8",
+      "name": "PCA Dose Amount",
+      "description": "This field contains the order\u2019s PCA dose amount. Example: if the ordered bolus is 3 mg, this field contains the value of 3",
+      "length": "0",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "RXV.9",
+      "name": "PCA Dose Amount Units",
+      "description": "This field indicates the amount units associated with the PCA dose amount. The preferred coding system is MDC; UCUM are also acceptable.\nExamples:\n263890^MDC_DIM_MILLI_G^MDC\nmg^milligram^UCUM",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

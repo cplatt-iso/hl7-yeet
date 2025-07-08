@@ -1,0 +1,124 @@
+{
+  "segment_id": "CDM",
+  "short_description": "Charge Description Master",
+  "description": "The CDM segment contains the fields for identifying anything which is charged to patient accounts, including procedures, services, supplies. It is intended to be used to maintain a list of valid chargeable utilization items. Its purpose is to keep billing codes synchronized between HIS, Patient Accounting, and other departmental systems. It is not intended to completely support materials management, inventory, or complex pricing structures for which additional complex fields would be required. Given an identifying charge code, the associated fields in the charge description master file will provide basic pricing and billing data. All the additional information necessary for patient accounting systems to do billing and claims is not intended to be included in this segment; those should be part of insurance or billing profile tables.\n\nThe CDM segment contains the fields which, for one chargeable item, remain the same across facilities, departments, and patient types. The following PRC segment contains the fields which, for the same chargeable item, vary depending upon facility or department or patient type.",
+  "fields": {
+    "1": {
+      "field_id": "CDM.1",
+      "name": "Primary Key Value - Cdm",
+      "description": "The key field of the entry. Must match MFE-4 - Primary Key Value - MFE. This field contains the code assigned by the institution for the purpose of uniquely identifying the thing that can be charged. For example, this field would be used to uniquely identify a procedure, item, or test for charging purposes. Probably the same set of values as used in FT1-7- Transaction Code in financial messages (refer to User-defined Table 0132 - Transaction Code in Chapter 2C, Code Tables, for suggested values). See Chapter 7 for discussion of the universal service ID.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "CDM.10",
+      "name": "Resource Load",
+      "description": "This field contains the Relative Value Unit (RVU) minutes and ATS, a factor related to CPT4 coding and to pricing structure for physical billing.",
+      "length": "0",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "CDM.11",
+      "name": "Contract Number",
+      "description": "This field contains any contract number pertaining to this chargeable item; for example, supplier contract or service contract.",
+      "length": "0",
+      "data_type": "CX - Extended Composite Id With Check Digit",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "12": {
+      "field_id": "CDM.12",
+      "name": "Contract Organization",
+      "description": "This field contains the organization with which there is a contractual arrangement for providing the service or material used for this chargeable item.",
+      "length": "0",
+      "data_type": "XON - Extended Composite Name And Identification Number For Organizations",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "13": {
+      "field_id": "CDM.13",
+      "name": "Room Fee Indicator",
+      "description": "This field contains a room fee indicator. Refer to HL7 Table 0136 - Yes/no Indicator in Chapter 2C, Code Tables, for valid values.\nY - this is a component of the room fees\nN - this is any other chargeable item other than room fees",
+      "length": "1",
+      "data_type": "ID - Coded Value For Hl7 Defined Tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "CDM.2",
+      "name": "Charge Code Alias",
+      "description": "This field contains an alternative charge code. For example, points to another charge description master entry in cases where one code supersedes or overrides another code. Repeating field allows for different codes used by different systems which should be handled as if they were the same; for example, the general ledger code may differ from the billing code. Or, in a multi-facility environment which does facility-specific pricing, there may be more than one of these master file entries for one charge description, each with a different facility. Refer to User-defined Table 0132 - Transaction Code in Chapter 2C, Code Tables, for suggested values.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "3": {
+      "field_id": "CDM.3",
+      "name": "Charge Description Short",
+      "description": "This field contains the text abbreviations or code that is associated with this CDM entry.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "CDM.4",
+      "name": "Charge Description Long",
+      "description": "This field contains the full text description of this CDM entry.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "CDM.5",
+      "name": "Description Override Indicator",
+      "description": "This field indicates whether this CDM entry's description can be overridden. Refer to User-defined Table 0268 - Override in Chapter 2C, Code Tables, for suggested values.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "CDM.6",
+      "name": "Exploding Charges",
+      "description": "This field contains the repeating occurrences for a list of other CDM entry charge codes identifying the other charges which should be generated from this CDM entry. Refer to User-defined Table 0132 - Transaction Code in Chapter 2C, Code Tables, for suggested values. If non-null, posting a charge to this CDM entry should result in posting the charges identified here. These are sometimes called \"linked items.\"\n\nIn the case of \"chained\" charges where the \"lead\" charge must be included in the exploded charges, the \"lead\" charge should be included in the list of exploding charges. If the price of this parent charge is included in the message, then it overrides the sum of the exploded charges prices.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "7": {
+      "field_id": "CDM.7",
+      "name": "Procedure Code",
+      "description": "This field contains the procedure code for procedure, if any, associated with this charge description. Repeating field allows for different procedure coding systems such as CPT4, ICD9. Coded entry made up of code plus coding schema. Refer to Externally-defined Table 0088 - Procedure Code in Chapter 2C, Code Tables, for suggested values.",
+      "length": "0",
+      "data_type": "CNE - Coded With No Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "8": {
+      "field_id": "CDM.8",
+      "name": "Active/Inactive Flag",
+      "description": "This field indicates whether this is a usable CDM entry. Refer to HL7 Table 0183 - Active/Inactive in Chapter 2C, Code Tables, for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded Value For Hl7 Defined Tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "CDM.9",
+      "name": "Inventory Number",
+      "description": "This optional field contains an identifying stock number, if any, which might be used, for example, as a cross reference for materials management. Refer to User-defined Table 0463 - Inventory number in Chapter 2C, Code Tables, for suggested values.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    }
+  }
+}

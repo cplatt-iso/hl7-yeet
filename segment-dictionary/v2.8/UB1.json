@@ -1,0 +1,214 @@
+{
+  "segment_id": "UB1",
+  "short_description": "Ub82",
+  "description": "The UB1 segment contains data specific to the United States. Only billing/claims fields that do not exist in other HL7 defined segments appear in this segment. The codes listed as examples are not an exhaustive or current list.\n\nAttention: UB1-2 was deprecated as of v2.3 and the detail was withdrawn and removed from the standard as of v 2.6.",
+  "fields": {
+    "1": {
+      "field_id": "UB1.1",
+      "name": "Set Id - Ub1",
+      "description": "Attention: UB1-1 was deprecated as of v2.3 and the detail was withdrawn and removed from the standard as of v 2.6.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Withdrawn",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "UB1.10",
+      "name": "Value Amount & Code",
+      "description": "Attention: UB1-10 was deprecated as of v2.3 and the detail was withdrawn and removed from the standard as of v 2.6.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Withdrawn",
+      "repeatability": "Repeatable 8 times"
+    },
+    "11": {
+      "field_id": "UB1.11",
+      "name": "Number Of Grace Days",
+      "description": "Attention: UB1-11 was deprecated as of v2.3 and the detail was withdrawn and removed from the standard as of v 2.6.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Withdrawn",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "UB1.12",
+      "name": "Special Program Indicator",
+      "description": "Attention: UB1-12 was deprecated as of v2.3 and the detail was withdrawn and removed from the standard as of v 2.6.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Withdrawn",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "UB1.13",
+      "name": "Psro/Ur Approval Indicator",
+      "description": "Attention: UB1-13 was deprecated as of v2.3 and the detail was withdrawn and removed from the standard as of v 2.6.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Withdrawn",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "UB1.14",
+      "name": "Psro/Ur Approved Stay-fm",
+      "description": "Attention: UB1-14 was deprecated as of v2.3 and the detail was withdrawn and removed from the standard as of v 2.6.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Withdrawn",
+      "repeatability": "Not repeatable"
+    },
+    "15": {
+      "field_id": "UB1.15",
+      "name": "Psro/Ur Approved Stay-to",
+      "description": "Attention: UB1-15 was deprecated as of v2.3 and the detail was withdrawn and removed from the standard as of v 2.6.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Withdrawn",
+      "repeatability": "Not repeatable"
+    },
+    "16": {
+      "field_id": "UB1.16",
+      "name": "Occurrence",
+      "description": "Attention: UB1-16 was deprecated as of v2.3 and the detail was withdrawn and removed from the standard as of v 2.6.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Withdrawn",
+      "repeatability": "Repeatable 5 times"
+    },
+    "17": {
+      "field_id": "UB1.17",
+      "name": "Occurrence Span",
+      "description": "Attention: UB1-17 was deprecated as of v2.3 and the detail was withdrawn and removed from the standard as of v 2.6.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Withdrawn",
+      "repeatability": "Not repeatable"
+    },
+    "18": {
+      "field_id": "UB1.18",
+      "name": "Occur Span Start Date",
+      "description": "Attention: UB1-18 was deprecated as of v2.3 and the detail was withdrawn and removed from the standard as of v 2.6.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Withdrawn",
+      "repeatability": "Not repeatable"
+    },
+    "19": {
+      "field_id": "UB1.19",
+      "name": "Occur Span End Date",
+      "description": "Attention: UB1-19 was deprecated as of v2.3 and the detail was withdrawn and removed from the standard as of v 2.6.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Withdrawn",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "UB1.2",
+      "name": "Blood Deductible",
+      "description": "Attention: UB1-2 was deprecated as of v2.3 and the detail was withdrawn and removed from the standard as of v 2.6.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Withdrawn",
+      "repeatability": "Not repeatable"
+    },
+    "20": {
+      "field_id": "UB1.20",
+      "name": "Ub-82 Locator 2",
+      "description": "Attention: UB1-20 was deprecated as of v2.3 and the detail was withdrawn and removed from the standard as of v 2.6.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Withdrawn",
+      "repeatability": "Not repeatable"
+    },
+    "21": {
+      "field_id": "UB1.21",
+      "name": "Ub-82 Locator 9",
+      "description": "Attention: UB1-21 was deprecated as of v2.3 and the detail was withdrawn and removed from the standard as of v 2.6.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Withdrawn",
+      "repeatability": "Not repeatable"
+    },
+    "22": {
+      "field_id": "UB1.22",
+      "name": "Ub-82 Locator 27",
+      "description": "Attention: UB1-22 was deprecated as of v2.3 and the detail was withdrawn and removed from the standard as of v 2.6.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Withdrawn",
+      "repeatability": "Not repeatable"
+    },
+    "23": {
+      "field_id": "UB1.23",
+      "name": "Ub-82 Locator 45",
+      "description": "Attention: UB1-23 was deprecated as of v2.3 and the detail was withdrawn and removed from the standard as of v 2.6.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Withdrawn",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "UB1.3",
+      "name": "Blood Furnished-pints",
+      "description": "Attention: UB1-3 was deprecated as of v2.3 and the detail was withdrawn and removed from the standard as of v 2.6.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Withdrawn",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "UB1.4",
+      "name": "Blood Replaced-pints",
+      "description": "Attention: UB1-4 was deprecated as of v2.3 and the detail was withdrawn and removed from the standard as of v 2.6.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Withdrawn",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "UB1.5",
+      "name": "Blood Not Replaced-pints",
+      "description": "Attention: UB1-5 was deprecated as of v2.3 and the detail was withdrawn and removed from the standard as of v 2.6.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Withdrawn",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "UB1.6",
+      "name": "Co-insurance Days",
+      "description": "Attention: UB1-6 was deprecated as of v2.3 and the detail was withdrawn and removed from the standard as of v 2.6.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Withdrawn",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "UB1.7",
+      "name": "Condition Code",
+      "description": "Attention: UB1-7 was deprecated as of v2.3 and the detail was withdrawn and removed from the standard as of v 2.6.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Withdrawn",
+      "repeatability": "Repeatable 5 times"
+    },
+    "8": {
+      "field_id": "UB1.8",
+      "name": "Covered Days",
+      "description": "Attention: UB1-8 was deprecated as of v2.3 and the detail was withdrawn and removed from the standard as of v 2.6.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Withdrawn",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "UB1.9",
+      "name": "Non Covered Days",
+      "description": "Attention: UB1-9 was deprecated as of v2.3 and the detail was withdrawn and removed from the standard as of v 2.6.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Withdrawn",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

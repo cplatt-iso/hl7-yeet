@@ -1,0 +1,52 @@
+{
+  "segment_id": "VND",
+  "short_description": "Purchasing Vendor",
+  "description": "This segment contains purchasing vendors that supply the inventory supply item specified in the ITM segment.",
+  "fields": {
+    "1": {
+      "field_id": "VND.1",
+      "name": "Set Id - Vnd",
+      "description": "This field contains a sequential number that identifies this segment within a given PURCHASING_VENDOR segment group. For the first occurrence of the segment in a given group, the sequence number shall be one; for the second occurrence, the sequence number shall be two; etc.",
+      "length": "4",
+      "data_type": "SI - Sequence Id",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "VND.2",
+      "name": "Vendor Identifier",
+      "description": "This field contains the identifier of the vendor in the system.",
+      "length": "0",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "VND.3",
+      "name": "Vendor Name",
+      "description": "This field contains the name of the vendor identified in VND-2.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "VND.4",
+      "name": "Vendor Catalog Number",
+      "description": "This field contains the catalog number assigned to the item by a purchasing vendor.",
+      "length": "0",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "VND.5",
+      "name": "Primary Vendor Indicator",
+      "description": "This field contains an indicator to communicate whether this purchasing vendor is the primary vendor used to place orders for inventory supply item. Refer to HL7 Table 0532 - Expanded Yes/no Indicator in Chapter 2C, Code Tables, for valid values.",
+      "length": "0",
+      "data_type": "CNE - Coded With No Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

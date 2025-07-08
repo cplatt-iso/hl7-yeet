@@ -1,0 +1,268 @@
+{
+  "segment_id": "AUT",
+  "short_description": "Authorization Information",
+  "description": "This segment represents an authorization or a pre-authorization for a referred procedure or requested service by the payor covering the patient's health care.",
+  "fields": {
+    "1": {
+      "field_id": "AUT.1",
+      "name": "Authorizing Payor, Plan Id",
+      "description": "This field contains the ID of the coverage plan authorizing treatment. Values should be entries in a locally defined table of plan codes. User defined Table 0072- Insurance Plan ID is used as the HL7 identifier for the user-defined table of values for this field.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "AUT.10",
+      "name": "Process Date",
+      "description": "This field contains the date that the authorization originated with the authorizing party.",
+      "length": "0",
+      "data_type": "DTM - Date/time",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "AUT.11",
+      "name": "Requested Discipline(s)",
+      "description": "Discipline \u2013 The scope of medical service(s) for which reimbursement for services rendered is requested. Examples include Physiotherapy, Occupational Therapy, Speech, etc. This field contains the requested discipline(s).",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "12": {
+      "field_id": "AUT.12",
+      "name": "Authorized Discipline(s)",
+      "description": "Discipline \u2013 The scope of medical service(s) for which reimbursement for services rendered is authorized. Examples include Physiotherapy, Occupational Therapy, Speech, etc. This field contains the authorized discipline(s).",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "13": {
+      "field_id": "AUT.13",
+      "name": "Authorization Referral Type",
+      "description": "The authorization/referral type distinguishes the content of the segment as pertaining to an authorization vs a referral vs other types. HJB: I don't think we need this for HL7 as the segment is distinct from RF1.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "AUT.14",
+      "name": "Approval Status",
+      "description": "The authorization/referral approval status indicates that status of an authorization",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "15": {
+      "field_id": "AUT.15",
+      "name": "Planned Treatment Stop Date",
+      "description": "The authorization planned treatment stop date is the date that the patient's treatment from this authorization is expected to complete, based on procedural protocols. This value can be used to indicate that an extension to an authorization is necessary, if the treatment continues longer than expected.",
+      "length": "0",
+      "data_type": "DTM - Date/time",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "16": {
+      "field_id": "AUT.16",
+      "name": "Clinical Service",
+      "description": "The authorization clinical service provides a means of categorizing the authorization. This is especially valuable for differentiating authorizations that do not have specific procedure codes associated with them.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "17": {
+      "field_id": "AUT.17",
+      "name": "Reason Text",
+      "description": "The authorization reason is a free text field allowing a user to capture, in a non-coded format, the reason for the authorization. Typically this would describe the patient's condition or illness for which the authorization is recorded.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "18": {
+      "field_id": "AUT.18",
+      "name": "Number of Authorized Treatments/Units",
+      "description": "The authorized duration is the amount of time, in days or visits, that the patient has been authorized for treatment by this authorization. The duration of \"days\" is reserved for inpatient authorizations.",
+      "length": "0",
+      "data_type": "CQ - Composite Quantity With Units",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "19": {
+      "field_id": "AUT.19",
+      "name": "Number of Used Treatments/Units",
+      "description": "The used duration is the amount of time, in days or visits that the patient has used of the originally authorized duration. The duration of \"days\" is reserved for inpatient authorizations.",
+      "length": "0",
+      "data_type": "CQ - Composite Quantity With Units",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "AUT.2",
+      "name": "Authorizing Payor, Company Id",
+      "description": "This field contains the ID of the insurance company or other entity that administers the authorizing coverage plan. Values may be entries in a locally defined table of payor codes. User-defined Table 0285 - Insurance Company ID Codes is used as the HL7 identifier for the user-defined table of values for this field.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "20": {
+      "field_id": "AUT.20",
+      "name": "Number of Schedule Treatments/Units",
+      "description": "The scheduled treatments is the amount of time, in days or visits that the patient has planned treatments scheduled The duration of \"days\" is reserved for inpatient authorizations.",
+      "length": "0",
+      "data_type": "CQ - Composite Quantity With Units",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "21": {
+      "field_id": "AUT.21",
+      "name": "Encounter Type",
+      "description": "The authorization encounter type provides a means of specifying the environment for the performance of the authorized services. For example, it is common for a procedure to be authorized only for an outpatient environment. If something causes the procedure to be performed in an inpatient environment, a new authorization would be needed.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "22": {
+      "field_id": "AUT.22",
+      "name": "Remaining Benefit Amount",
+      "description": "The authorization benefit amount is the amount remaining from the insurance company related to this authorization.",
+      "length": "0",
+      "data_type": "MO - Money",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "23": {
+      "field_id": "AUT.23",
+      "name": "Authorized Provider",
+      "description": "This represents the organization to which the patient was referred, or that is authorized to perform the procedure(s). The authorized provider represents the organization recognized by the insurance carrier that is authorized to perform the services for the patient specified on the authorization.",
+      "length": "0",
+      "data_type": "XON - Extended Composite Name And Identification Number For Organizations",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "24": {
+      "field_id": "AUT.24",
+      "name": "Authorized Health Professional",
+      "description": "The authorized HP represents the specific health professional being authorized to perform the services for the patient. This is a less frequently used field, as most often the authorization is for a group/organization and not a specific HP within that group.",
+      "length": "0",
+      "data_type": "XCN - Extended Composite Id Number And Name For Persons",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "25": {
+      "field_id": "AUT.25",
+      "name": "Source Text",
+      "description": "The authorization source text allows a user to capture information (such as the name) of the person contacted regarding the specific authorization.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "26": {
+      "field_id": "AUT.26",
+      "name": "Source Date",
+      "description": "The authorization source date allows a user to capture the date the person was contacted regarding the specific authorization.",
+      "length": "0",
+      "data_type": "DTM - Date/time",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "27": {
+      "field_id": "AUT.27",
+      "name": "Source Phone",
+      "description": "The authorization source phone number allows a user to capture the phone number of the person contacted regarding the specific authorization.",
+      "length": "0",
+      "data_type": "XTN - Extended Telecommunication Number",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "28": {
+      "field_id": "AUT.28",
+      "name": "Comment",
+      "description": "The authorization notes allow for a free text capture of any notes the user wishes to capture related to the authorization. This is a single notes field that allows the user to add additional text over time, or replace the text that already exists.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "29": {
+      "field_id": "AUT.29",
+      "name": "Action Code",
+      "description": "This field defines the action to be taken for this authorization. Refer to HL7 Table 0206 - Segment Action Code in Chapter 2 for valid values. When this field is valued, the AUT segment is not in \"snapshot mode\", rather in \"action mode\".",
+      "length": "0",
+      "data_type": "ID - Coded Value For Hl7 Defined Tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "AUT.3",
+      "name": "Authorizing Payor, Company Name",
+      "description": "This field contains the name of the insurance company or other entity that administers the authorizing coverage plan.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "AUT.4",
+      "name": "Authorization Effective Date",
+      "description": "This field contains the effective date of the authorization.",
+      "length": "0",
+      "data_type": "DTM - Date/time",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "AUT.5",
+      "name": "Authorization Expiration Date",
+      "description": "This field contains the expiration date after which the authorization to treat will no longer be in effect from the perspective of the coverage plan.",
+      "length": "0",
+      "data_type": "DTM - Date/time",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "AUT.6",
+      "name": "Authorization Identifier",
+      "description": "This field contains the coverage application's permanent identifier assigned to track the authorization and all related billing documents. This field is conditionally required. It is not required when authorization information is being requested. However, it is required when this segment is contained in a message which is responding to a request and contains the authorization information. This is a composite field.\n\nThe first component of this field is a string of up to 15 characters that identifies an individual authorization. It is assigned by the coverage application, and it identifies an authorization, and the subsequent billing transactions resulting from the given authorization, uniquely among all such authorizations granted from a particular processing application.\n\nThe second component is optional because this field, itself, is already defined as an authorization identifier.\n\nThe third component is optional. If used it should contain the application identifier for the coverage application. The application identifier is a string of up to six characters that is uniquely associated with an application. A given healthcare provider facility, or group of intercommunicating healthcare provider facilities, should establish a unique list of applications that may be potential originators and recipients, and then assign unique application identifiers to each of those applications. This list of application identifiers becomes one of the healthcare provider facility's master dictionary lists. Since applications fulfilling different application roles can send and receive referral messages containing authorizations, the coverage application identifier may not identify the application sending or receiving a particular message. Data elements on the Message Header (MSH) segment are available to identify the actual sending and receiving applications.",
+      "length": "0",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "AUT.7",
+      "name": "Reimbursement Limit",
+      "description": "This field contains the dollar limit for reimbursement specified by the coverage plan for the authorized treatment.",
+      "length": "0",
+      "data_type": "CP - Composite Price",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "AUT.8",
+      "name": "Requested Number Of Treatments",
+      "description": "This field contains the requested number of times that the treatment may be administered to the patient without obtaining additional authorization.",
+      "length": "0",
+      "data_type": "CQ - Composite Quantity With Units",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "AUT.9",
+      "name": "Authorized Number Of Treatments",
+      "description": "This field contains the number of times that the authorized treatment may be administered to the patient without obtaining additional authorization.",
+      "length": "0",
+      "data_type": "CQ - Composite Quantity With Units",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

@@ -20,9 +20,15 @@ const Toggle = ({ label, enabled, onChange }) => (
     </div>
 );
 
-
-// --- THIS IS THE CORRECTED FUNCTION SIGNATURE ---
-const SettingsPanel = ({ showTooltips, setShowTooltips, selectedModel, setSelectedModel }) => {
+const SettingsPanel = ({ 
+    showTooltips, 
+    setShowTooltips, 
+    selectedModel, 
+    setSelectedModel,
+    supportedHl7Versions,
+    selectedHl7Version,
+    setSelectedHl7Version
+}) => {
 
     const availableModels = [
         'gemini-1.5-flash',
@@ -41,6 +47,31 @@ const SettingsPanel = ({ showTooltips, setShowTooltips, selectedModel, setSelect
                 onChange={setShowTooltips}
             />
 
+            {/* --- NEW: HL7 Version Selector --- */}
+            <div>
+                <label htmlFor="hl7-version-select" className="block text-sm font-medium text-gray-300 mb-1">
+                    HL7 Definition Version
+                </label>
+                <select
+                    id="hl7-version-select"
+                    value={selectedHl7Version}
+                    onChange={(e) => setSelectedHl7Version(e.target.value)}
+                    disabled={!supportedHl7Versions || supportedHl7Versions.length === 0}
+                    className="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm p-2 text-white focus:ring-indigo-500 focus:border-indigo-500 disabled:opacity-50"
+                >
+                    {supportedHl7Versions && supportedHl7Versions.length > 0 ? (
+                        supportedHl7Versions.map(version => (
+                            <option key={version} value={version}>
+                                {version}
+                            </option>
+                        ))
+                    ) : (
+                        <option>Loading...</option>
+                    )}
+                </select>
+            </div>
+
+            {/* --- Existing AI Model Selector --- */}
             <div>
                 <label htmlFor="model-select" className="block text-sm font-medium text-gray-300 mb-1">
                     AI Analysis Model

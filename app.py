@@ -1,6 +1,8 @@
+# --- STEP 1: MONKEY PATCHING MUST BE THE VERY FIRST THING ---
 import eventlet
 eventlet.monkey_patch()
 
+# --- STEP 2: NOW, IMPORT EVERYTHING ELSE ---
 import os
 import json
 import socket
@@ -18,18 +20,18 @@ from flask_socketio import SocketIO, emit
 load_dotenv()
 logging.basicConfig(level=logging.INFO)
 
-# --- APP AND SOCKETIO SETUP ---
 app = Flask(__name__)
-# Using a wildcard for CORS is fine for dev, but you might want to restrict it in prod
 CORS(app, resources={r"/*": {"origins": "*"}}) 
-# We use eventlet for production-ready async mode
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 
-# --- GLOBALS FOR THE LISTENER THREAD ---
+# --- GLOBALS ---
 listener_thread = None
 stop_listener_event = threading.Event()
+# This cache will now hold dictionaries keyed by version, e.g., {'v2.5.1': {...}, 'v2.8': {...}}
+_hl7_definitions_cache = {}
+DEFINITIONS_DIRECTORY = 'segment-dictionary'
 
-# --- EXISTING CONFIGURATION AND HELPERS (UNCHANGED) ---
+# --- EXISTING CONFIGURATION ---
 GEMINI_API_KEY = os.getenv("GOOGLE_API_KEY")
 if not GEMINI_API_KEY:
     logging.warning("CRITICAL: GOOGLE_API_KEY not found. The AI Analyzer will not work.")
@@ -42,9 +44,12 @@ ALLOWED_MODELS = {
     'gemini-2.5-flash',
     'gemini-2.5-pro'
 }
-
 DATABASE_FILE = 'yeeter_usage.db'
+VT = b'\x0b'
+FS = b'\x1c'
+CR = b'\x0d'
 
+# --- DATABASE INITIALIZATION (UNCHANGED) ---
 def init_db():
     try:
         logging.info("Initializing database...")
@@ -66,22 +71,38 @@ def init_db():
     except Exception as e:
         logging.error(f"FATAL: Could not initialize database: {e}")
 
-VT = b'\x0b'
-FS = b'\x1c'
-CR = b'\x0d'
-_hl7_definitions_cache = None
-
-def load_hl7_definitions_from_json():
+# --- NEW DICTIONARY LOADING LOGIC ---
+def load_hl7_definitions_for_version(version):
+    """
+    Loads all segment definitions for a specific HL7 version from the directory structure.
+    Caches the result to avoid repeated file I/O.
+    """
     global _hl7_definitions_cache
-    if _hl7_definitions_cache is not None:
-        return _hl7_definitions_cache
-    try:
-        with open('hl7_field_defs.json', 'r') as f:
-            _hl7_definitions_cache = json.load(f)
-    except Exception:
-        _hl7_definitions_cache = {}
-    return _hl7_definitions_cache
+    if version in _hl7_definitions_cache:
+        return _hl7_definitions_cache[version]
 
+    version_path = os.path.join(DEFINITIONS_DIRECTORY, version)
+    if not os.path.isdir(version_path):
+        logging.error(f"Definitions directory not found for version: {version}")
+        return {}
+
+    version_definitions = {}
+    try:
+        for filename in os.listdir(version_path):
+            if filename.endswith('.json'):
+                segment_id = filename.split('.')[0].upper()
+                filepath = os.path.join(version_path, filename)
+                with open(filepath, 'r') as f:
+                    version_definitions[segment_id] = json.load(f)
+        
+        _hl7_definitions_cache[version] = version_definitions
+        logging.info(f"Successfully loaded and cached {len(version_definitions)} segment definitions for HL7 version {version}.")
+        return version_definitions
+    except Exception as e:
+        logging.error(f"Error loading definitions for version {version}: {e}")
+        return {}
+
+# --- PARSER HELPER (UPDATED FOR NEW DICTIONARY STRUCTURE) ---
 def _parse_hl7_string(hl7_message, definitions):
     comment_prefixes = ('#', '//', '---')
     valid_lines = [line.strip() for line in hl7_message.splitlines() if line.strip() and not line.strip().startswith(comment_prefixes)]
@@ -99,34 +120,41 @@ def _parse_hl7_string(hl7_message, definitions):
         if not line: continue
         parts = line.split(field_sep)
         segment_name = parts[0]
-        segment_def = definitions.get(segment_name, {})
-        segment_data = {"name": segment_name, "fields": []}
+        
+        segment_def_obj = definitions.get(segment_name, {})
+        segment_desc = segment_def_obj.get('description', f'{segment_name} - No description provided.')
+        segment_fields_def = segment_def_obj.get('fields', {})
+
+        segment_data = {"name": segment_name, "description": segment_desc, "fields": []}
+
         if segment_name == 'MSH':
-            msh1_def = segment_def.get("1", {})
-            segment_data["fields"].append({ "index": 1, "value": field_sep, "name": msh1_def.get("name", "Field Separator"), "description": msh1_def.get("description", "The separator character to be used for the rest of the message."), "field_id": "MSH.1", "length": msh1_def.get("length", "1"), "data_type": msh1_def.get("data_type", "ST") })
+            msh1_def = segment_fields_def.get("1", {})
+            segment_data["fields"].append({ "index": 1, "value": field_sep, "name": msh1_def.get("name", "Field Separator"), "description": msh1_def.get("description", "The separator character."), "field_id": "MSH.1", "length": msh1_def.get("length", "N/A"), "data_type": msh1_def.get("data_type", "Unknown") })
             msh_field_values = parts[1:]
             for i, field_value in enumerate(msh_field_values, start=2):
                 field_index_str = str(i)
-                field_def = segment_def.get(field_index_str, {})
+                field_def = segment_fields_def.get(field_index_str, {})
                 segment_data["fields"].append({ "index": i, "value": field_value, "name": field_def.get("name", "Unknown Field"), "description": field_def.get("description", "No description available."), "field_id": f"{segment_name}.{i}", "length": field_def.get("length", "N/A"), "data_type": field_def.get("data_type", "Unknown") })
         else:
             field_values = parts[1:]
             for i, field_value in enumerate(field_values, start=1):
                 field_index_str = str(i)
-                field_def = segment_def.get(field_index_str, {})
+                field_def = segment_fields_def.get(field_index_str, {})
                 segment_data["fields"].append({ "index": i, "value": field_value, "name": field_def.get("name", "Unknown Field"), "description": field_def.get("description", "No description available."), "field_id": f"{segment_name}.{i}", "length": field_def.get("length", "N/A"), "data_type": field_def.get("data_type", "Unknown") })
-        defined_indexes = {int(k) for k in segment_def.keys() if k.isdigit()}
+        
+        defined_indexes = {int(k) for k in segment_fields_def.keys() if k.isdigit()}
         parsed_indexes = {f['index'] for f in segment_data['fields']}
         missing_indexes = defined_indexes - parsed_indexes
         for missing_index in sorted(list(missing_indexes)):
-            field_def = segment_def.get(str(missing_index), {})
+            field_def = segment_fields_def.get(str(missing_index), {})
             segment_data["fields"].append({ "index": missing_index, "value": "", "name": field_def.get("name", f"Unknown Field {missing_index}"), "description": field_def.get("description", "No description available."), "field_id": f"{segment_name}.{missing_index}", "length": field_def.get("length", "N/A"), "data_type": field_def.get("data_type", "Unknown") })
+        
         segment_data["fields"].sort(key=lambda f: f["index"])
         structured_data.append(segment_data)
 
     return structured_data
 
-# --- NEW: MLLP LISTENER WORKER FUNCTION ---
+# --- MLLP LISTENER (UNCHANGED) ---
 def mllp_server_worker(port):
     server_socket = None
     try:
@@ -135,11 +163,9 @@ def mllp_server_worker(port):
         server_socket.bind(('', port))
         server_socket.listen(1)
         server_socket.settimeout(1.0)
-        
         logging.info(f"MLLP Listener started on port {port}. Waiting for connections.")
         with app.app_context():
             socketio.emit('listener_status', {'status': 'listening', 'port': port})
-
         while not stop_listener_event.is_set():
             try:
                 conn, addr = server_socket.accept()
@@ -150,35 +176,25 @@ def mllp_server_worker(port):
                         data = conn.recv(1024)
                         if not data: break
                         buffer += data
-
                     start_index = buffer.find(VT)
                     end_index = buffer.find(FS + CR)
-
                     if start_index != -1 and end_index != -1:
                         hl7_message_bytes = buffer[start_index + 1:end_index]
                         hl7_message_str = hl7_message_bytes.decode('utf-8', errors='ignore')
                         logging.info(f"Received message from {addr}")
-                        
                         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                         with app.app_context():
-                            socketio.emit('incoming_message', {
-                                'message': hl7_message_str, 
-                                'timestamp': timestamp,
-                                'from': f"{addr[0]}:{addr[1]}"
-                            })
-                        
+                            socketio.emit('incoming_message', { 'message': hl7_message_str, 'timestamp': timestamp, 'from': f"{addr[0]}:{addr[1]}" })
                         msh_segments = [s for s in hl7_message_str.split('\r') if s.startswith('MSH')]
                         control_id = "UNKNOWN"
                         if msh_segments:
                             fields = msh_segments[0].split('|')
                             if len(fields) > 9:
                                 control_id = fields[9]
-
                         ack_msg = f"MSH|^~\\&|HL7_YEETER|LISTENER|REMOTE_APP|REMOTE_FACILITY|{datetime.now().strftime('%Y%m%d%H%M%S')}||ACK|{control_id}|P|2.5.1\rMSA|AA|{control_id}"
                         mllp_ack = VT + ack_msg.encode('utf-8') + FS + CR
                         conn.sendall(mllp_ack)
                         logging.info(f"Sent ACK for message {control_id}")
-
             except socket.timeout:
                 continue
             except Exception as e:
@@ -196,12 +212,24 @@ def mllp_server_worker(port):
         with app.app_context():
             socketio.emit('listener_status', {'status': 'idle'})
 
-# --- EXISTING AND NEW API ENDPOINTS ---
+# --- API ENDPOINTS ---
 @app.route('/')
 def index():
     return "Backend is running. The real party is on the React frontend."
 
-# --- NEW: LISTENER CONTROL ENDPOINTS ---
+# --- NEW ENDPOINT to discover available HL7 versions ---
+@app.route('/get_supported_versions', methods=['GET'])
+def get_supported_versions():
+    try:
+        versions = [d for d in os.listdir(DEFINITIONS_DIRECTORY) if os.path.isdir(os.path.join(DEFINITIONS_DIRECTORY, d))]
+        return jsonify(sorted(versions, reverse=True))
+    except FileNotFoundError:
+        logging.error(f"Definitions directory '{DEFINITIONS_DIRECTORY}' not found.")
+        return jsonify([])
+    except Exception as e:
+        logging.error(f"Error reading versions from definitions directory: {e}")
+        return jsonify({"error": "Could not retrieve supported versions"}), 500
+
 @app.route('/listener/start', methods=['POST'])
 def start_listener_api():
     global listener_thread
@@ -225,12 +253,16 @@ def stop_listener_api():
         return jsonify({"message": "Listener stopping."})
     return jsonify({"message": "Listener was not running."})
 
-# --- EXISTING ENDPOINTS (UNCHANGED) ---
 @app.route('/parse_hl7', methods=['POST'])
 def parse_hl7_api():
-    definitions = load_hl7_definitions_from_json()
     data = request.get_json()
     hl7_message = data.get('message', '')
+    hl7_version = data.get('version', 'v2.5.1') # Default to v2.5.1
+    
+    definitions = load_hl7_definitions_for_version(hl7_version)
+    if not definitions:
+        return jsonify({"status": "error", "message": f"Could not load definitions for HL7 version {hl7_version}. Check server logs."}), 500
+
     try:
         structured_data = _parse_hl7_string(hl7_message, definitions)
         return jsonify({"status": "success", "data": structured_data})
@@ -242,14 +274,22 @@ def parse_hl7_api():
 def analyze_hl7_api():
     if not GEMINI_API_KEY:
         return jsonify({"error": "Google AI API key is not configured on the server."}), 500
+    
     data = request.get_json()
     hl7_message = data.get('message', '')
-    if not hl7_message: return jsonify({"error": "No message provided for analysis."}), 400
+    hl7_version = data.get('version', 'v2.5.1')
     model_name = data.get('model', 'gemini-1.5-flash') 
+
+    if not hl7_message: return jsonify({"error": "No message provided for analysis."}), 400
     if model_name not in ALLOWED_MODELS:
         return jsonify({"error": f"Invalid or unsupported model specified: {model_name}"}), 400
-    logging.info(f"Analyzing message with model: {model_name}")
-    definitions = load_hl7_definitions_from_json()
+    
+    logging.info(f"Analyzing message with model: {model_name} and HL7 version: {hl7_version}")
+    
+    definitions = load_hl7_definitions_for_version(hl7_version)
+    if not definitions:
+        return jsonify({"error": f"Could not load definitions for HL7 version {hl7_version}"}), 500
+
     parsed_data = _parse_hl7_string(hl7_message, definitions)
     breakdown_lines = []
     for segment in parsed_data:
@@ -257,24 +297,26 @@ def analyze_hl7_api():
         for field in segment['fields']:
             breakdown_lines.append(f"- {field['field_id']}: {field['value'].strip()}")
     breakdown_string = "\n".join(breakdown_lines)
+
     try:
         generation_config = genai.types.GenerationConfig(response_mime_type="application/json") # type: ignore
         model = genai.GenerativeModel(model_name, generation_config=generation_config) # type: ignore
         prompt = f"""
-Analyze the following HL7 v2.5.1 message. I have provided the raw message and a pre-parsed, unambiguous breakdown of its segments and fields. 
+Analyze the following HL7 {hl7_version} message. I have provided the raw message and a pre-parsed, unambiguous breakdown of its segments and fields. 
 **You MUST use the Segment-Field Breakdown as the source of truth for field locations and values.** Do not misidentify field positions.
-For example, if the breakdown shows a value in OBR-24, your explanation must refer to OBR-24, not OBR-25.
 
 --- HL7 Message ---
 {hl7_message}
 
---- Segment-Field Breakdown ---
+--- Segment-Field Breakdown ({hl7_version}) ---
 {breakdown_string}
 ---
 
 Your response will be a JSON object with two keys: "explanation" and "fixed_message".
-- "explanation": A concise, markdown-formatted string explaining any issues found.
+- "explanation": A concise, markdown-formatted string explaining any issues found. Reference the HL7 version {hl7_version} in your analysis.
 - "fixed_message": The corrected HL7 message. If no corrections are needed, return the original message.
+
+Your response should ensure that there is a line break between each message segment, and that the message is formatted correctly for HL7 transmission.
 """
         response = model.generate_content(prompt)
         usage = response.usage_metadata
@@ -290,11 +332,7 @@ Your response will be a JSON object with two keys: "explanation" and "fixed_mess
         except Exception as db_e:
             logging.error(f"Could not write to database: {db_e}")
         analysis_result = json.loads(response.text)
-        analysis_result['usage'] = {
-            'input_tokens': usage.prompt_token_count,
-            'output_tokens': usage.candidates_token_count,
-            'total_tokens': usage.total_token_count,
-        }
+        analysis_result['usage'] = { 'input_tokens': usage.prompt_token_count, 'output_tokens': usage.candidates_token_count, 'total_tokens': usage.total_token_count }
         return jsonify(analysis_result)
     except Exception as e:
         logging.error(f"Gemini analysis with model {model_name} failed:", exc_info=True)
@@ -360,21 +398,12 @@ def send_hl7():
                     ack_message_to_send = decoded_string
                 else:
                     ack_message_to_send = "Received a non-HL7 response: " + decoded_string
-            return jsonify({
-                "status": "success",
-                "message": "Response processed by backend.",
-                "ack": ack_message_to_send
-            })
+            return jsonify({ "status": "success", "message": "Response processed by backend.", "ack": ack_message_to_send })
     except Exception as e:
         logging.error(f"An exception occurred in send_hl7: {e}", exc_info=True)
         return jsonify({"status": "error", "message": str(e)}), 500
 
-# --- CRITICAL: RUN APP WITH SOCKETIO ---
 if __name__ == '__main__':
     init_db()
-    # Use eventlet for async support, which is required for SocketIO background tasks
-    import eventlet
-    eventlet.monkey_patch()
     logging.info("Starting Flask-SocketIO server with eventlet...")
-    # Make sure to run with socketio.run, not app.run
-    socketio.run(app, host='0.0.0.0', port=5001, debug=True)
+    socketio.run(app, host='0.0.0.0', port=5001, debug=True, use_reloader=False)

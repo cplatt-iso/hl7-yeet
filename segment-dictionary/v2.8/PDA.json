@@ -1,0 +1,88 @@
+{
+  "segment_id": "PDA",
+  "short_description": "Patient Death And Autopsy",
+  "description": "This segment carries information on a patient's death and possible autopsy.",
+  "fields": {
+    "1": {
+      "field_id": "PDA.1",
+      "name": "Death Cause Code",
+      "description": "This field is valued with the reason of the death.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "2": {
+      "field_id": "PDA.2",
+      "name": "Death Location",
+      "description": "This field is valued with the place the death occurred.",
+      "length": "0",
+      "data_type": "PL - Person Location",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "PDA.3",
+      "name": "Death Certified Indicator",
+      "description": "This field indicates whether a death was officially certified or not. Refer to HL7 Table 0136 - Yes/No Indicator for valid values.\nY - death has been certified\nN - death has not been certified",
+      "length": "1",
+      "data_type": "ID - Coded Value For Hl7 Defined Tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "PDA.4",
+      "name": "Death Certificate Signed Date/Time",
+      "description": "This field is valued with the date and time the death certificate was signed.",
+      "length": "0",
+      "data_type": "DTM - Date/time",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "PDA.5",
+      "name": "Death Certified By",
+      "description": "This field is valued with the person who signed the death certificate.",
+      "length": "0",
+      "data_type": "XCN - Extended Composite Id Number And Name For Persons",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "PDA.6",
+      "name": "Autopsy Indicator",
+      "description": "This field indicates whether an autopsy was performed. Refer to HL7 Table 0136 - Yes/No Indicator for valid values.\nY - an autopsy was performed\nN - an autopsy was not performed",
+      "length": "1",
+      "data_type": "ID - Coded Value For Hl7 Defined Tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "PDA.7",
+      "name": "Autopsy Start And End Date/Time",
+      "description": "If an autopsy is performed, this field is valued with the date and time the autopsy was begun and completed",
+      "length": "0",
+      "data_type": "DR - Date/time Range",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "PDA.8",
+      "name": "Autopsy Performed By",
+      "description": "This field is valued with the authority who performed the autopsy.",
+      "length": "0",
+      "data_type": "XCN - Extended Composite Id Number And Name For Persons",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "PDA.9",
+      "name": "Coroner Indicator",
+      "description": "This flag indicates whether the case/death has been assigned to the coroner/medical examiner for investigative purposed. Refer to HL7 Table 0136 - Yes/No Indicator for valid values.\nY - Has been assigned to the coroner.\nN - Has not been assigned to the coroner.",
+      "length": "1",
+      "data_type": "ID - Coded Value For Hl7 Defined Tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

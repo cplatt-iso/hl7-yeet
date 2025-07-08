@@ -1,0 +1,115 @@
+{
+  "segment_id": "FAC",
+  "short_description": "Facility",
+  "description": "This segment is maintained for backwards compatibility only as of V2.7.",
+  "fields": {
+    "1": {
+      "field_id": "FAC.1",
+      "name": "Facility Id-fac",
+      "description": "This field contains the facility identifier.",
+      "length": "0",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "FAC.10",
+      "name": "Signature Authority Title",
+      "description": "This field contains the title of the individual with signature authority or who is responsible for this report.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "FAC.11",
+      "name": "Signature Authority Address",
+      "description": "This field contains the address of the individual with signature authority or who is responsible for this report.",
+      "length": "0",
+      "data_type": "XAD - Extended Address",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "12": {
+      "field_id": "FAC.12",
+      "name": "Signature Authority Telecommunication",
+      "description": "This field contains the telecommunication information of the individual with signature authority of who is responsible for this report.",
+      "length": "0",
+      "data_type": "XTN - Extended Telecommunication Number",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "FAC.2",
+      "name": "Facility Type",
+      "description": "This field contains the type of facility. Refer to HL7 Table 0331 - Facility Type for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded Value For Hl7 Defined Tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "FAC.3",
+      "name": "Facility Address",
+      "description": "This field contains the facility\u2019s address.",
+      "length": "0",
+      "data_type": "XAD - Extended Address",
+      "optionality": "Required",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "4": {
+      "field_id": "FAC.4",
+      "name": "Facility Telecommunication",
+      "description": "This field contains the facility\u2019s telecommunication information.",
+      "length": "0",
+      "data_type": "XTN - Extended Telecommunication Number",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "FAC.5",
+      "name": "Contact Person",
+      "description": "This field contains the primary contact person\u2019s name.",
+      "length": "0",
+      "data_type": "XCN - Extended Composite Id Number And Name For Persons",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "6": {
+      "field_id": "FAC.6",
+      "name": "Contact Title",
+      "description": "This field contains the primary contact person\u2019s title.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "7": {
+      "field_id": "FAC.7",
+      "name": "Contact Address",
+      "description": "This field contains the primary contact person\u2019s address.",
+      "length": "0",
+      "data_type": "XAD - Extended Address",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "8": {
+      "field_id": "FAC.8",
+      "name": "Contact Telecommunication",
+      "description": "This field contains the primary contact person\u2019s telecommunication information.",
+      "length": "0",
+      "data_type": "XTN - Extended Telecommunication Number",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "9": {
+      "field_id": "FAC.9",
+      "name": "Signature Authority",
+      "description": "This field contains the name of the individual with signature authority or who is responsible for the report.",
+      "length": "0",
+      "data_type": "XCN - Extended Composite Id Number And Name For Persons",
+      "optionality": "Required",
+      "repeatability": "Repeatable indefinitely"
+    }
+  }
+}

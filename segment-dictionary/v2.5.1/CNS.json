@@ -1,0 +1,61 @@
+{
+  "segment_id": "CNS",
+  "short_description": "Clear Notification",
+  "description": "The clear equipment notification segment contains the data necessary to allow the receiving equipment to clear any associated notifications.",
+  "fields": {
+    "1": {
+      "field_id": "CNS.1",
+      "name": "Starting Notification Reference Number",
+      "description": "This field contains the starting notification reference number that is to be cleared.",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "CNS.2",
+      "name": "Ending Notification Reference Number",
+      "description": "This field contains the ending notification reference number that is to be cleared. If empty, then only notification with Starting Notification Reference Number will be cleared.",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "CNS.3",
+      "name": "Starting Notification Date/Time",
+      "description": "This field is the starting date/time of the notifications to be cleared. If this field is empty but Ending Notification Date/Time is filled, then all notifications before Ending Notification Date/Time will be cleared.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "CNS.4",
+      "name": "Ending Notification Date/Time",
+      "description": "This field is the ending date/time of the notifications to be cleared. If this field is empty but Starting Notification Date/Time is filled, then all notifications after Starting Notification Date/Time will be cleared.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "CNS.5",
+      "name": "Starting Notification Code",
+      "description": "This field contains the starting notification code that is to be cleared (see 13.4.7.4 NDS-4 Notification Code(CE) 01401).",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "CNS.6",
+      "name": "Ending Notification Code",
+      "description": "This field contains the ending notification code that is to be cleared (see 13.4.7.4 NDS-4 Notification Code(CE) 01401). If empty, then only notification with Starting Notification Code will be cleared.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

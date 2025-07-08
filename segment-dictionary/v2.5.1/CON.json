@@ -1,0 +1,232 @@
+{
+  "segment_id": "CON",
+  "short_description": "Consent",
+  "description": "The consent segment provides details about a specific consent by a patient or staff member",
+  "fields": {
+    "1": {
+      "field_id": "CON.1",
+      "name": "Set ID - CON",
+      "description": "This field contains the number that identifies this segment instance within the message. For the first occurrence of the segment, the sequence number shall be one, for the second occurrence, the sequence number shall be two, etc.",
+      "length": "4",
+      "data_type": "SI - Sequence ID",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "CON.10",
+      "name": "Consent Mode",
+      "description": "The method in which a subject provides consent.",
+      "length": "2",
+      "data_type": "CNE - Coded with No Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "CON.11",
+      "name": "Consent Status",
+      "description": "Indicates whether consent has been sought and granted.",
+      "length": "2",
+      "data_type": "CNE - Coded with No Exceptions",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "CON.12",
+      "name": "Consent Discussion Date/Time",
+      "description": "Identifies the time when consent was discussed with the subject. This should only be specified if this differs from the time the consent decision is made.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "CON.13",
+      "name": "Consent Decision Date/Time",
+      "description": "Identifies the time when the decision to grant/refuse consent was made. In the case of written consent, this is the time the consent form is signed.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "CON.14",
+      "name": "Consent Effective Date/Time",
+      "description": "The time the consent becomes/became effective. This only needs to be specified if the time differs from the Consent Decision Date/Time.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "15": {
+      "field_id": "CON.15",
+      "name": "Consent End Date/Time",
+      "description": "The time the consent becomes ineffective. If not specified, the consent is assumed to be indefinite. For consents relating to information release, the end date/time is the date by which the released information must be returned/destroyed.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "16": {
+      "field_id": "CON.16",
+      "name": "Subject Competence Indicator",
+      "description": "Identifies whether the subject was deemed competent to provide consent. Refer to table HL7 table 0136 \u2013 Yes/No Indicator.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "17": {
+      "field_id": "CON.17",
+      "name": "Translator Assistance Indicator",
+      "description": "Identifies whether translation was (or will be) required to obtain informed consent from the subject. Refer to table HL7 table 0136 \u2013 Yes/No Indicator.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "18": {
+      "field_id": "CON.18",
+      "name": "Language Translated To",
+      "description": "Identifies the language the consent material must be translated to. Refer to User-Defined Table 0545 \u2013 Language Translated To for values. This table may be populated with values similar to those that may be found in ISO table 639 \u2013 Language Codes.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "19": {
+      "field_id": "CON.19",
+      "name": "Informational Material Supplied Indicator",
+      "description": "Identifies whether additional educational or reference material was provided to the subject as part of the consent process. Refer to table HL7 table 0136 \u2013 Yes/No Indicator.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "CON.2",
+      "name": "Consent Type",
+      "description": "This field describes what the subject is consenting to, i.e. what type of service, surgical procedure, information access/release or other event. For values see User-Defined Table 0496 \u2013 Consent Type.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "20": {
+      "field_id": "CON.20",
+      "name": "Consent Bypass Reason",
+      "description": "Identifies why the subject\u2019s consent was not sought. This field must be populated when CON.11 (Consent Status) is B \u2013 Bypassed.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "21": {
+      "field_id": "CON.21",
+      "name": "Consent Disclosure Level",
+      "description": "Identifies how much information was disclosed to the subject as part of the informed consent process.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "22": {
+      "field_id": "CON.22",
+      "name": "Consent Non-disclosure Reason",
+      "description": "Identifies why the subject did not receive full disclosure.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "23": {
+      "field_id": "CON.23",
+      "name": "Non-subject Consenter Reason",
+      "description": "Identifies why consent was granted by a person other than the subject of the consent.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "24": {
+      "field_id": "CON.24",
+      "name": "Consenter ID",
+      "description": "Identification of the individual(s) who are consenting.",
+      "length": "250",
+      "data_type": "XPN - Extended Person Name",
+      "optionality": "Required",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "25": {
+      "field_id": "CON.25",
+      "name": "Relationship to Subject Table",
+      "description": "Identification of the relationship of the consenter to the subject.",
+      "length": "100",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Required",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "3": {
+      "field_id": "CON.3",
+      "name": "Consent Form ID",
+      "description": "Identifies a specific version of a consent form used to record the consent. A given version of a consent form implies a particular set of wording that appears on the form.",
+      "length": "40",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "CON.4",
+      "name": "Consent Form Number",
+      "description": "Uniquely identifies a specific recorded consent. This may be the number assigned to an electronic consent, or may be the number on a printed consent form.",
+      "length": "180",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "CON.5",
+      "name": "Consent Text",
+      "description": "Describes the specific procedures/information releases/events the subject is consenting to.",
+      "length": "65536",
+      "data_type": "FT - Formatted Text Data",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "6": {
+      "field_id": "CON.6",
+      "name": "Subject-specific Consent Text",
+      "description": "Describes any additions or variations to the standard procedures/information releases/events from a standard consent that are applicable to the subject whose consent is sought.",
+      "length": "65536",
+      "data_type": "FT - Formatted Text Data",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "7": {
+      "field_id": "CON.7",
+      "name": "Consent Background",
+      "description": "Describes any additional information relating to the procedure/information release/event that needs to be understood by the subject for informed consent. May include the reason for the service, the expected benefit, risks, etc.",
+      "length": "65536",
+      "data_type": "FT - Formatted Text Data",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "8": {
+      "field_id": "CON.8",
+      "name": "Subject-specific Consent Background",
+      "description": "Describes any additions or variations to the standard additional information that needs to be understood by the patient for informed consent. May include a description of benefits and risks that are specific to the subject from whom consent is sought. May also include an indication that there are no subject-specific risks/benefits.",
+      "length": "65536",
+      "data_type": "FT - Formatted Text Data",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "9": {
+      "field_id": "CON.9",
+      "name": "Consenter-imposed limitations",
+      "description": "Describes any restrictions or limitations placed on their consent by the subject.",
+      "length": "65536",
+      "data_type": "FT - Formatted Text Data",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    }
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "segment_id": "MSA",
+  "short_description": "Message Acknowledgment",
+  "description": "The MSA segment contains information sent while acknowledging another message.",
+  "fields": {
+    "1": {
+      "field_id": "MSA.1",
+      "name": "Acknowledgment Code",
+      "description": "This field contains an acknowledgment code, see message processing rules. Refer to HL7 Table 0008 - Acknowledgment code for valid values.",
+      "length": "2",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "MSA.2",
+      "name": "Message Control ID",
+      "description": "This field contains the message control ID of the message sent by the sending system. It allows the sending system to associate this response with the message for which it is intended.",
+      "length": "20",
+      "data_type": "ST - String Data",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "MSA.3",
+      "name": "Text Message",
+      "description": "This optional field further describes an error condition. This text may be printed in error logs or presented to an end user.",
+      "length": "80",
+      "data_type": "ST - String Data",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "MSA.4",
+      "name": "Expected Sequence Number",
+      "description": "This optional numeric field is used in the sequence number protocol.",
+      "length": "15",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "MSA.5",
+      "name": "Delayed Acknowledgment Type",
+      "description": "The MSA-5 was deprecated as of v2.2 and the detail was withdrawn and removed from the standard as of v 2.5.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Withdrawn",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "MSA.6",
+      "name": "Error Condition",
+      "description": "This field allows the acknowledging system to use a user-defined error code to further specify AR or AE type acknowledgments.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

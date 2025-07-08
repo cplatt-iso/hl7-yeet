@@ -1,0 +1,394 @@
+{
+  "segment_id": "FT1",
+  "short_description": "Financial Transaction",
+  "description": "The FT1 segment contains the detail data necessary to post charges, payments, adjustments, etc., to patient accounting records.",
+  "fields": {
+    "1": {
+      "field_id": "FT1.1",
+      "name": "Set Id - Ft1",
+      "description": "This field contains the number that identifies this transaction. For the first occurrence of the segment the sequence number shall be 1, for the second occurrence it shall be 2, etc.",
+      "length": "4",
+      "data_type": "SI - Sequence Id",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "FT1.10",
+      "name": "Transaction Quantity",
+      "description": "This field contains the quantity of items associated with this transaction.",
+      "length": "0",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "FT1.11",
+      "name": "Transaction Amount - Extended",
+      "description": "This field contains the amount of a transaction. It may be left blank if the transaction is automatically priced. Total price for multiple items.",
+      "length": "0",
+      "data_type": "CP - Composite Price",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "FT1.12",
+      "name": "Transaction Amount - Unit",
+      "description": "This field contains the unit price of a transaction. Price of a single item.",
+      "length": "0",
+      "data_type": "CP - Composite Price",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "FT1.13",
+      "name": "Department Code",
+      "description": "This field contains the department code that controls the transaction code described above. Refer to User-defined Table 0049 - Department Code for suggested values.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "FT1.14",
+      "name": "Health Plan Id",
+      "description": "This field contains the identifier of the primary insurance plan with which this transaction should be associated. Refer to User-defined Table 0072 - Insurance Plan ID for suggested values.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "15": {
+      "field_id": "FT1.15",
+      "name": "Insurance Amount",
+      "description": "This field contains the amount to be posted to the insurance plan referenced above.",
+      "length": "0",
+      "data_type": "CP - Composite Price",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "16": {
+      "field_id": "FT1.16",
+      "name": "Assigned Patient Location",
+      "description": "This field contains the current patient location. This can be the location of the patient when the charge item was ordered or when the charged service was rendered. For the current assigned patient location, use PV1-3 - Assigned Patient Location.",
+      "length": "0",
+      "data_type": "PL - Person Location",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "17": {
+      "field_id": "FT1.17",
+      "name": "Fee Schedule",
+      "description": "This field contains the code used to select the appropriate fee schedule to be used for this transaction posting. Refer to User-defined Table 0024 - Fee Schedule for suggested values.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "18": {
+      "field_id": "FT1.18",
+      "name": "Patient Type",
+      "description": "This field contains the type code assigned to the patient for this episode of care (visit or stay). Refer to User-defined Table 0018 - Patient Type in Chapter 3, \"Patient Administration\", for suggested values. This is for use when the patient type for billing purposes is different than the visit patient type in PV1-18 - Patient Type.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "19": {
+      "field_id": "FT1.19",
+      "name": "Diagnosis Code - Ft1",
+      "description": "This field contains the primary diagnosis code for billing purposes. ICD9-CM is assumed for all diagnosis codes. This is the most current diagnosis code that has been assigned to the patient. ICD10 can also be used. The name of coding system (third component) indicates which coding system is used. Refer to User-defined Table 0051 - Diagnosis Code for suggested values.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "2": {
+      "field_id": "FT1.2",
+      "name": "Transaction Id",
+      "description": "This field contains a number assigned by the sending system for control purposes. The number can be returned by the receiving system to identify errors.",
+      "length": "12",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "20": {
+      "field_id": "FT1.20",
+      "name": "Performed By Code",
+      "description": "This field contains the composite number/name of the person/group that performed the test/procedure/transaction, etc. This is the service provider. Refer to User-defined Table 0084 - Performed by for suggested values. As of v2.7, if XCN.1 - ID Number is populated, then the XCN.13 - Identifier Type Code and the XCN.9 - Assigning Authority or XCN.22 - Assigning Jurisdiction or XCN.23 - Assigning Agency or Department are required. If XCN.2 - Family Name is populated, then the XCN.10 - Name Type Code is required. No assumptions can be safely made based on position or sequence. Specification of meaning based on sequence is deprecated.",
+      "length": "0",
+      "data_type": "XCN - Extended Composite Id Number And Name For Persons",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "21": {
+      "field_id": "FT1.21",
+      "name": "Ordered By Code",
+      "description": "This field contains the composite number/name of the person/group that ordered the test/ procedure/transaction, etc. As of v2.7, if XCN.1 - ID Number is populated, then the XCN.13 - Identifier Type Code and the XCN.9 - Assigning Authority or XCN.22 - Assigning Jurisdiction or XCN.23 - Assigning Agency or Department are required. If XCN.2 - Family Name is populated, then the XCN.10 - Name Type Code is required. No assumptions can be safely made based on position or sequence. Specification of meaning based on sequence is deprecated.",
+      "length": "0",
+      "data_type": "XCN - Extended Composite Id Number And Name For Persons",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "22": {
+      "field_id": "FT1.22",
+      "name": "Unit Cost",
+      "description": "This field contains the unit cost of transaction. The cost of a single item.",
+      "length": "0",
+      "data_type": "CP - Composite Price",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "23": {
+      "field_id": "FT1.23",
+      "name": "Filler Order Number",
+      "description": "This field is used when the billing system is requesting observational reporting justification for a charge. This is the number used by a filler to uniquely identify a result. See Chapter 4 for a complete description.",
+      "length": "0",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "24": {
+      "field_id": "FT1.24",
+      "name": "Entered By Code",
+      "description": "This field identifies the composite number/name of the person who entered the insurance information.",
+      "length": "0",
+      "data_type": "XCN - Extended Composite Id Number And Name For Persons",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "25": {
+      "field_id": "FT1.25",
+      "name": "Procedure Code",
+      "description": "This field contains a unique identifier assigned to the procedure, if any, associated with the charge. Refer to Externally-defined Table 0088 - Procedure Code for suggested values. This field is a coded data type for compatibility with clinical and ancillary systems.",
+      "length": "0",
+      "data_type": "CNE - Coded With No Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "26": {
+      "field_id": "FT1.26",
+      "name": "Procedure Code Modifier",
+      "description": "This field contains the procedure code modifier to the procedure code reported in FT1-25 - Procedure Code, when applicable. Procedure code modifiers are defined by regulatory agencies such as CMS and the AMA. Multiple modifiers may be reported. The modifiers are sequenced in priority according to user entry. This is a requirement of the UB and the 1500 claim forms. Multiple modifiers are allowed and the order placed on the form affects reimbursement. Refer to Externally-defined Table 0340 - Procedure Code Modifier for suggested values.\n\nUsage Rule: This field can only be used if FT1-25 - Procedure Code contains certain procedure codes that require a modifier in order to be billed or performed. For example, HCPCS codes that require a modifier to be precise.",
+      "length": "0",
+      "data_type": "CNE - Coded With No Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "27": {
+      "field_id": "FT1.27",
+      "name": "Advanced Beneficiary Notice Code",
+      "description": "This field indicates the status of the patient\u2019s or the patient\u2019s representative\u2019s consent for responsibility to pay for potentially uninsured services. This element is introduced to satisfy CMS Medical Necessity requirements for outpatient services. This element indicates (a) whether the associated diagnosis codes for the service are subject to medical necessity procedures, (b) whether, for this type of service, the patient has been informed that they may be responsible for payment for the service, and (c) whether the patient agrees to be billed for this service. Refer to User-defined Table 0339 - Advanced Beneficiary Notice Code in Chapter 4, \"Orders\", for suggested values.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "28": {
+      "field_id": "FT1.28",
+      "name": "Medically Necessary Duplicate Procedure Reason",
+      "description": "This field is used to document why the procedure found in FT1-25 - Procedure Code is a duplicate of one ordered/charged previously for the same patient within the same date of service and has been determined to be medically necessary. The reason may be coded or it may be a free text entry. This field is intended to provide financial systems information on who to bill for duplicate procedures. Refer to User-Defined Table 0476 \u2013 Medically Necessary Duplicate Procedure Reason in Chapter 4, \"Orders\", for suggested values.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "29": {
+      "field_id": "FT1.29",
+      "name": "Ndc Code",
+      "description": "This field has been defined for NDC codes that are required by HIPAA for electronic claims for Pharmacy charges. Refer to Externally-defined Table 0549- NDC Codes for suggested values.\n\nIf a system supports multiple NDC codes for a charge, this information will be sent in OBX segments. FT1-29 and FT1-43 can be used for single NDC codes and quantities instead of using OBX.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "FT1.3",
+      "name": "Transaction Batch Id",
+      "description": "This field uniquely identifies the batch in which this transaction belongs.",
+      "length": "10",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "30": {
+      "field_id": "FT1.30",
+      "name": "Payment Reference Id",
+      "description": "The payment reference number of the payment medium reported in FT1-7 - Transaction Code.",
+      "length": "0",
+      "data_type": "CX - Extended Composite Id With Check Digit",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "31": {
+      "field_id": "FT1.31",
+      "name": "Transaction Reference Key",
+      "description": "The reference key linking the payment to the corresponding charge in an e-claim. This field should contain the FT1-1 - Set ID FT1 that identifies the charge corresponding to the payment. This field is repeating to allow a payment to be posted against multiple charges.",
+      "length": "4",
+      "data_type": "SI - Sequence Id",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "32": {
+      "field_id": "FT1.32",
+      "name": "Performing Facility",
+      "description": "This field contains the name of the Facility where the service is performed by the Provider Person/Group identified in FT1-20 \u2013 Performed By Code.",
+      "length": "0",
+      "data_type": "XON - Extended Composite Name And Identification Number For Organizations",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "33": {
+      "field_id": "FT1.33",
+      "name": "Ordering Facility",
+      "description": "This field contains the name of the Facility where the service is ordered by the Ordering Provider/Group identified in FT1-21 \u2013 Ordered By Code.",
+      "length": "0",
+      "data_type": "XON - Extended Composite Name And Identification Number For Organizations",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "34": {
+      "field_id": "FT1.34",
+      "name": "Item Number",
+      "description": "This field contains the Item Number for a product. If valued, this field will override the value in the Service Catalog. Item Number (along with Model Number) can be seen as a supplemental number for specific equipment or inventory-related charges.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "35": {
+      "field_id": "FT1.35",
+      "name": "Model Number",
+      "description": "This field contains the Model Number for a product. If valued, this field will override the value in the Service Catalog. Model Number (along with Item Number) can be seen as a supplemental number for specific equipment or inventory-related charges.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "36": {
+      "field_id": "FT1.36",
+      "name": "Special Processing Code",
+      "description": "This field contains a Special Processing Code that is available in reimbursement expressions. If valued, this field will override the value in the Service Catalog.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "37": {
+      "field_id": "FT1.37",
+      "name": "Clinic Code",
+      "description": "This field contains the state specific or payer specific type of service or place of service.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "38": {
+      "field_id": "FT1.38",
+      "name": "Referral Number",
+      "description": "This field contains the Referral Number associated with the charge.",
+      "length": "0",
+      "data_type": "CX - Extended Composite Id With Check Digit",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "39": {
+      "field_id": "FT1.39",
+      "name": "Authorization Number",
+      "description": "This field contains an authorization number assigned to the referral charge.",
+      "length": "0",
+      "data_type": "CX - Extended Composite Id With Check Digit",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "FT1.4",
+      "name": "Transaction Date",
+      "description": "This field contains the date/time or date/time range of the transaction. For example, this field would be used to identify the date a procedure, item, or test was conducted or used. It may be defaulted to today\u2019s date. To specify a single point in time, only the first component is valued. When the second component is valued, the field specifies a time interval during which the transaction took place.",
+      "length": "0",
+      "data_type": "DR - Date/time Range",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "40": {
+      "field_id": "FT1.40",
+      "name": "Service Provider Taxonomy Code",
+      "description": "This field contains the Taxonomy code for the Service Provider. It allows the provider to identify their specialty category for the particular service.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "41": {
+      "field_id": "FT1.41",
+      "name": "Revenue Code",
+      "description": "This field contains the Revenue Code for the charge. If valued, this field will override the value in the Service Catalog. Refer to User-defined Table 0456 \u2013 Revenue Code for suggested values.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "42": {
+      "field_id": "FT1.42",
+      "name": "Prescription Number",
+      "description": "This field contains the prescription number as assigned by the pharmacy or treatment application. Equivalent in uniqueness to the pharmacy/treatment filler order number. At some sites, this may be the pharmacy or treatment system (internal) sequential form. At other sites, this may be an external form.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "43": {
+      "field_id": "FT1.43",
+      "name": "Ndc Qty And Uom",
+      "description": "This field contains the Drug Code Quantity and the Units of Measurement for the corresponding NDC-Code in FT1-29 \u2013 NDC Code.",
+      "length": "0",
+      "data_type": "CQ - Composite Quantity With Units",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "FT1.5",
+      "name": "Transaction Posting Date",
+      "description": "This field contains the date of the transaction that was sent to the financial system for posting.",
+      "length": "0",
+      "data_type": "DTM - Date/time",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "FT1.6",
+      "name": "Transaction Type",
+      "description": "This field contains the code that identifies the type of transaction. Refer to User-defined Table 0017 - Transaction Type for suggested values.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "FT1.7",
+      "name": "Transaction Code",
+      "description": "This field contains the code assigned by the institution for the purpose of uniquely identifying the transaction based on the Transaction Type (FT1-6). For example, this field would be used to uniquely identify a procedure, supply item, or test for charges, or to identify the payment medium for payments. Refer to User-defined Table 0132 - Transaction Code for suggested values. See Chapter 7 for a discussion of the universal service ID for charges.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "FT1.8",
+      "name": "Transaction Description",
+      "description": "Attention: FT1-8 was deprecated as of v2.3 and the detail was withdrawn and removed from the standard as of v 2.6.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Withdrawn",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "FT1.9",
+      "name": "Transaction Description - Alt",
+      "description": "Attention: FT1-9 was deprecated as of v2.3 and the detail was withdrawn and removed from the standard as of v 2.6.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Withdrawn",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

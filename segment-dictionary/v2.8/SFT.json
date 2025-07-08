@@ -1,0 +1,61 @@
+{
+  "segment_id": "SFT",
+  "short_description": "Software Segment",
+  "description": "This segment provides additional information about the software product(s) used as a Sending Application. The primary purpose of this segment is for diagnostic use. There may be additional uses per site-specific agreements.\n\nImplementers are encouraged to use message profile identifiers (as found in 2.14.9.21, \"MSH-21 Message Profile Identifier (EI) 01598\") to control the behavior of the receiving application rather than relying on application or version information in the SFT segment.\n\nFor example, if software product A has versions 9 and 10 deployed in different Enterprise locations, the fact that they use different message types, segments, or fields should be reflected via their message profiles (see section 2B, \"Conformance Using Message Profiles\"). If there is an upgrade from version 10 to 10.1, this would be reflected in the SFT segment, but changes to the message contents should be reflected via a new/different conformance profile.\n\nUse Case: An external application has been customized to communicate with a centralized patient drug history system. However, due to certain, known characteristics of the external software package, the centralized system must modify its behavior in order to process transactions correctly. In one example, the external application may have multiple versions in production. As such, the centralized application will need to know the name of the Software Vendor Organization, the Software Release Number, the Software Product Name, and the Software Binary ID so that it can correctly identify the software submitting the transaction and modify its behavior appropriately.\n\nWhile preparing a transaction for submission to a centralized system the sending application specifies its Software Install Date and its configuration settings (Software Product Information).\nWhile processing the transaction, the centralized system encounters an error. Upon examination of the error, install date and configuration of the software that sent the message, helpdesk staff are able to determine the sending application has not been updated to reflect recent application changes.\n\nUse Case: In circumstances where a message is manipulated or modified by multiple systems, a repetition of this segment may be appended by each system.",
+  "fields": {
+    "1": {
+      "field_id": "SFT.1",
+      "name": "Software Vendor Organization",
+      "description": "Organization identification information for the software vendor that created this transaction. The purpose of this field, along with the remaining fields in this segment, is to provide a more complete picture of applications that are sending HL7 messages. The Software Vendor Organization field would allow the identification of the vendor who is responsible for maintaining the application.",
+      "length": "0",
+      "data_type": "XON - Extended Composite Name And Identification Number For Organizations",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "SFT.2",
+      "name": "Software Certified Version Or Release Number",
+      "description": "Latest software version number of the sending system that has been compliance tested and accepted. Software Certified Version or Release Number helps to provide a complete picture of the application that is sending/receiving HL7 messages. Versions are important in identifying a specific 'release' of an application. In some situations, the receiving application validates the Software Certified Version or Release Number against a list of \"certified\" versions/releases of the particular software to determine if the sending application adheres to specific business rules required by the receiving application.\n\nAlternatively, the software may perform different processing depending on the version of the sending software",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "SFT.3",
+      "name": "Software Product Name",
+      "description": "The name of the software product that submitted the transaction. A key component in the identification of an application is its Software Product Name. This is a key piece of information in identifying an application.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "SFT.4",
+      "name": "Software Binary Id",
+      "description": "Issued by a vendor for each unique software version instance to distinguish between like versions of the same software e.g., a checksum.\n\nSoftware Binary Ids are issued for each unique software version instance. As such, this information helps to differentiate between differing versions of the same software. Identical Primary IDs indicate that the software is identical at the binary level (configuration settings may differ).",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "SFT.5",
+      "name": "Software Product Information",
+      "description": "Software identification information that can be supplied by a software vendor with their transaction. Might include configuration settings, etc.\n\nThis field would contain any additional information an application provides with the transaction it has submitted. This information could be used for diagnostic purposes and provides greater flexibility in identifying a piece of software. Possibilities include setup or configuration parameter information.\n\nThis field should not be sent unless performing diagnostics.",
+      "length": "0",
+      "data_type": "TX - Text Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "SFT.6",
+      "name": "Software Install Date",
+      "description": "Date the submitting software was installed at the sending site.\n\nA Software Install Date on its own can often provide key information about the behavior of the application, and is necessary to provide a complete picture of the sending application.",
+      "length": "0",
+      "data_type": "DTM - Date/time",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

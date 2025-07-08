@@ -1,0 +1,34 @@
+{
+  "segment_id": "QPD",
+  "short_description": "Query Parameter Definition",
+  "description": "The QPD segment defines the parameters of the query",
+  "fields": {
+    "1": {
+      "field_id": "QPD.1",
+      "name": "Message Query Name",
+      "description": "This field contains the name of the query. These names are assigned by the function-specific chapters of this specification. It is one to one with the Query Profile for this query name, and it is in fact an identifier for that Query Profile. Site-specific query names begin with the letter \"Z.\" Refer to User defined table 0471 - Query name in Chapter 2C, Code Tables, for suggested values.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "QPD.2",
+      "name": "Query Tag",
+      "description": "This field may be valued by the initiating system to identify the query, and may be used to match response messages to the originating query. If this field is valued, the responding system is required to echo it back as the first field in the query acknowledgement segment (QAK).\n\nThis field differs from MSA-2-Message control ID in that its value remains constant for each message (i.e., all continuation messages) associated with the query, whereas MSA-2-Message control ID may vary with each continuation message, since it is associated with each individual message, not the query as a whole.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "QPD.3",
+      "name": "User Parameters (in Successive Fields)",
+      "description": "These successive parameter fields hold the values that the Client passes to the Server.\n\nThe client data is presented as a sequence of HL7 fields. Beginning at QPD-3-User parameters, the remaining fields of the QPD segment carry user parameter data. Each QPD user parameter field corresponds to one parameter defined in the Query Profile, where each name, type, optionality, and repetition of each parameter has been specified. While these parameters are understood to be usually \"anded\" together, the user SHALL inspect the required Query Profile to properly understand each. Except in the QSC variant, the parameter names do not need to be stated in the query; they are understood to be positional based on the Query Profile.\n\nEach parameter field may be specified in the Query Profile to be of any single data type, including the complex QIP and QSC types. Parameter fields may also contain the sort control (SRT) field or the segment group (ID) field defined in Sections 5.5.6.6, \"RCP-6 Sort-by Field (SRT) 01624,\" and 5.5.6.7, \"RCP-7 Segment Group Inclusion (ID) 01594,\"\n\nParameter fields in the QPD segment appear in the same order as in the Query Profile",
+      "length": "0",
+      "data_type": "varies - Varies",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

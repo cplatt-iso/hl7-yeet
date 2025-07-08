@@ -1,0 +1,142 @@
+{
+  "segment_id": "PRT",
+  "short_description": "Participation Information",
+  "description": "The Participation Information segment contains the data necessary to add, update, correct, and delete from the record persons, organizations, or locations (participants) participating in the activity being transmitted.\n\nIn general, the PRT segment is used to describe a participant playing a particular role within the context of the message. In OO, for example, in the results messages the PRT segment may be used to provide the performing provider, whether a person or organization. In a specimen shipment message it may be the waypoint location relevant for the shipment.\n\nThe positional location of the PRT segment indicates the relationship. When the segment is used following the OBX segment, then the participations relate to the relevant participations in the result.",
+  "fields": {
+    "1": {
+      "field_id": "PRT.1",
+      "name": "Participation Instance Id",
+      "description": "This field contains a unique identifier of the specific participation record.\n\nIn the case of waypoints tracked for a shipment, it identifies the waypoint.\n\nCondition: The identifier is required when known, but there are times we may only know a name but do not have an identifier.",
+      "length": "4",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "PRT.10",
+      "name": "Participation Device",
+      "description": "Identifier for the device participating.\n\nExample: The device used to register the shipment at the waypoint.\n\nIf this attribute repeats, all instances must represent the same device.\n\nCondition: At least one of the Participation Person, Participation Organization, Participation Location, or Participation Device fields must be valued.",
+      "length": "0",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Conditional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "11": {
+      "field_id": "PRT.11",
+      "name": "Participation Begin Date/Time (arrival Time)",
+      "description": "This field contains the date/time when the participation began.\n\nIn the case of waypoints, this reflects the time a shipment arrives at the waypoint.",
+      "length": "0",
+      "data_type": "DTM - Date/time",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "PRT.12",
+      "name": "Participation End Date/Time (departure Time)",
+      "description": "This field contains the date/time when the participation ended.\n\nIn the case of waypoints, this reflects the time a shipment departs from the waypoint.",
+      "length": "0",
+      "data_type": "DTM - Date/time",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "PRT.13",
+      "name": "Participation Qualitative Duration",
+      "description": "This field contains the qualitative length of time for participation (e.g., until the next assessment, four days, until discharge, etc.).",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "PRT.14",
+      "name": "Participation Address",
+      "description": "This field contains addresses associated with the participation. The address can repeat to indicate alternate addresses or an alternate expression of the same address.\n\nCondition: The address must be present if the Participation is Performing Organization Medical Director.",
+      "length": "0",
+      "data_type": "XAD - Extended Address",
+      "optionality": "Conditional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "15": {
+      "field_id": "PRT.15",
+      "name": "Participant Telecommunication Address",
+      "description": "The waypoint telecommunication address field carries telecommunications addresses for the waypoint. These telecommunications addresses are used to contact the waypoint for additional information regarding the receipt of the shipment. The address can repeat to indicate alternate addresses or an alternate expression of the same address.",
+      "length": "0",
+      "data_type": "XTN - Extended Telecommunication Number",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "2": {
+      "field_id": "PRT.2",
+      "name": "Action Code",
+      "description": "This field reveals the intent of the message. Refer to HL7 Table 0287 \u2013 Problem/goal action code for valid values.",
+      "length": "2",
+      "data_type": "ID - Coded Value For Hl7 Defined Tables",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "PRT.3",
+      "name": "Action Reason",
+      "description": "This field indicates the reason why the person, organization, location, or device is assuming (or changing) the role (e.g., shift change, new primary nurse, etc.).",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "PRT.4",
+      "name": "Participation",
+      "description": "This field indicates the functional involvement with the activity being transmitted (e.g., Case Manager, Evaluator, Transcriber, Nurse Care Practitioner, Midwife, Physician Assistant, etc.). Refer to HL7 Table 0912 \u2013 Participation for valid values.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "PRT.5",
+      "name": "Participation Person",
+      "description": "This field contains the identity of the person who is represented in the participation that is being transmitted.\n\nIf this attribute repeats, all instances must represent the same person.\n\nCondition: At least one of the Participation Person, Participation Organization, Participation Location, or Participation Device fields must be valued.",
+      "length": "0",
+      "data_type": "XCN - Extended Composite Id Number And Name For Persons",
+      "optionality": "Conditional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "6": {
+      "field_id": "PRT.6",
+      "name": "Participation Person Provider Type",
+      "description": "This field contains a code identifying the provider type for the participating person. This attribute correlates to the following master file attribute: STF-4 Staff Type. Coded values from the correlated master file table are used; the user defined master file table is used as the coding system for this attribute. For example, if you are using values from STF-2 Staff Type, the coding system would be HL70182 which is the table number for the user defined Staff Type table. This field is included in this segment to support international requirements. When ROL is used in an encounter message, it is not intended as a master file update.\n\nCondition: This field may only be valued if PRT-5 Participation Person is valued.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "PRT.7",
+      "name": "Participant Organization Unit Type",
+      "description": "This field identifies the environment in which the participant acts in the role specified in PRT-3 Action Reason. In the case of a person, the environment is not the specialty for the provider. The specialty information for the provider is defined in the PRA segment.\n\nThis attribute is included in the PRT segment to allow communication of this data when the participant information may not have been communicated previously in a master file or to provide better context. Refer to User-defined table 0406 - Organization unit type. This field is included in this segment to support international requirements, and is not intended as a master file update.\n\nCondition: This field may only be valued if PRT-5 Participation Person is valued.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "PRT.8",
+      "name": "Participation Organization",
+      "description": "The organization that is involved in the participation. If PRT-5 Participation Person is valued, it reflects the affiliation of the individual participating as identified in PRT-4 Participation. Otherwise the organization is directly participating as identified in PRT-4 Participation.\n\nIf this attribute repeats, all instances must represent the same organization.\n\nCondition: At least one of the Participation Person, Participation Organization, Participation Location, or Participation Device fields must be valued.",
+      "length": "0",
+      "data_type": "XON - Extended Composite Name And Identification Number For Organizations",
+      "optionality": "Conditional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "9": {
+      "field_id": "PRT.9",
+      "name": "Participant Location",
+      "description": "This field specifies the physical location (e.g., nurse station, ancillary service location, clinic, or floor) that is participating. If either PRT-5 Participation Person or PRT-8 Participation Organization is valued, it reflects the location of the individual or organization participating as identified in PRT-4 Participation. Otherwise the location is directly participating as identified in PRT-4 Participation.\n\nIf this attribute repeats, all instances must represent the same organization.\n\nCondition: At least one of the Participation Person, Participation Organization, Participation Location, or Participation Device fields must be valued.",
+      "length": "0",
+      "data_type": "PL - Person Location",
+      "optionality": "Conditional",
+      "repeatability": "Repeatable indefinitely"
+    }
+  }
+}

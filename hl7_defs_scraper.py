@@ -1,16 +1,11 @@
-# hl7_defs_scraper_final.py
-#
-# Pulls every HL7 v2.5.1 field definition from Caristix.
-# This version uses a robust locator to avoid strict mode violations.
-
+import time
 from playwright.sync_api import sync_playwright, Page, TimeoutError # type: ignore
 import json
 import re
+import os
 
 BASE = "https://hl7-definition.caristix.com"
-VERSION_PATH = "/v2/HL7v2.5.1"
-SEGMENTS_URL = f"{BASE}{VERSION_PATH}/Segments"
-
+OUTPUT_DIR = "segment-dictionary"
 
 # ────────────────────────────────────────────────────────────────
 
@@ -19,63 +14,112 @@ def get_attribute_by_label(page: Page, label: str) -> str:
     try:
         return page.locator(
             f"div.attribute-container:has(span.cx-caption:text-is('{label}')) span.attribute-value"
-        ).inner_text(timeout=5000).strip()
+        ).inner_text(timeout=10_000).strip()
     except Exception:
         return "N/A"
 
-def get_all_segment_names(page: Page) -> list[str]:
-    """Scrapes the main segments page to get a list of all segment names."""
-    print("Scraping segment list...")
-    page.goto(SEGMENTS_URL, timeout=90_000)
-    page.wait_for_load_state('networkidle', timeout=30_000)
-    
-    segment_links = page.locator("tbody tr td:first-child a").all()
-    segment_names = [link.inner_text().strip() for link in segment_links if link.inner_text().strip()]
-    
-    print(f"Found {len(segment_names)} segments.")
-    return segment_names
+def get_all_segment_names(page: Page, segments_page_url: str) -> list[str]:
+    """
+    Handles virtual scrolling by checking if the number of *unique items* has
+    stopped increasing, which is robust against DOM-recycling scrollers.
+    """
+    print(f"Dynamically scraping segment list from: {segments_page_url}")
+    page.goto(segments_page_url, timeout=90_000)
 
-def scrape_segment(page: Page, segment: str) -> dict:
-    """Scrapes a segment's fields by finding all field links and visiting each one."""
-    print(f"\nScraping segment: {segment}")
-    segment_url = f"{SEGMENTS_URL}/{segment}"
-    page.goto(segment_url, timeout=90_000)
-    page.wait_for_load_state('networkidle', timeout=45_000)
+    list_item_locator = "mat-nav-list a.mat-list-item"
+    try:
+        print("Waiting for initial segment list content to load...")
+        page.locator(f"{list_item_locator} h3").first.wait_for(timeout=30_000)
+        print("Initial content loaded. Beginning scroll loop...")
+    except Exception as e:
+        screenshot_path = "debug_screenshot_SCROLL_FAIL.png"
+        page.screenshot(path=screenshot_path)
+        print(f"‼️ FAILED to find initial list content. Error: {e} ‼️")
+        print(f"‼️ Screenshot saved to {screenshot_path} ‼️")
+        return []
 
-    # --- KEY FIX HERE ---
-    # Directly locate all <a> tags that link to a field detail page for the current segment.
-    # This is far more robust than iterating through table rows and avoids the strict mode violation.
-    field_link_locator = f"a[href*='{VERSION_PATH}/Fields/{segment}.']"
+    all_segment_names = set()
+    
+    while True:
+        count_before_iteration = len(all_segment_names)
+        h3_locators = page.locator(f"{list_item_locator} h3")
+        
+        for i in range(h3_locators.count()):
+            try:
+                h3_text = h3_locators.nth(i).inner_text(timeout=2000)
+                segment_id = h3_text.split('-')[0].strip()
+                if segment_id:
+                    all_segment_names.add(segment_id)
+            except Exception:
+                continue
+
+        print(f"Found {len(all_segment_names)} unique segments so far...")
+        count_after_iteration = len(all_segment_names)
+
+        if count_after_iteration == count_before_iteration:
+            print("Scroll complete. No new unique segments found.")
+            break
+
+        page.locator(list_item_locator).last.scroll_into_view_if_needed()
+        time.sleep(1)
+
+    final_list = sorted(list(all_segment_names))
+    print("\n------------------------------")
+    print("--- Final Extracted Segment List ---")
+    print(final_list)
+    print(f"--- Total Unique Segments Found: {len(final_list)} ---")
+    print("------------------------------\n")
+    
+    return final_list
+
+
+def scrape_segment(page: Page, segment: str, version: str) -> tuple[str, str, dict]:
+    """
+    Scrapes a segment's data. Uses a clean version string (e.g., "v2.5.1")
+    and constructs the correct URL path component internally.
+    """
+    print(f"-- Scraping segment: {segment} for version {version} --")
+    
+    url_version_component = f"HL7{version}"
+    version_path = f"/v2/{url_version_component}"
+    segment_url = f"{BASE}{version_path}/Segments/{segment}"
+    
+    try:
+        page.goto(segment_url, timeout=90_000)
+        page.locator("app-segment-detail").wait_for(timeout=30_000)
+
+        header_text = page.locator("h2.content-header-title-centered").inner_text(timeout=15_000)
+        short_description = header_text.split(' - ')[-1].strip()
+        long_description = page.locator("div.detail-text-container p").first.inner_text(timeout=15_000).strip()
+
+    except Exception as e:
+        screenshot_path = f"debug_screenshot_{segment}_{version}.png"
+        page.screenshot(path=screenshot_path)
+        print(f"  ‼️ CRITICAL FAILURE on segment page for {segment} ({version}). URL was {segment_url}")
+        print(f"  ‼️ Error: {e}")
+        print(f"  ‼️ A screenshot has been saved to '{screenshot_path}' for debugging.")
+        return "ERROR", "ERROR: Could not load segment page.", {}
+
+    field_link_locator = f"a[href*='{version_path}/Fields/{segment}.']"
     field_links = page.locator(field_link_locator).all()
-
-    field_urls = []
-    for link in field_links:
-        href = link.get_attribute('href')
-        if href:
-            full_url = BASE + href
-            if full_url not in field_urls:
-                field_urls.append(full_url)
+    field_urls = [BASE + href for link in field_links if (href := link.get_attribute('href')) is not None]
+    unique_field_urls = sorted(list(set(field_urls)))
     
-    print(f"  ↳ Found {len(field_urls)} fields for {segment}. Now scraping details for each...")
+    print(f"  ↳ Found {len(unique_field_urls)} fields for {segment}. Now scraping details...")
 
-    # 2. Visit each field's detail page to get the complete data
     fields_dict = {}
-    for url in field_urls:
+    for url in unique_field_urls:
         try:
             page.goto(url, timeout=90_000, wait_until="domcontentloaded")
-            # Wait for the main header of the field detail page to be visible
             page.locator("app-field-detail h2").wait_for(timeout=30_000)
             
             header_text = page.locator("app-field-detail h2").inner_text()
             match = re.search(r"-\s*([A-Z0-9\.]+\.\d+)\s*-\s*(.*)", header_text)
-            if not match:
-                print(f"    - Could not parse header on page {url}. Header was: '{header_text}'")
-                continue
+            if not match: continue
             
             field_id_full, field_name = match.groups()
             field_idx = field_id_full.split('.')[-1]
-            print(f"    - Scraping {field_id_full}...")
-
+            
             desc_element = page.locator("div.detail-text-container p").first
             description = desc_element.inner_text().strip() if desc_element.is_visible() else "No description found."
             
@@ -92,38 +136,59 @@ def scrape_segment(page: Page, segment: str) -> dict:
             print(f"    !! Failed to scrape details for {url}. Error: {e}")
             continue
 
-    return fields_dict
+    return short_description, long_description, fields_dict
 
 # ────────────────────────────────────────────────────────────────
 
 def main():
+    versions_to_scrape = ["v2.5.1", "v2.8"]
+
+    print(f"Starting HL7 Scraper for versions: {', '.join(versions_to_scrape)}")
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    
     with sync_playwright() as pw:
         browser = pw.chromium.launch(headless=True)
         page = browser.new_page()
         
-        all_results = {}
         try:
-            # For a full run, use the line below
-            # segments_to_scrape = get_all_segment_names(page)
-            
-            # For testing, we'll just run with a few segments.
-            segments_to_scrape = ["MSH", "PID", "ORC", "OBR", "OBX", "PV1", "OBX", "NTE", "DG1", "PR1", "AL1", "RXA", "RXR", "SPM", "EVN", "PD1", "PV1", "PV2", "IN1", "MRG", "AIS", "AIG", "AIL", "AIP", "NTE", "SCH"]
+            for version in versions_to_scrape:
+                print(f"\n{'='*25} PROCESSING VERSION: {version} {'='*25}")
+                
+                version_dir = os.path.join(OUTPUT_DIR, version)
+                os.makedirs(version_dir, exist_ok=True)
+                print(f"Output directory '{version_dir}' is ready.")
+                
+                url_version_component = f"HL7{version}"
+                segments_page_url = f"{BASE}/v2/{url_version_component}/Segments"
 
-            for seg in segments_to_scrape:
-                all_results[seg] = scrape_segment(page, seg)
+                segments_to_scrape = get_all_segment_names(page, segments_page_url)
+                
+                if not segments_to_scrape:
+                    print(f"No segments found for version {version}. Skipping.")
+                    continue
+
+                for i, seg in enumerate(segments_to_scrape):
+                    print(f"\nProcessing segment {i+1} of {len(segments_to_scrape)}: {seg}")
+                    short_desc, long_desc, fields_dict = scrape_segment(page, seg, version)
+                    
+                    if short_desc == "ERROR": continue
+
+                    segment_data = {
+                        "segment_id": seg,
+                        "short_description": short_desc,
+                        "description": long_desc,
+                        "fields": fields_dict
+                    }
+                    
+                    file_path = os.path.join(version_dir, f"{seg}.json")
+                    with open(file_path, "w") as f:
+                        json.dump(segment_data, f, indent=2)
+                    print(f"  ✅ Saved data for {seg} ({version}) to {file_path}")
 
         finally:
             browser.close()
 
-    if all_results:
-        with open("hl7_field_defs.json", "w") as f:
-            json.dump(all_results, f, indent=2)
-        print("\n✅  Saved all scraped data to hl7_field_defs.json")
-        
-        print("\n--- Sample output for MSH['1'] ---")
-        print(json.dumps(all_results.get("MSH", {}).get("1", {}), indent=2))
-    else:
-        print("\n❌ No data was scraped. The output file was not created.")
+    print(f"\n\n🎉 Scraping complete. All files saved in '{OUTPUT_DIR}'.")
 
 if __name__ == "__main__":
     main()

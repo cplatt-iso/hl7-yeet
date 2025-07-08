@@ -1,0 +1,52 @@
+{
+  "segment_id": "LCH",
+  "short_description": "Location Characteristic",
+  "description": "The LCH segment is used to identify location characteristics which determine which patients will be assigned to the room or bed. It contains the location characteristics of the room or bed identified in the preceding LOC segment. There should be one LCH segment for each attribute.\n\nWhen the LCH segment appears immediately following the LOC segment, it communicates characteristics which are the same across multiple departments that may use the same room. When the LCH segment appears immediately following the LDP segment, it communicates characteristics which differ for different departments that may use the same room. For example, the following characteristics are more likely to vary by which department is using the room: teaching, gender, staffed, set up, overflow, whereas the other characteristics are likely to remain the same.",
+  "fields": {
+    "1": {
+      "field_id": "LCH.1",
+      "name": "Primary Key Value - Lch",
+      "description": "This field contains the institution's identification code for the location. The identifying key value. This field has the same components as the patient location fields in the PV1 segment (except that bed status is not included here). At least the first component of this field is required. The contents of this field must exactly match the content of its preceding MFE (MFE-4 - Primary Key Value - MFE), its preceding LOC (LOC-1 - Primary Key Value - LOC), and its preceding LDP (LDP-1 - Primary Key Value - LDP).",
+      "length": "0",
+      "data_type": "PL - Person Location",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "LCH.2",
+      "name": "Segment Action Code",
+      "description": "This field indicates whether this repetition of the segment is being added, changed or deleted. The action code adds a validation check to indicate, from the point of view of the sending system, whether this repetition of a segment is being added, changed or deleted. This and the following field are used to implement the \"unique key\" mode of updating repeating segments. (See Chapter 2, section 2.23.4.2, \"Action code/unique identifier mode update definition.\") Refer to HL7 Table 0206 - Segment Action Code for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded Value For Hl7 Defined Tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "LCH.3",
+      "name": "Segment Unique Key",
+      "description": "This field contains an identifier code describing the group of resources following this RGS segment.",
+      "length": "0",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "LCH.4",
+      "name": "Location Characteristic Id",
+      "description": "This field contains an identifier code to show WHICH characteristic is being communicated with this segment. Refer to User-defined Table 0324 - Location Characteristic ID for suggested values.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "LCH.5",
+      "name": "Location Characteristic Value - Lch",
+      "description": "This field contains the value of the above field's characteristic. The expected coded values for this field will depend upon the previous field. For example, if the previous field is SMK, IMP, INF, the values would be \"Y\" or \"N\".\n\nWhen LCH-4-location characteristic ID contains \"SHA\"- Shadow, refer to HL7 Table 0136 - Yes/no Indicator in Chapter 2C, Code Tables, for valid values for LRL-5 - Organizational Location Relationship Value.\nY - not a real bed, but a temporary holding location that does not physically exist in the census\nN - this is a real bed\n\nWhen LCH-4 - Location Characteristic ID contains \"PRL\"- Privacy level (CWE), then LRL-5 - Organizational Location Relationship Value indicates how the room is set up and intended to be used, disregarding different uses under special circumstances. Refer to User-defined Table 0262 - Privacy Level in Chapter 2C, Code Tables, for suggested values.\n\nWhen LCH-4 - Location Characteristic ID contains \"LCR\"- Level of care, then LRL-5 - Organizational Location Relationship Value contains the code which indicates what severity of the patient's medical condition which this location is designed to handle. This indicates how the room is set up and intended to be used, disregarding different uses under special circumstances. Refer to User-defined Table 0263 - Level of Care in Chapter 2C, Code Tables, for suggested values.\n\nWhen LCH-4 - Location Characteristic ID contains \"IFD\"- Infectious disease, refer to HL7 Table 0136 - Yes/no Indicator in Chapter 2C, Code Tables, for valid values for LRL-5 - Organizational Location Relationship Value.\nY - patients with infectious diseases can be admitted to this location, that is, this location can be used for isolation\nN - this location cannot be used for isolation\n\nWhen LCH-4 - Location Characteristic ID contains \"SMO\"- Smoking, refer to HL7 Table 0136 - Yes/no Indicator in Chapter 2C, Code Tables, for valid values for LRL-5 - Organizational Location Relationship Value.\nY - this is a smoking location\nN - this is a non-smoking location\n\nWhen LCH-4 - Location Characteristic ID contains \"IMP\"- Implant, refer to HL7 Table 0136 - Yes/no Indicator in Chapter 2C, Code Tables, for valid values for LRL-5 - Organizational Location Relationship Value.\nY - this location can be used by radiation implant patients\nN - this location can not be used by radiation implant patients\n\nWhen LCH-4 - Location Characteristic ID contains \"LIC\"- Licensed, refer to HL7 Table 0136 - Yes/no Indicator in Chapter 2C, Code Tables, for valid values for LRL-5 - Organizational Location Relationship Value.\nY - this location is licensed\nN - this location is not licensed",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

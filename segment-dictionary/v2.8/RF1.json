@@ -1,0 +1,232 @@
+{
+  "segment_id": "RF1",
+  "short_description": "Referral Information",
+  "description": "This segment represents information that may be useful when sending referrals from the referring provider to the referred-to provider.",
+  "fields": {
+    "1": {
+      "field_id": "RF1.1",
+      "name": "Referral Status",
+      "description": "This field contains the status of the referral as defined by either the referred-to or the referred-by provider. Refer to User-defined Table 0283 - Referral Status in Chapter 2C, Code Tables, for suggested values.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "RF1.10",
+      "name": "Referral Reason",
+      "description": "This field contains the reason for which the referral will take place. Refer to User-defined Table 0336 - Referral Reason for suggested values.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "11": {
+      "field_id": "RF1.11",
+      "name": "External Referral Identifier",
+      "description": "This field contains an external application's permanent identifier for the referral. That is, this referral identifier does not belong to the application that originated the referral and assigned the originating referral identifier.\n\nThe first component is a string of up to 15 characters that identifies an individual referral. It is typically assigned by the referred-to provider application responding to a referral originating from a referring provider application, and it identifies a referral, and the subsequent referral transactions, uniquely among all such referrals for a particular referred-to provider processing application. For example, when a primary care provider (referring provider) sends a referral to a specialist (referred-to provider), the specialist's application system may accept the referral and assign it a new referral identifier which uniquely identifies that particular referral within the specialist's application system. This new referral identifier would be placed in the external referral identifier field when the specialist responds to the primary care physician.\n\nThe second component is optional because this field, itself, is already defined as a referral identifier.\n\nThe third component is optional. If used, it should contain the application identifier for the referred-to or external application (i.e., not the originating application).\nThe application identifier is a string of up to 15 characters that is uniquely associated with an application. A given healthcare provider facility, or group of intercommunicating healthcare provider facilities, should establish a unique list of applications that may be potential originators and recipients, and then assign unique application identifiers to each of those applications. This list of application identifiers becomes one of the healthcare provider facility's master dictionary lists. Since applications fulfilling different application roles can send and receive referral messages, the assigning authority application identifier may not identify the application sending or receiving a particular message. Data elements on the Message Header (MSH) segment are available to identify the actual sending and receiving applications.",
+      "length": "0",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "12": {
+      "field_id": "RF1.12",
+      "name": "Referral Documentation Completion Status",
+      "description": "This field can be used to indicate to the receiving provider that the clinical history in the message is incomplete and that more will follow. Refer to User-defined Table 0865 - Referral Documentation Completion Status for suggested values.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "RF1.13",
+      "name": "Planned Treatment Stop Date",
+      "description": "The planned treatment stop date is the date that the patient's treatment from this referral is expected to complete, based on procedural protocols. This value can be used to indicate that an extension to an authorization is necessary, if the treatment continues longer than expected.",
+      "length": "24",
+      "data_type": "DTM - Date/time",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "RF1.14",
+      "name": "Referral Reason Text",
+      "description": "The referral reason is a free text field allowing a user to capture, in a non-coded format, the reason for the referral. Typically this would describe the patient's condition or illness for which the referral is recorded.",
+      "length": "60",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "15": {
+      "field_id": "RF1.15",
+      "name": "Number of Authorized Treatments/Units",
+      "description": "The authorized duration is the amount of time, in days or visits, that the patient has been authorized for treatment for this referral. The duration of \"days\" is reserved for inpatient authorizations.",
+      "length": "721",
+      "data_type": "CQ - Composite Quantity With Units",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "16": {
+      "field_id": "RF1.16",
+      "name": "Number of Used Treatments/Units",
+      "description": "The used duration is the amount of time, in days or visits that the patient has used of the originally authorized duration. The duration of \"days\" is reserved for inpatient authorizations.",
+      "length": "721",
+      "data_type": "CQ - Composite Quantity With Units",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "17": {
+      "field_id": "RF1.17",
+      "name": "Number of Schedule Treatments/Units",
+      "description": "The scheduled treatments is the amount of time, in days or visits that the patient has planned treatments scheduled. The duration of \"days\" is reserved for inpatient authorizations.",
+      "length": "721",
+      "data_type": "CQ - Composite Quantity With Units",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "18": {
+      "field_id": "RF1.18",
+      "name": "Remaining Benefit Amount",
+      "description": "The remaining benefit amount is the amount remaining from the insurance company related to this referral.",
+      "length": "20",
+      "data_type": "MO - Money",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "19": {
+      "field_id": "RF1.19",
+      "name": "Authorized Provider",
+      "description": "This represents the organization to which the patient was referred to perform the procedure(s). The authorized provider represents the organization recognized by the insurance carrier that is authorized to perform the services for the patient specified on the referral",
+      "length": "250",
+      "data_type": "XON - Extended Composite Name And Identification Number For Organizations",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "RF1.2",
+      "name": "Referral Priority",
+      "description": "This field contains the urgency of the referral. Refer to User-defined Table 0280 - Referral Priority in Chapter 2C, Code Tables, for suggested values.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "20": {
+      "field_id": "RF1.20",
+      "name": "Authorized Health Professional",
+      "description": "The authorized HP represents the specific health professional authorized to perform the services for the patient. This is a less frequently used field, as most often the authorization is for a group/organization and not a specific HP within that group.",
+      "length": "250",
+      "data_type": "XCN - Extended Composite Id Number And Name For Persons",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "21": {
+      "field_id": "RF1.21",
+      "name": "Source Text",
+      "description": "The source text allows a user to capture information (such as the name) of the person contacted regarding the specific referral.",
+      "length": "60",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "22": {
+      "field_id": "RF1.22",
+      "name": "Source Date",
+      "description": "The source date allows a user to capture the date the person was contacted regarding the specific referral.",
+      "length": "24",
+      "data_type": "DTM - Date/time",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "23": {
+      "field_id": "RF1.23",
+      "name": "Source Phone",
+      "description": "The source phone number allows a user to capture the phone number of the person contacted regarding the specific referral.",
+      "length": "250",
+      "data_type": "XTN - Extended Telecommunication Number",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "24": {
+      "field_id": "RF1.24",
+      "name": "Comment",
+      "description": "The comment allows for a free text capture of any notes the user wishes to capture related to the referral. This is a single notes field that allows the user to add additional text over time, or replace the text that already exists.",
+      "length": "250",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "25": {
+      "field_id": "RF1.25",
+      "name": "Action Code",
+      "description": "This field defines the action to be taken for this referral. Refer to HL7 Table 0206 - Segment Action Code in Chapter 2, Code Tables, for valid values. When this field is valued, the AUT segment is not in \"snapshot mode\", rather in \"action mode\".",
+      "length": "1",
+      "data_type": "ID - Coded Value For Hl7 Defined Tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "RF1.3",
+      "name": "Referral Type",
+      "description": "This field contains the type of referral. It is loosely associated with a clinical specialty or type of resource. Refer to User-defined Table 0281 - Referral Type in Chapter 2C, Code Tables, for suggested values.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "RF1.4",
+      "name": "Referral Disposition",
+      "description": "This field contains the type of response or action that the referring provider would like from the referred-to provider. Refer to User-defined Table 0282 - Referral Disposition for suggested values.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "5": {
+      "field_id": "RF1.5",
+      "name": "Referral Category",
+      "description": "This field contains the location at which the referral will take place. Refer to User-defined Table 0284 - Referral Category for suggested values.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "RF1.6",
+      "name": "Originating Referral Identifier",
+      "description": "This field contains the originating application's permanent identifier for the referral. This is a composite field.\n\nThe first component is a string of up to 15 characters that identifies an individual referral. It is assigned by the originating application, and it identifies a referral, and the subsequent referral transactions, uniquely among all such referrals from a particular processing application.\n\nThe second component is optional because this field, itself, is already defined as a referral identifier.\n\nThe third component is optional. If used, it should contain the application identifier for the referred-to or external applications (i.e., not the originating application). The application identifier is a string of up to 15 characters that is uniquely associated with an application. A given healthcare provider facility, or group of intercommunicating healthcare provider facilities, should establish a unique list of applications that may be potential originators and recipients, and then assign unique application identifiers to each of those applications. This list of application identifiers becomes one of the healthcare provider facility's master dictionary lists. Since applications fulfilling different application roles can send and receive referral messages, the assigning authority application identifier may not identify the application sending or receiving a particular message. Data elements on the Message Header (MSH) segment are available to identify the actual sending and receiving applications.",
+      "length": "0",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "RF1.7",
+      "name": "Effective Date",
+      "description": "This field contains the date on which the referral is effective.",
+      "length": "0",
+      "data_type": "DTM - Date/time",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "RF1.8",
+      "name": "Expiration Date",
+      "description": "This field contains the date on which the referral expires.",
+      "length": "0",
+      "data_type": "DTM - Date/time",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "RF1.9",
+      "name": "Process Date",
+      "description": "This field contains the date on which the referral originated. It is used in cases of retroactive approval.",
+      "length": "0",
+      "data_type": "DTM - Date/time",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

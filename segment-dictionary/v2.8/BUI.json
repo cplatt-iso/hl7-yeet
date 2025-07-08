@@ -1,0 +1,115 @@
+{
+  "segment_id": "BUI",
+  "short_description": "Blood Unit information Segment",
+  "description": "The intent of this segment is to describe the information associated with a blood unit, one example of which is one or more blood unit(s) resulting from a donation",
+  "fields": {
+    "1": {
+      "field_id": "BUI.1",
+      "name": "Set ID \u2013 BUI",
+      "description": "No description found.",
+      "length": "4",
+      "data_type": "SI - Sequence Id",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "BUI.10",
+      "name": "Container Manufacturer",
+      "description": "No description found.",
+      "length": "0",
+      "data_type": "XON - Extended Composite Name And Identification Number For Organizations",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "BUI.11",
+      "name": "Transport Temperature",
+      "description": "No description found.",
+      "length": "0",
+      "data_type": "NR - Numeric Range",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "BUI.12",
+      "name": "Transport Temperature Units",
+      "description": "No description found.",
+      "length": "0",
+      "data_type": "CNE - Coded With No Exceptions",
+      "optionality": "Required",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "2": {
+      "field_id": "BUI.2",
+      "name": "Blood Unit Identifier",
+      "description": "No description found.",
+      "length": "0",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "BUI.3",
+      "name": "Blood Unit Type",
+      "description": "No description found.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "BUI.4",
+      "name": "Blood Unit Weight",
+      "description": "No description found.",
+      "length": "0",
+      "data_type": "NM - Numeric",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "BUI.5",
+      "name": "Weight Units",
+      "description": "No description found.",
+      "length": "0",
+      "data_type": "CNE - Coded With No Exceptions",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "BUI.6",
+      "name": "Blood Unit Volume",
+      "description": "No description found.",
+      "length": "0",
+      "data_type": "NM - Numeric",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "BUI.7",
+      "name": "Volume Units",
+      "description": "No description found.",
+      "length": "0",
+      "data_type": "CNE - Coded With No Exceptions",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "BUI.8",
+      "name": "Container Catalog Number",
+      "description": "No description found.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "BUI.9",
+      "name": "Container Lot Number",
+      "description": "No description found.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

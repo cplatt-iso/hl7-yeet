@@ -1,0 +1,268 @@
+{
+  "segment_id": "SPM",
+  "short_description": "Specimen",
+  "description": "The intent of this segment is to describe the characteristics of a specimen. It differs from the intent of the OBR in that the OBR addresses order-specific information. It differs from the SAC segment in that the SAC addresses specimen container attributes. An advantage afforded by a separate specimen segment is that it generalizes the multiple relationships among order(s), results, specimen(s) and specimen container(s).",
+  "fields": {
+    "1": {
+      "field_id": "SPM.1",
+      "name": "Set ID - SPM",
+      "description": "This field contains the sequence number. This field is used to identify SPM segment instances in message structures where the SPM segment repeats.",
+      "length": "4",
+      "data_type": "SI - Sequence ID",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "SPM.10",
+      "name": "Specimen Collection Site",
+      "description": "This field differs from SPM-8-Specimen Source Site in those cases where the source site must be approached via a particular site (e.g., anatomic location). For example, in the case where a liver biopsy is obtained via a percutaneous needle, the collection site would be the point of entry of the needle. For venous blood collected from the left radial vein, the collection site could be antecubital fossa.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "SPM.11",
+      "name": "Specimen Role",
+      "description": "This field indicates the role of the sample. Refer to User-defined Table 0369 \u2013 Specimen role for suggested values. Each of these values is normally identifiable by the systems and its components and can influence processing and data management related to the specimen.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "12": {
+      "field_id": "SPM.12",
+      "name": "Specimen Collection Amount",
+      "description": "This field specifies the volume or mass of the collected specimen. For laboratory tests, the collection volume is the volume of a specimen. Specifically, units should be expressed in the ISO Standard unit abbreviations (ISO-2955, 1977). This is a results-only field except when the placer or a party has already drawn the specimen.",
+      "length": "20",
+      "data_type": "CQ - Composite Quantity with Units",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "SPM.13",
+      "name": "Grouped Specimen Count",
+      "description": "This field refers to the number of individual specimens of a particular type represented by this instance of a specimen. The use of this field is restricted to specimens upon which all specimen related attributes are identical. This field would only be valued if the specimen role attribute has the value G.",
+      "length": "6",
+      "data_type": "NM - Numeric",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "SPM.14",
+      "name": "Specimen Description",
+      "description": "This is a text field that allows additional information specifically about the specimen to be sent in the message",
+      "length": "250",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "15": {
+      "field_id": "SPM.15",
+      "name": "Specimen Handling Code",
+      "description": "This describes how the specimen and/or container need to be handled from the time of collection through the initiation of testing. As this field is not required, no assumptions can be made as to meaning when this field is not populated.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "16": {
+      "field_id": "SPM.16",
+      "name": "Specimen Risk Code",
+      "description": "This field contains any known or suspected specimen hazards, e.g., exceptionally infectious agent or blood from a hepatitis patient. Either code and/or text may be absent. However, the code is always placed in the first component position and any free text in the second component. Thus, a component delimiter must precede free text without a code. Refer to User-defined Table 0489 - Risk Codes for suggested entries",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "17": {
+      "field_id": "SPM.17",
+      "name": "Specimen Collection Date/Time",
+      "description": "The date and time when the specimen was acquired from the source. The use of the Date Range data type allows for description of specimens collected over a period of time, for example, 24-hour urine collection. For specimens collected at a point in time, only the first component (start date/time) will be populated.",
+      "length": "26",
+      "data_type": "DR - Date/Time Range",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "18": {
+      "field_id": "SPM.18",
+      "name": "Specimen Received Date/Time",
+      "description": "The specimen received date/time is the time that the specimen is received at the diagnostic service. The actual time that is recorded is based on how specimen receipt is managed and may correspond to the time the sample is logged in. This is fundamentally different from SPM-xx Specimen Collection date/time.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "19": {
+      "field_id": "SPM.19",
+      "name": "Specimen Expiration Date/Time",
+      "description": "This field is the date and time the specimen can no longer be used for the purpose implied by the order. For example, in the Blood Banking environment the specimen can no longer be used for pre-transfusion compatibility testing. The specimen segment will include an SPM-21-Specimen Reject Reason of 'EX' indicating 'Expired' for message instances created after this date and time.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "SPM.2",
+      "name": "Specimen ID",
+      "description": "This field contains a unique identifier for the specimen as referenced by the Placer application, the Filler application, or both.",
+      "length": "80",
+      "data_type": "EIP - Entity Identifier Pair",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "20": {
+      "field_id": "SPM.20",
+      "name": "Specimen Availability",
+      "description": "This describes whether the specimen, as it exists, is currently available to use in an analysis. Refer to HL7 Table 0136 Yes/No Indicator for valid values",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "21": {
+      "field_id": "SPM.21",
+      "name": "Specimen Reject Reason",
+      "description": "This describes one or more reasons the specimen is rejected for the specified observation/result/analysis. Refer to HL7 Table 0490 - Specimen Reject Reason for valid values.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "22": {
+      "field_id": "SPM.22",
+      "name": "Specimen Quality",
+      "description": "The degree or grade of excellence of the specimen at receipt. The filler populates this attribute. Refer to User-defined Table 0491 - Specimen Quality for suggested entries.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "23": {
+      "field_id": "SPM.23",
+      "name": "Specimen Appropriateness",
+      "description": "The suitability of the specimen for the particular planned use as determined by the filler. Refer to User-defined Table 0492 - Specimen Appropriateness for suggested entries.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "24": {
+      "field_id": "SPM.24",
+      "name": "Specimen Condition",
+      "description": "A mode or state of being that describes the nature of the specimen. Refer to User-defined Table 0493 - Specimen Condition for suggested entries.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "25": {
+      "field_id": "SPM.25",
+      "name": "Specimen Current Quantity",
+      "description": "This attributes contains the amount of specimen that currently exists or is available for use in further testing.",
+      "length": "20",
+      "data_type": "CQ - Composite Quantity with Units",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "26": {
+      "field_id": "SPM.26",
+      "name": "Number of Specimen Containers",
+      "description": "This field identifies the number of containers for a given sample. For sample receipt verification purposes; may be different from the total number of samples that accompany the order.",
+      "length": "4",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "27": {
+      "field_id": "SPM.27",
+      "name": "Container Type",
+      "description": "The container in or on which a specimen is transported",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "28": {
+      "field_id": "SPM.28",
+      "name": "Container Condition",
+      "description": "In chain of custody cases where specimens are moved from lab to lab, the status of the container that the specimen is shipped in must be recorded at each receipt. If the container is compromised in any way (seal broken, container cracked or leaking, etc) then this needs to be recorded for legal reasons.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "29": {
+      "field_id": "SPM.29",
+      "name": "Specimen Child Role",
+      "description": "For child specimens, this field identifies the relationship between this specimen and the parent specimen. If this field is populated, then SPM-3-Specimen Parent ID must be populated. This field differs from SPM-15-Specimen Role in that this field refers to the role of this specimen relative to a parent role rather than the role of this specimen to the ordered service.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "SPM.3",
+      "name": "Specimen Parent IDs",
+      "description": "This field contains the identifiers for the specimen or specimens that contributed to the specimen that is described by the segment instance.",
+      "length": "80",
+      "data_type": "EIP - Entity Identifier Pair",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "4": {
+      "field_id": "SPM.4",
+      "name": "Specimen Type",
+      "description": "This field describes the precise nature of the entity that will be the source material for the observation.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "SPM.5",
+      "name": "Specimen Type Modifier",
+      "description": "This field contains modifying or qualifying description(s) about the specimen type",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "6": {
+      "field_id": "SPM.6",
+      "name": "Specimen Additives",
+      "description": "This field identifies any additives introduced to the specimen before or at the time of collection. These additives may be introduced in order to preserve, maintain or enhance the particular nature or component of the specimen. Refer to HL7 Table 0371 - Additive for valid values.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "7": {
+      "field_id": "SPM.7",
+      "name": "Specimen Collection Method",
+      "description": "Describes the procedure or process by which the specimen was collected.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "SPM.8",
+      "name": "Specimen Source Site",
+      "description": "specifies the source from which the specimen was obtained. For example, in the case where a liver biopsy is obtained via a percutaneous needle, the source would be liver.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "SPM.9",
+      "name": "Specimen Source Site Modifier",
+      "description": "This field contains modifying or qualifying description(s) about the specimen source site",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    }
+  }
+}

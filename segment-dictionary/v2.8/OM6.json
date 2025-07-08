@@ -1,0 +1,25 @@
+{
+  "segment_id": "OM6",
+  "short_description": "Observations That Are Calculated From Other Observations",
+  "description": "This segment contains the information about quantities that are derived from one or more other quantities or direct observations by mathematical or logical means.",
+  "fields": {
+    "1": {
+      "field_id": "OM6.1",
+      "name": "Sequence Number - Test/Observation Master File",
+      "description": "This field contains the same value as the sequence number of the associated OM1 segment.",
+      "length": "0",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "OM6.2",
+      "name": "Derivation Rule",
+      "description": "This field contains the observations whose categorical responses are taken from a specified table of codes (e.g., CWE data types). Record the preferred coding system for this observation (e.g., ICD9, SNOMED III). Take the codes from ASTM Table 3 or 5, or specify a local code.",
+      "length": "0",
+      "data_type": "TX - Text Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

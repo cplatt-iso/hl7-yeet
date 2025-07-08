@@ -1,0 +1,88 @@
+{
+  "segment_id": "LOC",
+  "short_description": "Location Identification",
+  "description": "The LOC segment can identify any patient location referenced by information systems. This segment gives physical set up information about the location. This is not intended to include any current occupant or current use information. There should be one LOC segment for each patient location. If desired, there can also be one LOC segment for each nursing unit and room.",
+  "fields": {
+    "1": {
+      "field_id": "LOC.1",
+      "name": "Primary Key Value - Loc",
+      "description": "This field contains the institution's identification code for the location. The identifying key value. Must match MFE-4 -Primary Key Value - MFE. This field has the same components as the patient location fields in the PV1 segment (except that bed status is not included here).\n\nAt least the first component of this field is required. The first component can be an identifying code for the nursing station for inpatient locations, or clinic, department or home for patient locations other than inpatient ones.",
+      "length": "0",
+      "data_type": "PL - Person Location",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "LOC.2",
+      "name": "Location Description",
+      "description": "This field contains the optional free text description of the location, to elaborate upon LOC primary key value.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "LOC.3",
+      "name": "Location Type - Loc",
+      "description": "This field contains the code identifying what type of location this is. Refer to User-defined Table 0260 - Patient Location Type for suggested values.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Required",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "4": {
+      "field_id": "LOC.4",
+      "name": "Organization Name - Loc",
+      "description": "This field contains the organization(s) of which this location is a part. For inpatient locations, this can be the hospital or institution name. For outpatient locations, this can be the clinic or office name.",
+      "length": "0",
+      "data_type": "XON - Extended Composite Name And Identification Number For Organizations",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "5": {
+      "field_id": "LOC.5",
+      "name": "Location Address",
+      "description": "This field contains the address of the patient location, especially for use for outpatient clinic or office locations.",
+      "length": "0",
+      "data_type": "XAD - Extended Address",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "6": {
+      "field_id": "LOC.6",
+      "name": "Location Phone",
+      "description": "This field contains the phone number within the patient location, if any. For example, the room or bed phone for use by the patient.",
+      "length": "0",
+      "data_type": "XTN - Extended Telecommunication Number",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "7": {
+      "field_id": "LOC.7",
+      "name": "License Number",
+      "description": "This field contains the multiple license numbers for the facility. Refer to User-defined Table 0461 - License Number for suggested values.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "8": {
+      "field_id": "LOC.8",
+      "name": "Location Equipment",
+      "description": "This repeating field indicates what types of equipment are built in. Applies only to room or bed locations. If LOC-3 - Location Type indicates that this is a room, this will be the equipment in the room which can be used by more than one bed. If LOC-3 - Location Type indicates this is a bed, this will be the bedside devices available to this bed. Refer to User-defined Table 0261 - Location Equipment for suggested values.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "9": {
+      "field_id": "LOC.9",
+      "name": "Location Service Code",
+      "description": "This field categorizes the types of services provided by the location. Refer to User-defined Table 0442 - Location Service Code for suggested values.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

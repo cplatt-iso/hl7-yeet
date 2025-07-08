@@ -1,0 +1,133 @@
+{
+  "segment_id": "OM4",
+  "short_description": "Observations that Require Specimens",
+  "description": "This segment applies to observations/batteries that require a specimen for their performance. When an observation or battery requires multiple specimens for their performance (e.g., creatinine clearance requires a 24-hour urine specimen and a serum specimen), multiple segments may be included, one for each specimen type.",
+  "fields": {
+    "1": {
+      "field_id": "OM4.1",
+      "name": "Sequence Number - Test/Observation Master File",
+      "description": "This field contains the same value as the sequence number of the associated OM1 segment.",
+      "length": "4",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "OM4.10",
+      "name": "Normal Collection Volume",
+      "description": "This field contains the normal specimen volume required by the lab. This is the amount used by the normal methods and provides enough specimens to repeat the procedure at least once if needed. The default unit is milliliters (ml).",
+      "length": "20",
+      "data_type": "CQ - Composite Quantity with Units",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "OM4.11",
+      "name": "Minimum Collection Volume",
+      "description": "This field contains the amount of specimen needed by the most specimen sparing method (e.g., using micro techniques). The minimum amount allows for only one determination. The default unit is milliliters (ml).",
+      "length": "20",
+      "data_type": "CQ - Composite Quantity with Units",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "OM4.12",
+      "name": "Specimen Requirements",
+      "description": "This field contains the other requirements for specimen delivery and special handling (e.g., delivery within one hour, iced).",
+      "length": "10240",
+      "data_type": "TX - Text Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "OM4.13",
+      "name": "Specimen Priorities",
+      "description": "This field contains the allowed priorities for obtaining the specimen. Note that they may be different from the processing priorities given in OM1-25 - Processing Priority . When a test is requested, the specimen priority given in TQ1-9 - Priority should be one of the priorities listed here. Multiple priorities are separated by repeat delimiters. Refer to HL7 Table 0027 - Priority for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "14": {
+      "field_id": "OM4.14",
+      "name": "Specimen Retention Time",
+      "description": "This field contains the usual time that a specimen for this observation is retained after the observation is completed, for the purpose of additional testing. The first component is the duration, and the second component is an ISO time unit.",
+      "length": "20",
+      "data_type": "CQ - Composite Quantity with Units",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "OM4.2",
+      "name": "Derived Specimen",
+      "description": "This field contains the codes that identify the parents and children for diagnostic studies -- especially in microbiology -- where the initial specimen (e.g., blood) is processed to produce results (e.g., the identity of the bacteria grown out of the culture). The process also produces new \"specimens\" (e.g., pure culture of staphylococcus, and E. coli), and these are studied by a second order process (bacterial sensitivities). The parents (e.g., blood culture) and children (e.g., penicillin MIC) are identified in such cases. Refer to HL7 Table 0170 - Derived specimen for valid values:",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "OM4.3",
+      "name": "Container Description",
+      "description": "This field contains the physical appearance, including color of tube tops, shape, and material composition (e.g., red-top glass tube). Note that the color is not necessarily a unique identifier of the additive and/or use of the tube. This is especially true for black and some blue tube tops, as can be seen above. Color is included here for user convenience.",
+      "length": "60",
+      "data_type": "TX - Text Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "OM4.4",
+      "name": "Container Volume",
+      "description": "This field indicates the capacity of the container.",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "OM4.5",
+      "name": "Container Units",
+      "description": "This field contains the units of measure of the container volume. If the units are ISO+ units, they should be recorded as single case abbreviations. If the units are ANS+ or L (local), the units and the source code table must be recorded, except that in this case, component delimiters should be replaced by subcomponent delimiters. For example, 1 indicates liters, whereas pt&&ANS+ indicates pints (ANSI units). The default unit is milliliters (ml), which should be assumed if no units are reported.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "OM4.6",
+      "name": "Specimen",
+      "description": "This field reports the specimen as one of the specimen codes described in ASTM Table 14 of 1238-91. If multiple kinds of specimen are associated with this observation (as in the case for a creatinine clearance), multiple segments may be included, one for each specimen type.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "OM4.7",
+      "name": "Additive",
+      "description": "This field contains the codes that should be those provided by NCCLS[3]. Refer to HL7 table 0371 - Additive/Preservative for valid values. The tables values are taken from NCCLS AUTO4. The value set can be extended with user specific values.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "OM4.8",
+      "name": "Preparation",
+      "description": "This field contains the special processing that should be applied to the container, e.g., add acidifying tablets before sending.",
+      "length": "10240",
+      "data_type": "TX - Text Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "OM4.9",
+      "name": "Special Handling Requirements",
+      "description": "This field contains the special handling requirements here (e.g., ice specimen, deliver within two hours of obtaining).",
+      "length": "10240",
+      "data_type": "TX - Text Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

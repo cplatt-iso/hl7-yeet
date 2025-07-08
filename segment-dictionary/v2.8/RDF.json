@@ -1,0 +1,25 @@
+{
+  "segment_id": "RDF",
+  "short_description": "Table Row Definition",
+  "description": "The RDF segment defines the content of the row data segments (RDT) in the tabular response (RTB).\n\n- As an optional segment in a query either a QBP or QBS, this segment can be used to limit the number of columns returned and to specify what column positions the fields occupy (where supported, these features can be used to override the defaults for the particular query). If omitted, all fields defined for the query are returned in their default column order.\n\n- As a required segment in a tabular response (RTB) to either a QBP or QBS, this segment defines the contents of the table row data (RDT) segments that follows. It is not necessarily an echo back of the segment as it appeared in the query.",
+  "fields": {
+    "1": {
+      "field_id": "RDF.1",
+      "name": "Number Of Columns Per Row",
+      "description": "This field specifies the number of data columns (and therefore the number of fields) contained within each row of returned data.",
+      "length": "0",
+      "data_type": "NM - Numeric",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "RDF.2",
+      "name": "Column Description",
+      "description": "Each repetition of this field consists of three components:\nThe segment field name that identifies the field occupying the column. The segment field name SHALL agree with the column name as it appears in the Query Profile. Use of the @ sign as prefix to the column name is optional.\n- The 2 or 3 character HL7 data type, as defined in Chapter 2. Refer to HL7 Table 0440 - Data types in Chapter 2C, Code Tables, for valid values.\n- The maximum width of the column, as dictated by the responding system. (This may vary from the HL7-defined maximum field length.)",
+      "length": "0",
+      "data_type": "RCD - Row Column Definition",
+      "optionality": "Required",
+      "repeatability": "Repeatable indefinitely"
+    }
+  }
+}

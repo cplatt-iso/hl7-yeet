@@ -1,0 +1,403 @@
+{
+  "segment_id": "SAC",
+  "short_description": "Specimen Container detail",
+  "description": "The container detail segment is the data necessary to maintain the containers that are being used throughout the Laboratory Automation System.",
+  "fields": {
+    "1": {
+      "field_id": "SAC.1",
+      "name": "External Accession Identifier",
+      "description": "This field identifies the laboratory accession. This identifier is assigned by the external laboratory information system.",
+      "length": "80",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "SAC.10",
+      "name": "Carrier Identifier",
+      "description": "This field identifies the carrier. It is the ID (e.g., number or bar code) of the carrier where the container (e.g., tube) is located.",
+      "length": "80",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "SAC.11",
+      "name": "Position in Carrier",
+      "description": "This field identifies the position of the container in the carrier (e.g., 13). The sub-components allow, if necessary, to transfer multiple axis information, e.g., 2-dimensional carrier (X^Y).",
+      "length": "80",
+      "data_type": "NA - Numeric Array",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "SAC.12",
+      "name": "Tray Type - SAC",
+      "description": "This field identifies the type of the tray. Refer to User-defined Table 0379 - Tray type for suggested values. Because the geometry can be different, the tray type should if possible express the number of positions in the tray.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "SAC.13",
+      "name": "Tray Identifier",
+      "description": "This field identifies the tray identifier (e.g., a number of a tray or a bar code on the tray), where the container carrier is located.",
+      "length": "80",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "SAC.14",
+      "name": "Position in Tray",
+      "description": "This field identifies the position of the carrier in the tray. The sub-components allow, if necessary, to transfer multiple axis information, e.g., 2-dimensional tray (X^Y).",
+      "length": "80",
+      "data_type": "NA - Numeric Array",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "15": {
+      "field_id": "SAC.15",
+      "name": "Location",
+      "description": "This field is the physical location that the specimen was at the time that the transaction was initiated. The location description can vary with the LAS. For example, it can be an X,Y,Z coordinate in a storage system; a refrigerator number and drawer number where the container-carrier-tray is located; or it can be the name of the institution and the laboratory which owns the container currently. The repeating of this field allows for hierarchical representation of location (lowest level first), e.g., shelf number, refrigerator storage id, lab name, institution name, etc.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "16": {
+      "field_id": "SAC.16",
+      "name": "Container Height",
+      "description": "This field identifies the height of the container in units specified below.",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "17": {
+      "field_id": "SAC.17",
+      "name": "Container Diameter",
+      "description": "This field identifies the outside diameter of the container in units specified below.",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "18": {
+      "field_id": "SAC.18",
+      "name": "Barrier Delta",
+      "description": "This field identifies the distance from the Point of Reference to the separator material (barrier) within the container in units specified below. This distance may be provided by the LAS to the instrument and/or specimen processing/handling device to facilitate the insertion of a sampling probe into the specimen without touching the separator.",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "19": {
+      "field_id": "SAC.19",
+      "name": "Bottom Delta",
+      "description": "This field identifies the distance from the Point of Reference to the outside bottom of the container in units specified below",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "SAC.2",
+      "name": "Accession Identifier",
+      "description": "This field identifies the laboratory accession. This identifier is assigned by the information system of the laboratory performing the tests.",
+      "length": "80",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "20": {
+      "field_id": "SAC.20",
+      "name": "Container Height/Diameter/Delta Units",
+      "description": "This field is the unit identifier that is being used to describe the diameter, height and deltas of the container. If the units are ISO+ units, they should be recorded as single case abbreviations. If the units are ANS+ or L (local), the units and the source code table must be recorded, except that in this case, component delimiters should be replaced by subcomponent delimiters. The default unit is millimeters (mm), which should be assumed if no units are reported.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "21": {
+      "field_id": "SAC.21",
+      "name": "Container Volume",
+      "description": "This field indicates the capacity of the container in the units specified below.",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "22": {
+      "field_id": "SAC.22",
+      "name": "Available Specimen Volume",
+      "description": "This field identifies the current specimen volume available for use in this container in the units specified below.",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "23": {
+      "field_id": "SAC.23",
+      "name": "Initial Specimen Volume",
+      "description": "This field identifies the volume of the specimen initially filled in this container in the units specified below.",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "24": {
+      "field_id": "SAC.24",
+      "name": "Volume Units",
+      "description": "This field is the unit identifier that is being used to describe the volume of the container. If the units are ISO+ units, they should be recorded as single case abbreviations. The default unit is milliliters (ml), which should be assumed if no units are reported.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "25": {
+      "field_id": "SAC.25",
+      "name": "Separator Type",
+      "description": "This field identifies the type of the separator that is being used (e.g., gel separator in the container - not to be confused with the communication separators). Refer to User-defined Table 0380 - Separator type for suggested values. It is recommended that the first table entry be \"NO\" meaning \"No Separator\".",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "26": {
+      "field_id": "SAC.26",
+      "name": "Cap Type",
+      "description": "This field indicates the type of cap that is to be used with this container for decapping, piercing or other mechanisms. Refer to User-defined Table 0381 - Cap type for suggested values.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "27": {
+      "field_id": "SAC.27",
+      "name": "Additive",
+      "description": "This field identifies any additives introduced to the specimen before or at the time of collection. These additives may be introduced in order to preserve, maintain or enhance the particular nature or component of the specimen. It is a repetitive field. Refer to HL7 Table 0371 - Additive for valid values. 'The value set can be extended with user specific values.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "28": {
+      "field_id": "SAC.28",
+      "name": "Specimen Component",
+      "description": "This field identifies the specimen component, e.g., supernatant, sediment, etc. Refer to User-defined Table 0372 - Specimen component for valid values. This table's values are taken from NCCLS AUTO4. The value set can be extended with user specific values.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "29": {
+      "field_id": "SAC.29",
+      "name": "Dilution Factor",
+      "description": "This field identifies the factor of dilution already performed on the specimen. The equipment entity that changes the dilution is responsible for sending this information to other equipment. If the endogenous content of the test (analyte) in the diluent is required for the calculation of the test (analyte) concentration, then the test (analyte) specific values should be exchanged between the systems via Master Files or other means.",
+      "length": "20",
+      "data_type": "SN - Structured Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "SAC.3",
+      "name": "Container Identifier",
+      "description": "This field identifies the container. This field is the container's unique identifier assigned by the corresponding equipment. A container may contain the primary (original) specimen or an aliquot (secondary sample) of that specimen. For primary sample this field contains Primary Container ID; for bar-coded aliquot samples this field contains Aliquot Container ID; for non-bar-coded aliquot samples (e.g., microtiter plate) this field is empty.",
+      "length": "80",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "30": {
+      "field_id": "SAC.30",
+      "name": "Treatment",
+      "description": "This field identifies the specimen treatment performed during lab processing. Refer to User-defined Table 0373 - Treatment for valid values. This table's values are taken from NCCLS AUTO4. The value set can be extended with user specific values.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "31": {
+      "field_id": "SAC.31",
+      "name": "Temperature",
+      "description": "This field identifies the specimen temperature in degrees Celsius [C] at the time of the transaction specified in the EQU segment.",
+      "length": "20",
+      "data_type": "SN - Structured Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "32": {
+      "field_id": "SAC.32",
+      "name": "Hemolysis Index",
+      "description": "This field is the index identifier that is being used to describe the Hemolysis Index of the specimen.",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "33": {
+      "field_id": "SAC.33",
+      "name": "Hemolysis Index Units",
+      "description": "This field is the unit's identifier that is being used to describe the Hemolysis Index of the specimen. It is recommended to use g/L. (The transmission of the index values is added here instead of the original use of the OBX segments, because the frequency of the transfer of the specimen details justifies use of more efficient mechanism.)",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "34": {
+      "field_id": "SAC.34",
+      "name": "Lipemia Index",
+      "description": "This field is the index identifier that is being used to describe the Lipemia Index of the specimen. It is recommended to use the optical turbidity at 600 nm (in absorbance units).",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "35": {
+      "field_id": "SAC.35",
+      "name": "Lipemia Index Units",
+      "description": "This field is the unit's identifier that is being used to describe the Lipemia Index of the specimen.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "36": {
+      "field_id": "SAC.36",
+      "name": "Icterus Index",
+      "description": "This field is the index identifier that is being used to describe the Icterus Index of the specimen.",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "37": {
+      "field_id": "SAC.37",
+      "name": "Icterus Index Units",
+      "description": "This field is the unit's identifier that is being used to describe the Icterus Index of the specimen. It is recommended to use mMol/L of bilirubin.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "38": {
+      "field_id": "SAC.38",
+      "name": "Fibrin Index",
+      "description": "This field is the index identifier that is being used to describe the Fibrin Index of the specimen. In the case of only differentiating between Absent and Present, we recommend using 0 and 1 respectively and send the field Fibrin Index Units null.",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "39": {
+      "field_id": "SAC.39",
+      "name": "Fibrin Index Units",
+      "description": "This field is the unit's identifier that is being used to describe the Fibrin Index of the specimen.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "SAC.4",
+      "name": "Primary (parent) Container Identifier",
+      "description": "If this field is filled in, it identifies the primary container from which this specimen came. For primary samples this field is empty; for aliquot samples this field should contain the identifier of primary container.",
+      "length": "80",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "40": {
+      "field_id": "SAC.40",
+      "name": "System Induced Contaminants",
+      "description": "This field describes the specimen contaminant identifier that is associated with the specimen in this container. Refer to User-defined Table 0374 - System induced contaminants for valid values. This table's values are taken from NCCLS AUTO4. The value set can be extended with user specific values.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "41": {
+      "field_id": "SAC.41",
+      "name": "Drug Interference",
+      "description": "This field describes the drug interference identifier that is associated with the specimen. Refer to User-defined Table 0382 - Drug interference for suggested values.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "42": {
+      "field_id": "SAC.42",
+      "name": "Artificial Blood",
+      "description": "This field describes the artificial blood identifier that is associated with the specimen. Refer to User-defined Table 0375 - Artificial blood for valid values. This table's values are taken from NCCLS AUTO4. The value set can be extended with user specific values.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "43": {
+      "field_id": "SAC.43",
+      "name": "Special Handling Code",
+      "description": "This field describes any special handling considerations that are associated with the specimen in the specific container (e.g. centrifugation). This describes how the specimen needs to be stored during collection, in transit, and upon receipt. Refer to User-defined Table 0376 - Special handling code for valid values. 'The value set can be extended with user specific values.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "44": {
+      "field_id": "SAC.44",
+      "name": "Other Environmental Factors",
+      "description": "This field describes other environmental factors that are associated with the specimen in a specific container, e.g., atmospheric exposure. Refer to User-defined Table 0377 - Other environmental factors for valid values. This table's values are taken from NCCLS AUTO4. The value set can be extended with user specific values.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "5": {
+      "field_id": "SAC.5",
+      "name": "Equipment Container Identifier",
+      "description": "This field identifies the container in a particular device (e.g., one container in a carousel or rack of containers within an analyzer, analyzer specific bar code mapping, etc.).",
+      "length": "80",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "SAC.6",
+      "name": "Specimen Source",
+      "description": "This field is the site where the specimen should be obtained or where the service should be performed.\n\nThis field is deprecated and retained for backward compatibility. This field is conditional, meaning that, in case where the SPM segment is used in a message together with the SAC, this field should be ignored. The reader is referred to the SPM Specimen segment in chapter 7.",
+      "length": "300",
+      "data_type": "SPS - Specimen Source",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "SAC.7",
+      "name": "Registration Date/Time",
+      "description": "This field is the date/time that the container was last registered with the \"automated system.\", e.g., reading of a container bar code by a device.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "SAC.8",
+      "name": "Container Status",
+      "description": "This field identifies the status of the unique container in which the specimen resides at the time that the transaction was initiated. Refer to HL7 Table 0370 - Container status for valid values. The equipment specific container status should be sent as <alternate identifier> as needed.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "SAC.9",
+      "name": "Carrier Type",
+      "description": "This field identifies the type of the carrier. Refer to User-defined Table 0378 - Carrier type for suggested values. Because the geometry can be different, the carrier type should, if possible, express the number of positions in the carrier.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

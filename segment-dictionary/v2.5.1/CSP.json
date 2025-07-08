@@ -1,0 +1,43 @@
+{
+  "segment_id": "CSP",
+  "short_description": "Clinical Study Phase",
+  "description": "The CSP segment contains information on a patients status for a particular phase of the study. This segment is optional and is useful when a study has different evaluation intervals within it. (See Section 0, HL7 Attribute Table - CSR - Clinical Study RegistrationPhase of a Clinical Trial. The CSP segment is implemented on a study-specific basis for messaging purposes. The fact that the patient has entered a phase of the study that represents a certain treatment approach may need to be messaged to other systems, like pharmacy, nursing, or order entry. It is also important to sponsors and data management centers for tracking patient progress through the study and monitoring the data schedule defined for each phase. It may subsume OBR and OBX segments that follow it to indicate that these data describe the phase.",
+  "fields": {
+    "1": {
+      "field_id": "CSP.1",
+      "name": "Study Phase Identifier",
+      "description": "This field identifies the phase of the study that a patient has entered. The set of codes will generally be developed for each clinical trial, although there are patterns that trials in particular disease or prevention categories may follow. The phase structure will be based on data collation and reporting needs for the study. It is an operational structure and need not be discussed in the clinical trial protocol documentation or even made known to patient care or data collection personnel. The coding system will usually be developed by the sponsor for multicentered clinical trials to standardize the receipt of automated data. Local codes could be added if an additional local message is desired. Otherwise, local coding conventions will be used. Example: 2^Init Rx, Crs 1^NCI T93-0807 Phases",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "CSP.2",
+      "name": "Date/time Study Phase Began",
+      "description": "This field contains the date the patient began this phase interval. The time is optional.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "CSP.3",
+      "name": "Date/time Study Phase Ended",
+      "description": "This field contains the date the patient ended this phase interval.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "CSP.4",
+      "name": "Study Phase Evaluability",
+      "description": "This field contains the disposition of the patients data for this phase interval for quality control and data analysis purposes. The set of codes will vary across clinical trials. An example answer set: Complete, Adverse Events Only, Outcome Only, None, Unknown.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

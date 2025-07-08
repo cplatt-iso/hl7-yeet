@@ -1,0 +1,169 @@
+{
+  "segment_id": "OM4",
+  "short_description": "Observations That Require Specimens",
+  "description": "This segment applies to observations/batteries that require a specimen for their performance. When an observation or battery requires multiple specimens for their performance (e.g., creatinine clearance requires a 24-hour urine specimen and a serum specimen), multiple segments may be included, one for each specimen type.\n\nOM4 is a repeating segment. It allows multiple specimens per Order Code and accommodates for multiple alternate specimen for each preferred specimen. In some cases an Order Code can require multiple specimens. In many cases there are preferred specimens and for each preferred it is possible to have one or more alternative specimens. The alternative specimen will carry in OM4-17 the Sequence Number \u2013 Test/Observation Master File (OM4-1) of the preferred specimen.",
+  "fields": {
+    "1": {
+      "field_id": "OM4.1",
+      "name": "Sequence Number - Test/Observation Master File",
+      "description": "This field contains the same value as the sequence number of the associated OM1 segment",
+      "length": "0",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "OM4.10",
+      "name": "Normal Collection Volume",
+      "description": "This field contains the normal specimen volume required by the lab. This is the amount used by the normal methods and provides enough specimens to repeat the procedure at least once if needed. The default unit is milliliters (ml).",
+      "length": "0",
+      "data_type": "CQ - Composite Quantity With Units",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "OM4.11",
+      "name": "Minimum Collection Volume",
+      "description": "This field contains the amount of specimen needed by the most specimen sparing method (e.g., using micro techniques). The minimum amount allows for only one determination. The default unit is milliliters (ml).",
+      "length": "0",
+      "data_type": "CQ - Composite Quantity With Units",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "OM4.12",
+      "name": "Specimen Requirements",
+      "description": "This field contains the other requirements for specimen delivery and special handling (e.g., delivery within one hour, iced).",
+      "length": "0",
+      "data_type": "TX - Text Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "OM4.13",
+      "name": "Specimen Priorities",
+      "description": "This field contains the allowed priorities for obtaining the specimen. Note that they may be different from the processing priorities given in OM1-25 - Processing Priority. When a test is requested, the specimen priority given in TQ1-9 - Priority should be one of the priorities listed here. Multiple priorities are separated by repeat delimiters. Refer to HL7 Table 0027 - Priority for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded Value For Hl7 Defined Tables",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "14": {
+      "field_id": "OM4.14",
+      "name": "Specimen Retention Time",
+      "description": "This field contains the usual time that a specimen for this observation is retained after the observation is completed, for the purpose of additional testing. The first component is the duration, and the second component is an ISO time unit.",
+      "length": "0",
+      "data_type": "CQ - Composite Quantity With Units",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "15": {
+      "field_id": "OM4.15",
+      "name": "Specimen Handling Code",
+      "description": "This describes how the specimen and/or container need to be handled from the time of collection through the initiation of testing. As this field is not required, no assumptions can be made as to meaning when this field is not populated.\n\nRefer to User-defined Table 0376 \u2013 Special Handling Code in Chapter 2C, Code Tables, for suggested values.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "16": {
+      "field_id": "OM4.16",
+      "name": "Specimen Preference",
+      "description": "This field indicates whether the Specimen/Attribute is Preferred or alternate for collection of the specimen. There can only be one occurrence of a Preferred or Alternate Specimen/Attribute for the code referenced in OM4-6 Specimen. For example, if two OM4 segments are received for specimen type of Serum, only one can be marked as Preferred. Refer to HL7 Table 0920 \u2013 Preferred Specimen/Attribute Status in Chapter 2C, Code Tables, for suggested values.",
+      "length": "0",
+      "data_type": "ID - Coded Value For Hl7 Defined Tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "17": {
+      "field_id": "OM4.17",
+      "name": "Preferred Specimen/Attribture Sequence ID",
+      "description": "This field contains the value of the sequence number of the Preferred Specimen that these specimens are the alternative for. Note: For the preferred specimen (i.e., OM4-16 = \"P\"), this field is not populated. This field is used by the Alternate Specimen (i.e., OM4-16 = \"A\") to point to the preferred specimen that it is to replace or be used as an alternative.\n\nExample:\n\nPreferred specimen\nOM4|0001||Tiger Top|\u2026 to field16|Y||\nOM4|0002||Plastic Screw Top|0.5|mL|Urine|without 6N HCI| \u2026 to field16|Y||\n\nAlternate specimen\nOM4|0003||Red Top|\u2026 to field16|A|0001|",
+      "length": "0",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "18": {
+      "field_id": "OM4.18",
+      "name": "Taxonomic Classification Code",
+      "description": "The species of living organism. This may include the common or scientific name, based on the coding system(s) used. SNOMED is the recommended coding system. If this field is not valued, a human is assumed. Refer to User-defined Table 0446 - Species Code for suggested values.\n\nFor example:\n...|L-80700^Canine, NOS^SNM3|...\n...|L-80100^Bovine^SNM3|...\n...|L-80A00^Feline^SNM3|....\n\nThis field is a list of species or other taxonomic classification(s) to which the indicated specimen type may appropriately be applied for the indicated observation or test. If this field is omitted the default meaning is that the test or observation is applicable to humans. In a veterinary context, if the test is applicable to any species, an appropriate code such as \"Kingdom Animalia (organism)\" should be used to avoid confusion with the meaning of human only.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "2": {
+      "field_id": "OM4.2",
+      "name": "Derived Specimen",
+      "description": "This field contains the observations whose categorical responses are taken from a specified table of codes (e.g., CWE data types). Record the preferred coding system for this observation (e.g., ICD9, SNOMED III). Take the codes from ASTM Table 3 or 5, or specify a local code.",
+      "length": "1",
+      "data_type": "ID - Coded Value For Hl7 Defined Tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "OM4.3",
+      "name": "Container Description",
+      "description": "This field contains the physical appearance, including color of tube tops, shape, and material composition (e.g., red-top glass tube). Note that the color is not necessarily a unique identifier of the additive and/or use of the tube. This is especially true for black and some blue tube tops, as can be seen above. Color is included here for user convenience.",
+      "length": "60",
+      "data_type": "TX - Text Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "OM4.4",
+      "name": "Container Volume",
+      "description": "This field indicates the capacity of the container.",
+      "length": "0",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "OM4.5",
+      "name": "Container Units",
+      "description": "This field identifies the current specimen volume available for use in this container in the units specified below.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "OM4.6",
+      "name": "Specimen",
+      "description": "This field reports the specimen as one of the specimen codes described in ASTM Table 14 of 1238-91. If multiple kinds of specimen are associated with this observation (as in the case for a creatinine clearance), multiple segments may be included, one for each specimen type.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "OM4.7",
+      "name": "Additive",
+      "description": "This table was not specified in previous versions and thus sites may choose to use other site-specific tables.\n\nThis field contains the codes that should be those provided by NCCLS. Refer to HL7 Table 0371 - Additive/Preservative for valid values. The table's values are taken from NCCLS AUTO4. The value set can be extended with user specific values.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "OM4.8",
+      "name": "Preparation",
+      "description": "This field contains the special handling requirements here (e.g., ice specimen, deliver within two hours of obtaining).",
+      "length": "0",
+      "data_type": "TX - Text Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "OM4.9",
+      "name": "Special Handling Requirements",
+      "description": "This field contains the special handling requirements here (e.g., ice specimen, deliver within two hours of obtaining).",
+      "length": "0",
+      "data_type": "TX - Text Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

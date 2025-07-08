@@ -1,0 +1,115 @@
+{
+  "segment_id": "PMT",
+  "short_description": "Payment Information",
+  "description": "This segment contains information that describes a payment made by a Payer organization.",
+  "fields": {
+    "1": {
+      "field_id": "PMT.1",
+      "name": "Payment/Remittance Advice Number",
+      "description": "Unique Payment/Remittance Advice number for the sending Network Application ID.",
+      "length": "0",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "PMT.10",
+      "name": "Payee Bank Account Id",
+      "description": "Id of Payee's Bank account.",
+      "length": "0",
+      "data_type": "CX - Extended Composite Id With Check Digit",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "PMT.11",
+      "name": "Payment Organization",
+      "description": "Organization identifier that made the Payment/Remittance Advice; could be a Payer, Insurance Company, TPA, Drug Company.",
+      "length": "0",
+      "data_type": "XON - Extended Composite Name And Identification Number For Organizations",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "PMT.12",
+      "name": "Esr-code-line",
+      "description": "Invoice Reference used with electronic banking methods.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "PMT.2",
+      "name": "Payment/Remittance Effective Date/Time",
+      "description": "[ Start ] Date/Time for this Payment/Remittance Advice.",
+      "length": "0",
+      "data_type": "DTM - Date/time",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "PMT.3",
+      "name": "Payment/Remittance Expiration Date/Time",
+      "description": "[ End ] Date/Time for this Payment/Remittance Advice.",
+      "length": "0",
+      "data_type": "DTM - Date/time",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "PMT.4",
+      "name": "Payment Method",
+      "description": "Code identifying the method for the movement of payment. Refer to User-defined Table 0570 \u2013 Payment Method Code in Chapter 2C, Code Tables, for suggested values.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "PMT.5",
+      "name": "Payment/Remittance Date/Time",
+      "description": "Date Payment/Remittance Advice was paid, which might not be the same as Date/Time of Message on MSH.",
+      "length": "0",
+      "data_type": "DTM - Date/time",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "PMT.6",
+      "name": "Payment/Remittance Amount",
+      "description": "Sum total of all Product/Service Paid Amount on PSL for this Payment/Remittance Advice, net of any Adjustments to Payee.",
+      "length": "0",
+      "data_type": "CP - Composite Price",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "PMT.7",
+      "name": "Check Number",
+      "description": "Unique check number from the Payer's application system.",
+      "length": "0",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "PMT.8",
+      "name": "Payee Bank Identification",
+      "description": "Identification of Payee's financial contact, e.g., name of the bank .",
+      "length": "0",
+      "data_type": "XON - Extended Composite Name And Identification Number For Organizations",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "PMT.9",
+      "name": "Payee Transit Number",
+      "description": "Personal ID of the payee used in financial transaction.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}
