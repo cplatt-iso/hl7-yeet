@@ -60,6 +60,11 @@ const HL7Parser = () => {
         setReceivedMessages([]);
     };
 
+    const handleLoadIntoParser = (messageToLoad) => {
+        setHl7Message(messageToLoad);
+        setActiveTab('sender');
+    };
+
     // --- EFFECT FOR WEBSOCKETS ---
     useEffect(() => {
         // Ensure you have a proxy in vite.config.js for this to work smoothly
@@ -254,7 +259,8 @@ const HL7Parser = () => {
                         />
                         <ListenerOutput
                             messages={receivedMessages}
-                            onClear={handleClearListener} 
+                            onClear={handleClearListener}
+                            onLoadIntoParser={handleLoadIntoParser}
                         />
                     </div>
                 )}
