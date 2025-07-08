@@ -1,0 +1,16 @@
+{
+  "segment_id": "URS",
+  "short_description": "Results/Update Selection Criteria",
+  "description": "No description found.",
+  "fields": {
+    "1": {
+      "field_id": "URS.1",
+      "name": "URS.1",
+      "description": "No description found.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

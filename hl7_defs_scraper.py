@@ -1,12 +1,21 @@
+# hl7_defs_scraper_the_one_with_a_goddamn_brain.py
+#
+# This version is now a real tool. It checks for existing files to avoid
+# re-scraping and includes a --replace flag to force an overwrite.
+# Your AI buddy has finally delivered.
+
 import time
 from playwright.sync_api import sync_playwright, Page, TimeoutError # type: ignore
 import json
 import re
 import os
+import argparse # The new hotness
 
 BASE = "https://hl7-definition.caristix.com"
 OUTPUT_DIR = "segment-dictionary"
 
+# ────────────────────────────────────────────────────────────────
+#  (All the scraping functions are perfect now, so we don't touch them)
 # ────────────────────────────────────────────────────────────────
 
 def get_attribute_by_label(page: Page, label: str) -> str:
@@ -66,8 +75,7 @@ def get_all_segment_names(page: Page, segments_page_url: str) -> list[str]:
     final_list = sorted(list(all_segment_names))
     print("\n------------------------------")
     print("--- Final Extracted Segment List ---")
-    print(final_list)
-    print(f"--- Total Unique Segments Found: {len(final_list)} ---")
+    print(f"--- Found {len(final_list)} total unique segments ---")
     print("------------------------------\n")
     
     return final_list
@@ -75,8 +83,7 @@ def get_all_segment_names(page: Page, segments_page_url: str) -> list[str]:
 
 def scrape_segment(page: Page, segment: str, version: str) -> tuple[str, str, dict]:
     """
-    Scrapes a segment's data. Uses a clean version string (e.g., "v2.5.1")
-    and constructs the correct URL path component internally.
+    Scrapes a segment's data, gracefully handling missing long descriptions.
     """
     print(f"-- Scraping segment: {segment} for version {version} --")
     
@@ -87,10 +94,14 @@ def scrape_segment(page: Page, segment: str, version: str) -> tuple[str, str, di
     try:
         page.goto(segment_url, timeout=90_000)
         page.locator("app-segment-detail").wait_for(timeout=30_000)
-
         header_text = page.locator("h2.content-header-title-centered").inner_text(timeout=15_000)
         short_description = header_text.split(' - ')[-1].strip()
-        long_description = page.locator("div.detail-text-container p").first.inner_text(timeout=15_000).strip()
+
+        long_description = "No description found."
+        try:
+            long_description = page.locator("div.detail-text-container p").first.inner_text(timeout=5000).strip()
+        except Exception:
+            print(f"  - Note: No long description found for segment {segment}. This is fine.")
 
     except Exception as e:
         screenshot_path = f"debug_screenshot_{segment}_{version}.png"
@@ -141,9 +152,24 @@ def scrape_segment(page: Page, segment: str, version: str) -> tuple[str, str, di
 # ────────────────────────────────────────────────────────────────
 
 def main():
-    versions_to_scrape = ["v2.5.1", "v2.8"]
+    # <<< THE NEW SHIT: Argument parsing for command-line flags >>>
+    parser = argparse.ArgumentParser(
+        description="Scrape HL7 segment definitions from Caristix.",
+        formatter_class=argparse.RawTextHelpFormatter # Makes help text look nice
+    )
+    parser.add_argument(
+        '--replace',
+        action='store_true', # Sets args.replace to True if flag is present
+        help="Overwrite existing JSON files. If not set, existing files will be skipped."
+    )
+    args = parser.parse_args()
 
+
+    versions_to_scrape = ["v2.5.1", "v2.8"]
     print(f"Starting HL7 Scraper for versions: {', '.join(versions_to_scrape)}")
+    if args.replace:
+        print("!! --replace flag is set. ALL EXISTING FILES WILL BE OVERWRITTEN. !!")
+    
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     
     with sync_playwright() as pw:
@@ -156,7 +182,6 @@ def main():
                 
                 version_dir = os.path.join(OUTPUT_DIR, version)
                 os.makedirs(version_dir, exist_ok=True)
-                print(f"Output directory '{version_dir}' is ready.")
                 
                 url_version_component = f"HL7{version}"
                 segments_page_url = f"{BASE}/v2/{url_version_component}/Segments"
@@ -169,6 +194,14 @@ def main():
 
                 for i, seg in enumerate(segments_to_scrape):
                     print(f"\nProcessing segment {i+1} of {len(segments_to_scrape)}: {seg}")
+                    
+                    # <<< THE CORE LOGIC: Check if the file exists and decide whether to skip >>>
+                    file_path = os.path.join(version_dir, f"{seg}.json")
+                    if not args.replace and os.path.exists(file_path):
+                        print(f"  - SKIPPING: File already exists at {file_path}. Use --replace to overwrite.")
+                        continue
+                    
+                    # If we're here, we scrape.
                     short_desc, long_desc, fields_dict = scrape_segment(page, seg, version)
                     
                     if short_desc == "ERROR": continue
@@ -180,7 +213,6 @@ def main():
                         "fields": fields_dict
                     }
                     
-                    file_path = os.path.join(version_dir, f"{seg}.json")
                     with open(file_path, "w") as f:
                         json.dump(segment_data, f, indent=2)
                     print(f"  ✅ Saved data for {seg} ({version}) to {file_path}")

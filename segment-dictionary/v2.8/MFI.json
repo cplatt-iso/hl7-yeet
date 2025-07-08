@@ -1,0 +1,61 @@
+{
+  "segment_id": "MFI",
+  "short_description": "Master File Identification",
+  "description": "No description found.",
+  "fields": {
+    "1": {
+      "field_id": "MFI.1",
+      "name": "Master File Identifier",
+      "description": "This field contains an optional code of up to 180 characters which (if applicable) uniquely identifies the application responsible for maintaining this file at a particular site. A group of intercommunicating applications may use more than a single instance of a master file of certain type (e.g., charge master or physician master). The particular instance of the file is identified by this field. Refer to User-defined table 0361 - Applications.",
+      "length": "0",
+      "data_type": "CWE - Coded With Exceptions",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "MFI.2",
+      "name": "Master File Application Identifier",
+      "description": "This field defines the file-level event code. Refer to HL7 table 0178 - File Level Event Code for valid values.",
+      "length": "0",
+      "data_type": "HD - Hierarchic Designator",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "3": {
+      "field_id": "MFI.3",
+      "name": "File-level Event Code",
+      "description": "This field contains the date/time for the file-level event on originating system.",
+      "length": "3",
+      "data_type": "ID - Coded Value For Hl7 Defined Tables",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "MFI.4",
+      "name": "Entered Date/Time",
+      "description": "This field contains the date the comment becomes or became effective.",
+      "length": "0",
+      "data_type": "DTM - Date/time",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "MFI.5",
+      "name": "Effective Date/Time",
+      "description": "These codes specify the application response level defined for a given Master File Message at the MFE segment level as defined in HL7 Table 0179 - Response Level. Required for MFN-Master File Notification message. Specifies additional detail (beyond MSH-15 - Accept Acknowledgment Type and MSH-16 - Application Acknowledgment Type) for application-level acknowledgment paradigms for Master Files transactions. MSH-15 - Accept Acknowledgment Type and MSH-16 - Application Acknowledgment Type operate as defined in Chapter 2.",
+      "length": "0",
+      "data_type": "DTM - Date/time",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "MFI.6",
+      "name": "Response Level Code",
+      "description": "No description found.",
+      "length": "2",
+      "data_type": "ID - Coded Value For Hl7 Defined Tables",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

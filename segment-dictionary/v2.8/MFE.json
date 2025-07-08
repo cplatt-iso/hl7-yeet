@@ -1,0 +1,70 @@
+{
+  "segment_id": "MFE",
+  "short_description": "Master File Entry",
+  "description": "No description found.",
+  "fields": {
+    "1": {
+      "field_id": "MFE.1",
+      "name": "Record-level Event Code",
+      "description": "A number or other identifier that uniquely identifies this change to this record from the point of view of the originating system. When returned to the originating system via the MFA segment, this field allows the target system to precisely identify which change to this record is being acknowledged. It is only required if the MFI response level code requires responses at the record level (any value other than NE).",
+      "length": "3",
+      "data_type": "ID - Coded Value For Hl7 Defined Tables",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "MFE.2",
+      "name": "Mfn Control Id",
+      "description": "An optional effective date/time can be included for the record-level action specified. It is the date/time the originating system expects that the event is to have been completed on the receiving system. If this field is not present, the effective date/time should default to the current date/time (when the message is received).",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "MFE.3",
+      "name": "Effective Date/Time",
+      "description": "These codes specify the application response level defined for a given Master File Message at the MFE segment level as defined in HL7 Table 0179 - Response Level. Required for MFN-Master File Notification message. Specifies additional detail (beyond MSH-15 - Accept Acknowledgment Type and MSH-16 - Application Acknowledgment Type) for application-level acknowledgment paradigms for Master Files transactions. MSH-15 - Accept Acknowledgment Type and MSH-16 - Application Acknowledgment Type operate as defined in Chapter 2.",
+      "length": "0",
+      "data_type": "DTM - Date/time",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "MFE.4",
+      "name": "Primary Key Value - Mfe",
+      "description": "This field contains the HL7 data type of MFE-4 - Primary Key Value - MFE. The valid values for the data type of a primary key are listed in HL7 Table 0355 - Primary Key Value Type.",
+      "length": "0",
+      "data_type": "varies - Varies",
+      "optionality": "Required",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "5": {
+      "field_id": "MFE.5",
+      "name": "Primary Key Value Type",
+      "description": "This field contains the date and time of the last change of the record.",
+      "length": "3",
+      "data_type": "ID - Coded Value For Hl7 Defined Tables",
+      "optionality": "Required",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "6": {
+      "field_id": "MFE.6",
+      "name": "Entered Date/Time",
+      "description": "This field contains the date the comment becomes or became effective.",
+      "length": "0",
+      "data_type": "DTM - Date/time",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "MFE.7",
+      "name": "Entered By",
+      "description": "This field contains the actual date the comment was keyed into the application.",
+      "length": "0",
+      "data_type": "XCN - Extended Composite Id Number And Name For Persons",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}
