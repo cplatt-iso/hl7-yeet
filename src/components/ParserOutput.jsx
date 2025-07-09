@@ -1,3 +1,5 @@
+// --- START OF FILE ParserOutput.jsx ---
+
 import React, { useState, useEffect } from 'react';
 import AccordionItem from './AccordionItem';
 import { DndProvider } from 'react-dnd';
@@ -6,14 +8,13 @@ import YeetLoader from './YeetLoader';
 
 const ParserOutput = ({ isProcessing, segments, error, showEmpty, setShowEmpty, onFieldMove, onFieldUpdate, setTooltipContent, showTooltips }) => {
     
-    // --- NEW STATE ---
-    // Keep track of the index of the segment we want to display in detail.
-    // Default to 0 (the MSH segment) if segments exist.
     const [selectedSegmentIndex, setSelectedSegmentIndex] = useState(0);
 
     // Effect to reset the selected index when the segments change (e.g., new message)
     useEffect(() => {
         if (segments && segments.length > 0) {
+            // Let's just default to the first segment instead of jumping around.
+            // The user can see the error badges and navigate themselves.
             setSelectedSegmentIndex(0);
         }
     }, [segments]);
@@ -56,23 +57,42 @@ const ParserOutput = ({ isProcessing, segments, error, showEmpty, setShowEmpty, 
 
                 {/* --- MASTER-DETAIL LAYOUT --- */}
                 <div className="flex gap-4">
-                    {/* --- LEFT PANEL: The Navigator --- */}
+                    {/* --- LEFT PANEL: The Navigator (WITH ERROR COUNTS & GOLD STARS) --- */}
                     <div className="w-48 flex-shrink-0 bg-gray-900/50 p-2 rounded-md border border-gray-700/50">
                         <div className="flex flex-col space-y-1">
-                            {segments.map((segment, index) => (
-                                <button
-                                    key={`${segment.name}-${index}`}
-                                    onClick={() => setSelectedSegmentIndex(index)}
-                                    className={`w-full text-left px-3 py-1.5 text-sm font-mono rounded-md transition-colors ${
-                                        selectedSegmentIndex === index 
-                                        ? 'bg-indigo-600 text-white font-bold' 
-                                        : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/50'
-                                    }`}
-                                >
-                                    {/* Handle repeating segments like OBX by showing their set ID */}
-                                    {segment.name} {segment.name === 'OBX' && `[${segment.fields[0]?.value || '?'}]`}
-                                </button>
-                            ))}
+                            {segments.map((segment, index) => {
+                                const errorCount = segment.fields.reduce((acc, field) => acc + (field.errors?.length || 0), 0);
+
+                                return (
+                                    <button
+                                        key={`${segment.name}-${index}`}
+                                        onClick={() => setSelectedSegmentIndex(index)}
+                                        className={`flex items-center justify-between w-full text-left px-3 py-1.5 text-sm font-mono rounded-md transition-colors ${
+                                            selectedSegmentIndex === index 
+                                            ? 'bg-indigo-600 text-white font-bold' 
+                                            : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/50'
+                                        }`}
+                                    >
+                                        <span>
+                                            {segment.name} {segment.name === 'OBX' && `[${segment.fields[0]?.value || '?'}]`}
+                                        </span>
+
+                                        {/* --- HERE'S YOUR FUCKING GOLD STAR --- */}
+                                        {/* If there are errors, show the angry red badge. Otherwise, show the happy green checkmark. */}
+                                        {errorCount > 0 ? (
+                                            <span className="bg-red-500 text-white text-xs font-semibold rounded-full px-2 py-0.5">
+                                                {errorCount}
+                                            </span>
+                                        ) : (
+                                            <span className="text-green-500">
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                            </span>
+                                        )}
+                                    </button>
+                                )
+                            })}
                         </div>
                     </div>
 
@@ -81,7 +101,6 @@ const ParserOutput = ({ isProcessing, segments, error, showEmpty, setShowEmpty, 
                         {selectedSegment && (
                             <DndProvider backend={HTML5Backend}>
                                 <AccordionItem
-                                    // Use a key that changes when the segment changes to ensure it re-renders
                                     key={selectedSegmentIndex}
                                     segment={selectedSegment}
                                     segmentIndex={selectedSegmentIndex}

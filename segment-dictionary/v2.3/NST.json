@@ -1,0 +1,142 @@
+{
+  "segment_id": "NST",
+  "short_description": "Statistics",
+  "description": "The NST segment allows network statistical information to be passed between the various systems on the network. Some fields in this segment refer to portions of lower level protocols; they contain information that can be used by network management applications monitoring the state of various network links",
+  "fields": {
+    "1": {
+      "field_id": "NST.1",
+      "name": "Statistics Available",
+      "description": "This field contains an indicator if statistics are available. Refer to HL7 table 0136 - Yes/no indicator for valid values",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "NST.10",
+      "name": "Checksum Errors Received",
+      "description": "This field contains the number of messages received with checksum errors",
+      "length": "10",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "NST.11",
+      "name": "Length Errors Received",
+      "description": "This field contains the number of messages received with length errors",
+      "length": "10",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "NST.12",
+      "name": "Other Errors Received",
+      "description": "This field contains the number of \u201cother\u201d invalid messages received (excluding length and checksum errors)",
+      "length": "10",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "NST.13",
+      "name": "Connect Timeouts",
+      "description": "This field contains the number of connect timeout errors",
+      "length": "10",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "NST.14",
+      "name": "Receive Timeouts",
+      "description": "This field contains the number of timeouts while waiting for a response to an initiated message",
+      "length": "10",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "15": {
+      "field_id": "NST.15",
+      "name": "Network Errors",
+      "description": "This field contains the number of network errors in response to an initiated message.",
+      "length": "10",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "NST.2",
+      "name": "Source Identifier",
+      "description": "This field identifies a particular lower level link (e.g., a port number).",
+      "length": "30",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "NST.3",
+      "name": "Source Type",
+      "description": "This field identifies (in certain systems) whether a lower level source identifier is an initiate or accept type. Refer to HL7 table 0332 - Network source type for valid values.",
+      "length": "3",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "NST.4",
+      "name": "Statistics Start",
+      "description": "This field contains the date/time stamp of the start of the collection of the statistics reported in fields 6-15 of this segment. It is strongly recommended that this value include seconds",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "NST.5",
+      "name": "Statistics End",
+      "description": "This field contains the date/time stamp of the end of the statistics collection period reported in fields 6-15 of this segment. It is strongly recommended that this value include seconds",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "NST.6",
+      "name": "Receive Character Count",
+      "description": "This field contains the number of characters received",
+      "length": "10",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "NST.7",
+      "name": "Send Character Count",
+      "description": "This field contains the number of characters sent",
+      "length": "10",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "NST.8",
+      "name": "Messages Received",
+      "description": "This field contains the number of messages received",
+      "length": "10",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "NST.9",
+      "name": "Messages Sent",
+      "description": "This field contains the number of messages sent",
+      "length": "10",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

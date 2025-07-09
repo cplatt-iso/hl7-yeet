@@ -1,0 +1,142 @@
+{
+  "segment_id": "RXD",
+  "short_description": "Pharmacy Dispense",
+  "description": "No description found.",
+  "fields": {
+    "1": {
+      "field_id": "RXD.1",
+      "name": "Dispense Sub-id Counter",
+      "description": "Starts with 1 the first time that medication is dispensed for this order. Increments by one with each additional issuance of medication",
+      "length": "4",
+      "data_type": "NM - Numeric",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "RXD.10",
+      "name": "Dispensing Provider",
+      "description": "provider ID of the person dispensing the pharmaceutical",
+      "length": "200",
+      "data_type": "CN_PERSON - Cn For Person",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "RXD.11",
+      "name": "Substitution Status",
+      "description": "refer to table 0167 - substitution status for suggested values",
+      "length": "1",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "RXD.12",
+      "name": "Total Daily Dose",
+      "description": "total daily dose being dispensed as expressed in terms of the actual dispense units.\n\nNote:The next two fields are equivalent to the corresponding fields of the RXE segment. They are included (optionally) in the RXD so that it may \"stand alone\" as a dispense result instruction segment",
+      "length": "10",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "RXD.13",
+      "name": "Dispense-to location",
+      "description": "the first component contains the inpatient or outpatient location where the drug was dispensed (if applicable). The default (null) value is the current census location for the patient. Site specific table. This component has the same form as PV1-3-assigned patient location",
+      "length": "12",
+      "data_type": "CM_LA1 - Location With Address Information",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "RXD.14",
+      "name": "Needs Human Review",
+      "description": "refer to table 0136 - Y/N indicator for valid values",
+      "length": "1",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "15": {
+      "field_id": "RXD.15",
+      "name": "Pharmacy Special Dispensing Instructions",
+      "description": "pharmacy-generated special instructions to the provider dispensing/administering the order",
+      "length": "200",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "2": {
+      "field_id": "RXD.2",
+      "name": "Dispense / Give Code",
+      "description": "Identifier of the medical substance ordered to be given to the patient; it is equivalent to OBR-4-universal service ID code. See the RXE segment for a complete definition of the RXE-2-give code.\n\nNote:The contents of RXD-2-dispense/give code should be identical to the comparable field in the RXE (RXE-2-give code). The RDS message refers ONLY to the dispensing of the drug by the Pharmacy.",
+      "length": "100",
+      "data_type": "CE - Coded Element",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "RXD.3",
+      "name": "Date / Time Dispensed",
+      "description": "when the pharmaceutical is dispensed from the Pharmacy. Use the time-stamp format",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "RXD.4",
+      "name": "Actual Dispense Amount",
+      "description": "amount dispensed",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "RXD.5",
+      "name": "Actual Dispense Units",
+      "description": "units dispensed. Site-defined table. As with Give units, if the units are part of the actual dispense code this field is optional, but if present, it overrides units implied by the actual dispense code. This must be in simple units that reflect the actual quantity of the substance dispensed. It does not include compound units",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "RXD.6",
+      "name": "Actual Dosage Form",
+      "description": "use this field when the give code and the dispense code do not specify the dosage form",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "RXD.7",
+      "name": "Prescription Number",
+      "description": "equivalent in uniqueness to the Pharmacy filler order number. At some sites, this may be the Pharmacy (internal) sequential form. At other sites, this may be an external form",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "RXD.8",
+      "name": "Number Of Refills Remaining",
+      "description": "outpatient only.",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "RXD.9",
+      "name": "Dispense Notes",
+      "description": "free text notes to the person dispensing the medication (may include the ordering provider's original notes, as well as any notes from the formulary or the pharmacy). This may contain free text describing a custom IV, mixture, or salve",
+      "length": "200",
+      "data_type": "ST - String Data",
+      "optionality": "Conditional",
+      "repeatability": "Repeatable indefinitely"
+    }
+  }
+}

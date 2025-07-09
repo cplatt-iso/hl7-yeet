@@ -1,0 +1,160 @@
+{
+  "segment_id": "RXO",
+  "short_description": "Pharmacy Prescription Order",
+  "description": "This is the \"master\" pharmacy order segment. It contains order data not specific to components or additives. Unlike the OBR, it does not contain status fields or other data that are results-only.\n\nIt can be used for any type of pharmacy order, including inpatient (unit dose and compound unit dose), outpatient, IVs, and hyperalimentation IVs (nutritional IVs).\n\nIn addition to the pharmaceutical information, this segment contains additional data such as provider and text comments.",
+  "fields": {
+    "1": {
+      "field_id": "RXO.1",
+      "name": "Requested Give Code",
+      "description": "identifier of the medical substance ordered to be given to the patient; it is equivalent to OBR-4-universal service ID code in function. The request-to-dispense fields, which define the type and amount of what is to be issued to the patient (see RXO-10 requested dispense code, RXO-11-requested dispense amount, and RXO-12-requested dispense units) do not necessarily correlate with the instructions of what amount is to be \"given\" or administered with each dose, and may or may not be specified with the order. For example, the \"give\" part of the order may convey the field-representation of give 15 mg of librium every 6 hours, while the request to dispense part of the order may convey issue 30 tablets of 10 MG generic equivalent for this outpatient prescription. When the give code does not include the dosage form, use RXO-5-requested dosage form.",
+      "length": "100",
+      "data_type": "CE - Coded Element",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "RXO.10",
+      "name": "Requested Dispense Code",
+      "description": "what is to be/was dispensed; it is equivalent to OBR-4-universal service ID in function. It may be present in the order or not, depending on the application. If not present, and values are given for RXO-11requested dispense amount and RXO-12-requested dispense units, the RXO-1-requested give code is assumed. If the requested dispense code does not include the dosage form, use RXO-5-requested dosage form.",
+      "length": "100",
+      "data_type": "CE - Coded Element",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "RXO.11",
+      "name": "Requested Dispense Amount",
+      "description": "amount to be dispensed",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "RXO.12",
+      "name": "Requested Dispense Units",
+      "description": "units for the dispense amount. This must be in simple units that reflect the actual quantity of the substance to be dispensed. It does not include compound units",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "RXO.13",
+      "name": "Number Of Refills",
+      "description": "outpatient only",
+      "length": "3",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "RXO.14",
+      "name": "Ordering Provider's Dea Number",
+      "description": "if required by site.",
+      "length": "60",
+      "data_type": "CN_PERSON - Cn For Person",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "15": {
+      "field_id": "RXO.15",
+      "name": "Pharmacist Verifier Id",
+      "description": "provider ID of pharmacist verifier. Use if required by the Pharmacy application or site on orders (or some subgroup of orders), in addition to ORC-11-verified by",
+      "length": "60",
+      "data_type": "CN_PERSON - Cn For Person",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "16": {
+      "field_id": "RXO.16",
+      "name": "Needs Human Review",
+      "description": "uses table 0136 - Y/N indicator.\n\nA smart Order Entry application knows of a possible drug interaction on a certain order, but the provider issuing the order wants to override the condition. In this case, the Pharmacy application receiving the order will want to have a staff pharmacist review the interaction and contact the ordering physician",
+      "length": "1",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "17": {
+      "field_id": "RXO.17",
+      "name": "Requested Give Per (time Unit)",
+      "description": "time unit to use to calculate the rate at which the pharmaceutical is to be administered",
+      "length": "20",
+      "data_type": "ST - String Data",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "RXO.2",
+      "name": "Requested Give Amount - Minimum",
+      "description": "ordered amount. In a variable dose order, this is the minimum ordered amount. In a nonvarying dose order, this is the exact amount of the order\n\nNote:This field is not a duplication of the first component of the quantity/timing field, since in non-Pharmacy orders, that component can be used to specify multiples of an ordered amount.\n\nAnother way to say this is that, for pharmacy orders, the quantity component of the quantity/timing field refers to what is to be given out at each service interval; thus, in terms of the RX order, that first component always defaults to 1. Hence, in the actual execution of the order, the value of 1 in the first component of the quantity/timing field always refers to one administration of the amount specified in this field (the Requested Give Amount field).",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "RXO.3",
+      "name": "Requested Give Amount - Maximum",
+      "description": "in a variable dose order, this is the maximum ordered amount. In a nonvarying dose order, this field is not used",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "RXO.4",
+      "name": "Requested Give Units",
+      "description": "units for the give amount.\n\nNote:These units can be a \"compound quantity\"; i.e., the units may contain the word \"per.\" For example, micrograms per KG (micg/kg) is an acceptable value, which means that the units are micrograms per KG (of body weight). See Chapter 7 for full definition of ISO+ units.",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "RXO.5",
+      "name": "Requested Dosage Form",
+      "description": "use when both RXO-1-requested give code and RXO-10-requested dispense code do not specify the drug form",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "RXO.6",
+      "name": "Provider's Pharmacy Instructions",
+      "description": "ordering provider's instructions to the pharmacy as a free text field",
+      "length": "200",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "7": {
+      "field_id": "RXO.7",
+      "name": "Provider's Administration Instructions",
+      "description": "ordering provider's instructions to the patient or to the provider administering the drug as a free text field",
+      "length": "200",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "8": {
+      "field_id": "RXO.8",
+      "name": "Deliver-to Location",
+      "description": "the first component contains the inpatient or outpatient location to which the pharmacy is to deliver the drug (if applicable). The default (null) value is the current census location for the patient. Site specific table. This component has the same form as PV1-3-assigned patient location.",
+      "length": "12",
+      "data_type": "CM_LA1 - Location With Address Information",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "RXO.9",
+      "name": "Allow Substitutions",
+      "description": "No description found.",
+      "length": "1",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

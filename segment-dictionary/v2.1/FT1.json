@@ -1,0 +1,205 @@
+{
+  "segment_id": "FT1",
+  "short_description": "Financial Transaction",
+  "description": "No description found.",
+  "fields": {
+    "1": {
+      "field_id": "FT1.1",
+      "name": "Set Id - Financial Transaction",
+      "description": "No description found.",
+      "length": "4",
+      "data_type": "SI - Set Id",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "FT1.10",
+      "name": "Transaction Amount - Extended",
+      "description": "No description found.",
+      "length": "12",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "FT1.11",
+      "name": "Transaction Quantity",
+      "description": "No description found.",
+      "length": "4",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "FT1.12",
+      "name": "Transaction Amount - Unit",
+      "description": "No description found.",
+      "length": "12",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "FT1.13",
+      "name": "Department Code",
+      "description": "No description found.",
+      "length": "16",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "FT1.14",
+      "name": "Insurance Plan Id",
+      "description": "No description found.",
+      "length": "8",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "15": {
+      "field_id": "FT1.15",
+      "name": "Insurance Amount",
+      "description": "No description found.",
+      "length": "12",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "16": {
+      "field_id": "FT1.16",
+      "name": "Patient Location",
+      "description": "No description found.",
+      "length": "12",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "17": {
+      "field_id": "FT1.17",
+      "name": "Fee Schedule",
+      "description": "No description found.",
+      "length": "1",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "18": {
+      "field_id": "FT1.18",
+      "name": "Patient Type",
+      "description": "No description found.",
+      "length": "2",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "19": {
+      "field_id": "FT1.19",
+      "name": "Diagnosis Code",
+      "description": "No description found.",
+      "length": "8",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "FT1.2",
+      "name": "Transaction Id",
+      "description": "No description found.",
+      "length": "12",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "20": {
+      "field_id": "FT1.20",
+      "name": "Performed By Code",
+      "description": "No description found.",
+      "length": "60",
+      "data_type": "CN - Composite Id Number And Name",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "21": {
+      "field_id": "FT1.21",
+      "name": "Ordered By Code",
+      "description": "No description found.",
+      "length": "60",
+      "data_type": "CN - Composite Id Number And Name",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "22": {
+      "field_id": "FT1.22",
+      "name": "Unit Cost",
+      "description": "No description found.",
+      "length": "12",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "FT1.3",
+      "name": "Transaction Batch Id",
+      "description": "No description found.",
+      "length": "5",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "FT1.4",
+      "name": "Transaction Date",
+      "description": "No description found.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "FT1.5",
+      "name": "Transaction Posting Date",
+      "description": "No description found.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "FT1.6",
+      "name": "Transaction Type",
+      "description": "No description found.",
+      "length": "8",
+      "data_type": "ID - Coded Value",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "FT1.7",
+      "name": "Transaction Code",
+      "description": "No description found.",
+      "length": "20",
+      "data_type": "ID - Coded Value",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "FT1.8",
+      "name": "Transaction Description",
+      "description": "No description found.",
+      "length": "40",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "FT1.9",
+      "name": "Transaction Description - Alt",
+      "description": "No description found.",
+      "length": "40",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

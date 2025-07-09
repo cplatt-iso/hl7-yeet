@@ -1,0 +1,79 @@
+{
+  "segment_id": "URS",
+  "short_description": "Unsolicited Selection",
+  "description": "The URS segment is identical with the QRF segment, except that, if the name of any field contains Query (of QRY), this word has been changed to Results (See URS-5-R/U other results subject definition).",
+  "fields": {
+    "1": {
+      "field_id": "URS.1",
+      "name": "R/U Where Subject Definition",
+      "description": "dentifies the department, system, or subsystem to which the result pertains. This field may repeat as in LAB~HEMO, etc",
+      "length": "20",
+      "data_type": "ST - String Data",
+      "optionality": "Required",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "2": {
+      "field_id": "URS.2",
+      "name": "R/U When Data Start Date / Time",
+      "description": "date/time the result starts. (if applicable).",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "URS.3",
+      "name": "R/U When Data End Date / Time",
+      "description": "date/time the result ends. (if applicable).",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "URS.4",
+      "name": "R/U What User Qualifier",
+      "description": "an identifier to define further the characteristics of the data that are of interest",
+      "length": "20",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "5": {
+      "field_id": "URS.5",
+      "name": "R/U Other Results Subject Definition",
+      "description": "further qualifier defined locally for use between two systems. This filter uses codes and field definitions that have specific meaning only to the application and/or site involved",
+      "length": "20",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "6": {
+      "field_id": "URS.6",
+      "name": "R/U Which Date / Time Qualifier",
+      "description": "specifies type of date referred to in URS-2-when data start date/time and URS-3-when data end date/time. Refer to table 0156 - which date/time qualifier",
+      "length": "12",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "7": {
+      "field_id": "URS.7",
+      "name": "R/U Which Date / Time Status Qualifier",
+      "description": "specifies status type of objects selected in date range defined by URS-2-when data start date/time and URS-3-when data end date/time. Refer to table 0157 - date/time status qualifier",
+      "length": "12",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "8": {
+      "field_id": "URS.8",
+      "name": "R/U Date / Time Selection Qualifier",
+      "description": "allows specification of certain types of values within the date/time range. Refer to table 0158 - date/time selection qualifier",
+      "length": "12",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    }
+  }
+}

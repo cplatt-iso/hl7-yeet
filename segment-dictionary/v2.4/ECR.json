@@ -1,0 +1,34 @@
+{
+  "segment_id": "ECR",
+  "short_description": "Equipment Command Response",
+  "description": "The equipment command response segment contains the receiving components response to the previously received command.",
+  "fields": {
+    "1": {
+      "field_id": "ECR.1",
+      "name": "Command Response",
+      "description": "This field identifies the response of the previously issued command. Refer to User-defined Table 0387 \u2013 Command response for valid values",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "ECR.2",
+      "name": "Date/Time Completed",
+      "description": "his field contains the date and time that the receiving component completed the requested command",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "ECR.3",
+      "name": "Command Response Parameters",
+      "description": "This field identifies any associated parameters that relate to the returned response command message",
+      "length": "65536",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    }
+  }
+}

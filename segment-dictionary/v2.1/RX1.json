@@ -1,0 +1,277 @@
+{
+  "segment_id": "RX1",
+  "short_description": "Pharmacy Order",
+  "description": "No description found.",
+  "fields": {
+    "1": {
+      "field_id": "RX1.1",
+      "name": "Unused",
+      "description": "No description found.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "RX1.10",
+      "name": "Drug Role",
+      "description": "No description found.",
+      "length": "1",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "RX1.11",
+      "name": "Prescription Sequence #",
+      "description": "No description found.",
+      "length": "3",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "RX1.12",
+      "name": "Quantity Dispensed",
+      "description": "No description found.",
+      "length": "4",
+      "data_type": "CQ - Composite Quantity With Units",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "RX1.13",
+      "name": "Unused",
+      "description": "No description found.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "RX1.14",
+      "name": "Drug Id",
+      "description": "No description found.",
+      "length": "5",
+      "data_type": "CE_0057 -",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "15": {
+      "field_id": "RX1.15",
+      "name": "Component Drug Ids",
+      "description": "No description found.",
+      "length": "5",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Repeatable 5 times"
+    },
+    "16": {
+      "field_id": "RX1.16",
+      "name": "Prescription Type",
+      "description": "No description found.",
+      "length": "2",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "17": {
+      "field_id": "RX1.17",
+      "name": "Substitution Status",
+      "description": "No description found.",
+      "length": "1",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "18": {
+      "field_id": "RX1.18",
+      "name": "Rx Order Status",
+      "description": "No description found.",
+      "length": "2",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "19": {
+      "field_id": "RX1.19",
+      "name": "Number Of Refills",
+      "description": "No description found.",
+      "length": "3",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "RX1.2",
+      "name": "Unused",
+      "description": "No description found.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "20": {
+      "field_id": "RX1.20",
+      "name": "Unused",
+      "description": "No description found.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "21": {
+      "field_id": "RX1.21",
+      "name": "Refills Remaining",
+      "description": "No description found.",
+      "length": "3",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "22": {
+      "field_id": "RX1.22",
+      "name": "Dea Class",
+      "description": "No description found.",
+      "length": "5",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "23": {
+      "field_id": "RX1.23",
+      "name": "Ordering Md's Dea Number",
+      "description": "No description found.",
+      "length": "10",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "24": {
+      "field_id": "RX1.24",
+      "name": "Unused",
+      "description": "No description found.",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "25": {
+      "field_id": "RX1.25",
+      "name": "Last Refill Date/Time",
+      "description": "No description found.",
+      "length": "19",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "26": {
+      "field_id": "RX1.26",
+      "name": "Rx Number",
+      "description": "No description found.",
+      "length": "20",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "27": {
+      "field_id": "RX1.27",
+      "name": "Prn Status",
+      "description": "No description found.",
+      "length": "5",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "28": {
+      "field_id": "RX1.28",
+      "name": "Pharmacy Instructions",
+      "description": "No description found.",
+      "length": "80",
+      "data_type": "TX - Text Data",
+      "optionality": "Optional",
+      "repeatability": "Repeatable 5 times"
+    },
+    "29": {
+      "field_id": "RX1.29",
+      "name": "Patient Instructions",
+      "description": "No description found.",
+      "length": "80",
+      "data_type": "TX - Text Data",
+      "optionality": "Optional",
+      "repeatability": "Repeatable 5 times"
+    },
+    "3": {
+      "field_id": "RX1.3",
+      "name": "Route",
+      "description": "No description found.",
+      "length": "8",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "30": {
+      "field_id": "RX1.30",
+      "name": "Instructions (sig)",
+      "description": "No description found.",
+      "length": "500",
+      "data_type": "TX - Text Data",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "4": {
+      "field_id": "RX1.4",
+      "name": "Site Administered",
+      "description": "No description found.",
+      "length": "20",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "RX1.5",
+      "name": "Iv Solution Rate",
+      "description": "No description found.",
+      "length": "10",
+      "data_type": "CQ - Composite Quantity With Units",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "RX1.6",
+      "name": "Drug Strength",
+      "description": "No description found.",
+      "length": "14",
+      "data_type": "CQ - Composite Quantity With Units",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "RX1.7",
+      "name": "Final Concentration",
+      "description": "No description found.",
+      "length": "10",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "RX1.8",
+      "name": "Final Volume In Ml.",
+      "description": "No description found.",
+      "length": "10",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "RX1.9",
+      "name": "Drug Dose",
+      "description": "No description found.",
+      "length": "10",
+      "data_type": "CM -",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

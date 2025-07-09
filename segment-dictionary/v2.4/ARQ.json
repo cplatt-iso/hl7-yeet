@@ -1,0 +1,232 @@
+{
+  "segment_id": "ARQ",
+  "short_description": "Appointment Request",
+  "description": "The ARQ segment defines a request for the booking of an appointment. It is used in transactions sent from an application acting in the role of a placer.",
+  "fields": {
+    "1": {
+      "field_id": "ARQ.1",
+      "name": "Placer Appointment ID",
+      "description": "This field contains placer applications permanent identifier for the appointment request (and the scheduled appointment itself, when confirmed as booked by the filler application). This is a composite field. Refer to Chapter 2, Section 2.9.17, EI - entity identifier, for a description of the EI data type and its components and subcomponents.",
+      "length": "75",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "ARQ.10",
+      "name": "Appointment Duration Units",
+      "description": "This field contains a code describing the units of time used in expressing the ARQ-9-Appointment duration field. This field should be valued according to the recommendations in Chapters 2 and 7. If this component is not valued, the ISO base unit of seconds (code s) will be assumed. Refer to Chapter 7, Figures 7-6 through 7-9, for a list of ISO and ANSI+ unit codes.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "ARQ.11",
+      "name": "Requested Start Date/Time Range",
+      "description": "This field contains the date and time that the appointment is requested to begin, in the form of a date/time range. The first component contains the earliest date and time that the appointment may be scheduled to begin. The second component contains the latest date and time that the appointment may be scheduled to begin.",
+      "length": "53",
+      "data_type": "DR - Date/time Range",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "12": {
+      "field_id": "ARQ.12",
+      "name": "Priority-ARQ",
+      "description": "This field contains the urgency of the request. The definition of this field is equivalent to the definition of the priority component of the Quantity/Timing data type given in the Order Entry chapter (Chapter 4), Section 4.4.6, Priority component.",
+      "length": "5",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "ARQ.13",
+      "name": "Repeating Interval",
+      "description": "This field contains the interval between repeating appointments. The default setting indicates that the appointment should occur once, if the component is not valued. The definition of this field is equivalent to the definition of the interval component of the Quantity/Timing data type given in the Order Entry chapter (Chapter 4), Section 4.3.2, Interval component.",
+      "length": "100",
+      "data_type": "RI - Repeat Interval",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "ARQ.14",
+      "name": "Repeating Interval Duration",
+      "description": "This field indicates how long the appointment repetitions should continue, once they have begun. The default setting indicates that the appointment should occur once. If the Interval Duration is defined as indefinitely repeating, the repetition of this appointment can only be stopped by using a discontinue event. The definition of this field is equivalent to the definition of the Interval component of the Quantity/Timing field given in the Order Entry chapter (Chapter 4), Section 4.3.3, Duration component, with the exception of the default value.",
+      "length": "5",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "15": {
+      "field_id": "ARQ.15",
+      "name": "Placer Contact Person",
+      "description": "This field identifies the person responsible for requesting the scheduling of a requested appointment. This person could be the same person responsible for executing the actual appointment, or it could be the provider requesting that an appointment be made on behalf of the patient, with another provider.",
+      "length": "250",
+      "data_type": "XCN - Extended Composite ID Number And Name For Persons",
+      "optionality": "Required",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "16": {
+      "field_id": "ARQ.16",
+      "name": "Placer Contact Phone Number",
+      "description": "This field contains the phone number used to contact the placer contact person.",
+      "length": "250",
+      "data_type": "XTN - Extended Telecommunication Number",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "17": {
+      "field_id": "ARQ.17",
+      "name": "Placer Contact Address",
+      "description": "This field contains the address used to contact the placer contact person.",
+      "length": "250",
+      "data_type": "XAD - Extended Address",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "18": {
+      "field_id": "ARQ.18",
+      "name": "Placer Contact Location",
+      "description": "This field contains a code that identifies the location of the placer contact person.",
+      "length": "80",
+      "data_type": "PL - Person Location",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "19": {
+      "field_id": "ARQ.19",
+      "name": "Entered By Person",
+      "description": "This field identifies the person responsible for entering the request for the scheduling of an appointment. It is included to provide an audit trail of persons responsible for the request. This person may be someone other than the placer contact person, who is responsible for entering orders and requests.",
+      "length": "250",
+      "data_type": "XCN - Extended Composite ID Number And Name For Persons",
+      "optionality": "Required",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "2": {
+      "field_id": "ARQ.2",
+      "name": "Filler Appointment ID",
+      "description": "This field contains the filler applications permanent identifier for the appointment request (and the scheduled appointment itself, when confirmed as a booked slot by the filler application). This is a composite field. Refer to Chapter 2, Section 2.9.17, EI - entity identifier, for a description of the EI data type and its components and subcomponents.",
+      "length": "75",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "20": {
+      "field_id": "ARQ.20",
+      "name": "Entered By Phone Number",
+      "description": "This field contains the phone number used to contact the ARQ-19-Entered by person.",
+      "length": "250",
+      "data_type": "XTN - Extended Telecommunication Number",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "21": {
+      "field_id": "ARQ.21",
+      "name": "Entered by Location",
+      "description": "This field contains a code that identifies the location of the entered by person.",
+      "length": "80",
+      "data_type": "PL - Person Location",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "22": {
+      "field_id": "ARQ.22",
+      "name": "Parent Placer Appointment ID",
+      "description": "This field relates a child to its parent, when a parent-child relationship exists. It contains the placer applications permanent identifier for the parent of the appointment request. This is a composite field.",
+      "length": "75",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "23": {
+      "field_id": "ARQ.23",
+      "name": "Parent Filler Appointment ID",
+      "description": "This field relates a child to its parent, when a parent-child relationship exists. It contains the filler applications permanent identifier for the parent of the appointment request. This is a composite field.",
+      "length": "75",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "24": {
+      "field_id": "ARQ.24",
+      "name": "Placer Order Number",
+      "description": "This field is the placer applications order number for the order associated with this scheduling request.",
+      "length": "22",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Conditional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "25": {
+      "field_id": "ARQ.25",
+      "name": "Filler Order Number",
+      "description": "This field is the order number assigned by the filler application for the order associated with this scheduling request.",
+      "length": "22",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Conditional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "3": {
+      "field_id": "ARQ.3",
+      "name": "Occurrence Number",
+      "description": "This field is used in conjunction with the placer appointment ID and/or the filler appointment ID to uniquely identify an individual occurrence (a child) of a parent repeating schedule appointment.",
+      "length": "5",
+      "data_type": "NM - Numeric",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "ARQ.4",
+      "name": "Placer Group Number",
+      "description": "This field allows a placer application to group sets of appointment requests together, and subsequently to identify the group.",
+      "length": "22",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "ARQ.5",
+      "name": "Schedule ID",
+      "description": "This field contains an identifier code for the schedule in which this appointment should be (or is) booked. This field is provided for situations in which filler applications maintain multiple schedules, and in which a particular resource or set of resources is controlled by more than one of those schedules.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "ARQ.6",
+      "name": "Request Event Reason",
+      "description": "This field contains the identifier code for the reason that the request event is being triggered. This field may contain a code describing the cancel reason, the delete reason, the discontinue reason, the add reason, or any other code describing the reason that a specific event is occurring.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "ARQ.7",
+      "name": "Appointment Reason",
+      "description": "This field contains the identifier code for the reason that the appointment is to take place. This field may contain a Universal Service ID describing the observation/test/battery/procedure or other activity that is to be performed during the requested appointment, similar to the Universal Service ID defined for the OBR segment in Chapter 4 on Order Entry. It may also contain a site-specific code describing a pre-defined set of reasons that an appointment may be set to occur. This code can be based on local and/or universal codes. The use of universal codes is recommended. Refer to User-defined Table 0276 - Appointment reason codes , below, for suggested codes.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "ARQ.8",
+      "name": "Appointment Type",
+      "description": "This field contains an identifier code for the type of appointment being requested. Refer to User-defined Table 0277 - Appointment type codes for suggested codes.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "ARQ.9",
+      "name": "Appointment Duration",
+      "description": "This field contains the amount of time being requested for the appointment. In cases of requests for repeating appointments, this field describes the duration of one instance of the appointment. If this field is unvalued, then the institutions standard duration for the type of appointment requested will be assumed.",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

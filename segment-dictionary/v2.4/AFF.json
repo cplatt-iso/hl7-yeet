@@ -1,0 +1,52 @@
+{
+  "segment_id": "AFF",
+  "short_description": "Professional Affiliation",
+  "description": "The AFF segment adds detailed information regarding professional affiliations with which the staff member identified by the STF segment is/was associated",
+  "fields": {
+    "1": {
+      "field_id": "AFF.1",
+      "name": "Set ID - AFF",
+      "description": "This field contains the number that identifies this transaction. For the first occurrence of the segment, the sequence number shall be one, for the second occurrence, the sequence number shall be two, etc.",
+      "length": "60",
+      "data_type": "SI - Sequence ID",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "AFF.2",
+      "name": "Professional Organization",
+      "description": "This field contains the official name of the association promoting specific professional interests with which the staff member is affiliated",
+      "length": "250",
+      "data_type": "XON - Extended Composite Name And Identification Number For Organizations",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "AFF.3",
+      "name": "Professional Organization Address",
+      "description": "This field contains the postal address of the professional organization with which the Staff Member is associated",
+      "length": "250",
+      "data_type": "XAD - Extended Address",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "AFF.4",
+      "name": "Professional Organization Affiliation Date Range",
+      "description": "This field contains the period the staff member started and ended membership in the professional organization",
+      "length": "52",
+      "data_type": "DR - Date/time Range",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "5": {
+      "field_id": "AFF.5",
+      "name": "Professional Affiliation Additional Information",
+      "description": "This field contains miscellaneous additional information related to the staff member's membership in the professional organization",
+      "length": "60",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

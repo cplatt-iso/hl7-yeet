@@ -1,0 +1,70 @@
+{
+  "segment_id": "PRA",
+  "short_description": "Practitioner Detail",
+  "description": "No description found.",
+  "fields": {
+    "1": {
+      "field_id": "PRA.1",
+      "name": "Pra - Primary Key Value",
+      "description": "No description found.",
+      "length": "20",
+      "data_type": "ST - String Data",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "PRA.2",
+      "name": "Practitioner Group",
+      "description": "No description found.",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "3": {
+      "field_id": "PRA.3",
+      "name": "Practitioner Category",
+      "description": "No description found.",
+      "length": "3",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "4": {
+      "field_id": "PRA.4",
+      "name": "Provider Billing",
+      "description": "No description found.",
+      "length": "1",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "PRA.5",
+      "name": "Specialty",
+      "description": "No description found.",
+      "length": "100",
+      "data_type": "CM_SPD - Specialty",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "6": {
+      "field_id": "PRA.6",
+      "name": "Practitioner Id Numbers",
+      "description": "No description found.",
+      "length": "100",
+      "data_type": "CM_PLN - Practitioner Id Numbers",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "7": {
+      "field_id": "PRA.7",
+      "name": "Privileges",
+      "description": "No description found.",
+      "length": "20",
+      "data_type": "CM_PIP - Privileges",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    }
+  }
+}

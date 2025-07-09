@@ -1,0 +1,115 @@
+{
+  "segment_id": "AIL",
+  "short_description": "Location Resource",
+  "description": "The AIL segment contains information about location resources (meeting rooms, operating rooms, examination rooms, or other locations) that can be scheduled. Resources included in a transaction using this segment are assumed to be controlled by a schedule on a schedule filler application. Resources not controlled by a schedule are not identified on a schedule request using this segment. Location resources are identified with this specific segment because of the specific encoding of locations used by the HL7 specification.",
+  "fields": {
+    "1": {
+      "field_id": "AIL.1",
+      "name": "Set ID - AIL",
+      "description": "This field contains a number that uniquely identifies the information represented by this segment in this transaction for the purposes of addition, change or deletion.",
+      "length": "4",
+      "data_type": "SI - Sequence ID",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "AIL.10",
+      "name": "Duration Units",
+      "description": "This field contains a code describing the units of time used associated with AIL-9-Duration. This field should be valued according to the recommendations made in Chapters 2 and 7. If this field is not valued, the ISO base unit of seconds (code s) will be assumed. Refer to Chapter 7, Figures 7-6 through 7-9, for a list of ISO and ANSI+ unit codes.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "AIL.11",
+      "name": "Allow Substitution Code",
+      "description": "This field contains a code indicating whether the identified location can be replace with an equivalent substitute location by the filler application. Refer to User-defined Table 0279 - Allow substitution codes for suggested codes.",
+      "length": "10",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "AIL.12",
+      "name": "Filler Status Code",
+      "description": "This field contains a code that describes the requested/scheduled status of the location, from the point of view of the filler application. Refer to User-defined Table 0278 - Filler status codes for suggested codes.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "AIL.2",
+      "name": "Segment Action Code",
+      "description": "This field contains the action to be taken when updating or modifying information in this segment from previously sent interface transactions. Refer to HL7 Table 0206 - Segment action code in Chapter 2, Section 2.15.4.2, Action code/unique identifier mode update definition, for valid values",
+      "length": "3",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "AIL.3",
+      "name": "Location Resource ID",
+      "description": "This field contains a coded identification of the location being requested or scheduled for an appointment. This field is used to identify a specific location being requested, or a specific location that has been scheduled for an appointment. If the specific location is not known but the type of location is, AIL-4-Location type-AIL is used to identify the type of location required or scheduled. Please see Section 2.9.29, PL - person location, in Chapter 2 for a description of each component.",
+      "length": "80",
+      "data_type": "PL - Person Location",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "AIL.4",
+      "name": "Location Type-AIL",
+      "description": "This field identifies the role of the location requested/scheduled for this appointment. For requests, if a specific location is not identified in AIL-3-Location resource ID, then this field identifies the type of location that should be scheduled by the filler application. At a minimum, the type identifier component should be valued.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "AIL.5",
+      "name": "Location Group",
+      "description": "This field identifies the requested resource as a member of the indicated group. If, in a Schedule Request Message (SRM), no specific location is requested, but a location type is requested, AIL-5-Location group can be used to further qualify the type of resource being requested.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "AIL.6",
+      "name": "Start Date/Time",
+      "description": "This field contains the date and time this service needs for the appointment. This field allows the application to identify that the service is required for the appointment at a different time than the appointments start date/time",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "AIL.7",
+      "name": "Start Date/Time Offset",
+      "description": "This field contains the offset this resource needs for the appointment, expressed in units of time relative to the scheduled start date/time. This field indicates to the application that the resource is required for the appointment at a different time than the appointments start date/time. The first component contains the offset amount. An offset of zero (0), or an unvalued field, indicates that the resource is required at the start date/time of the appointment.",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "AIL.8",
+      "name": "Start Date/Time Offset Units",
+      "description": "This field contains a code describing the units of time used for expressing the AIL-7-Start date/time offset field. This field should be valued according to the recommendations made in Chapters 2 and 7. If this field is not valued, the ISO base unit of seconds (code s) will be assumed. Refer to Chapter 7, Figures 7-6 through 7-9, for a list of ISO and ANSI+ unit codes.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "AIL.9",
+      "name": "Duration",
+      "description": "This field contains the duration for which the resource is requested/scheduled for this appointment, if it is different than the overall duration of the requested/scheduled appointment. This field indicates to the application that a resource is required for a different amount of time than the appointments overall duration. An unvalued duration indicates that the resource is required from its start date/time offset (specified in the previous two fields) until the end of the appointment. If no start date/time offset is specified, then the resource is required for the full duration of the appointment.",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

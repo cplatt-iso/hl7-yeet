@@ -1,0 +1,124 @@
+{
+  "segment_id": "PES",
+  "short_description": "Product Experience Sender",
+  "description": "HL7 Attribute Table - PES - Product Experience Sender",
+  "fields": {
+    "1": {
+      "field_id": "PES.1",
+      "name": "Sender Organization Name",
+      "description": "This field contains the name of the organization sending the message. Coded lists of manufacturers such as that from the World Health Organization database might be used in the component of the coded name to identify the source code type. If sent from an individual, this field may not be sent.",
+      "length": "250",
+      "data_type": "XON - Extended Composite Name And Identification Number For Organizations",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "10": {
+      "field_id": "PES.10",
+      "name": "Event Report Date",
+      "description": "This field contains the date the message was originally sent to the regulatory agency.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "PES.11",
+      "name": "Event Report Timing/Type",
+      "description": "This field contains the timing type of report as required by regulatory agency. Refer to HL7 Table 0234 - Report timing for valid values.",
+      "length": "3",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Repeatable twice"
+    },
+    "12": {
+      "field_id": "PES.12",
+      "name": "Event Report Source",
+      "description": "This field identifies the source from which the sender learned about the event. Multiple sources may be reported by repeating the element.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "PES.13",
+      "name": "Event Reported To",
+      "description": "This field indicates all the entities to whom the entity submitting the report has reported the event. Repeat the element if the report was submitted to more than one entity. Refer to HL7 Table 0236 - Event reported to for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "2": {
+      "field_id": "PES.2",
+      "name": "Sender Individual Name",
+      "description": "This field contains the name of the contact individual. If sent by an organization, the individuals in the organization who serve as primary contact points correspondence regarding this event.",
+      "length": "250",
+      "data_type": "XCN - Extended Composite ID Number And Name For Persons",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "3": {
+      "field_id": "PES.3",
+      "name": "Sender Address",
+      "description": "This field contains the postal address of the message sender to which correspondence regarding the experience being reported should be directed.",
+      "length": "250",
+      "data_type": "XAD - Extended Address",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "4": {
+      "field_id": "PES.4",
+      "name": "Sender Telephone",
+      "description": "This field contains the telephone number of the message sender to which telephone communications regarding the experience being reported should be directed. An electronic mail address can be specified in this field.",
+      "length": "250",
+      "data_type": "XTN - Extended Telecommunication Number",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "5": {
+      "field_id": "PES.5",
+      "name": "Sender Event Identifier",
+      "description": "The first component of this field contains the product manufacturers unique alphanumeric identifier for this specific event. This identifier will be used on all subsequent communications regarding this event. For events reported to the FDA, the identifier is: the FDA assigned manufacturer or distributor number; a hyphen; the 4-digit year; a hyphen; and a consecutive 5-digit sequence number for each report filled by the sender that year. For example, the event identifier for the third event reported in 1996 by a manufacturer whose FDA-assigned registration number is 1234567 would be 1234567-1993-3. Organizations without a FDA-assigned registration number should use 0000000 until assigned a number. Reports from other facilities should use the 10-digit HCFA number left padded with zeros in place of the FDA-assigned registration number. The second through fourth components are defined in exactly the same way as the three components of the hierarchic designator (HD) data type (Section 2.8.18, HD - hierarchic designator).",
+      "length": "75",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "PES.6",
+      "name": "Sender Sequence Number",
+      "description": "This field contains sequentially assigned integer values which distinguish messages which share the same sender event identification element. 0 for initial report, 1 for second, and so on.",
+      "length": "2",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "PES.7",
+      "name": "Sender Event Description",
+      "description": "This field contains the summary narrative text description of the event that occurred written by the sender, which may include a description of the nature of the event, how the product was involved, any environmental conditions that may have influenced the event, and patient follow-up or required treatment. Note that laboratory results can be encoded as OBX segments rather then including them in the narrative. By representing clinical information in OBX segments rather than in the narrative, these data become much more useful and flexible.",
+      "length": "600",
+      "data_type": "FT - Formatted Text Data",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "8": {
+      "field_id": "PES.8",
+      "name": "Sender Comment",
+      "description": "This field contains the text commentary regarding the report being made, such as disclaimers, which is not necessarily part of the report.",
+      "length": "600",
+      "data_type": "FT - Formatted Text Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "PES.9",
+      "name": "Sender Aware Date/Time",
+      "description": "This field identifies the date the sender became aware of the event.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

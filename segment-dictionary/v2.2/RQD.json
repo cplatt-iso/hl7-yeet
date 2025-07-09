@@ -1,0 +1,97 @@
+{
+  "segment_id": "RQD",
+  "short_description": "Requisition Detail",
+  "description": "RQD contains the detail for each requisitioned item.",
+  "fields": {
+    "1": {
+      "field_id": "RQD.1",
+      "name": "Requisition Line Number",
+      "description": "number that identifies this line in the requisition",
+      "length": "4",
+      "data_type": "SI - Sequence Id",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "RQD.10",
+      "name": "Date Needed",
+      "description": "date this item is required",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "RQD.2",
+      "name": "Item Code - Internal",
+      "description": "identifier and description that uniquely identify the item on the application sending the requisition",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "RQD.3",
+      "name": "Item Code - External",
+      "description": "identifier and description that uniquely identify the item on the application receiving the requisition",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "RQD.4",
+      "name": "Hospital Item Code",
+      "description": "identifier and description that uniquely identify the item on all applications in the hospital. The identifier is usually controlled by the hospital Financial application in the Charge Description Master file",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "RQD.5",
+      "name": "Requisition Quantity",
+      "description": "quantity requisitioned for this item",
+      "length": "6",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "RQD.6",
+      "name": "Requisition Unit Of Measure",
+      "description": "unit of measure for this item",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "RQD.7",
+      "name": "Department Cost Center",
+      "description": "accounting code that identifies this department in order to charge for this item",
+      "length": "30",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "RQD.8",
+      "name": "Item Natural Account Code",
+      "description": "accounting code that identifies this item in order to charge for this item",
+      "length": "30",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "RQD.9",
+      "name": "Deliver-to Id",
+      "description": "unique identifier and descriptive name of the department/location where the item should be delivered",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

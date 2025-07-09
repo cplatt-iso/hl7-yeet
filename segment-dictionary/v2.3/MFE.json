@@ -1,0 +1,43 @@
+{
+  "segment_id": "MFE",
+  "short_description": "Master file entry segment",
+  "description": "No description found.",
+  "fields": {
+    "1": {
+      "field_id": "MFE.1",
+      "name": "Record-Level Event Code",
+      "description": "This field defines the record-level event for the master file record identified by the MFI segment and the primary key field in this segment. Refer to HL7 table 0180 - Record level event code for valid values.",
+      "length": "3",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "MFE.2",
+      "name": "MFN Control ID",
+      "description": "A number or other identifier that uniquely identifies this change to this record from the point of view of the originating system. When returned to the originating system via the MFA segment, this field allows the target system to precisely identify which change to this record is being acknowledged. It is only required if the MFI response level code requires responses at the record level (any value other than NE).\n\nNote: Note that this segment does not contain a Set ID field. The MFE-2-MFN control ID implements a more general concept than the Set ID. It takes the place of the SET ID in the MFE segment.",
+      "length": "20",
+      "data_type": "ST - String Data",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "MFE.3",
+      "name": "Effective Date/Time",
+      "description": "An optional effective date/time can be included for the record-level action specified. It is the date/time the originating system expects that the event is to have been completed on the receiving system. If this field is not present, the effective date/time should default to the current date/time (when the message is received).",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "MFE.4",
+      "name": "Primary Key Value",
+      "description": "This field uniquely identifies the record of the master file (identified in the MFI segment) to be changed (as defined by the record-level event code). This field may be either a CE or PL data type. The PL data type is used only on Location master transactions. When the CE data type is used, the first component of this CE data field carries an optional subcomponent, the application ID, that uniquely identifies the application responsible for creating the primary key value. The application ID subcomponent can be used to guarantee uniqueness of the primary key across multiple applications.\n\nThe repetition of the primary key permits the identification of an individual component of a complex record as the object of the record-level event code. This feature allows the Master Files protocol to be used for modifications of single components of complex records",
+      "length": "200",
+      "data_type": "VARIES - Variable Datatype",
+      "optionality": "Required",
+      "repeatability": "Repeatable indefinitely"
+    }
+  }
+}

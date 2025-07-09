@@ -1,0 +1,250 @@
+{
+  "segment_id": "RXD",
+  "short_description": "Pharmacy/Treatment Dispense",
+  "description": "HL7 Attribute Table - RXD - Pharmacy/Treatment Dispense",
+  "fields": {
+    "1": {
+      "field_id": "RXD.1",
+      "name": "Dispense Sub-ID Counter",
+      "description": "This field starts with 1 the first time that medication/treatment is delivered/dispensed for this order. Increments by one with each additional issuance.",
+      "length": "4",
+      "data_type": "NM - Numeric",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "RXD.10",
+      "name": "Dispensing Provider",
+      "description": "This field contains the provider ID of the person dispensing the pharmaceutical.",
+      "length": "200",
+      "data_type": "XCN - Extended Composite ID Number And Name For Persons",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "11": {
+      "field_id": "RXD.11",
+      "name": "Substitution Status",
+      "description": "Refer to HL7 Table 0167 - Substitution status for suggested values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "RXD.12",
+      "name": "Total Daily Dose",
+      "description": "This field contains the total daily dose being dispensed as expressed in terms of the actual dispense units.",
+      "length": "10",
+      "data_type": "CQ - Composite Quantity With Units",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "RXD.13",
+      "name": "Dispense-To Location",
+      "description": "The first component (which is of PL data type with the component delimiters demoted to subcomponents) contains the inpatient or outpatient location where the drug or treatment was dispensed (if applicable). The default (null) value is the current census location for the patient. Site-specific table. The first eight components have the same form as the first eight components of PV1-3-assigned patient location. The final eight components replace the ninth component of PV1-3-assigned patient location and represent the full address specification.",
+      "length": "200",
+      "data_type": "LA2 - Location With Address Information (variant 2",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "RXD.14",
+      "name": "Needs Human Review",
+      "description": "Refer to HL7 table 0136 - Yes/no indicator for valid values. The values have the following meaning for this field:",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "15": {
+      "field_id": "RXD.15",
+      "name": "Pharmacy/Treatment Supplier's Special Dispensing Instructions",
+      "description": "This field contains pharmacy or treatment supplier-generated special instructions to the provider dispensing/administering the order.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "16": {
+      "field_id": "RXD.16",
+      "name": "Actual Strength",
+      "description": "Use when RXD-2-dispense/give code does not specify the strength. This is the numeric part of the strength, of a single dosage unit of the dispensed product, used in combination with RXD-17-actual strength unit .",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "17": {
+      "field_id": "RXD.17",
+      "name": "Actual Strength Unit",
+      "description": "Use when RXD-2-dispense/give code does not specify the strength. This is the unit of the strength, of a single dosage unit of the dispensed product, used in combination with RXD-16-actual strength .",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "18": {
+      "field_id": "RXD.18",
+      "name": "Substance Lot Number",
+      "description": "This field contains the lot number of the medical substance administered.",
+      "length": "20",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "19": {
+      "field_id": "RXD.19",
+      "name": "Substance Expiration Date",
+      "description": "This field contains the expiration date of the medical substance administered.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "2": {
+      "field_id": "RXD.2",
+      "name": "Dispense/Give Code",
+      "description": "This field identifies the medical substance or treatment ordered to be given to the patient; it is equivalent to OBR-4-universal service ID . See the RXE segment for a complete definition of the RXE-2-give code . If the substance dispensed is a vaccine, CVX codes may be used to code this field (see HL7 table 0292 - Vaccines administered).",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "20": {
+      "field_id": "RXD.20",
+      "name": "Substance Manufacturer Name",
+      "description": "This field contains the manufacturer of the medical substance administered when it is a manufactured substance.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "21": {
+      "field_id": "RXD.21",
+      "name": "Indication",
+      "description": "This field contains the identifier of the condition or problem for which the drug/treatment was prescribed. May repeat if multiple indications are relevant.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "22": {
+      "field_id": "RXD.22",
+      "name": "Dispense Package Size",
+      "description": "This field contains the size of package to be dispensed. Units are transmitted in RXD-23-dispense package size unit.",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "23": {
+      "field_id": "RXD.23",
+      "name": "Dispense Package Size Unit",
+      "description": "This field contains the units in which RXE-28-dispense package size is denominated. The advertised number of units in the manufacturers package i.e., the package as it comes from the supplier",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "24": {
+      "field_id": "RXD.24",
+      "name": "Dispense Package Method",
+      "description": "This field contains the method by which treatment is dispensed. Refer to HL7 Table 0321 - Dispense method for valid values.",
+      "length": "2",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "25": {
+      "field_id": "RXD.25",
+      "name": "Supplementary Code",
+      "description": "This field accommodates the identification of any codes that might be associated with the pharmaceutical substance. Common codes include: the Generic Product Identifier (GPI), Generic Code Number_Sequence Number (GCN_SEQNO), National Drug Code (NDC ).",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "26": {
+      "field_id": "RXD.26",
+      "name": "Initiating Location",
+      "description": "This field identifies the pharmacy or other treatment dispensing service (e.g., respiratory) that received the initial request.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "27": {
+      "field_id": "RXD.27",
+      "name": "Packaging/Assembly Location",
+      "description": "This field identifies the pharmacy which packaged/assembled request.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "RXD.3",
+      "name": "Date/Time Dispensed",
+      "description": "This field indicates when the pharmaceutical/treatment is dispensed from the pharmacy or treatment supplier. Use the time stamp format.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "RXD.4",
+      "name": "Actual Dispense Amount",
+      "description": "This field indicates the amount dispensed.",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "RXD.5",
+      "name": "Actual Dispense Units",
+      "description": "This field indicates the units dispensed. Site-defined table. This field is required if the units are not implied by the actual dispense code. If present, it overrides units implied by the actual dispense code. This must be in simple units that reflect the actual quantity of the substance dispensed. It does not include compound units.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "RXD.6",
+      "name": "Actual Dosage Form",
+      "description": "The dosage form indicates the manner in which the medication/treatment is aggregated for dispensing, e.g., tablets, capsules, suppositories. In some cases, this information is implied by the dispense/give code in RXD-2-dispense/give code. Use this field when the give code and the dispense code do not specify the dosage form.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "RXD.7",
+      "name": "Prescription Number",
+      "description": "This field is equivalent in uniqueness to the pharmacy/treatment supplier filler order number. At some sites, this may be the pharmacy/treatment supplier (internal) sequential form. At other sites, this may be an external number.",
+      "length": "20",
+      "data_type": "ST - String Data",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "RXD.8",
+      "name": "Number of Refills Remaining",
+      "description": "This field is conditional because it is required when a prescription is dispensed to an outpatient. It is not relevant to inpatient treatment orders.",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "RXD.9",
+      "name": "Dispense Notes",
+      "description": "This field contains free text notes to the person dispensing the medication/treatment (may include the ordering providers original notes, as well as any notes from the formulary or the pharmacy or treatment supplier). This may contain free text describing a custom IV, mixture, or salve for example.",
+      "length": "200",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    }
+  }
+}

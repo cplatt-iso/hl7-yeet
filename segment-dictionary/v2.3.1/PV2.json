@@ -1,0 +1,340 @@
+{
+  "segment_id": "PV2",
+  "short_description": "additional information segment",
+  "description": "The PV2 segment is a continuation of visit-specific information contained on the PV1 segment.",
+  "fields": {
+    "1": {
+      "field_id": "PV2.1",
+      "name": "Prior Pending Location",
+      "description": "This field is required for cancel pending transfer (A27 (cancel pending admit)) messages. In all other events it is optional.",
+      "length": "80",
+      "data_type": "PL - Person Location",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "PV2.10",
+      "name": "Estimated Length of Inpatient Stay",
+      "description": "This field specifies the estimated days of inpatient stays.",
+      "length": "3",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "PV2.11",
+      "name": "Actual Length of Inpatient Stay",
+      "description": "This field contains the actual days of inpatient stays. The actual length of the inpatient stay may not be calculated from the admission and discharge dates because of possible leaves of absence.",
+      "length": "3",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "PV2.12",
+      "name": "Visit Description",
+      "description": "This field contains a brief user-defined description of the visit.",
+      "length": "50",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "PV2.13",
+      "name": "Referral Source Code",
+      "description": "This field contains the name and the identification numbers of the person or organization that made the referral. This person/organization is not the same as the referring doctor. For example, Joe Smith referred me to the Clinic (or to Dr. Jones at the Clinic).",
+      "length": "90",
+      "data_type": "XCN - Extended Composite ID Number And Name For Persons",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "14": {
+      "field_id": "PV2.14",
+      "name": "Previous Service Date",
+      "description": "This field contains the date of previous service for the same recurring condition. This may be a required field for billing certain illnesses (e.g., accident related) to a third party.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "15": {
+      "field_id": "PV2.15",
+      "name": "Employment Illness Related Indicator",
+      "description": "This field specifies whether a patient's illness was job-related. Refer to Chapter 2, HL7 table 0136 - Yes/no indicator for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "16": {
+      "field_id": "PV2.16",
+      "name": "Purge Status Code",
+      "description": "This field contains the purge status code for the account. It is used by the application program to determine purge processing. Refer to user-defined table 0213 - Purge status for suggested values.",
+      "length": "1",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "17": {
+      "field_id": "PV2.17",
+      "name": "Purge Status Date",
+      "description": "This field contains the date on which the data will be purged from the system.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "18": {
+      "field_id": "PV2.18",
+      "name": "Special Program Code",
+      "description": "This field designates the specific health insurance program for a visit required for healthcare reimbursement. Examples include Child Health Assistance, Elective Surgery Program, Family Planning, etc. User-defined table 0214 - Special program codes is used as the HL7 identifier for the user-defined table of values for this field.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "19": {
+      "field_id": "PV2.19",
+      "name": "Retention Indicator",
+      "description": "This field allows the user to control the financial and demographic purge processes at the visit. It is used to preserve demographic and financial data on specific, high priority visits. Refer to Chapter 2, HL7 table 0136 - Yes/no indicator for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "PV2.2",
+      "name": "Accommodation Code",
+      "description": "This field indicates the specific patient accommodations for this visit. User-defined table 0129 - Accommodation code is used as the HL7 identifier for the user-defined table for values for this field.",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "20": {
+      "field_id": "PV2.20",
+      "name": "Expected Number of Insurance Plans",
+      "description": "This field contains the number of insurance plans that may provide coverage for this visit.",
+      "length": "1",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "21": {
+      "field_id": "PV2.21",
+      "name": "Visit Publicity Code",
+      "description": "This field contains a user-defined code indicating what level of publicity is allowed (e.g., No Publicity, Family Only) for a specific visit. User-defined table 0215 - Publicitycode is used as the HL7 identifier for the user-defined table of values for this field. Refer to PD1-11- publicity code for the patient level publicity code.",
+      "length": "1",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "22": {
+      "field_id": "PV2.22",
+      "name": "Visit Protection Indicator",
+      "description": "This field identifies the person's protection that determines, in turn, whether access to information about this person should be kept from users who do not have adequate authority for a specific visit. Refer to Chapter 2, HL7 table 0136 - Yes/no indicator for valid values. Refer to PD1-12- protection indicator for the patient level protection indicator.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "23": {
+      "field_id": "PV2.23",
+      "name": "Clinic Organization Name",
+      "description": "This field contains the organization name or sub-unit and identifier that is associated with the (visit) episode of care. For example, the Allergy or Oncology Clinic within the facility might be named.",
+      "length": "90",
+      "data_type": "XON - Extended Composite Name And Identification Number For Organizations",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "24": {
+      "field_id": "PV2.24",
+      "name": "Patient Status Code",
+      "description": "This field indicates the status of the episode of care: for instance, Active Inpatient vs. Discharged Inpatient. Refer to user defined table0216 - Patient status for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "25": {
+      "field_id": "PV2.25",
+      "name": "Visit Priority Code",
+      "description": "This field contains the priority of the visit, e.g., whether the admission is an emergency, elective, or urgent. Refer to user defined table 0217 - Visit priority for suggested values.",
+      "length": "1",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "26": {
+      "field_id": "PV2.26",
+      "name": "Previous Treatment Date",
+      "description": "This field contains the date that the patient last had treatment for any condition prior to this visit. In the case of a prior hospital visit, it is likely to be the previous discharge date.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "27": {
+      "field_id": "PV2.27",
+      "name": "Expected Discharge Disposition",
+      "description": "This field describes what the patient's disposition is expected to be at the end of the visit. Refer to user-defined table 0112 - Discharged disposition for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "28": {
+      "field_id": "PV2.28",
+      "name": "Signature on File Date",
+      "description": "This field contains the date on which a signature was obtained for insurance billing purposes.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "29": {
+      "field_id": "PV2.29",
+      "name": "First Similar Illness Date",
+      "description": "This field is used to determine if the patient has a pre-existing condition.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "PV2.3",
+      "name": "Admit Reason",
+      "description": "This field contains the short description of the reason for patient admission.",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "30": {
+      "field_id": "PV2.30",
+      "name": "Patient Charge Adjustment Code",
+      "description": "This field contains a user-defined code that indicates which adjustments should be made to this patient's charges. User-defined table 0218 - Charge adjustment is used as the HL7 identifier for the user-defined table of values for this field. This field is the same as GT1-26-guarantor charge adjustment code .",
+      "length": "80",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "31": {
+      "field_id": "PV2.31",
+      "name": "Recurring Service Code",
+      "description": "This field indicates whether the treatment is continuous. User-defined table 0219 - Recurring service is used as the HL7 identifier for the user-defined table of values for this field.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "32": {
+      "field_id": "PV2.32",
+      "name": "Billing Media Code",
+      "description": "This field indicates if the account is to be rejected from tape billing. Refer to Chapter 2 , HL7 table 0136 - Yes/no indicator for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "33": {
+      "field_id": "PV2.33",
+      "name": "Expected Surgery Date & Time",
+      "description": "This field contains the date and time on which the surgery is expected to occur.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "34": {
+      "field_id": "PV2.34",
+      "name": "Military Partnership Code",
+      "description": "This field indicates that a military facility has contracted with a non-military facility for the use of its services. Refer to Chapter 2, HL7 table 0136 - Yes/no indicator for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "35": {
+      "field_id": "PV2.35",
+      "name": "Military Non-Availability Code",
+      "description": "This field indicates whether a patient has permission to use a non-military facility for treatment. Refer to Chapter 2 , HL7 table 0136 - Yes/no indicator for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "36": {
+      "field_id": "PV2.36",
+      "name": "Newborn Baby Indicator",
+      "description": "This field indicates whether the patient is a baby. Refer to Chapter 2, HL7 table 0136 - Yes/no indicator for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "37": {
+      "field_id": "PV2.37",
+      "name": "Baby Detained Indicator",
+      "description": "This field indicates if the baby is detained after the mother's discharge. Refer to Chapter 2, HL7 table 0136 - Yes/no indicator for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "PV2.4",
+      "name": "Transfer Reason",
+      "description": "This field contains the short description of the reason for a patient location change.",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "PV2.5",
+      "name": "Patient Valuables",
+      "description": "This field contains the short description of patient valuables checked in during admission.",
+      "length": "25",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "6": {
+      "field_id": "PV2.6",
+      "name": "Patient Valuables Location",
+      "description": "This field indicates the location of the patient's valuables.",
+      "length": "25",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "PV2.7",
+      "name": "Visit User Code",
+      "description": "This field further categorizes a patient's visit with respect to an individual institution's needs (e.g., teaching flag = TE, indicating the patient is a teaching case). User-defined table 0130 - Visit user code is used as the HL7 identifier or the user-defined table of values for this field.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "PV2.8",
+      "name": "Expected Admit Date/Time",
+      "description": "This field contains the date and time that the patient is expected to be admitted. This field is also used to reflect the date/time of an outpatient/emergency patient registration.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "PV2.9",
+      "name": "Expected Discharge Date/Time",
+      "description": "This field contains the date and time that the patient is expected to be discharged. This is a non-event related date used by ancillaries to determine more accurately the projected workloads. This field is also used to reflect the anticipated discharge date/time of an outpatient/emergency patient, or an inpatient.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

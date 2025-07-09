@@ -1,0 +1,250 @@
+{
+  "segment_id": "PID",
+  "short_description": "Patient Identification",
+  "description": "The PID segment is used by all applications as the primary means of communicating patient identification information. This segment contains permanent patient identifying, and demographic information that, for the most part, is not likely to change frequently",
+  "fields": {
+    "1": {
+      "field_id": "PID.1",
+      "name": "Set Id - Patient Id",
+      "description": "for those messages that permit segments to repeat, the Set ID field is used to identify the repetitions. For example, the swap and query transactions allow for multiple PID segments would have Set ID values of 1, 2, then 3, etc",
+      "length": "4",
+      "data_type": "SI - Sequence Id",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "PID.10",
+      "name": "Race",
+      "description": "ERISA also has a published list of ethnic classifications which may be used by local agreement at a site. Refer to user-defined table 0005 - race",
+      "length": "1",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "PID.11",
+      "name": "Patient Address",
+      "description": "mailing address of the patient",
+      "length": "106",
+      "data_type": "AD - Address",
+      "optionality": "Optional",
+      "repeatability": "Repeatable 3 times"
+    },
+    "12": {
+      "field_id": "PID.12",
+      "name": "County Code",
+      "description": "patient's county code. This field was left in for backwards compatibility. County can now be supported in the other geographic designation component of the AD data type",
+      "length": "4",
+      "data_type": "ST - String Data",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "PID.13",
+      "name": "Phone Number - Home",
+      "description": "up to three repetitions are permitted. The first is considered the primary number",
+      "length": "40",
+      "data_type": "TN - Telephone Number",
+      "optionality": "Optional",
+      "repeatability": "Repeatable 3 times"
+    },
+    "14": {
+      "field_id": "PID.14",
+      "name": "Phone Number - Business",
+      "description": "up to three repetitions are permitted. The first is considered the primary one",
+      "length": "40",
+      "data_type": "TN - Telephone Number",
+      "optionality": "Optional",
+      "repeatability": "Repeatable 3 times"
+    },
+    "15": {
+      "field_id": "PID.15",
+      "name": "Language - Patient",
+      "description": "the patient's primary language",
+      "length": "25",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "16": {
+      "field_id": "PID.16",
+      "name": "Marital Status",
+      "description": "patient's marital status. Refer to user-defined table 0002 - marital status for suggested entries",
+      "length": "1",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "17": {
+      "field_id": "PID.17",
+      "name": "Religion",
+      "description": "patient's religion. Refer to user-defined table 0006 - religion",
+      "length": "3",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "18": {
+      "field_id": "PID.18",
+      "name": "Patient Account Number",
+      "description": "number assigned by accounting to which all charges, payments, etc. are recorded. It is used to identify the patient's account. Refer to table 0061 - check digit scheme in Chapter 2.",
+      "length": "20",
+      "data_type": "CK - Composite Id With Check Digit",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "19": {
+      "field_id": "PID.19",
+      "name": "Social Security Number - Patient",
+      "description": "patient's social security number. This number may also be an RR retirement number",
+      "length": "16",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "PID.2",
+      "name": "Patient Id (external Id)",
+      "description": "if the patient is from another institution, outside office, etc., the identifier used by that institution can be shown here. This may be a number which multiple disparate corporations or facilities share. Refer to table 0061 - check digit scheme in Chapter 2",
+      "length": "16",
+      "data_type": "CK - Composite Id With Check Digit",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "20": {
+      "field_id": "PID.20",
+      "name": "Driver's License Number - Patient",
+      "description": "patient's drivers license number. Some sites may use this as a unique number that identifies the patient. Default of the second component is the state in which the patient is being registered",
+      "length": "25",
+      "data_type": "CM_LICENSE_NO - Cm For Driving License",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "21": {
+      "field_id": "PID.21",
+      "name": "Mother's Identifier",
+      "description": "used as a link field for newborns, for example. Typically a patient ID or account number may be used. Refer to HL7 table 0061 - check digit scheme as defined in Chapter 2.",
+      "length": "20",
+      "data_type": "CK - Composite Id With Check Digit",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "22": {
+      "field_id": "PID.22",
+      "name": "Ethnic Group",
+      "description": "further defines patient ancestry. Refer to user-defined table 0189 - ethnic group for suggested values",
+      "length": "1",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "23": {
+      "field_id": "PID.23",
+      "name": "Birth Place",
+      "description": "indicates the location of the patient's birth",
+      "length": "25",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "24": {
+      "field_id": "PID.24",
+      "name": "Multiple Birth Indicator",
+      "description": "indicates if the patient was part of a multiple birth. Refer to HL7 table 0136 - Y/N indicator as described in Chapter 2.",
+      "length": "2",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "25": {
+      "field_id": "PID.25",
+      "name": "Birth Order",
+      "description": "if a patient was part of a multiple birth, a value (number) indicating the patient's birth order",
+      "length": "2",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "26": {
+      "field_id": "PID.26",
+      "name": "Citizenship",
+      "description": "indicates the patient's country of citizenship. Refer to user-defined table 0171 - country code for suggested values or to ISO 3166",
+      "length": "3",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "27": {
+      "field_id": "PID.27",
+      "name": "Veterans Military Status",
+      "description": "indicates the military status assigned to a veteran. Refer to user-defined table 0172 - veterans military status for suggested codes",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "PID.3",
+      "name": "Patient Id (internal Id)",
+      "description": "primary ID used by the facility to uniquely identify a patient at the time of admit, (e.g., medical record number, billing number, etc). Refer to table 0061-check digit scheme",
+      "length": "20",
+      "data_type": "CM_PAT_ID - Patient Id",
+      "optionality": "Required",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "4": {
+      "field_id": "PID.4",
+      "name": "Alternate Patient Id",
+      "description": "third number may be required to identify a patient. Possible contents include a visit number, a visit date, or Social Security Number",
+      "length": "12",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "PID.5",
+      "name": "Patient Name",
+      "description": "name is standard format described in Chapter 2.",
+      "length": "48",
+      "data_type": "PN - Person Name",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "PID.6",
+      "name": "Mother's Maiden Name",
+      "description": "family name under which the mother was born (i.e., before marriage.) Used to disambiguate patients with the same last name",
+      "length": "30",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "PID.7",
+      "name": "Date Of Birth",
+      "description": "patient's date of birth",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "PID.8",
+      "name": "Sex",
+      "description": "patient's sex. Refer to table 0001 - sex for valid codes.",
+      "length": "1",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "PID.9",
+      "name": "Patient Alias",
+      "description": "name(s) by which the patient has been known at some time",
+      "length": "48",
+      "data_type": "PN - Person Name",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    }
+  }
+}

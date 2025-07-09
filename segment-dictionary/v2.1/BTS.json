@@ -1,0 +1,34 @@
+{
+  "segment_id": "BTS",
+  "short_description": "Batch Trailer",
+  "description": "No description found.",
+  "fields": {
+    "1": {
+      "field_id": "BTS.1",
+      "name": "Batch Message Count",
+      "description": "No description found.",
+      "length": "10",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "BTS.2",
+      "name": "Batch Comment",
+      "description": "No description found.",
+      "length": "80",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "BTS.3",
+      "name": "Batch Totals",
+      "description": "No description found.",
+      "length": "100",
+      "data_type": "CM -",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

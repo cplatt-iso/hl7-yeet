@@ -1,0 +1,16 @@
+{
+  "segment_id": "ERR",
+  "short_description": "Error",
+  "description": "No description found.",
+  "fields": {
+    "1": {
+      "field_id": "ERR.1",
+      "name": "Error Code And Location",
+      "description": "No description found.",
+      "length": "80",
+      "data_type": "ID - Coded Value",
+      "optionality": "Required",
+      "repeatability": "Repeatable indefinitely"
+    }
+  }
+}

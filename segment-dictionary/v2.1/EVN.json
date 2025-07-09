@@ -1,0 +1,43 @@
+{
+  "segment_id": "EVN",
+  "short_description": "Event Type",
+  "description": "No description found.",
+  "fields": {
+    "1": {
+      "field_id": "EVN.1",
+      "name": "Event Type Code",
+      "description": "No description found.",
+      "length": "3",
+      "data_type": "ID - Coded Value",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "EVN.2",
+      "name": "Date/Time Of Event",
+      "description": "No description found.",
+      "length": "19",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "EVN.3",
+      "name": "Date/Time Planned Event",
+      "description": "No description found.",
+      "length": "19",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "EVN.4",
+      "name": "Event Reason Code",
+      "description": "No description found.",
+      "length": "3",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

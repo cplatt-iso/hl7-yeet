@@ -1,3 +1,5 @@
+// --- START OF FILE FieldRow.jsx ---
+
 import React, { useState } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 
@@ -5,10 +7,11 @@ const ItemTypes = {
     FIELD: 'field'
 };
 
-// We now accept 'showTooltips' to conditionally show the definitions
 const FieldRow = ({ field, segmentIndex, fieldIndex, onFieldMove, onFieldUpdate, setTooltipContent, showTooltips }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editValue, setEditValue] = useState(field.value);
+
+    const hasErrors = field.errors && field.errors.length > 0;
     
     const handleDoubleClick = () => {
         setIsEditing(true);
@@ -32,8 +35,13 @@ const FieldRow = ({ field, segmentIndex, fieldIndex, onFieldMove, onFieldUpdate,
     };
 
     const handleMouseEnter = () => {
-        // ONLY show tooltip if the setting is enabled
-        if (showTooltips) {
+        if (hasErrors) {
+            setTooltipContent({
+                title: 'Validation Errors',
+                body: field.errors.join('\n'),
+                type: 'error'
+            });
+        } else if (showTooltips) {
             setTooltipContent({
                 title: field.name,
                 body: field.description
@@ -42,7 +50,6 @@ const FieldRow = ({ field, segmentIndex, fieldIndex, onFieldMove, onFieldUpdate,
     };
 
     const handleMouseLeave = () => {
-        // ALWAYS clear tooltip on leave
         setTooltipContent(null);
     };
     
@@ -73,16 +80,45 @@ const FieldRow = ({ field, segmentIndex, fieldIndex, onFieldMove, onFieldUpdate,
 
     return (
         <tr
+            className={`${hasErrors ? 'bg-red-500/10' : ''}`}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
         >
             <td className="py-1 px-2 text-gray-500">{field.field_id}</td>
             <td className="py-1 px-2 text-gray-300">{field.name}</td>
             <td className="py-1 px-2 text-indigo-300">{field.data_type}</td>
+            
+            {/* --- OPTIONALITY CELL --- */}
+            <td 
+                className={`py-1 px-2 text-center font-bold ${
+                    field.optionality === 'R' ? 'text-orange-400' :
+                    field.optionality === 'C' ? 'text-blue-400' :
+                    'text-gray-500 font-normal'
+                }`}
+                title={
+                    field.optionality === 'R' ? 'Required' :
+                    field.optionality === 'O' ? 'Optional' :
+                    field.optionality === 'C' ? 'Conditional' :
+                    field.optionality
+                }
+            >
+                {field.optionality}
+            </td>
+            
+            {/* --- REPEATABILITY CELL --- */}
+            <td
+                className={`py-1 px-2 text-center font-bold ${
+                    field.repeatable === 'Y' ? 'text-green-400' : 'text-gray-500 font-normal'
+                }`}
+                title={field.repeatable === 'Y' ? 'Repeatable' : 'Not Repeatable'}
+            >
+                {field.repeatable}
+            </td>
+
             <td className="py-1 px-2 text-yellow-300">{field.length}</td>
             <td 
                 ref={drop}
-                className="py-1 px-2 value-cell"
+                className={`py-1 px-2 value-cell rounded-sm ${hasErrors ? 'bg-red-500/20' : ''}`}
                 onDoubleClick={handleDoubleClick}
             >
                 {isEditing ? (

@@ -1,0 +1,34 @@
+{
+  "segment_id": "ODT",
+  "short_description": "Diet tray instructions segment",
+  "description": "This segment addresses tray instructions. These are independent of diet codes, supplements, and preferences and therefore get separate order numbers.",
+  "fields": {
+    "1": {
+      "field_id": "ODT.1",
+      "name": "Tray Type",
+      "description": "This field defines the type of dietary tray. Refer to HL7table 0160 - Tray type for valid entries.",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "ODT.2",
+      "name": "Service Period",
+      "description": "When blank, the modifier applies to all service periods. This field allows you to designate one or more of the feeding periods during a day by combining the codes as needed. It can also combine with quantity/timing to give such information as which service period the order belongs with. This field is identical in meaning with ODS-2-service period. See Section 4.6.1.2, 'Service period (CE) 00270,' for further details.",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable 10 times"
+    },
+    "3": {
+      "field_id": "ODT.3",
+      "name": "Text Instruction",
+      "description": "This field defines instructions associated with the tray. Example:",
+      "length": "80",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

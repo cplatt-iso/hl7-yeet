@@ -1,0 +1,79 @@
+{
+  "segment_id": "PRA",
+  "short_description": "Practitioner detail segment",
+  "description": "The PRA segment adds detailed medical practitioner information to the personnel identified by the STF segment. A PRA segment may optionally follow an STF segment. A PRA segment must always have been preceded by a corresponding STF segment. The PRA segment may also be used for staff who work in healthcare who are not practitioners, but need to be certified, e.g., \u201cmedical records staff.\u201d",
+  "fields": {
+    "1": {
+      "field_id": "PRA.1",
+      "name": "PRA - Primary Key Value",
+      "description": "This field must match MFE-4-primary key value, to identify which entry is being referenced",
+      "length": "20",
+      "data_type": "ST - String Data",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "PRA.2",
+      "name": "Practioner Group",
+      "description": "This field contains the name and/or code of a group of practitioners to which this practitioner belongs",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "3": {
+      "field_id": "PRA.3",
+      "name": "Practioner Category",
+      "description": "This field contains the category of practitioner. Refer to user-defined table 0186 - Practitioner category whose values may include codes for staff physician, courtesy physician, resident, physician assistant, physical therapist, psychiatrist, psychologist, pharmacist, registered nurse, licensed practical nurse, licensed vocational nurse, nurse practitioner, etc",
+      "length": "3",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "4": {
+      "field_id": "PRA.4",
+      "name": "Provider Billing",
+      "description": "This field indicates how provider services are billed. Refer to HL7 table 0187 - Provider billing for valid values",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "PRA.5",
+      "name": "Specialty",
+      "description": "This repeating field is made up of multiple components to record the practitioner\u2019s specialties. The multiple components of each specialty are: (1) specialty name or abbreviation, identifies provider\u2019s specialty, (2) name of specialty governing board, (3) Certification Status, (4) certified date contains the date of certification, if certified",
+      "length": "100",
+      "data_type": "CM_SPD - Specialty",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "6": {
+      "field_id": "PRA.6",
+      "name": "Practitioner ID Numbers",
+      "description": "This repeating field contains this practitioner\u2019s license numbers and other ID numbers. This is a field made up of the following components: (1) the ID number, and (2) the type of number, and optionally (3) the state or province in which it is valid, if relevant, or other qualifying information. It is recommended that state qualifications use the abbreviations from the postal service of the country. The practitioner ID number type (component 2) is a user-defined table (table 0338).",
+      "length": "100",
+      "data_type": "CM_PLN - Practitioner ID Numbers",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "7": {
+      "field_id": "PRA.7",
+      "name": "Privileges",
+      "description": "This field contains the institutional privileges which this provider may exercise. Depends upon institutional needs. For example, admit, transfer, discharge, place orders, verify orders, review results, etc. Can also be used for privileges other than patient services. This is a repeating field, with each privilege made up of the following components: (1) privilege; (2) privilege class; (3) privilege expiration date, if any; and (4) privilege activation date, if any. Note that the privilege and privilege class components are CE data types, and thus they are encoded with the subcomponent delimiter (&) rather than the component delimiter (^)",
+      "length": "200",
+      "data_type": "CM_PIP - Privileges",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "8": {
+      "field_id": "PRA.8",
+      "name": "Date Entered Practice",
+      "description": "This field contains the date the practitioner began practicing at the present institution (e.g., at hospital, at physician organization, at managed care network).",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

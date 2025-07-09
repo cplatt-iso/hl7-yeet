@@ -1,0 +1,151 @@
+{
+  "segment_id": "PR1",
+  "short_description": "Procedures segment",
+  "description": "The PR1 segment contains information relative to various types of procedures that can be performed on a patient. The PR1 segment can be used to send procedure information, for example: Surgical, Nuclear Medicine, X-ray with contrast, etc. The PR1 segment is used to send multiple procedures, for example, for medical records encoding or for billing systems.",
+  "fields": {
+    "1": {
+      "field_id": "PR1.1",
+      "name": "Set ID - PR1",
+      "description": "This field contains the number that identifies this transaction. For the first occurrence of the segment the sequence number shall be 1, for the second occurrence it shall be 2, etc.",
+      "length": "4",
+      "data_type": "SI - Sequence ID",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "PR1.10",
+      "name": "Anesthesia Minutes",
+      "description": "This field contains the length of time in minutes that the anesthesia was administered.",
+      "length": "4",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "PR1.11",
+      "name": "Surgeon",
+      "description": "HL7 has introduced the ROL segment to report a wide range of practitioner roles related to a single procedure. This segment is described in Chapter 12. When using trigger events introduced in HL7 Version 2.3, it is recommended that the ROL segment be used to report all practitioner roles related to the procedure.",
+      "length": "120",
+      "data_type": "XCN - Extended Composite ID Number And Name For Persons",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "12": {
+      "field_id": "PR1.12",
+      "name": "Procedure Practitioner",
+      "description": "HL7 has introduced the ROL segment to report a wide range of practitioner roles related to a single procedure. This segment is described in Chapter 12. When using trigger events introduced in HL7 Version 2.3, it is recommended that the ROL segment be used to report all practitioner roles related to the procedure.",
+      "length": "230",
+      "data_type": "XCN - Extended Composite ID Number And Name For Persons",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "13": {
+      "field_id": "PR1.13",
+      "name": "Consent Code",
+      "description": "This field contains the type of consent that was obtained for permission to treat the patient. User-defined table 0059 - Consent code is used as the HL7 identifier for the user-defined table of values for this field.",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "PR1.14",
+      "name": "Procedure Priority",
+      "description": "This field contains a number that identifies the significance or priority of the procedure code.",
+      "length": "2",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "15": {
+      "field_id": "PR1.15",
+      "name": "Associated Diagnosis Code",
+      "description": "This field contains the diagnosis which is the primary reason this procedure was performed, e.g., Medicare wants to know for which diagnosis this procedure is submitted for inclusion on HCFA 1500 form. User-defined table 0051 - Diagnosis code is used as the HL7 identifier for the user-defined table of values for this field .",
+      "length": "80",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "16": {
+      "field_id": "PR1.16",
+      "name": "Procedure Code Modifier",
+      "description": "This field contains the procedure code modifier to the procedure code reported in field 3, when applicable. Procedure code modifiers are defined by regulatory agencies such as HCFA and the AMA. Multiple modifiers may be reported. Refer to user-defined table 0340 - Procedure code modifier for suggested values.",
+      "length": "80",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "2": {
+      "field_id": "PR1.2",
+      "name": "Procedure Coding Method",
+      "description": "This field has been retained for backward compatibility only . Use the components of PR1-3-procedure code instead of this field.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "PR1.3",
+      "name": "Procedure Code",
+      "description": "Use this field instead of PR1-2-procedure coding method and PR1-4-procedure description. Those two fields have been retained for backward compatibility only. This field contains a unique identifier assigned to the procedure. User-defined table 0088 - Procedure code is used as the HL7 identifier for the user-defined table of values for this field . This field is a CE data type for compatibility with clinical and ancillary systems.",
+      "length": "80",
+      "data_type": "CE - Coded Element",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "PR1.4",
+      "name": "Procedure Description",
+      "description": "This field has been retained for backward compatibility only . Use the components of PR1-3-procedure code instead of this field. The field contains a text description that describes the procedure.",
+      "length": "40",
+      "data_type": "ST - String Data",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "PR1.5",
+      "name": "Procedure Date/Time",
+      "description": "This field contains the date/time that the procedure was performed.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "PR1.6",
+      "name": "Procedure Functional Type",
+      "description": "This field contains the optional code that further defines the type of procedure. Refer to user-defined table 0230 - Procedure functional type for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "PR1.7",
+      "name": "Procedure Minutes",
+      "description": "This field indicates the length of time in whole minutes that the procedure took to complete.",
+      "length": "4",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "PR1.8",
+      "name": "Anesthesiologist",
+      "description": "HL7 has introduced the ROL segment to report a wide range of practitioner roles related to a single procedure. This segment is described in Chapter 12. When using trigger events introduced in HL7 Version 2.3, it is recommended that the ROL segment be used to report all practitioner roles related to the procedure.",
+      "length": "120",
+      "data_type": "XCN - Extended Composite ID Number And Name For Persons",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "9": {
+      "field_id": "PR1.9",
+      "name": "Anesthesia Code",
+      "description": "This field contains a unique identifier of the anesthesia used during the procedure. User-defined table 0019 - Anesthesia code is used as the HL7 identifier for the user-defined table of values for this field.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

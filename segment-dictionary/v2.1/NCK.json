@@ -1,0 +1,16 @@
+{
+  "segment_id": "NCK",
+  "short_description": "System Clock",
+  "description": "No description found.",
+  "fields": {
+    "1": {
+      "field_id": "NCK.1",
+      "name": "System Date/Time",
+      "description": "No description found.",
+      "length": "19",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

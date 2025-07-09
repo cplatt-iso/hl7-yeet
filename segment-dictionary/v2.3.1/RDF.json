@@ -1,0 +1,25 @@
+{
+  "segment_id": "RDF",
+  "short_description": "Table row definition segment",
+  "description": "The RDF segment defines the content of the row data segments (RDT) in the Tabular Data Response Message (TBR). It is used in two ways:",
+  "fields": {
+    "1": {
+      "field_id": "RDF.1",
+      "name": "Number of Columns per Row",
+      "description": "This field specifies the number of data columns (and therefore the number of fields) contained within each row of returned data.",
+      "length": "3",
+      "data_type": "NM - Numeric",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "RDF.2",
+      "name": "Column Description",
+      "description": "Each repetition of this field consists of three components:",
+      "length": "40",
+      "data_type": "RCD - Row Column Definition",
+      "optionality": "Required",
+      "repeatability": "Repeatable indefinitely"
+    }
+  }
+}

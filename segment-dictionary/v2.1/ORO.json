@@ -1,0 +1,43 @@
+{
+  "segment_id": "ORO",
+  "short_description": "Order Other",
+  "description": "No description found.",
+  "fields": {
+    "1": {
+      "field_id": "ORO.1",
+      "name": "Order Item Id",
+      "description": "No description found.",
+      "length": "200",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "ORO.2",
+      "name": "Substitute Allowed",
+      "description": "No description found.",
+      "length": "1",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "ORO.3",
+      "name": "Results Copies To",
+      "description": "No description found.",
+      "length": "80",
+      "data_type": "CN - Composite Id Number And Name",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "4": {
+      "field_id": "ORO.4",
+      "name": "Stock Location",
+      "description": "No description found.",
+      "length": "2",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

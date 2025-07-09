@@ -1,0 +1,43 @@
+{
+  "segment_id": "RXR",
+  "short_description": "Pharmacy Route",
+  "description": "The Pharmacy Route segment contains the alternative combination of route, site, administration device, and administration method that are prescribed. The pharmacy and/or nursing staff has a choice between the routes based on either their professional judgment or administration instructions provided by the physician",
+  "fields": {
+    "1": {
+      "field_id": "RXR.1",
+      "name": "Route",
+      "description": "route of administration. Some current \"route codes,\" such as some of the NDC-derived codes include the site already. In such cases, the entire code can be included in this field as a \"locally defined code\" for the CE data type. Refer to table 0162 - route of administration for valid entries",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "RXR.2",
+      "name": "Site",
+      "description": "site of the administration route. Refer to table 0163 - administrative site for valid entries.\n\nAs a CE data type, this field may be extended to cover a wide variety of body site codes (e.g., when SNOMED is used as the table source).",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "RXR.3",
+      "name": "Administration Device",
+      "description": "mechanical device used to aid in the administration of the drug. Common examples are IV-sets of different types. Refer to table 0164 - administration device for valid entries",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "RXR.4",
+      "name": "Administration Method",
+      "description": "administration method identifies the specific method requested for the administration of the drug to the patient. Refer to table 0165 - administration method for valid entries",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

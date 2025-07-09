@@ -1,0 +1,97 @@
+{
+  "segment_id": "AIS",
+  "short_description": "service segment",
+  "description": "The AIS segment contains information about various kinds of services that can be scheduled. Services included in a transaction using this segment are assumed to be controlled by a schedule on a schedule filler application. Services not controlled by a schedule are not identified on a schedule request using this segment.",
+  "fields": {
+    "1": {
+      "field_id": "AIS.1",
+      "name": "Set ID - AIS",
+      "description": "This field contains a number that uniquely identifies the information represented by this segment in this transaction for the purposes of addition, change or deletion.",
+      "length": "4",
+      "data_type": "SI - Sequence ID",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "AIS.10",
+      "name": "Filler Status Code",
+      "description": "This field contains a code that describes the requested/scheduled status of the resource or activity, from the point of view of the filler application. Refer to user-defined table 0278 - Filler status codes for suggested codes.",
+      "length": "200",
+      "data_type": "CE - Coded Element",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "AIS.2",
+      "name": "Segment Action Code",
+      "description": "This field contains the action to be taken when updating or modifying information in this segment from previously sent interface transactions. Refer to HL7 table 0206 - Segment action code in Chapter 2, Section 2.23.4.2, 'Action code/unique identifier mode update definition,' for valid values.",
+      "length": "3",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "AIS.3",
+      "name": "Universal Service ID",
+      "description": "This field contains an identifier code for a service to be scheduled. This field may contain a Universal Service ID describing the observation/test/battery/procedure or other activity that is to be performed during the requested appointment, similar to the Universal Service ID defined for the OBR segment in the Order Entry chapter (Chapter 4). This code can be based on local and/or universal codes. The use of universal codes is recommended.",
+      "length": "200",
+      "data_type": "CE - Coded Element",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "AIS.4",
+      "name": "Start Date/Time",
+      "description": "This field contains the date and time this service needs for the appointment. This field allows the application to identify that the service is required for the appointment at a different time than the appointment's start date/time",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "AIS.5",
+      "name": "Start Date/Time Offset",
+      "description": "This field contains the offset this service needs for the appointment, expressed in units of time relative to the scheduled start date/time. This field allows the application to identify that the service is required for the appointment at a different time than the appointment's start date/time. The first component contains the offset amount. An offset of zero (0), or an unvalued field indicates that the service is required at the start date/time of the appointment.",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "AIS.6",
+      "name": "Start Date/Time Offset Units",
+      "description": "This field contains a code describing the units of time used for expressing the start date/time offset. This field should be valued according to the recommendations in Chapters 2 and 7. If this field is not valued, the ISO base unit of seconds (code s) will be assumed. Refer to Chapter 7, Figures 7-10 through 7-13, for a list of ISO and ANSI+ unit codes.",
+      "length": "200",
+      "data_type": "CE - Coded Element",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "AIS.7",
+      "name": "Duration",
+      "description": "This field contains the duration for which the resource is requested/scheduled for this appointment, if different from the overall duration of the requested/scheduled appointment. This field indicates to the application that a resource is required for a different amount of time than the appointment's overall duration. An unvalued duration indicates that the resource is required from its start date/time offset (specified in the previous two fields) until the end of the appointment. If no start date/time offset is specified, then the resource is required for the full duration of the appointment.",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "AIS.8",
+      "name": "Duration Units",
+      "description": "This field contains a code describing the units of time used for expressing the duration. This field should be valued according to the recommendations in Chapters 2 and 7. If this field is not valued, the ISO base unit of seconds (code s) will be assumed. Refer to Chapter 7, Figures 7-10 through 7-13, for a list of ISO and ANSI+ unit codes.",
+      "length": "200",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "AIS.9",
+      "name": "Allow Substitution Code",
+      "description": "This field contains a code indicating whether the identified resource can be substituted with an equivalent resource by the filler application. Refer to user-defined table 0279 - Allow substitution codes for suggested codes.",
+      "length": "10",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

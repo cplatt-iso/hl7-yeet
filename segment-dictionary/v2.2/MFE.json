@@ -1,0 +1,43 @@
+{
+  "segment_id": "MFE",
+  "short_description": "Master File Entry",
+  "description": "No description found.",
+  "fields": {
+    "1": {
+      "field_id": "MFE.1",
+      "name": "Record-level Event Code",
+      "description": "No description found.",
+      "length": "3",
+      "data_type": "ID - Coded Value",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "MFE.2",
+      "name": "Mfn Control Id",
+      "description": "No description found.",
+      "length": "20",
+      "data_type": "ST - String Data",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "MFE.3",
+      "name": "Effective Date / Time",
+      "description": "No description found.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "MFE.4",
+      "name": "Primary Key Value",
+      "description": "No description found.",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Required",
+      "repeatability": "Repeatable indefinitely"
+    }
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "segment_id": "QRF",
+  "short_description": "Query Filter",
+  "description": "No description found.",
+  "fields": {
+    "1": {
+      "field_id": "QRF.1",
+      "name": "Where Subject Filter",
+      "description": "No description found.",
+      "length": "20",
+      "data_type": "ST - String Data",
+      "optionality": "Required",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "2": {
+      "field_id": "QRF.2",
+      "name": "When Data Start Date/Time",
+      "description": "No description found.",
+      "length": "19",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "QRF.3",
+      "name": "When Data End Date/Time",
+      "description": "No description found.",
+      "length": "19",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "QRF.4",
+      "name": "What User Qualifier",
+      "description": "No description found.",
+      "length": "20",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "5": {
+      "field_id": "QRF.5",
+      "name": "Other Qry Subject Filter",
+      "description": "No description found.",
+      "length": "20",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    }
+  }
+}

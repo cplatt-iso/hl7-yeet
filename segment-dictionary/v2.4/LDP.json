@@ -1,0 +1,115 @@
+{
+  "segment_id": "LDP",
+  "short_description": "Location Department",
+  "description": "The LDP segment identifies how a patient location room is being used by a certain department. Multiple departments can use the same patient location, so there can be multiple LDP segments following an LOC segment. There must be at least one LDP segment for each LOC segment. This is not intended to include any current occupant information.\n\nThe Technical Steward for the LDP segment is PAFM.",
+  "fields": {
+    "1": {
+      "field_id": "LDP.1",
+      "name": "Primary Key Value - LDP",
+      "description": "This field contains the institutions identification code for the location. The identifying key value. This field has the same components as the patient location fields in the PV1 segment (except that bed status is not included here). At least the first component of this field is required. The contents of this field must exactly match the content of its preceding MFE (MFE-4 - Primary key value - MFE) and its preceding LOC ( LOC-1 - primary key value - LOC) .",
+      "length": "200",
+      "data_type": "PL - Person Location",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "LDP.10",
+      "name": "Visiting Hours",
+      "description": "This field contains the hours when this location is open for visiting. Refer to HL7 Table 0267 - Days of the week for valid values for the first two components.",
+      "length": "80",
+      "data_type": "VH - Visiting Hours",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "11": {
+      "field_id": "LDP.11",
+      "name": "Contact Phone",
+      "description": "This field contains the phone number to use to contact facility personnel about the patient location, in case of inquiries about the location. This phone is not necessarily within the named patient location.",
+      "length": "250",
+      "data_type": "XTN - Extended Telecommunication Number",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "LDP.12",
+      "name": "Location Cost Center",
+      "description": "This field contains the cost center to which this location belongs. Refer to User-defined Table 0462 - Location cost center for suggested values.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "LDP.2",
+      "name": "Location Department",
+      "description": "This field contains the institutions department to which this location belongs, or its cost center. Refer to User-defined Table 0264 - Location departmentfor suggested values.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "LDP.3",
+      "name": "Location Service",
+      "description": "This field contains the hospital or ancillary service with which this location is associated. Depends on institution use. Repeats for rooms that can be used, for example, by different services on different days. These values should match the values used for PV1-10 - Hospital service, which is site defined. Refer to User-defined Table 0069 - Hospital service for suggested values.",
+      "length": "3",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "4": {
+      "field_id": "LDP.4",
+      "name": "Specialty Type",
+      "description": "This field contains the specialty type (if any) of the department or clinic. This may also be considered a bed type. Specialty type is a physical accommodation type, whereas accommodation type (LCC-3 - Accommodation type) is a financial accommodation type. Refer to User-defined Table 0265 - Specialty type for suggested values. See also LCH-4 - Location characteristic ID and LHC-5 - Location characteristic value.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "5": {
+      "field_id": "LDP.5",
+      "name": "Valid Patient Classes",
+      "description": "This field contains the patient types that are allowed to be assigned to this bed. For example, Inpatient, Outpatient, Series, Clinic, ER, Ambulatory, Observation, etc. These values should be the same set of values as those used for PV1-2 - Patient class. Refer to User-defined Table 0004 - Patient class for suggested values.",
+      "length": "1",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "6": {
+      "field_id": "LDP.6",
+      "name": "Active/Inactive Flag",
+      "description": "This field indicates whether the entry for this location is currently an active, that is, valid, usable entry (disregarding whether its waiting to be maintained by housekeeping). Refer to HL7 Table 0183 - Active/inactive for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "LDP.7",
+      "name": "Activation Date LDP",
+      "description": "This field contains the date and time when the location became active or \"in service\" for a department (disregarding whether it is waiting to be maintained by housekeeping).",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "LDP.8",
+      "name": "Inactivation Date - LDP",
+      "description": "This field contains the date when the location became inactive or \"out of service\" for this department (disregarding whether it is waiting to be maintained by housekeeping).",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "LDP.9",
+      "name": "Inactivated Reason",
+      "description": "This field contains the reason the location was put out of service. It is used whenLDP-8 - Inactivation date-LDP is sent.",
+      "length": "80",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

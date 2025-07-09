@@ -1,0 +1,178 @@
+{
+  "segment_id": "OBX",
+  "short_description": "Observation/Result",
+  "description": "The OBX segment is used to transmit a single observation or observation fragment. It represents the smallest indivisible unit of a report. Its structure is summarized in Figure 7-5.",
+  "fields": {
+    "1": {
+      "field_id": "OBX.1",
+      "name": "Set ID - OBX",
+      "description": "This field contains the sequence number. For compatibility with ASTM.",
+      "length": "4",
+      "data_type": "SI - Sequence ID",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "OBX.10",
+      "name": "Nature of Abnormal Test",
+      "description": "This field contains the nature of the abnormal test. Refer to HL7 Table 0080 - Nature of abnormal testing for valid values. As many of the codes as apply may be included, separated by repeat delimiters. For example, normal values based on age, sex, and race would be codes as A~S~R.",
+      "length": "2",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "11": {
+      "field_id": "OBX.11",
+      "name": "Observation Result Status",
+      "description": "This field contains the observation result status. Refer to HL7 table 0085 - Observation result status codes interpretation for valid values. This field reflects the current completion status of the results for one Observation Identifier.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "OBX.12",
+      "name": "Date Last Observation Normal Value",
+      "description": "This field contains the changes in the observation methods that would make values obtained from the old method not comparable with those obtained from the new method.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "OBX.13",
+      "name": "User Defined Access Checks",
+      "description": "This field permits the producer to record results-dependent codes for classifying the observation at the receiving system. This field should be needed only rarely, because most classifications are fixed attributes of the observation ID and can be defined in the associated observation master file (see description in Chapter 8).",
+      "length": "20",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "OBX.14",
+      "name": "Date/Time of the Observation",
+      "description": "This field is required in two circumstances. The first is when the observations reported beneath one report header (OBR) have different dates/times. This could occur in the case of queries, timed test sequences, or clearance studies where one measurement within a battery may have a different time than another measurement.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "15": {
+      "field_id": "OBX.15",
+      "name": "Producer's ID",
+      "description": "This field contains a unique identifier of the responsible producing service. It should be reported explicitly when the test results are produced at outside laboratories, for example. When this field is null, the receiving system assumes that the observations were produced by the sending organization. This information supports CLIA regulations in the US. The code for producer ID is recorded as a CE data type. In the US, the Medicare number of the producing service is suggested as the identifier.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "16": {
+      "field_id": "OBX.16",
+      "name": "Responsible Observer",
+      "description": "When required, this field contains the identifier of the individual directly responsible for the observation (i.e., the person who either performed or verified it). In a nursing service, the observer is usually the professional who performed the observation (e.g., took the blood pressure). In a laboratory, the observer is the technician who performed or verified the analysis. The code for the observer is recorded as a CE data type. If the code is sent as a local code, it should be unique and unambiguous when combined with OBX-15-producer ID.",
+      "length": "250",
+      "data_type": "XCN - Extended Composite ID Number And Name For Persons",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "17": {
+      "field_id": "OBX.17",
+      "name": "Observation Method",
+      "description": "No description found.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "18": {
+      "field_id": "OBX.18",
+      "name": "Equipment Instance Identifier",
+      "description": "This field identifies the Equipment Instance (e.g., Analyzer, Analyzer module, group of Analyzers,...) responsible for the production of the observation. This is the identifier from an institution's master list of equipment, where the institution is specified by the namespace ID or if it is blank, then by the Producers ID (OBX-15). It should be possible to retrieve from this master list the equipment type, serial number, etc., however it is not planned to transfer this information with every OBX. The repeating of this field allows for the hierarchical representation of the equipment (lowest level first), e.g., module of an instrument, instrument consisting of modules, cluster of multiple instruments, etc.",
+      "length": "22",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "19": {
+      "field_id": "OBX.19",
+      "name": "Date/Time of the Analysis",
+      "description": "This field is used to transfer the time stamp associated with generation of the analytical result by the instrument specified in Equipment Instance Identifier (see above).",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "OBX.2",
+      "name": "Value Type",
+      "description": "This field contains the format of the observation value in OBX. It must be valued if OBX-11-Observ result status is not valued with an X. If the value is CE then the result must be a coded entry. When the value type is TX or FT then the results are bulk text. The valid values for the value type of an observation are listed in HL7 Table 0125 - Value type.",
+      "length": "2",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "OBX.3",
+      "name": "Observation Identifier",
+      "description": "This field contains a unique identifier for the observation. The format is that of the Coded Element (CE). Example: 8625-6^P-R interval^LN.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "OBX.4",
+      "name": "Observation Sub-Id",
+      "description": "This field is used to distinguish between multiple OBX segments with the same observation ID organized under one OBR. For example, a chest X-ray report might include three separate diagnostic impressions. The standard requires three OBX segments, one for each impression. By putting a 1 in the Sub-ID of the first of these OBX segments, 2 in the second, and 3 in the third, we can uniquely identify each OBX segment for editing or replacement.",
+      "length": "20",
+      "data_type": "ST - String Data",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "OBX.5",
+      "name": "Observation Value",
+      "description": "This field contains the value observed by the observation producer. OBX-2-value type contains the data type for this field according to which observation value is formatted. It is not a required field because some systems will report only the normalcy/abnormalcy (OBX-8), especially in product experience reporting.\n\nThe length of the observation field is variable, depending upon value type. See OBX-2 value type.\n\nMay repeat for multipart, single answer results with appropriate data types, e.g., CE, TX, and FT data types.",
+      "length": "65536",
+      "data_type": "VARIES - Variable Datatype",
+      "optionality": "Conditional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "6": {
+      "field_id": "OBX.6",
+      "name": "Units",
+      "description": "No description found.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "OBX.7",
+      "name": "References Range",
+      "description": "When the observation quantifies the amount of a toxic substance, then the upper limit of the range identifies the toxic limit. If the observation quantifies a drug, the lower limits identify the lower therapeutic bounds and the upper limits represent the upper therapeutic bounds above which toxic side effects are common.",
+      "length": "60",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "OBX.8",
+      "name": "Abnormal Flags",
+      "description": "This field contains a table lookup indicating the normalcy status of the result. We strongly recommend sending this value when applicable. (See ASTM 1238 - review for more details). Refer to User-defined Table 0078 - Abnormal flags for valid entries.",
+      "length": "5",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Repeatable 5 times"
+    },
+    "9": {
+      "field_id": "OBX.9",
+      "name": "Probability",
+      "description": "This field contains the probability of a result being true for results with categorical values. It mainly applies to discrete coded results. It is a decimal number represented as an ASCII string that must be between 0 and 1, inclusive.",
+      "length": "5",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

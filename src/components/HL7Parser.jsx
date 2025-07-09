@@ -1,3 +1,5 @@
+// --- START OF FILE HL7Parser.jsx ---
+
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { io } from 'socket.io-client';
 import { parseHl7, sendHl7, analyzeHl7, getTotalUsage, getUsageByModel, getSupportedVersions } from '../api/mllp';
@@ -81,6 +83,7 @@ const HL7Parser = () => {
     // --- DATA FETCHING ON LOAD ---
     useEffect(() => {
         const fetchInitialData = async () => {
+            const PREFERRED_DEFAULT = 'v2.5.1';
             try {
                 const [total, byModel, versions] = await Promise.all([
                     getTotalUsage(),
@@ -90,18 +93,24 @@ const HL7Parser = () => {
                 setTotalTokenUsage(total);
                 setModelUsage(byModel);
                 setSupportedVersions(versions);
-                // Default to the first (likely latest) version if available
+
+                // --- THIS IS THE NEW, SMARTER LOGIC ---
+                // If our preferred default version exists in the list from the API, set it.
+                // Otherwise, fall back to the newest one (versions[0]).
                 if (versions.length > 0) {
-                    setSelectedHl7Version(versions[0]);
+                    if (versions.includes(PREFERRED_DEFAULT)) {
+                        setSelectedHl7Version(PREFERRED_DEFAULT);
+                    } else {
+                        // If 2.5.1 isn't an option for some reason, just use the newest.
+                        setSelectedHl7Version(versions[0]);
+                    }
                 }
             } catch (error) {
                 console.error("Couldn't fetch initial data:", error);
-                // Handle error gracefully, maybe show a toast
             }
         };
         fetchInitialData();
     }, []);
-
     // --- PARSING EFFECT (NOW DEPENDS ON HL7 VERSION) ---
     useEffect(() => {
         if (activeTab !== 'sender' || !hl7Message.trim()) {
@@ -113,7 +122,7 @@ const HL7Parser = () => {
             setIsProcessing(true);
             // Pass the selected HL7 version to the parser
             parseHl7(hl7Message, selectedHl7Version)
-                .then(data => { setSegments(data); setError(''); })
+                .then(data => { setSegments(data); setError(''); }) // The `data` now magically contains `errors` key on fields.
                 .catch(err => { setSegments([]); setError(err.message); })
                 .finally(() => { setIsProcessing(false); });
         }, 500);
@@ -164,6 +173,8 @@ const HL7Parser = () => {
         setActiveTab('sender');
     };
 
+
+
     const handleAnalyze = async () => {
         if (!hl7Message || isAnalyzing) return;
         setOriginalMessageForDiff(hl7Message);
@@ -201,8 +212,8 @@ const HL7Parser = () => {
         <button
             onClick={() => setActiveTab(name)}
             className={`px-6 py-2 text-sm font-medium rounded-t-lg transition-colors border-b-2 ${activeTab === name
-                    ? 'border-indigo-500 text-white'
-                    : 'border-transparent text-gray-400 hover:border-gray-500 hover:text-gray-200'
+                ? 'border-indigo-500 text-white'
+                : 'border-transparent text-gray-400 hover:border-gray-500 hover:text-gray-200'
                 }`}
         >
             {label}

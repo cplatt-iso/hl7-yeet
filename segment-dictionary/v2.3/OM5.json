@@ -1,0 +1,34 @@
+{
+  "segment_id": "OM5",
+  "short_description": "Observation batteries",
+  "description": "This segment contains the information about batteries and supersets (a nature code of F, P or S, as described in OM1-18-nature of test/observation).",
+  "fields": {
+    "1": {
+      "field_id": "OM5.1",
+      "name": "Sequence Number",
+      "description": "This field contains the same value as the sequence number of the associated OM1 segment",
+      "length": "4",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "OM5.2",
+      "name": "Test/Observations Included w/an Ordered Test Battery",
+      "description": "This field contains the codes and names of all tests/observations included within a single battery (nature code P, as described in OM1-18-nature of test/observation), a single functional procedure (nature code F), or a given superset (nature code S). When a segment includes a list of component elements, the sending system should be sure that the segments defining all of the components are sent before the segment that references them. An entry in this list can itself be a battery.\nThe individual test/observation IDs should be recorded as type CE, i.e., in the standard format for coded observation identifiers. Multiple observations should be separated by repeat delimiters\n\nIf the definition segment defined serum electrolytes, this field might look like the following:\n84132^potassium^AS4~\n84295^sodium^AS4~\n82435^chloride^AS4~\n82374^HCO3^^AS4~\n\nFor S (superset) parameters, this field contains the batteries that are included within the \u201csuper\u201d battery. For example, ROUTINES might be defined as:\n402^Electrolytes~352^Urinalysis~432^CBC~520^SMA12",
+      "length": "200",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "3": {
+      "field_id": "OM5.3",
+      "name": "Observation ID Suffixes",
+      "description": "This field contains the tests or procedures that produce a type which uses observation ID suffixes following the test/observation ID code. This field lists the possible options. The applicable threecharacter mnemonics given in ASTM Table 20 (or others appropriate to the application) are listed, separated by repeat delimiters. For example, a chest X-ray may use the suffixes IMP, REC, DEV, or others. Each of the expected suffixes should be listed here",
+      "length": "200",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

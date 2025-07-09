@@ -1,0 +1,223 @@
+{
+  "segment_id": "OM7",
+  "short_description": "Additional Basic Attributes",
+  "description": "The OM7 segment contains additional basic attributes that apply to the definition of most observations/services.",
+  "fields": {
+    "1": {
+      "field_id": "OM7.1",
+      "name": "Sequence Number - Test/ Observation Master File",
+      "description": "This field contains the value as the sequence number.",
+      "length": "4",
+      "data_type": "NM - Numeric",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "OM7.10",
+      "name": "Test/Service Default Frequency",
+      "description": "This field indicates the default frequency (how often) the service would be ordered for or performed on.",
+      "length": "60",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "OM7.11",
+      "name": "Consent Indicator",
+      "description": "This field indicates if a consent is needed for the service item. Refer to HL7 Table 0136 - Yes/no ind icator.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "OM7.12",
+      "name": "Consent Identifier",
+      "description": "This field contains the identifier for the consent specified for the service item. Refer to User-defined Table 0413 - Consent identifier for suggested values.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "OM7.13",
+      "name": "Consent Effective Start Date/Time",
+      "description": "This field contains the date and time the consent is valid for the service item.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "OM7.14",
+      "name": "Consent Effective End Date/Time",
+      "description": "This field contains the date and time the consent is no longer valid for the test/service.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "15": {
+      "field_id": "OM7.15",
+      "name": "Consent Interval Quantity",
+      "description": "This field specifies the period of time for which a consent is valid for a specific service item.",
+      "length": "5",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "16": {
+      "field_id": "OM7.16",
+      "name": "Consent Interval Units",
+      "description": "This field specifies the unit of time for OM7-15 - Consent interval quantity . Refer to User-defined Table 0414 - Units of time for suggested values.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "17": {
+      "field_id": "OM7.17",
+      "name": "Consent Waiting Period Quantity",
+      "description": "This field contains the time period between the time the consent is signed and the procedure can be performed.",
+      "length": "5",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "18": {
+      "field_id": "OM7.18",
+      "name": "Consent Waiting Period Units",
+      "description": "This field specifies the unit of time for OM7-17 - Consent waiting period quantity . Refer to User-defined Table 0414 - Units of time for suggested values.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "19": {
+      "field_id": "OM7.19",
+      "name": "Effective Date/Time of Change",
+      "description": "This field contains the date and time of the last change in the test procedure that would make previous results incompatible with new results.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "OM7.2",
+      "name": "Universal Service Identifier",
+      "description": "This field contains the producers usual or preferred identification of the test or service. The test/service ID may be any of those included in ASTM tables 3 and 5, or a local code.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "20": {
+      "field_id": "OM7.20",
+      "name": "Entered By",
+      "description": "This field contains the identity of the person who actually keyed the service item into the application. It provides an audit trail in case the request is entered incorrectly and the ancillary department needs to clarify the request.",
+      "length": "250",
+      "data_type": "XCN - Extended Composite ID Number And Name For Persons",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "21": {
+      "field_id": "OM7.21",
+      "name": "Orderable-at Location",
+      "description": "This field contains the location(s) where the test/service can be ordered.",
+      "length": "200",
+      "data_type": "PL - Person Location",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "22": {
+      "field_id": "OM7.22",
+      "name": "Formulary Status",
+      "description": "This field indicates whether or not the service (pharmaceutical) is in the formulary. Refer to User-defined Table 0473 - Formulary status for valid values.",
+      "length": "1",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "23": {
+      "field_id": "OM7.23",
+      "name": "Special Order Indicator",
+      "description": "This field indicates whether or not the service (pharmaceutical) is a special order. Refer to HL7 Table 0136 - Yes/no indicator for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "24": {
+      "field_id": "OM7.24",
+      "name": "Primary Key Value - CDM",
+      "description": "A llows the ability to associate a Service/Test/Observation item with a CIM (charge item master). It is possible to allow multiple charge items to a single SIM item.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "3": {
+      "field_id": "OM7.3",
+      "name": "Category Identifier",
+      "description": "This field contains the category name (term given to a group of service items for the purpose of classification). Examples: Laboratory, Pharmacy, Diagnostic Imaging, etc. Refer to User-defined Table 0412 - Category identifier for suggested values.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "4": {
+      "field_id": "OM7.4",
+      "name": "Category Description",
+      "description": "This field contains a text description for the category of the test/service item.",
+      "length": "200",
+      "data_type": "TX - Text Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "OM7.5",
+      "name": "Category Synonym",
+      "description": "This field contains an alternate name(s) for the category of the test/service. Example: The category \"Radiology\" is a synonym name for the category \" Diagnostic Imaging\".",
+      "length": "200",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "6": {
+      "field_id": "OM7.6",
+      "name": "Effective Test/Service Start Date/Time",
+      "description": "This field contains the date and time that the service item is available to be ordered, performed, etc.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "OM7.7",
+      "name": "Effective Test/Service End Date/Time",
+      "description": "This field contains the date and time that the service item is no longer authorized to be ordered, performed, etc.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "OM7.8",
+      "name": "Test/Service Default Duration Quantity",
+      "description": "This field indicates the default duration quantity for the service.",
+      "length": "5",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "OM7.9",
+      "name": "Test/Service Default Duration Units",
+      "description": "This field indicates the default duration units for the service.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

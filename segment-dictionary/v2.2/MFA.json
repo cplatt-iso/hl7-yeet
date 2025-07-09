@@ -1,0 +1,52 @@
+{
+  "segment_id": "MFA",
+  "short_description": "Master File Acknowledgement",
+  "description": "No description found.",
+  "fields": {
+    "1": {
+      "field_id": "MFA.1",
+      "name": "Record-level Event Code",
+      "description": "No description found.",
+      "length": "3",
+      "data_type": "ID - Coded Value",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "MFA.2",
+      "name": "Mfn Control Id",
+      "description": "No description found.",
+      "length": "20",
+      "data_type": "ST - String Data",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "MFA.3",
+      "name": "Event Completion Date / Time",
+      "description": "No description found.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "MFA.4",
+      "name": "Error Return Code And/Or Text",
+      "description": "No description found.",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "MFA.5",
+      "name": "Primary Key Value",
+      "description": "No description found.",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Required",
+      "repeatability": "Repeatable indefinitely"
+    }
+  }
+}

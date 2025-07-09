@@ -1,0 +1,151 @@
+{
+  "segment_id": "CSR",
+  "short_description": "Clinical Study Registration",
+  "description": "The CSR segment will contain fundamental administrative and regulatory information required to document a patient\u2019s enrollment on a clinical trial. This segment is all that is required if one needs to message another system that an enrollment has taken place, i.e., from clinical trials to pharmacy, accounting, or order entry systems. The CSR segment may also be used to identify that OBR, OBX, RXA, and RXR segments that follow represent data applicable to the identified study",
+  "fields": {
+    "1": {
+      "field_id": "CSR.1",
+      "name": "Sponsor Study ID",
+      "description": "The field contains the universal identifier for the clinical trial. Since many clinical trials are collaborative and multi-centered, and since one goal of these standards is to promote automated data exchange among sites, the primary identifier should come from the sponsor. The coding system component may reference the sponsor",
+      "length": "60",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "CSR.10",
+      "name": "Patient Study Eligibility Status",
+      "description": "This field indicates whether the patient was an appropriate candidate for the trial. It is important for quality control and data analysis. The code set will vary among clinical trials. An example answer set is: Yes, No, By Approval, Not Assessed, Unknown. This field is required for the patient registration trigger event (C01).",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "CSR.11",
+      "name": "Study Randomization Date/time",
+      "description": "This field contains the date the patient was randomized. The time component is optional. Up to three randomizations are supported. Sequential randomizations are listed in chronologic order",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Repeatable 3 times"
+    },
+    "12": {
+      "field_id": "CSR.12",
+      "name": "Study Randomized Arm",
+      "description": "This field contains codes that must be developed by users. The blind treatment assignment may be communicated as a dummy text: ^blind or if a coded treatment assignment must also be communicated: 1^blind^local_code. If more than one randomization occurs, the second and third repetitions will correspond to the second and third repetitions of CSR-11-study randomization date/time, if they exist",
+      "length": "200",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable 3 times"
+    },
+    "13": {
+      "field_id": "CSR.13",
+      "name": "Stratum for Study Randomization",
+      "description": "Many studies have stratified randomization schemas. The strata codes must be developed for each clinical trial. This field is important for statistical analysis of the study results. The second and third repetitions will correspond to the second and third repetitions of CSR-11-study randomization date/time and CSR-12-randomized study arm, if they exist",
+      "length": "200",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable 3 times"
+    },
+    "14": {
+      "field_id": "CSR.14",
+      "name": "Patient Evaluability Status",
+      "description": "This field categorizes the inclusion of this patient\u2019s data for various analyses. The patient\u2019s data may be evaluable for analysis of adverse events but not for outcomes. Or it may be evaluable for some outcomes and not others. The coding systems will vary among trials. This field is required for the off-study trigger event (C04).",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "15": {
+      "field_id": "CSR.15",
+      "name": "Date/time Ended Study",
+      "description": "This field contains the date the patient completes or is otherwise removed from the study. This field is required for the off-study event (C04). The time component is optional",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "16": {
+      "field_id": "CSR.16",
+      "name": "Reason Ended Study",
+      "description": "This information is important for quality control and data analysis. The coding systems will vary among trials. An example answer set is: Adverse Events, Completed Trial, Death, Drug Resistance, Intercurrent Illness, Lost to Follow up, No Response to Therapy, Noncompliance, Progression of Disease, Protocol Violation, Refused Further Therapy. This field is required for the off-study trigger event (C04).",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "CSR.2",
+      "name": "Alternate Study ID",
+      "description": "This field contains an alternate identifier that may be used as agreed upon by messaging parties. For example, the sending application may code its internal study number here.",
+      "length": "60",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "CSR.3",
+      "name": "Institution Registering the Patient",
+      "description": "This field distinguishes the institution where registration occurred. The legal approval to give patients access to a trial lies with the Internal Review Board for the institution. Universal healthcare provider facility codes should be used when they exist. Currently coding systems must be devised by users.",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "CSR.4",
+      "name": "Sponsor Patient ID",
+      "description": "This field contains the main patient identification for the study. The sponsor patient ID allows automation of records on patients treated at various institutions. The sponsor patient ID should be unique for each patient participating on the study identified in CSR-1-sponsor study ID.",
+      "length": "30",
+      "data_type": "CX - Extended Composite ID With Check Digit",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "CSR.5",
+      "name": "Alternate Patient ID",
+      "description": "This field may be the sending application\u2019s patient identification. Coding conventions may be used as agreed upon by users.",
+      "length": "30",
+      "data_type": "CX - Extended Composite ID With Check Digit",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "CSR.6",
+      "name": "Date/Time of Patient Study Registration",
+      "description": "This field contains the date of the patient registration is mandatory. The time component is optional. The time stamp for a registration may be useful. For example, patients may be randomized at the pharmacy according to the order in which they were registered.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "CSR.7",
+      "name": "Person Performing Study Registration",
+      "description": "This field contains the healthcare facility employee who actually phoned, submitted a form, or interactively registered the patient on the clinical trial. This is generally done under authorization from the attending physician or a principal or collaborating investigator.",
+      "length": "60",
+      "data_type": "XCN - Extended Composite ID Number And Name",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "CSR.8",
+      "name": "Study Authorizing Provider",
+      "description": "This field contains the healthcare provider, generally the attending physician, who is accountable that the patient is eligible for the trial and has signed an informed consent. National standard healthcare provider codes should be used when they exist. This field is required for the patient registration trigger event (C01).",
+      "length": "60",
+      "data_type": "XCN - Extended Composite ID Number And Name",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "CSR.9",
+      "name": "Date/time Patient Study Consent Signed",
+      "description": "This field contains the consent form signing date is collected to provide a checkpoint that the consent form was obtained. Since many trials involve unapproved drugs and other treatment modalities, the consent form is highly important to document and store. This field is required for the patient registration trigger event (C01). The time component is optional",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

@@ -1,0 +1,88 @@
+{
+  "segment_id": "NSC",
+  "short_description": "Status change",
+  "description": "The NSC segment can be used to request the start-up, shut-down, and/or migration (to a different cpu or file-server/file-system) of a particular application. It can also be used in an unsolicited update from one system to another to announce the start-up, shut-down, or migration of an application.",
+  "fields": {
+    "1": {
+      "field_id": "NSC.1",
+      "name": "Network Change Type",
+      "description": "This field contains the type of change being requested (if NMR query) or announced (if NMD unsolicited update). Refer to user-defined table 0333 - Network change type for suggested values. Implies that \"new\" version starts up with no loss or duplication of data as old one is shutting down (if possible).",
+      "length": "4",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "NSC.2",
+      "name": "Current CPU",
+      "description": "This field contains a site-specific name for the current CPU",
+      "length": "30",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "NSC.3",
+      "name": "Current Fileserver",
+      "description": "This field contains a site-specific name for the current fileserver or file system used by this application",
+      "length": "30",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "NSC.4",
+      "name": "Current Application",
+      "description": "This field contains a site-specific name available to identify the \"current\" application process used for interfacing with lower level protocols. To be used in conjunction with the sending/receiving system and facility values in the MSH.",
+      "length": "30",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "NSC.5",
+      "name": "Current Facility",
+      "description": "This field contains a site-specific name for the current facility used by this application. To be used in conjunction with the values for the sending/receiving system and facility values in the MSH",
+      "length": "30",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "NSC.6",
+      "name": "New CPU",
+      "description": "This field contains a site-specific name for the new CPU",
+      "length": "30",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "NSC.7",
+      "name": "New Fileserver",
+      "description": "This field contains a site-specific name for the new fileserver or file system used by this application",
+      "length": "30",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "NSC.8",
+      "name": "New Application",
+      "description": "This field contains a site-specific name available to identify \"new\" application processes used for interfacing with lower level protocols. To be used in conjunction with the sending/receiving system and facility values in the MSH",
+      "length": "30",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "NSC.9",
+      "name": "New Facility",
+      "description": "This field contains a site-specific name for the new facility used by this application. To be used in conjunction with the values for the sending/receiving system and facility values in the MSH.",
+      "length": "30",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

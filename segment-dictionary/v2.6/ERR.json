@@ -1,0 +1,115 @@
+{
+  "segment_id": "ERR",
+  "short_description": "Error",
+  "description": "The ERR segment is used to add error comments to acknowledgment messages.",
+  "fields": {
+    "1": {
+      "field_id": "ERR.1",
+      "name": "Error Code and Location",
+      "description": "This field identifies an erroneous segment in another message. Retained for backward compatibility only as of v 2.5; refer to ERR-2 and ERR-3 instead.",
+      "length": "493",
+      "data_type": "ELD - Error Location and Description",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "10": {
+      "field_id": "ERR.10",
+      "name": "Override Type",
+      "description": "Identifies what type of override can be used to override the specific error identified. Refer to User-defined table 0518 Override Type for suggested values.",
+      "length": "705",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "ERR.11",
+      "name": "Override Reason Code",
+      "description": "Provides a list of potential override codes that can be used to override enforcement of the application rule that generated the error. Refer to User-defined table 0519 - Override Reason for suggested values.",
+      "length": "705",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "12": {
+      "field_id": "ERR.12",
+      "name": "Help Desk Contact Point",
+      "description": "Lists phone, e-mail, fax, and other relevant numbers for helpdesk support related to the specified error.",
+      "length": "652",
+      "data_type": "XTN - Extended Telecommunication Number",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "2": {
+      "field_id": "ERR.2",
+      "name": "Error Location",
+      "description": "Identifies the location in a message related to the identified error, warning or message. If multiple repetitions are present, the error results from the values in a combination of places.",
+      "length": "18",
+      "data_type": "ERL - Error Location",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "3": {
+      "field_id": "ERR.3",
+      "name": "HL7 Error Code",
+      "description": "Identifies the HL7 (communications) error code. Refer to HL7 Table 0357 - Message Error Condition Codes for valid values.",
+      "length": "705",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "ERR.4",
+      "name": "Severity",
+      "description": "Identifies the severity of an application error. Knowing if something is Error, Warning or Information is intrinsic to how an application handles the content. Refer to HL7 Table 0516 - Error severity for valid values. If ERR-3 has a value of \"0\", ERR-4 will have a value of \"I\".",
+      "length": "2",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "ERR.5",
+      "name": "Application Error Code",
+      "description": "Application specific code identifying the specific error that occurred. Refer to User-Defined Table 0533 - Application Error Code for suggested values.\n\nIf the message associated with the code has parameters, it is recommended that the message be indicated in the format of the java text MessageFormat appproach. This style provides information on the paramter type to allow numbers, dates and times to be formatted appropriately for the language.",
+      "length": "705",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "ERR.6",
+      "name": "Application Error Parameter",
+      "description": "Additional information to be used, together with the Application Error Code, to understand a particular error condition/warning/etc. This field can repeat to allow for up to 10 parameters.",
+      "length": "80",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Repeatable 10 times"
+    },
+    "7": {
+      "field_id": "ERR.7",
+      "name": "Diagnostic Information",
+      "description": "Information that may be used by help desk or other support personnel to diagnose a problem.",
+      "length": "2048",
+      "data_type": "TX - Text Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "ERR.8",
+      "name": "User Message",
+      "description": "The text message to be displayed to the application user.",
+      "length": "250",
+      "data_type": "TX - Text Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "ERR.9",
+      "name": "Inform Person Indicator",
+      "description": "A code to indicate who (if anyone) should be informed of the error. This field may also be used to indicate that a particular person should NOT be informed of the error (e.g., Do not inform patient). Refer to User-defined table 0517- Inform Person Code for suggested values.",
+      "length": "20",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    }
+  }
+}

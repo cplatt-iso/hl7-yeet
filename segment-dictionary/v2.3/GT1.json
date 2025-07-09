@@ -1,0 +1,502 @@
+{
+  "segment_id": "GT1",
+  "short_description": "Guarantor",
+  "description": "The GT1 segment contains guarantor (e.g., the person or the organization with financial responsibility for payment of a patient account) data for patient and insurance billing applications.",
+  "fields": {
+    "1": {
+      "field_id": "GT1.1",
+      "name": "Set ID - Guarantor",
+      "description": "Set ID-GT1 contains a number that identifies this transaction. For the first occurrence of the segment the sequence shall be 1, for the second occurrence it shall be 2, etc",
+      "length": "4",
+      "data_type": "SI - Sequence ID",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "GT1.10",
+      "name": "Guarantor Type",
+      "description": "This field indicates the type of guarantor, e.g., individual, institution, etc. Refer to user-defined table 0068 - Guarantor type for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "GT1.11",
+      "name": "Guarantor Relationship",
+      "description": "This field indicates the relationship of the guarantor with the patient, e.g., parent, child, etc. Refer to user-defined table 0063 - Relationship for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "GT1.12",
+      "name": "Guarantor SSN",
+      "description": "This field contains the guarantor\u2019s social security number.",
+      "length": "11",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "GT1.13",
+      "name": "Guarantor Date - Begin",
+      "description": "This field contains the date that the guarantor becomes responsible for the patient\u2019s account.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "GT1.14",
+      "name": "Guarantor Date - End",
+      "description": "This field contains the date that the guarantor stops being responsible for the patient\u2019s account.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "15": {
+      "field_id": "GT1.15",
+      "name": "Guarantor Priority",
+      "description": "This field is used to determine the order in which the guarantors are responsible for the patient\u2019s account.\n\n\u201c1\u201d = primary guarantor\n\u201c2\u201d = secondary guarantor, etc",
+      "length": "2",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "16": {
+      "field_id": "GT1.16",
+      "name": "Guarantor Employer Name",
+      "description": "This field contains the name of the guarantor\u2019s employer, if the employer is a person. When the guarantor\u2019s employer is an organization, use GT1-51-guarantor employer\u2019s organization name Multiple names for the same person may be sent in this field, not multiple employers. The legal name must be sent first in the repetition. When the legal name is not sent, a repeat delimiter must be sent first for the first repetition.",
+      "length": "130",
+      "data_type": "XPN - Extended Person Name",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "17": {
+      "field_id": "GT1.17",
+      "name": "Guarantor Employer Address",
+      "description": "This field contains the guarantor\u2019s employer\u2019s address. Multiple addresses for the same employer may be sent in this field. The mailing address must be sent first in the repetition. When the mailing address is not sent, a repeat delimiter must be sent first for the first repetition.",
+      "length": "106",
+      "data_type": "XAD - Extended Address",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "18": {
+      "field_id": "GT1.18",
+      "name": "Guarantor Employ Phone Number",
+      "description": "This field contains the guarantor\u2019s employer\u2019s phone number. Multiple phone numbers for the same employer. The primary telephone number must be sent first in the sequence. When the primary telephone number is not sent, a repeat delimiter must be sent first for the first repetition.",
+      "length": "40",
+      "data_type": "XTN - Extended Telecommunication Number",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "19": {
+      "field_id": "GT1.19",
+      "name": "Guarantor Employee ID Number",
+      "description": "This field contains the guarantor\u2019s employee number.",
+      "length": "20",
+      "data_type": "CX - Extended Composite ID With Check Digit",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "2": {
+      "field_id": "GT1.2",
+      "name": "Guarantor Number",
+      "description": "This field contains the primary identifier, or other identifiers, assigned to the guarantor",
+      "length": "59",
+      "data_type": "CX - Extended Composite ID With Check Digit",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "20": {
+      "field_id": "GT1.20",
+      "name": "Guarantor Employment Status",
+      "description": "This field contains the code that indicates the guarantor\u2019s employment status, e.g., full time, part time, self-employed, etc. Refer to user-defined table 0066 - Employment status for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "21": {
+      "field_id": "GT1.21",
+      "name": "Guarantor Organization",
+      "description": "This field contains the name of the guarantor when the guarantor is an organization. Multiple names for the same guarantor may be sent in this field, not multiple guarantors. The legal name is assumed to be in the first repetition. When the legal name is not sent, a repeat delimiter must be sent first for the first repetition. The components for this data type are described in Chapter 2.\n\nBeginning with Version 2.3, if the guarantor is a person, send a null value (\"\") in GT1-21-guarantor organization name and put the person name in GT1-3-guarantor person name. Either guarantor person name or guarantor organization name is required.",
+      "length": "130",
+      "data_type": "XON - Extended Composite Name And ID For Organizations",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "22": {
+      "field_id": "GT1.22",
+      "name": "Guarantor Billing Hold Flag",
+      "description": "This field indicates whether or not a system should suppress printing of the guarantor\u2019s bills.\n\nY a system should suppress printing of guarantor\u2019s bills\nN a system should not suppress printing of guarantor\u2019s bills",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "23": {
+      "field_id": "GT1.23",
+      "name": "Guarantor Credit Rating Code",
+      "description": "This field contains the guarantor\u2019s credit rating.",
+      "length": "80",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "24": {
+      "field_id": "GT1.24",
+      "name": "Guarantor Death Date And Time",
+      "description": "This field is used to indicate the date and time at which the guarantor\u2019s death occurred.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "25": {
+      "field_id": "GT1.25",
+      "name": "Guarantor Death Flag",
+      "description": "This field indicates whether or not the guarantor is deceased. Refer to HL7 table 0136 - Yes/no indicator for valid values.\n\nY the guarantor is deceased\nN the guarantor is living",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "26": {
+      "field_id": "GT1.26",
+      "name": "Guarantor Charge Adjustment Code",
+      "description": "This field contains user-defined codes that indicate which adjustments should be made to this guarantor\u2019s charges. For example, when the hospital agrees to adjust this guarantor\u2019s charges to a sliding scale. Refer to user-defined table 0218 - Charge adjustment for suggested values.\n\nExample: This field would contain the value used for sliding-fee scale processing\u00e9",
+      "length": "80",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "27": {
+      "field_id": "GT1.27",
+      "name": "Guarantor Household Annual Income",
+      "description": "This field contains the combined annual income of all members of the guarantor\u2019s household.",
+      "length": "10",
+      "data_type": "CP - Composite Price",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "28": {
+      "field_id": "GT1.28",
+      "name": "Guarantor Household Size",
+      "description": "This field specifies the number of people living at the guarantor\u2019s primary residence.",
+      "length": "3",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "29": {
+      "field_id": "GT1.29",
+      "name": "Guarantor Employer ID Number",
+      "description": "This is a code that uniquely identifies the guarantor\u2019s employer when the employer is a person. It may be a user-defined code or a code defined by a government agency (Federal Tax ID#).\n\nWhen further breakdowns of employer information are needed, such as a division or plant, it is recommended that the coding scheme incorporate the relationships (e.g., define separate codes for each division).",
+      "length": "20",
+      "data_type": "CX - Extended Composite ID With Check Digit",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "3": {
+      "field_id": "GT1.3",
+      "name": "Guarantor Name",
+      "description": "This field contains the name of the guarantor. Multiple names for the same guarantor may be sent in this field. The legal name is assumed to be in the first repetition. When the legal name is not sent, a repeat delimiter must be sent first for the first repetition. The components for this data type are described in Chapter 2.\n\nBeginning with Version 2.3, if the guarantor is an organization, send a null value (\" \") in GT1-3-guarantor person name and put the organization name in GT1-21-guarantor organization name. Either guarantor person name or guarantor organization name is required",
+      "length": "48",
+      "data_type": "XPN - Extended Person Name",
+      "optionality": "Required",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "30": {
+      "field_id": "GT1.30",
+      "name": "Guarantor Marital Status Code",
+      "description": "This field contains the marital status of the guarantor. Refer to user-defined table 0002 - Marital status for suggested values.",
+      "length": "1",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "31": {
+      "field_id": "GT1.31",
+      "name": "Guarantor Hire Effective Date",
+      "description": "This field contains the date that the guarantor\u2019s employment began.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "32": {
+      "field_id": "GT1.32",
+      "name": "Employment Stop Date",
+      "description": "his field indicates the date on which the guarantor\u2019s employment with a particular employer ended.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "33": {
+      "field_id": "GT1.33",
+      "name": "Living Dependency",
+      "description": "Identifies the specific living conditions of the guarantor. Refer to user-defined table 0223 - Living dependency for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "34": {
+      "field_id": "GT1.34",
+      "name": "Ambulatory Status Code",
+      "description": "Identifies the transient state of mobility for the guarantor. Refer to user-defined table 0009 - Ambulatory status for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "35": {
+      "field_id": "GT1.35",
+      "name": "Citizenship",
+      "description": "This field contains the code to identify the guarantor\u2019s citizenship. HL7 recommends using ISO table 3166 as the suggested values in user-defined table 0171 - Citizenship.",
+      "length": "4",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "36": {
+      "field_id": "GT1.36",
+      "name": "Primary Language",
+      "description": "This field identifies the guarantor\u2019s primary speaking language. HL7 recommends using ISO table 639 as the suggested values in user-defined table 0296 - Language.",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "37": {
+      "field_id": "GT1.37",
+      "name": "Living Arrangement",
+      "description": "This field identifies the situation in which the person lives at his residential address. Refer to the user-defined table 0220- Living arrangement for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "38": {
+      "field_id": "GT1.38",
+      "name": "Publicity Indicator",
+      "description": "This field contains a user-defined code indicating what level of publicity is allowed (e.g., No Publicity, Family Only) for a guarantor. Refer to user-defined table 0215 - Publicity indicator for suggested values.",
+      "length": "80",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "39": {
+      "field_id": "GT1.39",
+      "name": "Protection Indicator",
+      "description": "This field identifies the guarantor\u2019s protection, which determines whether or not access to information about this enrollee should be restricted from users who do not have adequate authority. Refer to HL7 table 0136 - Yes/no indicator for valid values.\n\nY restrict access\nN do not restrict access",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "GT1.4",
+      "name": "Guarantor Spouse Name",
+      "description": "This field contains the name of the guarantor\u2019s spouse. Multiple names for the same guarantor spouse may be sent in this field. The legal name is assumed to be in the first repetition. When the legal name is not sent, a repeat delimiter must be sent first for the first repetition.",
+      "length": "48",
+      "data_type": "XPN - Extended Person Name",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "40": {
+      "field_id": "GT1.40",
+      "name": "Student Indicator",
+      "description": "This field indicates whether the guarantor is currently a student, and whether the patient is a full-time or part-time student. This field does not indicate the degree level (high school, college) of the student, or his/her field of study (accounting, engineering, etc.). Refer to user-defined table 0231- Student status for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "41": {
+      "field_id": "GT1.41",
+      "name": "Religion",
+      "description": "This field indicates the type of religion practiced by the guarantor. Refer to user-defined table 0006 - Religion for suggested values.",
+      "length": "3",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "42": {
+      "field_id": "GT1.42",
+      "name": "Mother s Maiden Name",
+      "description": "This field indicates the guarantor\u2019s mother\u2019s maiden name.",
+      "length": "48",
+      "data_type": "XPN - Extended Person Name",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "43": {
+      "field_id": "GT1.43",
+      "name": "Nationality Code",
+      "description": "This field contains a code that identifies the nation or national grouping to which the person belongs. This may be different from a person\u2019s citizenship in countries in which multiple nationalities are recognized (for example, Spain: Basque, Catalan, etc.). HL7 recommends using ISO table 3166 as suggested values in user-defined table 0212 - Nationality.",
+      "length": "80",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "44": {
+      "field_id": "GT1.44",
+      "name": "Ethnic Group",
+      "description": "This field contains the guarantor\u2019s ethnic or race group. ERISA has a published list of ethnic classifications that may be used by local agreement at a site. Refer to user-defined table 0189 - Ethnic group for suggested values.",
+      "length": "3",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "45": {
+      "field_id": "GT1.45",
+      "name": "Contact Person's Name",
+      "description": "This field contains the name of the person who should be contacted regarding the guarantor bills, etc. This may be someone other than the guarantor. (Contact guarantor\u2019s wife regarding all bills - guarantor lives out of country). The components for this data type are described in Chapter 2.\n\nThis is a repeating field that allows for multiple names for the same person. The legal name is assumed to be in the first repetition. When the legal name is not sent, a repeat delimiter must be sent first for the first repetition\u00e9",
+      "length": "48",
+      "data_type": "XPN - Extended Person Name",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "46": {
+      "field_id": "GT1.46",
+      "name": "Contact Person s Telephone Number",
+      "description": "This field contains the telephone number of the guarantor (person) to contact regarding guarantor bills, etc. Multiple phone numbers for that person may be sent in this sequence. The primary telephone number is assumed to be in the first repetition. When the primary telephone number is not sent, a repeat delimiter must be sent first for the first repetition.",
+      "length": "40",
+      "data_type": "XTN - Extended Telecommunication Number",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "47": {
+      "field_id": "GT1.47",
+      "name": "Contact Reason",
+      "description": "This field contains a user-defined code that identifies the reason for contacting the guarantor, for example, to phone the guarantor if payments are late. Refer to user-defined table 0222 - Contact reason for suggested values.",
+      "length": "80",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "48": {
+      "field_id": "GT1.48",
+      "name": "Contact Relationship Code",
+      "description": "Identifies the guarantor relationship to the contact person specified above. Some examples of the relationship between the guarantor and the guarantor contact person might include wife, attorney, power of attorney, self, and organization. Refer to user-defined table 0063 - Relationship for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "49": {
+      "field_id": "GT1.49",
+      "name": "Job Title",
+      "description": "This field contains a descriptive name of the guarantor\u2019s occupation (e.g., Sr. Systems Analyst, Sr. Accountant).",
+      "length": "20",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "GT1.5",
+      "name": "Guarantor Address",
+      "description": "This field contains the guarantor\u2019s address. Multiple addresses for the same person may be sent in this field. The mailing address is assumed to be in the first repetition. When the mailing address is not sent, a repeat delimiter must be sent first for the first repetition.",
+      "length": "106",
+      "data_type": "XAD - Extended Address",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "50": {
+      "field_id": "GT1.50",
+      "name": "Job Code/Class",
+      "description": "This field contains the guarantor\u2019s job code and employee classification. Refer to user-defined tables 0327 - Job code and 0328 - Job class for suggested values",
+      "length": "20",
+      "data_type": "JCC - Job Code Class",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "51": {
+      "field_id": "GT1.51",
+      "name": "Guarantor Employer's Organization Name",
+      "description": "This field contains the name of the guarantor\u2019s employer when the guarantor\u2019s employer is an organization. When the guarantor\u2019s employer is a person, use GT1-16 guarantor employer name. Multiple names for the same guarantor may be sent in this field. The legal name is assumed to be in the first repetition. When the legal name is not sent, a repeat delimiter must be sent first for the first repetition.",
+      "length": "130",
+      "data_type": "XON - Extended Composite Name And ID For Organizations",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "52": {
+      "field_id": "GT1.52",
+      "name": "Handicap",
+      "description": "This field contains a code to describe the guarantor\u2019s disability. Refer to user-defined table 0310 - Handicap for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "53": {
+      "field_id": "GT1.53",
+      "name": "Job Status",
+      "description": "This field contains a code that identifies the guarantor\u2019s current job status, for example, part- time/workers comp, full-time/leave of absence, full-time/suspended. Refer to user-defined table 0311 - Job status for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "54": {
+      "field_id": "GT1.54",
+      "name": "Guarantor Financial Class",
+      "description": "This field contains the financial class (FC) assigned to the guarantor for the purpose of identifying sources of reimbursement. It can be different than that of the patient. When the FC of the guarantor is different than the FC of the patient, and the guarantor\u2019s coverage for that patient has been exhausted, the source of reimbursement falls back onto the FC of the patient. Refer to user-defined table 0064 - Financial class for suggested values.",
+      "length": "50",
+      "data_type": "FC - Financial Class",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "55": {
+      "field_id": "GT1.55",
+      "name": "Guarantor Race",
+      "description": "This field refers to the guarantor\u2019s race. Refer to user-defined table 0005 - Race for suggested values.",
+      "length": "1",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "GT1.6",
+      "name": "Guarantor Ph Num- Home",
+      "description": "This field contains the guarantor\u2019s home phone number. All personal phone numbers for the guarantor may be sent in this field. The primary telephone number is assumed to be in the first repetition. When the primary telephone number is not sent, a repeat delimiter must be sent first for the first repetition.",
+      "length": "40",
+      "data_type": "XTN - Extended Telecommunication Number",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "7": {
+      "field_id": "GT1.7",
+      "name": "Guarantor Ph Num-Business",
+      "description": "This field contains the guarantor\u2019s business phone number. All business phone numbers for the guarantor may be sent in this field. The primary telephone number is assumed to be in the first repetition. When the primary telephone number is not sent, a repeat delimiter must be sent first for the first repetition.",
+      "length": "40",
+      "data_type": "XTN - Extended Telecommunication Number",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "8": {
+      "field_id": "GT1.8",
+      "name": "Guarantor Date/Time of Birth",
+      "description": "This field contains the guarantor\u2019s date of birth.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "GT1.9",
+      "name": "Guarantor Sex",
+      "description": "This field contains the guarantor\u2019s gender. Refer to user-defined table 0001 - Sex for valid values.",
+      "length": "1",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

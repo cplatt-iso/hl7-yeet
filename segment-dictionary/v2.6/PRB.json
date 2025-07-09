@@ -1,0 +1,259 @@
+{
+  "segment_id": "PRB",
+  "short_description": "Problem Details",
+  "description": "The problem detail segment contains the data necessary to add, update, correct, and delete the problems of a given individual.",
+  "fields": {
+    "1": {
+      "field_id": "PRB.1",
+      "name": "Action Code",
+      "description": "This field contains the intent of the message. Refer to HL7 table 0287 - Problem/goal action code for valid values.",
+      "length": "2",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "PRB.10",
+      "name": "Problem Classification",
+      "description": "This field indicates the kind of problem. This field can be used to categorize problems so that they may be managed and viewed independently within different applications (e.g., admission, final, post-operative, pre-operative, outpatient, discharge, etc.).",
+      "length": "705",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "PRB.11",
+      "name": "Problem Management Discipline",
+      "description": "This field indicates the category of caregiver with responsibility for managing this specific problem (e.g., care team, nursing, medicine, respiratory therapy, occupational therapy, dietary, etc.). This is a repeating field to allow identification of all disciplines that may have the responsibility for this problem.",
+      "length": "705",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "12": {
+      "field_id": "PRB.12",
+      "name": "Problem Persistence",
+      "description": "This field contains the perseverance of a problem (e.g., acute, chronic, etc.).",
+      "length": "705",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "PRB.13",
+      "name": "Problem Confirmation Status",
+      "description": "This field contains the verification status of a problem (e.g., confirmed, differential, provisional, rule-out, etc.).",
+      "length": "705",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "PRB.14",
+      "name": "Problem Life Cycle Status",
+      "description": "This field contains the current status of the problem at this particular date/time (e.g., active, active-improving, active-stable, active-worsening, inactive, resolved, etc.).",
+      "length": "705",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "15": {
+      "field_id": "PRB.15",
+      "name": "Problem Life Cycle Status Date/Time",
+      "description": "This field indicates the effective date/time of the current problem life cycle status.",
+      "length": "24",
+      "data_type": "DTM - Date/Time",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "16": {
+      "field_id": "PRB.16",
+      "name": "Problem Date of Onset",
+      "description": "This field contains the date/time when the problem began.",
+      "length": "24",
+      "data_type": "DTM - Date/Time",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "17": {
+      "field_id": "PRB.17",
+      "name": "Problem Onset Text",
+      "description": "This field allows for a textual representation of the time when the problem began.",
+      "length": "80",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "18": {
+      "field_id": "PRB.18",
+      "name": "Problem Ranking",
+      "description": "This field contains a user-defined prioritization of a problem (e.g., numeric ranking, or the use of words such as \"primary,\" \"secondary,\" etc.).",
+      "length": "705",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "19": {
+      "field_id": "PRB.19",
+      "name": "Certainty of Problem",
+      "description": "This field contains a qualitative representation of the certainty of a problem (e.g., HI - high, LO - low, ME - medium, etc.).",
+      "length": "705",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "PRB.2",
+      "name": "Action Date/Time",
+      "description": "This field contains the date/time that the operation represented by the action code was performed.",
+      "length": "24",
+      "data_type": "DTM - Date/Time",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "20": {
+      "field_id": "PRB.20",
+      "name": "Probability of Problem",
+      "description": "This field contains a quantitative or numeric representation of the certainty that the problem exists for this patient. This field has a valid range of 0 to 1. For example, a healthcare provider may be 75% (.75) sure that the problem has been correctly identified.",
+      "length": "5",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "21": {
+      "field_id": "PRB.21",
+      "name": "Individual Awareness of Problem",
+      "description": "This field contains the individual's comprehension of the problem (e.g., full, marginal, partial, etc.).",
+      "length": "705",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "22": {
+      "field_id": "PRB.22",
+      "name": "Problem Prognosis",
+      "description": "This field contains the prognosis for the individual's problem (e.g., good, poor, etc.).",
+      "length": "705",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "23": {
+      "field_id": "PRB.23",
+      "name": "Individual Awareness of Prognosis",
+      "description": "This field contains the individual's comprehension of the prognosis for the problem (e.g., full, marginal, partial, etc.).",
+      "length": "705",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "24": {
+      "field_id": "PRB.24",
+      "name": "Family/Significant Other Awareness of Problem/Prognosis",
+      "description": "This field indicates the individual's family or significant other's comprehension of the actual problem/prognosis.",
+      "length": "200",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "25": {
+      "field_id": "PRB.25",
+      "name": "Security/Sensitivity",
+      "description": "This field contains information about the level of security and/or sensitivity surrounding the problem (e.g., highly sensitive, not sensitive, sensitive, etc.).",
+      "length": "705",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "26": {
+      "field_id": "PRB.26",
+      "name": "Problem Severity",
+      "description": "This field indicates the severity of the Problem. Refer to User-defined Table 0836- Problem Severity for suggested values.",
+      "length": "705",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "27": {
+      "field_id": "PRB.27",
+      "name": "Problem Perspective",
+      "description": "This field indicates from whose perspective this problem was identified. Refer to User-defined Table 0838 - Problem Perspective for suggested values.",
+      "length": "705",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "28": {
+      "field_id": "PRB.28",
+      "name": "Mood Code",
+      "description": "This field indicates the Mood of the Problem. It allows expression of the context of the problem.\n\nNote: As Mood Code changes the meaning of the segment it must only be used in new messages as of v2.6.",
+      "length": "60",
+      "data_type": "CNE - Coded with No Exceptions",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "PRB.3",
+      "name": "Problem ID",
+      "description": "This field identifies the problem. This is the identifier from an institution's master list of problems.",
+      "length": "705",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "PRB.4",
+      "name": "Problem Instance ID",
+      "description": "This field contains the identifier assigned by an initiating system to an instance of a problem.",
+      "length": "60",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "PRB.5",
+      "name": "Episode of Care ID",
+      "description": "This field uniquely identifies the episode of care to which this problem applies. (See note under \"Ongoing issues.\")",
+      "length": "60",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "PRB.6",
+      "name": "Problem List Priority",
+      "description": "This field prioritizes this problem on a list that is maintained for the individual.",
+      "length": "60",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "PRB.7",
+      "name": "Problem Established Date/Time",
+      "description": "This field contains the date/time when the corresponding problem was initially identified by the caregiver.",
+      "length": "24",
+      "data_type": "DTM - Date/Time",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "PRB.8",
+      "name": "Anticipated Problem Resolution Date/Time",
+      "description": "This field contains the estimated date/time for resolving the stated problem.",
+      "length": "24",
+      "data_type": "DTM - Date/Time",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "PRB.9",
+      "name": "Actual Problem Resolution Date/Time",
+      "description": "This field contains the date/time that the problem was actually resolved.",
+      "length": "24",
+      "data_type": "DTM - Date/Time",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

@@ -1,3 +1,5 @@
+# --- START OF FILE app.py ---
+
 # --- STEP 1: MONKEY PATCHING MUST BE THE VERY FIRST THING ---
 import eventlet
 eventlet.monkey_patch()
@@ -8,6 +10,7 @@ import json
 import socket
 import logging
 import threading
+import re
 from datetime import datetime
 from dotenv import load_dotenv
 import google.generativeai as genai
@@ -71,7 +74,7 @@ def init_db():
     except Exception as e:
         logging.error(f"FATAL: Could not initialize database: {e}")
 
-# --- NEW DICTIONARY LOADING LOGIC ---
+# --- NEW DICTIONARY LOADING LOGIC (UNCHANGED) ---
 def load_hl7_definitions_for_version(version):
     """
     Loads all segment definitions for a specific HL7 version from the directory structure.
@@ -102,7 +105,40 @@ def load_hl7_definitions_for_version(version):
         logging.error(f"Error loading definitions for version {version}: {e}")
         return {}
 
-# --- PARSER HELPER (UPDATED FOR NEW DICTIONARY STRUCTURE) ---
+# --- NEW VALIDATION HELPERS ---
+def _validate_data_type(data_type, value):
+    """Checks if the value conforms to the HL7 data type. Returns error message or None."""
+    if not value: return None # Don't validate empty values for type
+    
+    dt = (data_type or "").upper()
+    if dt == 'NM' and not value.replace('.', '', 1).isdigit():
+        return f"Data type mismatch: Expected Numeric (NM), got '{value}'."
+    if dt == 'DT' and not re.match(r'^\d{8}$', value):
+        return f"Data type mismatch: Expected Date (DT) in YYYYMMDD format, got '{value}'."
+    if dt == 'TM' and not re.match(r'^\d{4,6}(\.\d+)?$', value):
+        return f"Data type mismatch: Expected Time (TM) in HHMMSS format, got '{value}'."
+    # Add more data type checks here as needed, you lazy bastard
+    return None
+
+def _validate_length(max_len_def, value):
+    """Checks if the value exceeds the defined maximum length. Returns error message or None."""
+    if not value or not max_len_def: return None
+    try:
+        max_len = int(max_len_def)
+        if len(value) > max_len:
+            return f"Length error: Value '{value}' ({len(value)} chars) exceeds max length of {max_len}."
+    except (ValueError, TypeError):
+        # The definition's length is not a simple integer, so we skip.
+        return None
+    return None
+
+def _validate_required(optionality, value):
+    """Checks if a required field is missing. Returns error message or None."""
+    if (optionality or "").upper() == 'R' and not value:
+        return "Required field is missing."
+    return None
+
+# --- PARSER HELPER (UPDATED WITH VALIDATION LOGIC) ---
 def _parse_hl7_string(hl7_message, definitions):
     comment_prefixes = ('#', '//', '---')
     valid_lines = [line.strip() for line in hl7_message.splitlines() if line.strip() and not line.strip().startswith(comment_prefixes)]
@@ -127,27 +163,56 @@ def _parse_hl7_string(hl7_message, definitions):
 
         segment_data = {"name": segment_name, "description": segment_desc, "fields": []}
 
+        # This function processes a single field, adding validation errors & METADATA!
+        def process_field(index, value, field_def):
+            errors = []
+            
+            # Run all our validation checks
+            type_err = _validate_data_type(field_def.get("data_type"), value)
+            if type_err: errors.append(type_err)
+
+            len_err = _validate_length(field_def.get("length"), value)
+            if len_err: errors.append(len_err)
+
+            req_err = _validate_required(field_def.get("optionality"), value)
+            if req_err: errors.append(req_err)
+
+            return {
+                "index": index,
+                "value": value,
+                "name": field_def.get("name", "Unknown Field"),
+                "description": field_def.get("description", "No description available."),
+                "field_id": f"{segment_name}.{index}",
+                "length": field_def.get("length", "N/A"),
+                "data_type": field_def.get("data_type", "Unknown"),
+                "errors": errors,
+                # --- HERE'S THE NEW SHIT ---
+                "optionality": field_def.get("optionality", "N/A"),
+                "repeatable": field_def.get("repeatable", "N/A"),
+            }
+
         if segment_name == 'MSH':
             msh1_def = segment_fields_def.get("1", {})
-            segment_data["fields"].append({ "index": 1, "value": field_sep, "name": msh1_def.get("name", "Field Separator"), "description": msh1_def.get("description", "The separator character."), "field_id": "MSH.1", "length": msh1_def.get("length", "N/A"), "data_type": msh1_def.get("data_type", "Unknown") })
+            segment_data["fields"].append(process_field(1, field_sep, msh1_def))
+            
             msh_field_values = parts[1:]
             for i, field_value in enumerate(msh_field_values, start=2):
                 field_index_str = str(i)
                 field_def = segment_fields_def.get(field_index_str, {})
-                segment_data["fields"].append({ "index": i, "value": field_value, "name": field_def.get("name", "Unknown Field"), "description": field_def.get("description", "No description available."), "field_id": f"{segment_name}.{i}", "length": field_def.get("length", "N/A"), "data_type": field_def.get("data_type", "Unknown") })
+                segment_data["fields"].append(process_field(i, field_value, field_def))
         else:
             field_values = parts[1:]
             for i, field_value in enumerate(field_values, start=1):
                 field_index_str = str(i)
                 field_def = segment_fields_def.get(field_index_str, {})
-                segment_data["fields"].append({ "index": i, "value": field_value, "name": field_def.get("name", "Unknown Field"), "description": field_def.get("description", "No description available."), "field_id": f"{segment_name}.{i}", "length": field_def.get("length", "N/A"), "data_type": field_def.get("data_type", "Unknown") })
+                segment_data["fields"].append(process_field(i, field_value, field_def))
         
         defined_indexes = {int(k) for k in segment_fields_def.keys() if k.isdigit()}
         parsed_indexes = {f['index'] for f in segment_data['fields']}
         missing_indexes = defined_indexes - parsed_indexes
         for missing_index in sorted(list(missing_indexes)):
             field_def = segment_fields_def.get(str(missing_index), {})
-            segment_data["fields"].append({ "index": missing_index, "value": "", "name": field_def.get("name", f"Unknown Field {missing_index}"), "description": field_def.get("description", "No description available."), "field_id": f"{segment_name}.{missing_index}", "length": field_def.get("length", "N/A"), "data_type": field_def.get("data_type", "Unknown") })
+            segment_data["fields"].append(process_field(missing_index, "", field_def))
         
         segment_data["fields"].sort(key=lambda f: f["index"])
         structured_data.append(segment_data)
@@ -212,12 +277,11 @@ def mllp_server_worker(port):
         with app.app_context():
             socketio.emit('listener_status', {'status': 'idle'})
 
-# --- API ENDPOINTS ---
+# --- API ENDPOINTS (Mostly Unchanged) ---
 @app.route('/')
 def index():
     return "Backend is running. The real party is on the React frontend."
 
-# --- NEW ENDPOINT to discover available HL7 versions ---
 @app.route('/get_supported_versions', methods=['GET'])
 def get_supported_versions():
     try:
@@ -264,6 +328,7 @@ def parse_hl7_api():
         return jsonify({"status": "error", "message": f"Could not load definitions for HL7 version {hl7_version}. Check server logs."}), 500
 
     try:
+        # This now returns data with validation errors included. No other change needed.
         structured_data = _parse_hl7_string(hl7_message, definitions)
         return jsonify({"status": "success", "data": structured_data})
     except Exception as e:

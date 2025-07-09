@@ -1,0 +1,79 @@
+{
+  "segment_id": "OM3",
+  "short_description": "Categorical Test/observation",
+  "description": "This segment applies to free text and other non-numeric data types",
+  "fields": {
+    "1": {
+      "field_id": "OM3.1",
+      "name": "Segment Type Id",
+      "description": "the string OM3 - identifies a record as a categorical test/observation segment",
+      "length": "3",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "OM3.2",
+      "name": "Sequence Number - Test/ Observation Master File",
+      "description": "the same value as the sequence number of the associated OM1 segment",
+      "length": "4",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "OM3.3",
+      "name": "Preferred Coding System",
+      "description": "for observations whose categorical responses are taken from a specified table of codes (e.g., CE data types), record the preferred coding system for this observation (e.g., ICD9, SNOMED III). Take the codes from ASTM Table 3 or 5, or specify a local code",
+      "length": "5",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "OM3.4",
+      "name": "Valid Coded Answers",
+      "description": "in the case that the list of coded answers is easily enumerated, list the valid coded answers for this observation here using the preferred coding system given in OM3-3-preferred coding system. If for example, the given observation was VDRL, the valid answers might be non-reactive, 86^ intermediate, and 87^ reactive",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "OM3.5",
+      "name": "Normal Test Codes For Categorical Observations",
+      "description": "certain observations/tests with a nature code of A or C (see OM1-19-nature of test/observation) have text (alpha) results (e.g., reactive, nonreactive). Alpha normals for those tests should be entered in this field (e.g., \"nonreactive\").",
+      "length": "200",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "6": {
+      "field_id": "OM3.6",
+      "name": "Abnormal Test Codes For Categorical Observations",
+      "description": "a list of the text answers that are abnormal for the test",
+      "length": "200",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "OM3.7",
+      "name": "Critical Test Codes For Categorical Observations",
+      "description": "a list of coded results that are critically abnormal for this observation",
+      "length": "200",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "OM3.8",
+      "name": "Data Type",
+      "description": "the allowed data type for a single categorical observation (code A or C in OM1-19-nature of observation).",
+      "length": "2",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

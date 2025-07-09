@@ -4,4 +4,6 @@ flask-cors
 google-generativeai
 python-dotenv
 flask-socketio
+Flask-Bcrypt
+Flask-JWT-Extended
 eventlet

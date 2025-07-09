@@ -1,0 +1,214 @@
+{
+  "segment_id": "FT1",
+  "short_description": "Financial Transaction",
+  "description": "The FT1 segment contains detail data necessary to post charges, payments, adjustments, etc. to patient accounting records.",
+  "fields": {
+    "1": {
+      "field_id": "FT1.1",
+      "name": "Set Id - Financial Transaction",
+      "description": "number that uniquely identifies this transaction for the purpose of adding, changing, or deleting the transaction",
+      "length": "4",
+      "data_type": "SI - Sequence Id",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "FT1.10",
+      "name": "Transaction Quantity",
+      "description": "quantity of items associated with this transaction. This field is no longer needed as it is now part of FT1-7-transaction code. It has been kept for backwards compatibility.",
+      "length": "4",
+      "data_type": "NM - Numeric",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "FT1.11",
+      "name": "Transaction Amount - Extended",
+      "description": "amount of transaction. This field may be blank if the transaction is automatically priced. Total price for multiple items",
+      "length": "12",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "FT1.12",
+      "name": "Transaction Amount - Unit",
+      "description": "unit price of transaction. Price of a single item",
+      "length": "12",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "FT1.13",
+      "name": "Department Code",
+      "description": "department code which controls the transaction code described above. Refer to user-defined table 0049 - department code",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "FT1.14",
+      "name": "Insurance Plan Id",
+      "description": "ID of the primary insurance plan this transaction should be associated with. Refer to user-defined table 0072 - insurance plan ID",
+      "length": "8",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "15": {
+      "field_id": "FT1.15",
+      "name": "Insurance Amount",
+      "description": "amount to be posted to the insurance plan referenced above",
+      "length": "12",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "16": {
+      "field_id": "FT1.16",
+      "name": "Assigned Patient Location",
+      "description": "current patient location. Refer to user-defined table 0079-location",
+      "length": "12",
+      "data_type": "CM_INTERNAL_LOCATION - Cm For Location Information In Hospital",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "17": {
+      "field_id": "FT1.17",
+      "name": "Fee Schedule",
+      "description": "code used to select the appropriate fee schedule to be used for this transaction posting. Refer to userdefined table 0024 - fee schedule",
+      "length": "1",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "18": {
+      "field_id": "FT1.18",
+      "name": "Patient Type",
+      "description": "type code assigned to the patient for this visit. Refer to user-defined table 0018 - patient type",
+      "length": "2",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "19": {
+      "field_id": "FT1.19",
+      "name": "Diagnosis Code",
+      "description": "ICD9-CM is assumed for all diagnosis codes. This diagnosis code is the most current diagnosis code assigned to the patient. ICD10 can also be used. Refer to user-defined table 0051 - diagnosis code",
+      "length": "8",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "2": {
+      "field_id": "FT1.2",
+      "name": "Transaction Id",
+      "description": "number assigned by the sending system for control purposes. The number can be returned by the receiving to identify errors",
+      "length": "12",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "20": {
+      "field_id": "FT1.20",
+      "name": "Performed By Code",
+      "description": "composite number/name of the person/group which performed the test/procedure/transaction, etc. Refer to user defined table 0084 - performed by table",
+      "length": "60",
+      "data_type": "CN_PERSON - Cn For Person",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "21": {
+      "field_id": "FT1.21",
+      "name": "Ordered By Code",
+      "description": "composite number/name of person/group which ordered the test/procedure/transaction, etc",
+      "length": "60",
+      "data_type": "CN_PERSON - Cn For Person",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "22": {
+      "field_id": "FT1.22",
+      "name": "Unit Cost",
+      "description": "unit price of transaction. The cost of a single item",
+      "length": "12",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "23": {
+      "field_id": "FT1.23",
+      "name": "Filler Order Number",
+      "description": "used when the billing system is requesting observational reporting justification for a charge. This is the number used by a filler to uniquely identify a result.",
+      "length": "75",
+      "data_type": "CM_FILLER - Number Of Processing Power Point",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "FT1.3",
+      "name": "Transaction Batch Id",
+      "description": "uniquely identifies the batch in which this transaction belongs",
+      "length": "10",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "FT1.4",
+      "name": "Transaction Date",
+      "description": "uniquely identifies the batch in which this transaction belongs",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "FT1.5",
+      "name": "Transaction Posting Date",
+      "description": "date the transaction was sent to the financial system for posting",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "FT1.6",
+      "name": "Transaction Type",
+      "description": "code that identifies the type of transaction. e.g., charge, credit, payment, etc. Refer to user-defined table 0017 - transaction type",
+      "length": "8",
+      "data_type": "ID - Coded Value",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "FT1.7",
+      "name": "Transaction Code",
+      "description": "code assigned by the institution for the purpose of uniquely identifying the transaction. For example, this field would be used to uniquely identify a procedure, item, or test for charging purposes. Refer to user-defined table 0132 - transaction code. See Chapter 7 for discussion on the univeral service ID",
+      "length": "20",
+      "data_type": "CE - Coded Element",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "FT1.8",
+      "name": "Transaction Description",
+      "description": "description of the transaction associated with the code entered in FT1-7-transaction code. This field is no longer needed as it is now part of FT1-7-transaction code. It has been kept for backwards compatibility",
+      "length": "40",
+      "data_type": "ST - String Data",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "FT1.9",
+      "name": "Transaction Description - Alternate",
+      "description": "alternate financial transaction description to be used on a site specific basis. This field is no longer needed as it is now part of FT1-7-transaction code. It has been kept for backwards compatibility",
+      "length": "40",
+      "data_type": "ST - String Data",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

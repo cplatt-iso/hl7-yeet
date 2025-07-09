@@ -1,7 +1,8 @@
+// --- START OF FILE AccordionItem.jsx ---
+
 import React, { useState } from 'react';
 import FieldRow from './FieldRow';
 
-// Add 'showTooltips' to the props you're expecting
 const AccordionItem = ({ segment, segmentIndex, showEmpty, onFieldMove, onFieldUpdate, setTooltipContent, showTooltips }) => {
     const [isOpen, setIsOpen] = useState(true);
 
@@ -26,7 +27,10 @@ const AccordionItem = ({ segment, segmentIndex, showEmpty, onFieldMove, onFieldU
                             <tr>
                                 <th className="py-2 px-2 w-20">ID</th>
                                 <th className="py-2 px-2 w-1/4">Name</th>
-                                <th className="py-2 px-2 w-48">Data Type</th>
+                                <th className="py-2 px-2 w-32">Data Type</th>
+                                {/* --- NEW COMPACT HEADERS --- */}
+                                <th className="py-2 px-2 w-12 text-center" title="Optionality">Opt</th>
+                                <th className="py-2 px-2 w-12 text-center" title="Repeatability">Rpt</th>
                                 <th className="py-2 px-2 w-16">Length</th>
                                 <th className="py-2 px-2 w-auto">Value</th>
                             </tr>
@@ -45,7 +49,7 @@ const AccordionItem = ({ segment, segmentIndex, showEmpty, onFieldMove, onFieldU
                                         onFieldMove={onFieldMove}
                                         onFieldUpdate={onFieldUpdate}
                                         setTooltipContent={setTooltipContent}
-                                        showTooltips={showTooltips} // <-- THE MISSING GODDAMN PIECE
+                                        showTooltips={showTooltips}
                                     />
                                 );
                             })}

@@ -1,0 +1,196 @@
+{
+  "segment_id": "GT1",
+  "short_description": "Guarantor",
+  "description": "The GT1 segment contains guarantor (e.g., person with financial responsibility for payment of a patient account) data for patient and insurance billing applications",
+  "fields": {
+    "1": {
+      "field_id": "GT1.1",
+      "name": "Set Id - Guarantor",
+      "description": "number that uniquely identifies the transaction for the purpose of adding, changing, or deleting a transaction",
+      "length": "4",
+      "data_type": "SI - Sequence Id",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "GT1.10",
+      "name": "Guarantor Type",
+      "description": "type of guarantor, e.g., individual, institution, etc. Refer to user-defined table 0068 - guarantor type",
+      "length": "2",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "GT1.11",
+      "name": "Guarantor Relationship",
+      "description": "relationship of the guarantor with the patient, e.g., parent, child, etc. Refer to user-defined table 0063 - guarantor relationship",
+      "length": "2",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "GT1.12",
+      "name": "Guarantor Social Security Number",
+      "description": "guarantor's social security number",
+      "length": "11",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "GT1.13",
+      "name": "Guarantor Date - Begin",
+      "description": "date the guarantor becomes responsible for the patient's account",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "GT1.14",
+      "name": "Guarantor Date - End",
+      "description": "date the guarantor stops being responsible for the patient's account",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "15": {
+      "field_id": "GT1.15",
+      "name": "Guarantor Priority",
+      "description": "used to determine the order in which the guarantors will be responsible for the patient's account",
+      "length": "2",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "16": {
+      "field_id": "GT1.16",
+      "name": "Guarantor Employer Name",
+      "description": "name of the guarantor's employer",
+      "length": "45",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "17": {
+      "field_id": "GT1.17",
+      "name": "Guarantor Employer Address",
+      "description": "guarantor's employer's address",
+      "length": "106",
+      "data_type": "AD - Address",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "18": {
+      "field_id": "GT1.18",
+      "name": "Guarantor Employ Phone Number",
+      "description": "guarantor's employer phone number",
+      "length": "40",
+      "data_type": "TN - Telephone Number",
+      "optionality": "Optional",
+      "repeatability": "Repeatable 3 times"
+    },
+    "19": {
+      "field_id": "GT1.19",
+      "name": "Guarantor Employee Id Number",
+      "description": "guarantor's employee number",
+      "length": "20",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "GT1.2",
+      "name": "Guarantor Number",
+      "description": "unique number assigned to the guarantor",
+      "length": "20",
+      "data_type": "COMP_ID_DIGIT - Composite Id W/chk Digit",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "20": {
+      "field_id": "GT1.20",
+      "name": "Guarantor Employment Status",
+      "description": "code that indicates the guarantor's employment status. e.g., Full Time, Part Time, Self Employed, etc. Refer to user-defined table 0066 - employment status",
+      "length": "2",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "21": {
+      "field_id": "GT1.21",
+      "name": "Guarantor Organization",
+      "description": "No description found.",
+      "length": "60",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "GT1.3",
+      "name": "Guarantor Name",
+      "description": "name of the guarantor",
+      "length": "48",
+      "data_type": "PN - Person Name",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "GT1.4",
+      "name": "Guarantor Spouse Name",
+      "description": "name of the guarantor's spouse",
+      "length": "48",
+      "data_type": "PN - Person Name",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "GT1.5",
+      "name": "Guarantor Address",
+      "description": "guarantor's address",
+      "length": "106",
+      "data_type": "AD - Address",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "GT1.6",
+      "name": "Guarantor Phone Number - Home",
+      "description": "guarantor's home phone number",
+      "length": "40",
+      "data_type": "TN - Telephone Number",
+      "optionality": "Optional",
+      "repeatability": "Repeatable 3 times"
+    },
+    "7": {
+      "field_id": "GT1.7",
+      "name": "Guarantor Phone Number - Business",
+      "description": "guarantor's business phone number",
+      "length": "40",
+      "data_type": "TN - Telephone Number",
+      "optionality": "Optional",
+      "repeatability": "Repeatable 3 times"
+    },
+    "8": {
+      "field_id": "GT1.8",
+      "name": "Guarantor Date Of Birth",
+      "description": "guarantor's date of birth",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "GT1.9",
+      "name": "Guarantor Sex",
+      "description": "refer to table 0001 - sex for valid entries",
+      "length": "1",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

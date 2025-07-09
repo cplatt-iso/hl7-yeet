@@ -1,0 +1,61 @@
+{
+  "segment_id": "AL1",
+  "short_description": "Patient allergy information segment",
+  "description": "The AL1 segment contains patient allergy information of various types. Most of this information will be derived from user-defined tables. Each AL1 segment describes a single patient allergy.",
+  "fields": {
+    "1": {
+      "field_id": "AL1.1",
+      "name": "Set ID - AL1",
+      "description": "This field contains the number that identifies this transaction. For the first occurrence of the segment, the sequence number shall be one, for the second occurrence, the sequence number shall be two, etc.",
+      "length": "4",
+      "data_type": "SI - Sequence ID",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "AL1.2",
+      "name": "Allergy Type",
+      "description": "This field indicates a general allergy category (drug, food, pollen, etc.). Refer to user-defined table 0127 - Allergy type for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "AL1.3",
+      "name": "Allergy Code/Mnemonic/Description",
+      "description": "This field uniquely identifies a particular allergy. This element may conform to some external, standard coding system (that must be identified), or it may conform to local, largely textual or mnemonic descriptions.",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "AL1.4",
+      "name": "Allergy Severity",
+      "description": "This field indicates the general severity of the allergy (severe, moderate, mild, etc.). Refer to user-defined table 0128 - Allergy severity for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "AL1.5",
+      "name": "Allergy Reaction",
+      "description": "This field contains a short, textual description of the specific allergy reaction (convulsions, sneeze, rash, etc.).",
+      "length": "15",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "6": {
+      "field_id": "AL1.6",
+      "name": "Identification Date",
+      "description": "This field contains the date that the allergy was identified.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

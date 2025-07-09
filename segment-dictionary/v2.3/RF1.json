@@ -1,0 +1,106 @@
+{
+  "segment_id": "RF1",
+  "short_description": "Referral Information Segment",
+  "description": "This segment represents information that may be useful when sending referrals from the referring provider to the referred-to provider.",
+  "fields": {
+    "1": {
+      "field_id": "RF1.1",
+      "name": "Referral Status",
+      "description": "This field contains the status of the referral as defined by either the referred-to or the referredby provider. Refer to user-defined table 0283 - Referral status for suggested values",
+      "length": "200",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "RF1.10",
+      "name": "Referral Reason",
+      "description": "This field contains the reason for which the referral will take place. Refer to user-defined table 0336 - Referral reason for suggested values",
+      "length": "200",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "11": {
+      "field_id": "RF1.11",
+      "name": "External Referral Identifier",
+      "description": "This field contains an external application\u2019s permanent identifier for the referral. That is, this referral identifier does not belong to the application which originated the referral and assigned the originating referral identifier.\n\nThe first component is a string of up to 15 characters that identifies an individual referral. It is typically assigned by the referred-to provider application responding to a referral originating from a referring provider application, and it identifies a referral, and the subsequent referral transactions, uniquely among all such referrals for a particular referred-to provider processing application. For example, when a primary care provider (referring provider) sends a referral to a specialist (referred-to provider), the specialist\u2019s application system may accept the referral and assign it a new referral identifier which uniquely identifies that particular referral within the specialist\u2019s application system. This new referral identifier would be placed in the external referral identifier field when the specialist responds to the primary care physician.\n\nThe second component is optional because this field, itself, is already defined as a referral identifier.\n\nThe third component is optional. If used, it should contain the application identifier for the referred-to or external application (i.e., not the originating application. The application identifier is a string of up to 15 characters that is uniquely associated with an application. A given healthcare provider facility, or group of intercommunicating healthcare provider facilities, should establish a unique list of applications that may be potential originators and recipients, and then assign unique application identifiers to each of those applications. This list of application identifiers becomes one of the healthcare provider facility\u2019s master dictionary lists. Since applications fulfilling different application roles can send and receive referral messages, the assigning authority application identifier may not identify the application sending or receiving a particular message. Data elements on the Message Header (MSH) segment are available to identify the actual sending and receiving applications",
+      "length": "30",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "2": {
+      "field_id": "RF1.2",
+      "name": "Referral Priority",
+      "description": "This field contains the urgency of the referral. Refer to user-defined table 0280 - Referral priority for suggested values",
+      "length": "200",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "RF1.3",
+      "name": "Referral Type",
+      "description": "This field contains the type of referral. It is loosely associated with a clinical specialty or type of resource. Refer to user-defined table 0281 - Referral type for suggested values",
+      "length": "200",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "RF1.4",
+      "name": "Referral Disposition",
+      "description": "This field contains the type of response or action that the referring provider would like from the referred-to provider. Refer to user-defined table 0282 - Referral disposition for suggested values",
+      "length": "200",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "5": {
+      "field_id": "RF1.5",
+      "name": "Referral Category",
+      "description": "This field contains the location at which the referral will take place. Refer to user-defined table 0284 - Referral category for suggested values",
+      "length": "200",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "RF1.6",
+      "name": "Originating Referral Identifier",
+      "description": "This field contains the originating application\u2019s permanent identifier for the referral. This is a composite field.\n\nThe first component is a string of up to 15 characters that identifies an individual referral. It is assigned by the originating application, and it identifies a referral, and the subsequent referral transactions, uniquely among all such referrals from a particular processing application.\n\nThe second component is optional because this field, itself, is already defined as a referral identifier.\n\nThe third component is optional. If used, it should contain the application identifier for the referred-to or external applications (i.e., not the originating application). The application identifier is a string of up to 15 characters that is uniquely associated with an application. A given healthcare provider facility, or group of intercommunicating healthcare provider facilities, should establish a unique list of applications that may be potential originators and recipients, and then assign unique application identifiers to each of those applications. This list of application identifiers becomes one of the healthcare provider facility\u2019s master dictionary lists. Since applications fulfilling different application roles can send and receive referral messages, the assigning authority application identifier may not identify the application sending or receiving a particular message. Data elements on the Message Header (MSH) segment are available to identify the actual sending and receiving applications",
+      "length": "30",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "RF1.7",
+      "name": "Effective Date",
+      "description": "This field contains the date on which the referral is effective",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "RF1.8",
+      "name": "Expiration Date",
+      "description": "This field contains the date on which the referral expires",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "RF1.9",
+      "name": "Process Date",
+      "description": "This field contains the date on which the referral originated. It is used in cases of retroactive approval",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

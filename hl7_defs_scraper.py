@@ -165,7 +165,7 @@ def main():
     args = parser.parse_args()
 
 
-    versions_to_scrape = ["v2.5.1", "v2.8"]
+    versions_to_scrape = ["v2.1", "v2.2"]
     print(f"Starting HL7 Scraper for versions: {', '.join(versions_to_scrape)}")
     if args.replace:
         print("!! --replace flag is set. ALL EXISTING FILES WILL BE OVERWRITTEN. !!")

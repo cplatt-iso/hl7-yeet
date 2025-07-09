@@ -1,0 +1,142 @@
+{
+  "segment_id": "ADJ",
+  "short_description": "Adjustment",
+  "description": "This segment describes Provider and/or Payer adjustments to a Product/Service Line Item or Response Summary. These include surcharges such as tax, dispensing fees and mark ups.",
+  "fields": {
+    "1": {
+      "field_id": "ADJ.1",
+      "name": "Provider Adjustment Number",
+      "description": "Unique Adjustment Number assigned by the Provider Application.",
+      "length": "73",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "ADJ.10",
+      "name": "Substitute Value",
+      "description": "Substituted value of data item noted in this adjustment.",
+      "length": "250",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "ADJ.11",
+      "name": "Adjustment Action",
+      "description": "Action requested of party that receives this adjustment. Refer to User-defined Table 0569 - Adjustment Action for suggested values.",
+      "length": "4",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "ADJ.12",
+      "name": "Provider Adjustment Number Cross Reference",
+      "description": "Unique Provider Adjustment Number assigned by the Provider Application that is referenced by this Payer Adjustment.",
+      "length": "73",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "ADJ.13",
+      "name": "Provider Product/Service Line Item Number Cross Reference",
+      "description": "Unique Provider Product/Service Line Item Number assigned by the Provider Application that is referenced by this Payer Adjustment; used for groups with multiple line items that need to be singled out by a Payer Adjustment.",
+      "length": "73",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "ADJ.14",
+      "name": "Adjustment Date",
+      "description": "Date/Time adjustment was made. May also be synonymous with Adjudication Date.",
+      "length": "26",
+      "data_type": "DTM - Date/Time",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "15": {
+      "field_id": "ADJ.15",
+      "name": "Responsible Organization",
+      "description": "Business organization that is responsible for the adjustment (e.g., Payer organization); can be used for a Payment/Remittance Advice for 1 Payee from multiple Payers.",
+      "length": "183",
+      "data_type": "XON - Extended Composite Name and Identification Number for Organizations",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "ADJ.2",
+      "name": "Payer Adjustment Number",
+      "description": "Unique Adjustment Number assigned by the Payer Application.",
+      "length": "73",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "ADJ.3",
+      "name": "Adjustment Sequence Number",
+      "description": "Unique sequence number for this adjustment - starts with 1, then 2, etc., for each unique adjustment for the Product/Service Line Item.",
+      "length": "4",
+      "data_type": "SI - Sequence ID",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "ADJ.4",
+      "name": "Adjustment Category",
+      "description": "Indicates the category of adjustment and is used to assist in determining which table is used for Adjustment Reason. Refer to User-defined Table 0564 - Adjustment Category Code for suggested values.",
+      "length": "4",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "ADJ.5",
+      "name": "Adjustment Amount",
+      "description": "Adjustment amount, such as taxes, deductibles, previously paid amount.",
+      "length": "254",
+      "data_type": "CP - Composite Price",
+      "optionality": "Optional",
+      "repeatability": "Repeatable 5 times"
+    },
+    "6": {
+      "field_id": "ADJ.6",
+      "name": "Adjustment Quantity",
+      "description": "Adjustment quantity.",
+      "length": "222",
+      "data_type": "CQ - Composite Quantity with Units",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "ADJ.7",
+      "name": "Adjustment Reason PA",
+      "description": "Reason for this adjustment. Codes used to explain a Provider adjustment to a Product/Service Group or Product/Service Line Item by a Provider. Refer to User-defined table 0565 - Provider Adjustment Reason Code for suggested values.",
+      "length": "211",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "ADJ.8",
+      "name": "Adjustment Description",
+      "description": "Description of adjustment, such as client instructions.",
+      "length": "250",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "ADJ.9",
+      "name": "Original Value",
+      "description": "Original value of data item noted in this adjustment.",
+      "length": "250",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

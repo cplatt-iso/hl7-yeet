@@ -1,0 +1,106 @@
+{
+  "segment_id": "ACC",
+  "short_description": "Accident",
+  "description": "The ACC segment contains patient information relative to an accident in which the patient has been involved.",
+  "fields": {
+    "1": {
+      "field_id": "ACC.1",
+      "name": "Accident Date/Time",
+      "description": "This field contains the date/time of the accident.",
+      "length": "24",
+      "data_type": "DTM - Date/Time",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "ACC.10",
+      "name": "Police Notified Indicator",
+      "description": "This field indicates if the police were notified. Refer to HL7 Table 0136 - Yes/No Indicator for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "ACC.11",
+      "name": "Accident Address",
+      "description": "This field contains the address where the accident occurred.",
+      "length": "250",
+      "data_type": "XAD - Extended Address",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "ACC.2",
+      "name": "Accident Code",
+      "description": "This field contains the type of accident. Refer to User-defined Table 0050 - Accident Codefor suggested values. ICD accident codes are recommended.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "ACC.3",
+      "name": "Accident Location",
+      "description": "This field contains the location of the accident.",
+      "length": "25",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "ACC.4",
+      "name": "Auto Accident State",
+      "description": "As of Version 2.5, this field has been retained for backward compatibility only. Use ACC-11 - Accident Address instead of this field, as the state in which the accident occurred is part of the address. This field specifies the state in which the auto accident occurred. (CMS 1500 requirement in the US.) Refer toUser-defined Table 0347 - State/Province for suggested values.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "ACC.5",
+      "name": "Accident Job Related Indicator",
+      "description": "This field indicates if the accident was related to a job. Refer to HL7 Table 0136 - Yes/no Indicator for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "ACC.6",
+      "name": "Accident Death Indicator",
+      "description": "This field indicates whether or not a patient has died as a result of an accident. Refer to HL7 Table 0136 - Yes/no Indicator for valid values.",
+      "length": "12",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "ACC.7",
+      "name": "Entered By",
+      "description": "This field identifies the person entering the accident information.",
+      "length": "3220",
+      "data_type": "XCN - Extended Composite ID Number and Name for Persons",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "ACC.8",
+      "name": "Accident Description",
+      "description": "Description of the accident.",
+      "length": "25",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "ACC.9",
+      "name": "Brought In By",
+      "description": "This field identifies the person or organization that brought in the patient.",
+      "length": "80",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

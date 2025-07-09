@@ -1,0 +1,16 @@
+{
+  "segment_id": "DSC",
+  "short_description": "Continuation Pointer",
+  "description": "No description found.",
+  "fields": {
+    "1": {
+      "field_id": "DSC.1",
+      "name": "Continuation Pointer",
+      "description": "No description found.",
+      "length": "60",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

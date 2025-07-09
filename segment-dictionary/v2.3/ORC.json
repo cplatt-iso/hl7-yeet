@@ -1,0 +1,178 @@
+{
+  "segment_id": "ORC",
+  "short_description": "Common order segment",
+  "description": "The Common Order segment (ORC) is used to transmit fields that are common to all orders (all types of services that are requested). The ORC segment is required in the Order (ORM) message. ORC is mandatory in Order Acknowledgment (ORR) messages if an order detail segment is present, but is not required otherwise.\n\nIf details are needed for a particular type of order segment (e.g., Pharmacy, Dietary), the ORC must precede any order detail segment (e.g., RXO, ODS). In some cases, the ORC may be as simple as the string ORC|OK|<placer order number>|<filler order number>|<cr>.\n\nIf details are not needed for the order, the order detail segment may be omitted. For example, to place an order on hold, one would transmit an ORC with the following fields completed: ORC-1-order control with a value of HD, ORC-2-placer order number, and ORC-3-filler order number",
+  "fields": {
+    "1": {
+      "field_id": "ORC.1",
+      "name": "Order Control",
+      "description": "Determines the function of the order segment. Refer to HL7 table 0119 - Order control for valid entries.\n\nThis field may be considered the \u201ctrigger event\u201d identifier for orders. The codes fall roughly into the following three categories:\n\n1- Event request - Codes like \u201cNW\u201d (new order) and \u201cCA\u201d (cancel order request) are used to initiate an event. Event request codes are intended to initiate an event.\n\n2- Event acknowledgment - Codes like \u201cOK\u201d (order accepted) and \u201cCR\u201d (canceled as requested) are used to reply to the event request. Event acknowledgment codes are intended to reply to an application that requested an event.\n\n3- Event notification - Codes like \u201cOC\u201d (order canceled) and \u201cOD\u201d (order discontinued) are used to notify other applications that an event has occurred. No application reply is necessary. Event notification codes are intended to notify another application that, e.g., the filler has performed some action on an order that the other application, e.g., the placer, needs to know.\n\nFillers, placers, and other applications can use event requests, event acknowledgments, and event - notification-type trigger events interchangeably. However, certain order control codes can originate only from the filler (e.g., CR) and others can only originate from the placer (e.g., CA)",
+      "length": "2",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "ORC.10",
+      "name": "Entered By",
+      "description": "This field is the identity of the person who actually keyed the request into the application. It provides an audit trail in case the request is entered incorrectly and the ancillary department needs to clarify the request. By local agreement, either the ID number or name component may be omitted",
+      "length": "120",
+      "data_type": "XCN - Extended Composite ID Number And Name",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "ORC.11",
+      "name": "Verified By",
+      "description": "This field is the identity of the person who verified the accuracy of the entered request. It is used in cases where the request is entered by a technician and needs to be verified by a higher authority (e.g., a nurse). By local agreement, either the ID number or name component may be omitted",
+      "length": "120",
+      "data_type": "XCN - Extended Composite ID Number And Name",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "ORC.12",
+      "name": "Ordering Provider",
+      "description": "This field is the identity of the person who is responsible for creating the request (i.e., ordering physician). ORC-12-ordering provider is the same as OBR-16-ordering provider",
+      "length": "120",
+      "data_type": "XCN - Extended Composite ID Number And Name",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "ORC.13",
+      "name": "Enterer's Location",
+      "description": "This field is the location (e.g., nurse station, ancillary service location, clinic, floor) where the person who entered the request was physically located when the order was entered. Only those subcomponents relevant to enterer\u2019s location should be valued (commonly nursing unit; facility; building; floor). The person who entered the request is defined in ORC-10-entered by",
+      "length": "80",
+      "data_type": "PL - Person Location",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "ORC.14",
+      "name": "Call Back Phone Number",
+      "description": "This field is the telephone number to call for clarification of a request or other information regarding the order. ORC-14-call back phone number is the same as OBR-17-order call back phone number",
+      "length": "40",
+      "data_type": "XTN - Extended Telecommunication Number",
+      "optionality": "Optional",
+      "repeatability": "Repeatable twice"
+    },
+    "15": {
+      "field_id": "ORC.15",
+      "name": "Order Effective Date/Time",
+      "description": "This field is the date/time that the changes to the request took effect or are supposed to take effect.\n\nIf ORC-9-transaction date/time is after or equal to ORC-16-order effective date/time, the data values in the ORC and its subordinate segments took effect on the order effective date/time.\n\nIf ORC-9-transaction date/time is before the time specified in ORC-15-order effective date/time, the data values in ORC and its subordinate segments are planned to take effect on the order effective date/time.\n\nIf ORC-15-order effective date/time is left blank, its value is assumed to be equal to that specified in ORC-9transaction date/time or MSH-7-message date/time if the transaction date/time is blank\n\nIn the case where the time specified in ORC-15-effective date/time (for the order control code event in the same ORC segment) is different from the corresponding date/time in ORC-7-quantity/timing, the time specified in ORC-15-order effective date/time takes precedence. Thus if the ORC event is a discontinue request to the filler for a continuing order, and the order-effective date/time is prior to the end date/time of ORC-7-quantity/timing, the order effective date/time should take precedence. If the order identified in the ORC has children, the children which have not started should be canceled; if there is a child in process, it should be discontinued; if a child has progressed beyond the point where it can be discontinued, its status is unaffected.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "16": {
+      "field_id": "ORC.16",
+      "name": "Order Control Code Reason",
+      "description": "This field is the explanation (either in coded or text form) of the reason for the order event described by the order control code (HL7 table 0119). Whereas an NTE after the order-specific segment (e.g., RXO, ORO, OBR) would provide a comment for that specific segment, the purpose of the order control code reason is only to expand on the reason for the order event.\n\nORC-16-order control code reason is typically not valued when ORC-1-order control is NW, although it could be. In the case of a canceled order, for example, this field is commonly used to explain the cancellation. A Pharmacy system that canceled a drug order from a physician because of a well documented allergy would likely report the fact of the allergy in this field.\n\nIf it canceled the order because of a drug interaction this field might contain at least the names (and codes, if needed) of the interacting substances, the text describing the interaction, and the level of severity of the interaction",
+      "length": "200",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "17": {
+      "field_id": "ORC.17",
+      "name": "Entering Organization",
+      "description": "This field is the organization that the enterer belonged to at the time he/she enters/maintains the order, such as medical group or department. The person who entered the request is defined in ORC-10 entered by.",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "18": {
+      "field_id": "ORC.18",
+      "name": "Entering Device",
+      "description": "This field is the identifier of the physical device (terminal, PC) used to enter the order.",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "19": {
+      "field_id": "ORC.19",
+      "name": "Action By",
+      "description": "This field is the identity of the person who initiated the event represented by the corresponding order control code. For example, if the order control code is CA (cancel order request), this field represents the person who requested the order cancellation. This person is typically a care provider but may not always be the same as ORC-12 ordering provider.",
+      "length": "120",
+      "data_type": "XCN - Extended Composite ID Number And Name",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "ORC.2",
+      "name": "Placer Order Number",
+      "description": "This field is the placer application\u2019s order number",
+      "length": "22",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "ORC.3",
+      "name": "Filler Order Number",
+      "description": "This field is the order number associated with the filling application. It is a case of the Entity Identifier data type (Section 2.8.13). Its first component is a string that identifies an order detail segment (e.g., OBR). A limit of fifteen (15) characters is suggested but not required. It is assigned by the order filler (receiving) application. This string must uniquely identify the order (as specified in the order detail segment) from other orders in a particular filling application (e.g., clinical laboratory). This uniqueness must persist over time",
+      "length": "22",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "ORC.4",
+      "name": "Placer Group Number",
+      "description": "This field allows an order placing application to group sets of orders together and subsequently identify them. It is a case of an Entity Identifier data type",
+      "length": "22",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "ORC.5",
+      "name": "Order Status",
+      "description": "This field is the status of an order. Refer to HL7 table 0038 - Order status for valid entries. The purpose of this field is to report the status of an order either upon request (solicited), or when the status changes (unsolicited). It does not initiate action. It is assumed that the order status always reflects the status as it is known to the sending application at the time that the message is sent. Only the filler can originate the value of this field",
+      "length": "2",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "ORC.6",
+      "name": "Response Flag",
+      "description": "This field allows the placer (sending) application to determine the amount of information to be returned from the filler. Sometimes the requested level of response may not be possible immediately, but when it is possible, the filler (receiving) application must send the information. When the field is null, D is the default value of the field. Refer to HL7 table 0121 - Response flag for valid entries",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "ORC.7",
+      "name": "Quantity/Timing",
+      "description": "This field determines the priority, quantity, frequency, and timing of an atomic service. Order segments should be thought of as describing an atomic service. It is a composite field that is defined in detail in Section 4.4, \u201cQuantity/Timing (TQ) Definition\"",
+      "length": "200",
+      "data_type": "TQ - Timing Quantity",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "ORC.8",
+      "name": "Parent Order",
+      "description": "This field relates a child to its parent when a parent-child relationship exists. The parent-child mechanism is described under ORC-1-order control notes",
+      "length": "200",
+      "data_type": "CM_EIP - Parent Order",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "ORC.9",
+      "name": "Date/Time of Transaction",
+      "description": "This field is the date and time the current transaction enters the ordering application. For messages creating new orders, this is the date and time the order was entered. For other messages, this is the date and time the current transaction (e.g., cancellation) enters the sending application. This date and time is for the current transaction and is not a \u201creplacement\u201d time for a correction to the original order. Similarly, ORC-10-entered by, ORC-11-verified by, and ORC-13-enterers location of this segment relate to the current transaction, not the original order.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

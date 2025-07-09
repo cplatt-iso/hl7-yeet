@@ -1,0 +1,196 @@
+{
+  "segment_id": "MSH",
+  "short_description": "Message Header",
+  "description": "The MSH segment defines the intent, source, destination, and some specifics of the syntax of a message.",
+  "fields": {
+    "1": {
+      "field_id": "MSH.1",
+      "name": "Field Separator",
+      "description": "This field contains the separator between the segment ID and the first real field, MSH-2-encoding characters. As such it serves as the separator and defines the character to be used as a separator for the rest of the message. Recommended value is |, (ASCII 124).",
+      "length": "1",
+      "data_type": "ST - String Data",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "MSH.10",
+      "name": "Message Control ID",
+      "description": "This field contains a number or other identifier that uniquely identifies the message. The receiving system echoes this ID back to the sending system in the Message acknowledgment segment (MSA).",
+      "length": "20",
+      "data_type": "ST - String Data",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "MSH.11",
+      "name": "Processing ID",
+      "description": "This field is used to decide whether to process the message as defined in HL7 Application (level 7) Processing rules. The first component defines whether the message is part of a production, training, or debugging system (refer to HL7 Table 0103 - Processing ID for valid values). The second component defines whether the message is part of an archival process or an initial load (refer to HL7 Table 0207 - Processing modefor valid values). This allows different priorities to be given to different processing modes.",
+      "length": "3",
+      "data_type": "PT - Processing Type",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "MSH.12",
+      "name": "Version ID",
+      "description": "This field is matched by the receiving system to its own version to be sure the message will be interpreted correctly. Beginning with Version 2.3.1, it has two additional internationalization components, for use by HL7 international affiliates. The <internationalization code> is CE data type (using the ISO country codes where appropriate) which represents the HL7 affiliate. The <internal version ID> is used if the HL7 Affiliate has more than a single local version associated with a single US version. The <internal version ID> has a CE data type, since the table values vary for each HL7 Affiliate.",
+      "length": "60",
+      "data_type": "VID - Version Identifier",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "MSH.13",
+      "name": "Sequence Number",
+      "description": "A non-null value in this field implies that the sequence number protocol is in use. This numeric field is incremented by one for each subsequent value.",
+      "length": "15",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "MSH.14",
+      "name": "Continuation Pointer",
+      "description": "This field is used to define continuations in application-specific ways.",
+      "length": "180",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "15": {
+      "field_id": "MSH.15",
+      "name": "Accept Acknowledgment Type",
+      "description": "This field identifies the conditions under which accept acknowledgments are required to be returned in response to this message. Required for enhanced acknowledgment mode. Refer to HL7 Table 0155 - Accept/application acknowledgment conditions for valid values.",
+      "length": "2",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "16": {
+      "field_id": "MSH.16",
+      "name": "Application Acknowledgment Type",
+      "description": "This field contains the conditions under which application acknowledgments are required to be returned in response to this message. Required for enhanced acknowledgment mode.",
+      "length": "2",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "17": {
+      "field_id": "MSH.17",
+      "name": "Country Code",
+      "description": "This field contains the country of origin for the message. It will be used primarily to specify default elements, such as currency denominations. The values to be used are those of ISO 3166, which are reprinted here upon written approval from ANSI.[2]. The ISO 3166 table has three separate forms of the country code: HL7 specifies that the 3-character (alphabetic) form be used for the country code.",
+      "length": "3",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "18": {
+      "field_id": "MSH.18",
+      "name": "Character Set",
+      "description": "This field contains the character set for the entire message. Refer to HL7 Table 0211 - Alternate character sets for valid values.",
+      "length": "16",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "19": {
+      "field_id": "MSH.19",
+      "name": "Principal Language Of Message",
+      "description": "This field contains the principal language of the message. Codes come from ISO 639.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "MSH.2",
+      "name": "Encoding Characters",
+      "description": "This field contains the four characters in the following order: the component separator, repetition separator, escape character, and subcomponent separator. Recommended values are ^~\\& (ASCII 94, 126, 92, and 38, respectively). See Section 2.8, MESSAGE DELIMITERS.",
+      "length": "4",
+      "data_type": "ST - String Data",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "20": {
+      "field_id": "MSH.20",
+      "name": "Alternate Character Set Handling Scheme",
+      "description": "When any alternative character sets are used (as specified in the second or later components of MSH-18 character sets ), and if any special handling scheme is needed, this component is to specify the scheme used, according to HL7 Table 0356- Alternate character set handling scheme as defined below:",
+      "length": "20",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "21": {
+      "field_id": "MSH.21",
+      "name": "Conformance Statement ID",
+      "description": "Sites may use this field to assert adherence to a Conformance Statement published by HL7 or by a site. Conformance Statements contain detailed explanations of grammar, syntax, and usage for a particular message or set of messages. Examples of the use of Conformance Statements appear in Chapter 5, \"Query.\"",
+      "length": "10",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "3": {
+      "field_id": "MSH.3",
+      "name": "Sending Application",
+      "description": "This field uniquely identifies the sending application among all other applications within the network enterprise. The network enterprise consists of all those applications that participate in the exchange of HL7 messages within the enterprise. Entirely site-defined. User-defined Table 0361-Sending/receiving application is used as the user-defined table of values for the first component.",
+      "length": "180",
+      "data_type": "HD - Hierarchic Designator",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "MSH.4",
+      "name": "Sending Facility",
+      "description": "This field further describes the sending application, MSH-3-sending application. With the promotion of this field to an HD data type, the usage has been broadened to include not just the sending facility but other organizational entities such as a) the organizational entity responsible for sending application; b) the responsible unit; c) a product or vendors identifier, etc. Entirely site-defined. User-defined Table 0362 - Sending/receiving facility is used as the HL7 identifier for the user-defined table of values for the first component.",
+      "length": "180",
+      "data_type": "HD - Hierarchic Designator",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "MSH.5",
+      "name": "Receiving Application",
+      "description": "This field uniquely identifies the receiving application among all other applications within the network enterprise. The network enterprise consists of all those applications that participate in the exchange of HL7 messages within the enterprise. Entirely site-defined . User-defined Table 0361-Sending/receiving application is used as the HL7 identifier for the user-defined table of values for the first component.",
+      "length": "180",
+      "data_type": "HD - Hierarchic Designator",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "MSH.6",
+      "name": "Receiving Facility",
+      "description": "This field identifies the receiving application among multiple identical instances of the application running on behalf of different organizations. User-defined Table 0362 - Sending/receiving facility is used as the HL7 identifier for the user-defined table of values for the first component. Entirely site-defined.",
+      "length": "180",
+      "data_type": "HD - Hierarchic Designator",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "MSH.7",
+      "name": "Date/Time Of Message",
+      "description": "This field contains the date/time that the sending system created the message. If the time zone is specified, it will be used throughout the message as the default time zone.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "MSH.8",
+      "name": "Security",
+      "description": "In some applications of HL7, this field is used to implement security features. Its use is not yet further specified.",
+      "length": "40",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "MSH.9",
+      "name": "Message Type",
+      "description": "This field contains the message type, trigger event, and the message structure ID for the message.",
+      "length": "15",
+      "data_type": "MSG - Message Type",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

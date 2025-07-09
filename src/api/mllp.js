@@ -1,3 +1,5 @@
+// --- START OF FILE mllp.js ---
+
 // By setting the base URL to an empty string, all fetch requests
 // will be relative to the current domain.
 const API_URL = ''; // This can be set via environment variables if needed
@@ -26,6 +28,7 @@ export const parseHl7 = async (message, version) => {
         body: JSON.stringify({ message, version }), // Pass the version
     });
     const result = await handleResponse(response);
+    // The data now includes validation errors! No change needed here.
     return result.data;
 };
 

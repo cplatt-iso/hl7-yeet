@@ -1,0 +1,43 @@
+{
+  "segment_id": "RXR",
+  "short_description": "Pharmacy route segment",
+  "description": "The Pharmacy/Treatment Route segment contains the alternative combination of route, site, administration device, and administration method that are prescribed. The pharmacy, treatment staff and/or nursing staff has a choice between the routes based on either their professional judgment or administration instructions provided by the physician.",
+  "fields": {
+    "1": {
+      "field_id": "RXR.1",
+      "name": "Route",
+      "description": "This field is the route of administration.\n\nSome current \u201croute codes,\u201d such as some of the NDC-derived codes include the site already. In such cases, the entire code can be included in this field as a \u201clocally-defined code\u201d for the CE data type. Refer to HL7 table 0162 - Route of administration for valid values",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "RXR.2",
+      "name": "Site",
+      "description": "This field contains the site of the administration route. Refer to HL7 table 0163 - Administrative site for valid values\n\nAs a CE data type, this field may be extended to cover a wide variety of body site codes (e.g., when SNOMED is used as the table source)",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "RXR.3",
+      "name": "Administration Device",
+      "description": "This field contains the mechanical device used to aid in the administration of the drug or other treatment. Common examples are IV-sets of different types. Refer to HL7 table 0164 - Administration device for valid entries",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "RXR.4",
+      "name": "Administration Method",
+      "description": "Administration method identifies the specific method requested for the administration of the drug or treatment to the patient. Refer to HL7 table 0165 - Administration method for valid values",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

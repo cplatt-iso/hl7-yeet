@@ -1,0 +1,133 @@
+{
+  "segment_id": "DG1",
+  "short_description": "Diagnosis",
+  "description": "No description found.",
+  "fields": {
+    "1": {
+      "field_id": "DG1.1",
+      "name": "Set Id - Diagnosis",
+      "description": "No description found.",
+      "length": "4",
+      "data_type": "SI - Set Id",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "DG1.10",
+      "name": "Drg Grouper Review Code",
+      "description": "No description found.",
+      "length": "2",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "DG1.11",
+      "name": "Outlier Type",
+      "description": "No description found.",
+      "length": "2",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "DG1.12",
+      "name": "Outlier Days",
+      "description": "No description found.",
+      "length": "3",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "DG1.13",
+      "name": "Outlier Cost",
+      "description": "No description found.",
+      "length": "12",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "DG1.14",
+      "name": "Grouper Version And Type",
+      "description": "No description found.",
+      "length": "4",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "DG1.2",
+      "name": "Diagnosis Coding Method",
+      "description": "No description found.",
+      "length": "2",
+      "data_type": "ID - Coded Value",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "DG1.3",
+      "name": "Diagnosis Code",
+      "description": "No description found.",
+      "length": "8",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "DG1.4",
+      "name": "Diagnosis Description",
+      "description": "No description found.",
+      "length": "40",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "DG1.5",
+      "name": "Diagnosis Date/Time",
+      "description": "No description found.",
+      "length": "19",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "DG1.6",
+      "name": "Diagnosis/Drg Type",
+      "description": "No description found.",
+      "length": "2",
+      "data_type": "ID - Coded Value",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "DG1.7",
+      "name": "Major Diagnostic Category",
+      "description": "No description found.",
+      "length": "4",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "DG1.8",
+      "name": "Diagnostic Related Group",
+      "description": "No description found.",
+      "length": "4",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "DG1.9",
+      "name": "Drg Approval Indicator",
+      "description": "No description found.",
+      "length": "2",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

@@ -1,0 +1,457 @@
+{
+  "segment_id": "PV2",
+  "short_description": "Additional Information",
+  "description": "The PV2 segment is a continuation of information contained on the PV1 segment.",
+  "fields": {
+    "1": {
+      "field_id": "PV2.1",
+      "name": "Prior Pending Location",
+      "description": "This field is required for cancel pending transfer (A26) messages. In all other events it is optional.",
+      "length": "80",
+      "data_type": "PL - Person Location",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "PV2.10",
+      "name": "Estimated Length of Inpatient Stay",
+      "description": "This field specifies the estimated days of inpatient stays.",
+      "length": "3",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "PV2.11",
+      "name": "Actual Length of Inpatient Stay",
+      "description": "This field contains the actual days of inpatient stays. The actual length of the inpatient stay may not be calculated from the admission and discharge dates because of possible leaves of absence.",
+      "length": "3",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "PV2.12",
+      "name": "Visit Description",
+      "description": "This field contains a brief user-defined description of the visit.",
+      "length": "50",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "PV2.13",
+      "name": "Referral Source Code",
+      "description": "This field contains the name and the identification numbers of the person or organization that made the referral. This person/organization is not the same as the referring doctor. For example, Adam Everyman referred me to the Clinic (or to Dr. Everywoman at the Clinic).",
+      "length": "250",
+      "data_type": "XCN - Extended Composite ID Number and Name for Persons",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "14": {
+      "field_id": "PV2.14",
+      "name": "Previous Service Date",
+      "description": "This field contains the date of previous service for the same recurring condition. This may be a required field for billing certain illnesses (e.g., accident related) to a third party.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "15": {
+      "field_id": "PV2.15",
+      "name": "Employment Illness Related Indicator",
+      "description": "This field specifies whether a patient's illness was job-related. Refer to HL7 Table 0136 - Yes/No Indicator for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "16": {
+      "field_id": "PV2.16",
+      "name": "Purge Status Code",
+      "description": "This field contains the purge status code for the account. It is used by the application program to determine purge processing. Refer to User-defined Table 0213 - Purge Status Code for suggested values.",
+      "length": "1",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "17": {
+      "field_id": "PV2.17",
+      "name": "Purge Status Date",
+      "description": "This field contains the date on which the data will be purged from the system.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "18": {
+      "field_id": "PV2.18",
+      "name": "Special Program Code",
+      "description": "This field designates the specific health insurance program for a visit required for healthcare reimbursement. Refer to User-defined Table 0214 - Special Program Codes for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "19": {
+      "field_id": "PV2.19",
+      "name": "Retention Indicator",
+      "description": "This field allows the user to control the financial and demographic purge processes at the visit. It is used to preserve demographic and financial data on specific, high priority visits. Refer to HL7 Table 0136 - Yes/No Indicator for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "PV2.2",
+      "name": "Accommodation Code",
+      "description": "This field indicates the specific patient accommodations for this visit. Refer to User-defined Table 0129 - Accommodation Code for suggested values.",
+      "length": "705",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "20": {
+      "field_id": "PV2.20",
+      "name": "Expected Number of Insurance Plans",
+      "description": "This field contains the number of insurance plans that may provide coverage for this visit.",
+      "length": "1",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "21": {
+      "field_id": "PV2.21",
+      "name": "Visit Publicity Code",
+      "description": "This field contains a user-defined code indicating what level of publicity is allowed for a specific visit. Refer to User-defined Table 0215 - Publicity Code for suggested values. Refer to PD1-11 - Publicity Code for the patient level publicity code.",
+      "length": "1",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "22": {
+      "field_id": "PV2.22",
+      "name": "Visit Protection Indicator",
+      "description": "From V2.6 onward, this field has been retained for backward compatibility only. Use the ARV segment instead. This field identifies the person's protection that determines, in turn, whether access to information about this person should be kept from users who do not have adequate authority for a specific visit. Refer to HL7 Table 0136 - Yes/No Indicator for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Not repeatable"
+    },
+    "23": {
+      "field_id": "PV2.23",
+      "name": "Clinic Organization Name",
+      "description": "This field contains the organization name or sub-unit and identifier that is associated with the (visit) episode of care. For example, the Allergy or Oncology Clinic within the healthcare facility might be named.",
+      "length": "250",
+      "data_type": "XON - Extended Composite Name and Identification Number for Organizations",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "24": {
+      "field_id": "PV2.24",
+      "name": "Patient Status Code",
+      "description": "This field indicates the status of the episode of care. Refer to User-defined Table 0216 - Patient Status for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "25": {
+      "field_id": "PV2.25",
+      "name": "Visit Priority Code",
+      "description": "This field contains the priority of the visit. Refer to User-defined Table 0217 - Visit Priority Code for suggested values.",
+      "length": "1",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "26": {
+      "field_id": "PV2.26",
+      "name": "Previous Treatment Date",
+      "description": "This field contains the date that the patient last had treatment for any condition prior to this visit. In the case of a prior hospital visit, it is likely to be the previous discharge date.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "27": {
+      "field_id": "PV2.27",
+      "name": "Expected Discharge Disposition",
+      "description": "This field describes what the patient's disposition is expected to be at the end of the visit. Refer to User-defined Table 0112 - Discharge Disposition for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "28": {
+      "field_id": "PV2.28",
+      "name": "Signature on File Date",
+      "description": "This field contains the date on which a signature was obtained for insurance billing purposes.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "29": {
+      "field_id": "PV2.29",
+      "name": "First Similar Illness Date",
+      "description": "This field is used to determine if the patient has a pre-existing condition.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "PV2.3",
+      "name": "Admit Reason",
+      "description": "This field contains the short description of the reason for patient admission.",
+      "length": "705",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "30": {
+      "field_id": "PV2.30",
+      "name": "Patient Charge Adjustment Code",
+      "description": "This field contains a user-defined code that indicates which adjustments should be made to this patient's charges. Refer to User-defined Table 0218 - Charge Adjustment for suggested values. This field is the same as GT1-26 - Guarantor Charge Adjustment Code.",
+      "length": "705",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "31": {
+      "field_id": "PV2.31",
+      "name": "Recurring Service Code",
+      "description": "This field indicates whether the treatment is continuous. Refer to User-defined Table 0219 - Recurring Service for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "32": {
+      "field_id": "PV2.32",
+      "name": "Billing Media Code",
+      "description": "This field indicates if the account is to be rejected from tape billing. Refer to HL7 Table 0136 - Yes/No Indicator for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "33": {
+      "field_id": "PV2.33",
+      "name": "Expected Surgery Date and Time",
+      "description": "This field contains the date and time on which the surgery is expected to occur.",
+      "length": "24",
+      "data_type": "DTM - Date/Time",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "34": {
+      "field_id": "PV2.34",
+      "name": "Military Partnership Code",
+      "description": "This field indicates that a military healthcare facility has contracted with a non-military healthcare facility for the use of its services. Refer to HL7 Table 0136 - Yes/No Indicator for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "35": {
+      "field_id": "PV2.35",
+      "name": "Military Non-Availability Code",
+      "description": "This field indicates whether a patient has permission to use a non-military healthcare facility for treatment. Refer to HL7 Table 0136 - Yes/No Indicator for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "36": {
+      "field_id": "PV2.36",
+      "name": "Newborn Baby Indicator",
+      "description": "This field indicates whether the patient is a baby. Refer to HL7 Table 0136 - Yes/No Indicator for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "37": {
+      "field_id": "PV2.37",
+      "name": "Baby Detained Indicator",
+      "description": "This field indicates if the baby is detained after the mother's discharge. Refer to HL7 Table 0136 - Yes/No Indicator for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "38": {
+      "field_id": "PV2.38",
+      "name": "Mode of Arrival Code",
+      "description": "Identifies how the patient was brought to the healthcare facility. Refer to User-defined Table 0430 - Mode of Arrival Code for suggested values.",
+      "length": "705",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "39": {
+      "field_id": "PV2.39",
+      "name": "Recreational Drug Use Code",
+      "description": "This field indicates what recreational drugs the patient uses. It is used for the purpose of room assignment. Refer to User-defined Table 0431 - Recreational Drug Use Code for suggested values.",
+      "length": "705",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "4": {
+      "field_id": "PV2.4",
+      "name": "Transfer Reason",
+      "description": "This field contains the short description of the reason for a patient location change.",
+      "length": "705",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "40": {
+      "field_id": "PV2.40",
+      "name": "Admission Level of Care Code",
+      "description": "This field indicates the acuity level assigned to the patient at the time of admission. Refer to User-defined Table 0432 - Admission Level of Care Code for suggested values.",
+      "length": "705",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "41": {
+      "field_id": "PV2.41",
+      "name": "Precaution Code",
+      "description": "This field indicates non-clinical precautions that need to be taken with the patient. Refer to User-defined Table 0433 - Precaution Code for suggested values.",
+      "length": "705",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "42": {
+      "field_id": "PV2.42",
+      "name": "Patient Condition Code",
+      "description": "This field indicates the patient's current medical condition for the purpose of communicating to non-medical outside parties, e.g., family, employer, religious minister, media, etc. Refer to User-defined Table 0434 - Patient Condition Code for suggested values.",
+      "length": "705",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "43": {
+      "field_id": "PV2.43",
+      "name": "Living Will Code",
+      "description": "This field indicates whether or not the patient has a living will and, if so, whether a copy of the living will is on file at the healthcare facility. If the patient does not have a living will, the value of this field indicates whether the patient was provided information on living wills. Refer to User-defined Table 0315 - Living Will Code for suggested values. See also PD1-7 - Living Will.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "44": {
+      "field_id": "PV2.44",
+      "name": "Organ Donor Code",
+      "description": "This field indicates whether the patient wants to donate his/her organs and whether an organ donor card or similar documentation is on file with the healthcare organization. Refer to User-defined Table 0316 - Organ Donor Code for suggested values. See also PD1-8 - Organ Donor .",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "45": {
+      "field_id": "PV2.45",
+      "name": "Advance Directive Code",
+      "description": "This field indicates the patient's instructions to the healthcare facility. Refer to User-defined Table 0435 - Advance Directive Code for suggested values. See also PD1-15 - Advance Directive Code. This field is required if PV2-50 - Advance Directive Last Verified Date is valued.",
+      "length": "705",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Conditional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "46": {
+      "field_id": "PV2.46",
+      "name": "Patient Status Effective Date",
+      "description": "This field indicates the effective date for PV2-24 - Patient Status.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "47": {
+      "field_id": "PV2.47",
+      "name": "Expected LOA Return Date/Time",
+      "description": "This field is conditionally required for A21 - Patient goes on LOA. It may be populated in A22 - Patient returns from LOA as well as in the A53 - Cancel LOA for a patient and the A54 - Cancel patient returns from LOA triggers. This field contains the date/time that the patient is expected to return from LOA.",
+      "length": "24",
+      "data_type": "DTM - Date/Time",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "48": {
+      "field_id": "PV2.48",
+      "name": "Expected Pre-admission Testing Date/Time",
+      "description": "This field contains the date/time that the patient is expected for pre-admission testing.",
+      "length": "24",
+      "data_type": "DTM - Date/Time",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "49": {
+      "field_id": "PV2.49",
+      "name": "Notify Clergy Code",
+      "description": "This field allows the user to indicate whether the clergy should be notified. Refer to User-defined Table 0534 - Notify Clergy Code for suggested values.",
+      "length": "20",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "5": {
+      "field_id": "PV2.5",
+      "name": "Patient Valuables",
+      "description": "This field contains the short description of patient valuables checked in during admission.",
+      "length": "25",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "50": {
+      "field_id": "PV2.50",
+      "name": "Advance Directive Last Verified Date",
+      "description": "This field indicates the date that all the advance directives held in PV2-45 - Advance Directive Code were last verified. When this field is valued, the field PV2-45 - Advance Directive Code is required.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "PV2.6",
+      "name": "Patient Valuables Location",
+      "description": "This field indicates the location of the patient's valuables.",
+      "length": "25",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "PV2.7",
+      "name": "Visit User Code",
+      "description": "This field further categorizes a patient's visit with respect to an individual institution's needs, and is expected to be site-specific. Refer to User-defined Table 0130 - Visit User Code for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "8": {
+      "field_id": "PV2.8",
+      "name": "Expected Admit Date/Time",
+      "description": "This field contains the date and time that the patient is expected to be admitted. This field is also used to reflect the date/time of an outpatient/emergency patient registration.",
+      "length": "24",
+      "data_type": "DTM - Date/Time",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "PV2.9",
+      "name": "Expected Discharge Date/Time",
+      "description": "This field contains the date and time that the patient is expected to be discharged. This is a non-event related date used by ancillaries to determine more accurately the projected workloads. This field is also used to reflect the anticipated discharge date/time of an outpatient/emergency patient, or an inpatient.",
+      "length": "24",
+      "data_type": "DTM - Date/Time",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "segment_id": "EQL",
+  "short_description": "Embedded Query Language",
+  "description": "The EQL segment is used to define queries using select statements based on the query language of choice (e.g., SQL). Refer to the functional chapters for the lists of HL7-defined EQL select statements.",
+  "fields": {
+    "1": {
+      "field_id": "EQL.1",
+      "name": "Query Tag",
+      "description": "This field may be valued by the initiating system to identify the query, and may be used to match response messages to the originating query. If it is valued, the responding system is required to echo it back as the first field in the query acknowledgment segment (QAK). This field differs from MSA2-Message control ID in that its value remains constant for each message (i.e., all continuation messages) associated with the query, whereas MSA-2-Message control ID may vary with each continuation message, since it is associated with each individual message, not the query as a whole",
+      "length": "32",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "EQL.2",
+      "name": "Query/Response Format Code",
+      "description": "This field refers to HL7 Table 0106 - Query/response format code for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "EQL.3",
+      "name": "EQL Query Name",
+      "description": "This field contains the name of the query. Where the default HL7 coding system is used, these names are assigned by the function-specific chapters of this specification. The values for this field are equivalent to those of SPR-3-Stored procedure name (see Section 5.10.5.5 \u201cSPR - stored procedure request definition segment\u201d).",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "EQL.4",
+      "name": "EQL Query Statement",
+      "description": "This field contains the EQL select statement that is the basis of the query.",
+      "length": "4096",
+      "data_type": "ST - String Data",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "segment_id": "ERR",
+  "short_description": "Error segment",
+  "description": "The ERR segment is used to add error comments to acknowledgment messages.",
+  "fields": {
+    "1": {
+      "field_id": "ERR.1",
+      "name": "Error Code and Location",
+      "description": "This field identifies an erroneous segment in another message. The second component is anindex if there is more than one segment of type <segment ID>. For systems that do not use the HL7 Encoding Rules, the data item number may be used for the third component. The fourth component references a locally-defined error table (as a CE data type) is restricted from having any subcomponents as the subcomponent separator is now the CE\u2019s component separator.",
+      "length": "80",
+      "data_type": "CM_ELD - Error",
+      "optionality": "Required",
+      "repeatability": "Repeatable indefinitely"
+    }
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "segment_id": "LCH",
+  "short_description": "Location Characteristic",
+  "description": "The LCH segment is used to identify location characteristics which determine which patients will be assigned to the room or bed. It contains the location characteristics of the room or bed identified in the preceding LOC segment. There should be one LCH segment for each attribute.\n\nWhen the LCH segment appears immediately following the LOC segment, it communicates characteristics which are the same across multiple departments that may use the same room. When the LCH segment appears immediately following the LDP segment, it communicates characteristics which differ for different departments that may use the same room. For example, the following characteristics are more likely to vary by which department is using the room: teaching, gender, staffed, set up, overflow, whereas the other characteristics are likely to remain the same",
+  "fields": {
+    "1": {
+      "field_id": "LCH.1",
+      "name": "Primary Key Value",
+      "description": "This field contains the institution\u2019s identification code for the location. The identifying key value. This field has the same components as the patient location fields in the PV1 segment (except that bed status is not included here). At least the first component of this field is required. The contents of this field must exactly match the content of its preceding MFE ( MFE-4-primary key value), its preceding LOC (LOC1-LOC primary key value), and its preceding LDP (LDP-1-LDP primary key value).",
+      "length": "200",
+      "data_type": "PL - Person Location",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "LCH.2",
+      "name": "Segment Action Code",
+      "description": "This field indicates whether this repetition of the segment is being added, changed or deleted. This repetition of the repeating segment must be identified using FT1-25-segment unique key. The action code adds a validation check to indicate, from the point of view of the sending system, whether this repetition of a segment is being added, changed or deleted. This and the following field are used to implement the \u201cunique key\u201d mode of updating repeating segments. (See Chapter 2, Section 2.23.4.2, \u201cAction code/unique identifier mode update definition.\u201c.) Refer to HL7 table 0206 - Segment action code for valid values",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "LCH.3",
+      "name": "Segment Unique Key",
+      "description": "This field contains a unique identifier for one of the multiple repetitions of this segment, to be used in conjunction with the preceding field. Each of the repetitions of the segment will be uniquely identified by this unique key field for the purposes of updates",
+      "length": "80",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "LCH.4",
+      "name": "Location Characteristic ID",
+      "description": "This field contains an identifier code to show WHICH characteristic is being communicated with this segment. Refer to user-defined table 0324 - Location characteristic ID for suggested values",
+      "length": "80",
+      "data_type": "CE - Coded Element",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "LCH.5",
+      "name": "Location Characteristic Value",
+      "description": "This field contains the value of the above field\u2019s characteristic. The expected coded values for this field will depend upon the previous field. For example, if the previous field is SMK, IMP, INF, the values would be \u201cY\u201d or \u201cN\u201d.\n\nWhen LCH-4-location characteristic ID contains \u201cSHA\u201d- Shadow, refer to HL7 table 0136 - Yes/no indicator for valid values for LRL-5-location relationship value\n- Y not a real bed, but a temporary holding location that does not physically exist in the census\n- N this is a real bed\n\nWhen LCH-4-location characteristic ID contains \u201cPRL\u201d- Privacy level (CE) , then LRL-5-location relationship value indicates how the room is set up and intended to be used, disregarding different uses under special circumstances. Refer to user-defined table 0262 - Privacy level for suggested values.\n\nWhen LCH-4-location characteristic ID contains \u201cLCR\u201d- Level of care, then LRL-5-location relationship value contains the code which indicates what severity of the patient\u2019s medical condition which this location is designed to handle. This indicates how the room is set up and intended to be used, disregarding different uses under special circumstances. Refer to user-defined table 0263 - Level of care\n\nWhen LCH-4-location characteristic ID contains \u201cIFD\u201d- Infectious disease, refer to HL7 table 0136 - Yes/no indicator for valid values for LRL-5-location relationship value.\n- Y patients with infectious diseases can be admitted to this location, that is, this location can be used for isolation\n- N this location cannot be used for isolation\n\nWhen LCH-4-location characteristic ID contains \u201cSMO\u201d- Smoking, refer to HL7 table 0136 - Yes/no indicator for valid values for LRL-5-location relationship value.\n- Y this is a smoking location\n- N this is a non-smoking location\n\nWhen LCH-4-location characteristic ID contains \u201cIMP\u201d- Implant, refer to HL7 table 0136 - Yes/no indicator for valid values for LRL-5-location relationship value.\n- Y this location can be used by radiation implant patients\n- N this location can not be used by radiation implant patients\n\nWhen LCH-4-Location Characteristic ID contains \u201cLIC\u201d- Licensed, refer to HL7 table 0136 - Yes/no indicator for valid values for LRL-5-Location relationship value.\n- Y this location is licensed\n- N this location is not licensed",
+      "length": "80",
+      "data_type": "CE - Coded Element",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

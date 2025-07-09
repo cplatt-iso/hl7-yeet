@@ -1,0 +1,79 @@
+{
+  "segment_id": "TCD",
+  "short_description": "Test Code Detail",
+  "description": "The test code detail segment contains the data necessary to perform operations or calculations, or execute decisions by the laboratory automation system, and which are not supported by the original HL7 segments related to orders (ORC, OBR). For detail of use see messages of laboratory orders and observations in chapters 4 and 7.",
+  "fields": {
+    "1": {
+      "field_id": "TCD.1",
+      "name": "Universal Service Identifier",
+      "description": "This field identifies the test code that information is being transmitted about",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "TCD.2",
+      "name": "Auto-Dilution Factor",
+      "description": "This field is the value that is to be used as the factor for automatically diluting a particular specimen by an instrument for this particular test code. (See examples in definition of \u201cDilution factor\u201d in the \u201cSpecimen and Container Detail Segment\u201d.)",
+      "length": "20",
+      "data_type": "SN - Structured Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "TCD.3",
+      "name": "Rerun Dilution Factor",
+      "description": "This field is the value that is to be used as the factor for automatically diluting a particular specimen in case of rerun for this particular test code.",
+      "length": "20",
+      "data_type": "SN - Structured Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "TCD.4",
+      "name": "Pre-Dilution Factor",
+      "description": "This field is the value that is to be used as the factor for a particular specimen that is delivered to the automated system as pre-diluted for this particular test code.",
+      "length": "20",
+      "data_type": "SN - Structured Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "TCD.5",
+      "name": "Endogenous Content of Pre-Dilution Diluent",
+      "description": "This field represents the rest concentration of the measured test in the diluent. It is the value that is to be used for calculation of the concentration of pre-diluted specimens for this particular test code",
+      "length": "20",
+      "data_type": "SN - Structured Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "TCD.6",
+      "name": "Automatic Repeat Allowed",
+      "description": "This field identifies whether or not automatic repeats are to be initiated for this particular specimen for this particular test code. Refer to HL7 Table 0136 -Yes/no indicator for valid values",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "TCD.7",
+      "name": "Reflex Allowed",
+      "description": "This field identifies whether or not automatic or manual reflex testing is to be initiated for this particular specimen. Refer to HL7 Table 0136 -Yes/no indicator for valid values",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "TCD.8",
+      "name": "Analyte Repeat Status",
+      "description": "This field identifies the repeat status for the analyte/result (e.g. original, rerun, repeat, reflex). Refer to HL7 Table 0389 \u2013 Analyte repeat status for valid values",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

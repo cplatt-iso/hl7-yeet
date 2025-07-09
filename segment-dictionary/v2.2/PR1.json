@@ -1,0 +1,133 @@
+{
+  "segment_id": "PR1",
+  "short_description": "Procedures",
+  "description": "The PR1 segment contains information relative to various types of procedures that can be performed on a patient. For example: Surgical, Nuclear Medicine, X-Ray with contrast, etc",
+  "fields": {
+    "1": {
+      "field_id": "PR1.1",
+      "name": "Set Id - Procedure",
+      "description": "unique number that is used to identify a transaction for the purpose of adding, changing or deleting entries.",
+      "length": "4",
+      "data_type": "SI - Sequence Id",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "PR1.10",
+      "name": "Anesthesia Minutes",
+      "description": "length of time in minutes that the anesthesia was administered",
+      "length": "4",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "PR1.11",
+      "name": "Surgeon",
+      "description": "surgeon who performed the procedure. It is recommended that PR1-12-procedure MD be used instead of this field. This field remains only for backward compatibility. Refer to user-defined table 0010 - physician ID",
+      "length": "60",
+      "data_type": "CN_PERSON - Cn For Person",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "PR1.12",
+      "name": "Procedure Practitioner",
+      "description": "different types of practitioners associated with this procedure. The ID and name components follow the standard rules defined for a composite name (CN) field. If the procedure type component is unvalued, it is assumed that the physician identified is a resident. Refer to user-defined table 0010 - physician ID. Refer to user-defined table 0133 - procedure practitioner type for suggested entries.",
+      "length": "60",
+      "data_type": "CM_PRACTITIONER - Action Carried Out By",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "13": {
+      "field_id": "PR1.13",
+      "name": "Consent Code",
+      "description": "type of consent that was obtained for permission to treat the patient. Refer to user-defined table 0059 - consent code",
+      "length": "2",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "PR1.14",
+      "name": "Procedure Priority",
+      "description": "number which identifies the significance or priority of the procedure code",
+      "length": "2",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "PR1.2",
+      "name": "Procedure Coding Method",
+      "description": "methodology used to assign a code to the procedure (CPT4 for example). If more than one coding method is needed for a single procedure, this field and associated PR1-3-procedure code and PR1-4procedure description may repeat. In this instance, the three fields (PR1-2 through 4) are directly associated with one another. Refer to user-defined table 0089 - procedure coding method for suggested values",
+      "length": "2",
+      "data_type": "ID - Coded Value",
+      "optionality": "Required",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "3": {
+      "field_id": "PR1.3",
+      "name": "Procedure Code",
+      "description": "unique identifier assigned to the procedure. Refer to user-defined table 0088 - procedure code for suggested values",
+      "length": "10",
+      "data_type": "ID - Coded Value",
+      "optionality": "Required",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "4": {
+      "field_id": "PR1.4",
+      "name": "Procedure Description",
+      "description": "text description that describes the procedure",
+      "length": "40",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "5": {
+      "field_id": "PR1.5",
+      "name": "Procedure Date / Time",
+      "description": "date/time the procedure was performed",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "PR1.6",
+      "name": "Procedure Type",
+      "description": "optional code that further defines the type of procedure. Refer to user-defined table 0090 - procedure type for suggested values",
+      "length": "2",
+      "data_type": "ID - Coded Value",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "PR1.7",
+      "name": "Procedure Minutes",
+      "description": "length of time in whole minutes that the procedure took to complete",
+      "length": "4",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "PR1.8",
+      "name": "Anesthesiologist",
+      "description": "Anesthesiologist who administered the anesthesia. It is recommended that PR1-12-procedure MD be used instead of this field. This field remains only for backward compatibility. Refer to user-defined table 0010 - physician ID.",
+      "length": "60",
+      "data_type": "CN_PERSON - Cn For Person",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "PR1.9",
+      "name": "Anesthesia Code",
+      "description": "uniquely identifies the anesthesia used during the procedure. It is recommended that PR1-12-procedure MD be used instead of this field. This field remains only for backward compatibility",
+      "length": "2",
+      "data_type": "ID - Coded Value",
+      "optionality": "Backward Compatibility",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

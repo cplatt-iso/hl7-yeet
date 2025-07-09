@@ -1,0 +1,187 @@
+{
+  "segment_id": "GT1",
+  "short_description": "Guarantor",
+  "description": "No description found.",
+  "fields": {
+    "1": {
+      "field_id": "GT1.1",
+      "name": "Set Id - Guarantor",
+      "description": "No description found.",
+      "length": "4",
+      "data_type": "SI - Set Id",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "GT1.10",
+      "name": "Guarantor Type",
+      "description": "No description found.",
+      "length": "2",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "GT1.11",
+      "name": "Guarantor Relationship",
+      "description": "No description found.",
+      "length": "2",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "GT1.12",
+      "name": "Guarantor Ssn",
+      "description": "No description found.",
+      "length": "11",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "GT1.13",
+      "name": "Guarantor Date - Begin",
+      "description": "No description found.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "GT1.14",
+      "name": "Guarantor Date - End",
+      "description": "No description found.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "15": {
+      "field_id": "GT1.15",
+      "name": "Guarantor Priority",
+      "description": "No description found.",
+      "length": "2",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "16": {
+      "field_id": "GT1.16",
+      "name": "Guarantor Employer Name",
+      "description": "No description found.",
+      "length": "45",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "17": {
+      "field_id": "GT1.17",
+      "name": "Guarantor Employer Address",
+      "description": "No description found.",
+      "length": "106",
+      "data_type": "AD - Address",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "18": {
+      "field_id": "GT1.18",
+      "name": "Guarantor Employ Phone #",
+      "description": "No description found.",
+      "length": "40",
+      "data_type": "TN - Telephone Number",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "19": {
+      "field_id": "GT1.19",
+      "name": "Guarantor Employee Id Num",
+      "description": "No description found.",
+      "length": "20",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "GT1.2",
+      "name": "Guarantor Number",
+      "description": "No description found.",
+      "length": "20",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "20": {
+      "field_id": "GT1.20",
+      "name": "Guarantor Employment Status",
+      "description": "No description found.",
+      "length": "2",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "GT1.3",
+      "name": "Guarantor Name",
+      "description": "No description found.",
+      "length": "48",
+      "data_type": "PN - Person Name",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "GT1.4",
+      "name": "Guarantor Spouse Name",
+      "description": "No description found.",
+      "length": "48",
+      "data_type": "PN - Person Name",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "GT1.5",
+      "name": "Guarantor Address",
+      "description": "No description found.",
+      "length": "106",
+      "data_type": "AD - Address",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "GT1.6",
+      "name": "Guarantor Ph. Num.- Home",
+      "description": "No description found.",
+      "length": "40",
+      "data_type": "TN - Telephone Number",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "GT1.7",
+      "name": "Guarantor Ph. Num-business",
+      "description": "No description found.",
+      "length": "40",
+      "data_type": "TN - Telephone Number",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "GT1.8",
+      "name": "Guarantor Date Of Birth",
+      "description": "No description found.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "GT1.9",
+      "name": "Guarantor Sex",
+      "description": "No description found.",
+      "length": "1",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

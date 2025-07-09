@@ -1,0 +1,61 @@
+{
+  "segment_id": "ARV",
+  "short_description": "Access Restrictions",
+  "description": "The ARV segment is used to communicate the requested/required type of access restrictions from system to system, at both the person/patient and the encounter/visit level.",
+  "fields": {
+    "1": {
+      "field_id": "ARV.1",
+      "name": "Set ID",
+      "description": "This field contains the number that identifies this segment. For the first occurrence of the segment, the sequence number shall be one, for the second occurrence, the sequence number shall be two, etc.",
+      "length": "4",
+      "data_type": "SI - Sequence ID",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "ARV.2",
+      "name": "Access Restriction Action Code",
+      "description": "This field contains a code defining the action to be taken for this segment. It allows access restriction information to be sent to delete or update previously sent access restrictions. Refer to HL7 Table 0206 - Segment Action Code for suggested values.",
+      "length": "705",
+      "data_type": "CNE - Coded with No Exceptions",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "ARV.3",
+      "name": "Access Restriction Value",
+      "description": "This field specifies the information to which access is restricted. This access may be restricted at a field level by employing the specific HL7 field identifiers or may be otherwise determined by user-defined coded values. Refer to User-defined Table 0717 - Access Restriction Value for suggested values.",
+      "length": "705",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "ARV.4",
+      "name": "Access Restriction Reason",
+      "description": "This field is used to convey the reason for the restricted access. Repeat of the Access Restriction Reason is allowed to accommodate communication of multiple reasons for an access restriction. Refer to User-defined Table 0719 - Access Restriction Reason Code for suggested values.",
+      "length": "705",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "5": {
+      "field_id": "ARV.5",
+      "name": "Special Access Restriction Instructions",
+      "description": "Used to convey specific instructions about the protection of the patient's data (e.g., \"Always refer to the patient as Mr. Everyman\"). This field may also be used to specify instructions about the release of information to family and friends (e.g., \"Do not release information to patient's brother, Adam Everyman\"). These instructions may be in conjunction with other fields (as elected by the system).",
+      "length": "250",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "6": {
+      "field_id": "ARV.6",
+      "name": "Access Restriction Date Range",
+      "description": "This element defines the date from which an access restriction commences until the date it is specifically rescinded.",
+      "length": "49",
+      "data_type": "DR - Date/Time Range",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

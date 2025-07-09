@@ -1,0 +1,25 @@
+{
+  "segment_id": "OM6",
+  "short_description": "Observations that are Calculated from Other Observ",
+  "description": "This segment contains the information about quantities that are derived from one or more other quantities or direct observations by mathematical or logical means.\n\nThe Technical Steward for the OM6 segment is ORDERS.",
+  "fields": {
+    "1": {
+      "field_id": "OM6.1",
+      "name": "Sequence Number - Test/ Observation Master File",
+      "description": "This field contains the same value as the sequence number of the associated OM1 segment.",
+      "length": "4",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "OM6.2",
+      "name": "Derivation Rule",
+      "description": "This field is used when there are patient variables that are derived from one or more other patient variables (e.g., creatinine clearance, ideal weight, maximum daily temperature, average glucose, framingham risk). This field contains the rules for deriving the value of this variable (i.e., nature code C, as given in OM1-18 - Nature of service/test/observation). These can be described in terms of humanly understandable formulas or descriptions.",
+      "length": "10240",
+      "data_type": "TX - Text Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

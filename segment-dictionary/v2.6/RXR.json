@@ -1,0 +1,61 @@
+{
+  "segment_id": "RXR",
+  "short_description": "Pharmacy/Treatment Route",
+  "description": "The Pharmacy/Treatment Route segment contains the alternative combination of route, site, administration device, and administration method that are prescribed as they apply to a particular order. The pharmacy, treatment staff and/or nursing staff has a choice between the routes based on either their professional judgment or administration instructions provided by the physician.",
+  "fields": {
+    "1": {
+      "field_id": "RXR.1",
+      "name": "Route",
+      "description": "This field is the route of administration.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "RXR.2",
+      "name": "Administration Site",
+      "description": "This field contains the site of the administration route. When using a post-coordinated code table in this field, RXR-6 Administration Site may be used to modify the meaning of this field.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "RXR.3",
+      "name": "Administration Device",
+      "description": "This field contains the mechanical device used to aid in the administration of the drug or other treatment. Common examples are IV-sets of different types. Refer to User-defined Table 0164 - Administration device for valid entries.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "RXR.4",
+      "name": "Administration Method",
+      "description": "This field identifies the specific method requested for the administration of the drug or treatment to the patient. Refer To User-defined Table 0165 - Administration M ethod for valid values.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "RXR.5",
+      "name": "Routing Instruction",
+      "description": "This field provides instruction on administration routing, especially in cases where more than one route of administration is possible. A typical case would be designating which IV line should be used when more than one IV line is a possible route for injection.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "RXR.6",
+      "name": "Administration Site Modifier",
+      "description": "This field contains a modifier which modifies the meaning of RXR-2 Administration Site .",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

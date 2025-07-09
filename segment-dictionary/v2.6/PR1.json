@@ -1,0 +1,205 @@
+{
+  "segment_id": "PR1",
+  "short_description": "Procedures",
+  "description": "The PR1 segment contains information relative to various types of procedures that can be performed on a patient. The PR1 segment can be used to send procedure information, for example: Surgical, Nuclear Medicine, X-ray with contrast, etc. The PR1 segment is used to send multiple procedures, for example, for medical records encoding or for billing systems.",
+  "fields": {
+    "1": {
+      "field_id": "PR1.1",
+      "name": "Set ID - PR1",
+      "description": "This field contains the number that identifies this transaction. For the first occurrence of the segment the sequence number shall be 1, for the second occurrence it shall be 2, etc.",
+      "length": "4",
+      "data_type": "SI - Sequence ID",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "PR1.10",
+      "name": "Anesthesia Minutes",
+      "description": "This field contains the length of time in minutes that the anesthesia was administered.",
+      "length": "4",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "PR1.11",
+      "name": "Surgeon",
+      "description": "PR1-11 was deprecated as of v2.3 and the detail was withdrawn and removed from the standard as of v 2.6",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Withdrawn",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "PR1.12",
+      "name": "Procedure Practitioner",
+      "description": "PR1-12 was deprecated as of v2.3 and the detail was withdrawn and removed from the standard as of v 2.6",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Withdrawn",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "PR1.13",
+      "name": "Consent Code",
+      "description": "This field contains the type of consent that was obtained for permission to treat the patient. Refer to User-defined Table 0059 - Consent Code for suggested values.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "PR1.14",
+      "name": "Procedure Priority",
+      "description": "This field contains a number that identifies the significance or priority of the procedure code. Refer to HL7 Table 0418 - Procedure Priority for valid values.",
+      "length": "2",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "15": {
+      "field_id": "PR1.15",
+      "name": "Associated Diagnosis Code",
+      "description": "This field contains the diagnosis that is the primary reason this procedure was performed, e.g., in the US, Medicare wants to know for which diagnosis this procedure is submitted for inclusion on CMS 1500 form. Refer to User-defined Table 0051 - Diagnosis Code for suggested values.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "16": {
+      "field_id": "PR1.16",
+      "name": "Procedure Code Modifier",
+      "description": "This field contains the procedure code modifier to the procedure code reported in field 3, when applicable. Procedure code modifiers are defined by regulatory agencies such as CMS and the AMA. Multiple modifiers may be reported. Refer to Externally-defined Table 0340 - Procedure Code Modifier for suggested values.",
+      "length": "705",
+      "data_type": "CNE - Coded with No Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "17": {
+      "field_id": "PR1.17",
+      "name": "Procedure DRG Type",
+      "description": "This field indicates a procedures priority ranking relative to its DRG. Refer to User-defined Table 0416 - Procedure DRG Type for suggested values.",
+      "length": "20",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "18": {
+      "field_id": "PR1.18",
+      "name": "Tissue Type Code",
+      "description": "Code representing type of tissue removed from a patient during this procedure. Refer to User-defined Table 0417 - Tissue Type Code for suggested values.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "19": {
+      "field_id": "PR1.19",
+      "name": "Procedure Identifier",
+      "description": "This field contains a value that uniquely identifies a single procedure for an encounter. It is unique across all segments and messages for an encounter. This field is required in all implementations employing Update Diagnosis/Procedures (P12) messages.",
+      "length": "427",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "PR1.2",
+      "name": "Procedure Coding Method",
+      "description": "PR1-2 was deprecated as of v2.3 and the detail was withdrawn and removed from the standard as of v 2.6",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Withdrawn",
+      "repeatability": "Not repeatable"
+    },
+    "20": {
+      "field_id": "PR1.20",
+      "name": "Procedure Action Code",
+      "description": "This field defines the action to be taken for this procedure. Refer to HL7 Table 0206 - Segment Action Code in Chapter 2 for valid values. This field is required for the Update Diagnosis/Procedures (P12) message. In all other events it is optional.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "21": {
+      "field_id": "PR1.21",
+      "name": "DRG Procedure Determination Status",
+      "description": "This field contains the status of the use of this particular procedure for the DRG determination. Refer to User-defined Table 0761 - DRG Procedure Determination Status for suggested values.",
+      "length": "20",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "22": {
+      "field_id": "PR1.22",
+      "name": "DRG Procedure Relevance",
+      "description": "This field contains the relevance of this particular procedure for the DRG determination. Refer toUser-defined Table 0763 - DRG Procedure Relevance for suggested values.",
+      "length": "20",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "PR1.3",
+      "name": "Procedure Code",
+      "description": "This field contains a unique identifier assigned to the procedure. Refer to Externally-defined Table 0088 - Procedure Code for suggested values. This field is a CNE data type for compatibility with clinical and ancillary systems.",
+      "length": "705",
+      "data_type": "CNE - Coded with No Exceptions",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "PR1.4",
+      "name": "Procedure Description",
+      "description": "PR1-4 was deprecated as of v2.3 and the detail was withdrawn and removed from the standard as of v 2.6",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Withdrawn",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "PR1.5",
+      "name": "Procedure Date/Time",
+      "description": "This field contains the date/time that the procedure was performed.",
+      "length": "24",
+      "data_type": "DTM - Date/Time",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "PR1.6",
+      "name": "Procedure Functional Type",
+      "description": "This field contains the optional code that further defines the type of procedure. Refer to User-defined Table 0230 - Procedure Functional Type for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "PR1.7",
+      "name": "Procedure Minutes",
+      "description": "This field indicates the length of time in whole minutes that the procedure took to complete.",
+      "length": "4",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "PR1.8",
+      "name": "Anesthesiologist",
+      "description": "PR1-8 was deprecated as of v2.3 and the detail was withdrawn and removed from the standard as of v 2.6",
+      "length": "0",
+      "data_type": "ST - String Data",
+      "optionality": "Withdrawn",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "PR1.9",
+      "name": "Anesthesia Code",
+      "description": "This field contains a unique identifier of the anesthesia used during the procedure. Refer to User-defined Table 0019 - Anesthesia Code for suggested values.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

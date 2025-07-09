@@ -1,0 +1,88 @@
+{
+  "segment_id": "QRF",
+  "short_description": "Query filter segment",
+  "description": "The QRF segment is used with the QRD segment to further refine the content of an original style query",
+  "fields": {
+    "1": {
+      "field_id": "QRF.1",
+      "name": "Where Subject Filter",
+      "description": "This field identifies the department, system, or subsystem to which the query pertains. This field may repeat as in LAB~HEMO, etc",
+      "length": "20",
+      "data_type": "ST - String Data",
+      "optionality": "Required",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "2": {
+      "field_id": "QRF.2",
+      "name": "When Data Start Date/Time",
+      "description": "This field contains the dates and times equal to or after which this value should be included",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "QRF.3",
+      "name": "When Data End Date/Time",
+      "description": "This field contains the dates and times equal to or before which this date should be included",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "QRF.4",
+      "name": "What User Qualifier",
+      "description": "This field contains an identifier to further define characteristics of the data of interest",
+      "length": "60",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "5": {
+      "field_id": "QRF.5",
+      "name": "Other QRY Subject Filter",
+      "description": "This field contains a filter defined locally for use between two systems. This filter uses codes and field definitions which have specific meaning only to the applications and/or site involved",
+      "length": "60",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "6": {
+      "field_id": "QRF.6",
+      "name": "Which Date/Time Qualifier",
+      "description": "This field specifies the type of date referred to in QRF-2-when data start date/time and QRF-3when data end date/time",
+      "length": "12",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "7": {
+      "field_id": "QRF.7",
+      "name": "Which Date/Time Status Qualifier",
+      "description": "This field specifies the status type of objects selected in date range defined by QRF-2-when data start date/time and QRF-3-when data end date/time).",
+      "length": "12",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "8": {
+      "field_id": "QRF.8",
+      "name": "Date/Time Selection Qualifier",
+      "description": "This field allows the specification of certain types of values within the date/time range",
+      "length": "12",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "9": {
+      "field_id": "QRF.9",
+      "name": "When Quantity/Timing Qualifier",
+      "description": "This field allows an interval definition to be used for specifying multiple responses to a query. With the addition of this filter, new query specifications should no longer use QRF-2-when data start date/time and QRF-3-when data end date/time in future implementations",
+      "length": "60",
+      "data_type": "TQ - Timing Quantity",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

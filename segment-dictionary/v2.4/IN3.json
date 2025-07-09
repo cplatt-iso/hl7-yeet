@@ -1,0 +1,232 @@
+{
+  "segment_id": "IN3",
+  "short_description": "Insurance Additional Information, Certification",
+  "description": "The IN3 segment contains additional insurance information for certifying the need for patient care. Fields used by this segment are defined by HCFA, or other regulatory agencies.",
+  "fields": {
+    "1": {
+      "field_id": "IN3.1",
+      "name": "Set ID - IN3",
+      "description": "IN3-1 - Set ID - IN3 contains the number that identifies this transaction. For the first occurrence of the segment the sequence number shall be 1, for the second occurrence it shall be 2, etc. The set ID in the IN3 segment is used when there are multiple certifications for the insurance plan identified in IN1-2.",
+      "length": "4",
+      "data_type": "SI - Sequence ID",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "IN3.10",
+      "name": "Certification End Date",
+      "description": "This field contains date that this certification ends",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "IN3.11",
+      "name": "Days",
+      "description": "This field contains the number of days for which this certification is valid. This field applies to denied, pending, or approved days. Refer to User-defined Table 0149 - Day type for suggested values",
+      "length": "3",
+      "data_type": "DTN - Day Type And Number",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "IN3.12",
+      "name": "Non-Concur Code/Description",
+      "description": "This field contains the non-concur code and description for a denied request. Refer to Userdefined Table 0233 - Non-concur code/description for suggested values",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "IN3.13",
+      "name": "Non-Concur Effective Date/Time",
+      "description": "This field contains the effective date of the non-concurrence classification",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "IN3.14",
+      "name": "Physician Reviewer",
+      "description": "This field contains the physician who works with and reviews cases that are pending physician review for the certification agency. Multiple names for the same person may be sent in this sequence. The legal name is assumed to be in the first repetition. When the legal name is not sent, a repeat delimiter must be sent first for the first repetition. Refer to User-defined Table 0010 - Physician ID for suggested values",
+      "length": "250",
+      "data_type": "XCN - Extended Composite ID Number And Name For Persons",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "15": {
+      "field_id": "IN3.15",
+      "name": "Certification Contact",
+      "description": "This field contains the name of the party contacted at the certification agency who granted the certification and communicated the certification number",
+      "length": "48",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "16": {
+      "field_id": "IN3.16",
+      "name": "Certification Contact Phone Number",
+      "description": "This field contains the phone number of the certification contact. Multiple phone numbers for the same certification contact may be sent in this sequence. The primary phone number is assumed to be in the first repetition. When the primary telephone number is not sent, a repeat delimiter must be sent first for the first repetition",
+      "length": "250",
+      "data_type": "XTN - Extended Telecommunication Number",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "17": {
+      "field_id": "IN3.17",
+      "name": "Appeal Reason",
+      "description": "This field contains the reason that an appeal was made on a non-concur for certification. Refer to User-defined Table 0345 - Appeal reason for suggested values",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "18": {
+      "field_id": "IN3.18",
+      "name": "Certification Agency",
+      "description": "This field contains the certification agency. Refer to User-defined Table 0346 - Certification agency for suggested values",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "19": {
+      "field_id": "IN3.19",
+      "name": "Certification Agency Phone Number",
+      "description": "This field contains the phone number of the certification agency",
+      "length": "250",
+      "data_type": "XTN - Extended Telecommunication Number",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "2": {
+      "field_id": "IN3.2",
+      "name": "Certification Number",
+      "description": "This field contains the number assigned by the certification agency. The assigning authority and identifier type code are strongly recommended for all CX data types",
+      "length": "250",
+      "data_type": "CX - Extended Composite ID With Check Digit",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "20": {
+      "field_id": "IN3.20",
+      "name": "Pre-Certification Req/Window",
+      "description": "This field indicates whether pre-certification is required for particular patient types, and the time window for obtaining the certification.",
+      "length": "40",
+      "data_type": "PCF - Pre-certification Required",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "21": {
+      "field_id": "IN3.21",
+      "name": "Case Manager",
+      "description": "This field contains the name of the entity which is handling this particular patient\u2019s case (e.g., UR nurse, or a specific healthcare facility location).",
+      "length": "48",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "22": {
+      "field_id": "IN3.22",
+      "name": "Second Opinion Date",
+      "description": "This field contains the date that the second opinion was obtained",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "23": {
+      "field_id": "IN3.23",
+      "name": "Second Opinion Status",
+      "description": "This field contains the code that represents the status of the second opinion. Refer to Userdefined Table 0151 - Second opinion status for suggested values",
+      "length": "1",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "24": {
+      "field_id": "IN3.24",
+      "name": "Second Opinion Documentation Received",
+      "description": "Use this field if accompanying documentation has been received by the provider. Refer to User-defined Table 0152 - Second opinion documentation received for suggested values",
+      "length": "1",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "25": {
+      "field_id": "IN3.25",
+      "name": "Second Opinion Physician",
+      "description": "This field contains an identifier and name of the physician who provided the second opinion. Multiple names and identifiers for the same person may be sent in this sequence. The legal name is assumed to be in the first repetition. When the legal name is not sent, a repeat delimiter must be sent first for the first repetition. Refer to User-defined Table 0010 - Physician ID for suggested values",
+      "length": "250",
+      "data_type": "XCN - Extended Composite ID Number And Name For Persons",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "3": {
+      "field_id": "IN3.3",
+      "name": "Certified By",
+      "description": "This field contains the party that approved the certification. Multiple names and identifiers for the same person may be sent in this sequence. The legal name is assumed to be in the first repetition. When the legal name is not sent, a repeat delimiter must be sent first for the first repetition",
+      "length": "250",
+      "data_type": "XCN - Extended Composite ID Number And Name For Persons",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "4": {
+      "field_id": "IN3.4",
+      "name": "Certification Required",
+      "description": "This field indicates whether certification is required. Refer to HL7 table 0136 - Yes/no indicator for valid values",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "IN3.5",
+      "name": "Penalty",
+      "description": "This field contains the penalty, in dollars or a percentage that will be assessed if the precertification is not performed. Refer to User-defined Table 0148 - Penalty type for suggested values",
+      "length": "10",
+      "data_type": "MOP - Money Or Percentage",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "IN3.6",
+      "name": "Certification Date/Time",
+      "description": "This field contains the date and time stamp that indicates when insurance was certified to exist for the patient",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "IN3.7",
+      "name": "Certification Modify Date/Time",
+      "description": "This field contains the date/time that the certification was modified",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "IN3.8",
+      "name": "Operator",
+      "description": "This field contains the name party who is responsible for sending this certification information. Multiple names for the same person may be sent in this sequence. The legal name is assumed to be in the first repetition. When the legal name is not sent, a repeat delimiter must be sent first for the first repetition",
+      "length": "250",
+      "data_type": "XCN - Extended Composite ID Number And Name For Persons",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "9": {
+      "field_id": "IN3.9",
+      "name": "Certification Begin Date",
+      "description": "This field contains the date that this certification begins",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

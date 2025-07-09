@@ -1,0 +1,43 @@
+{
+  "segment_id": "PCE",
+  "short_description": "Patient Charge Cost Center Exception",
+  "description": "The Patient Charge Cost Center Exception segment identifies the Patient Price associated with Cost Center and Patient Charge Identifier combinations that should be used in an instance that the item is billed to a patient. The grouping of Cost Center accounts, Patient Charge Identifier, and Patient Price is unique.",
+  "fields": {
+    "1": {
+      "field_id": "PCE.1",
+      "name": "Set ID \u2013 PCE",
+      "description": "This field contains a sequential number that identifies this segment within a given material item segment group. For the first occurrence of the segment in a given group, the sequence number shall be one; for the second occurrence, the sequence number shall be two; etc.",
+      "length": "2",
+      "data_type": "SI - Sequence ID",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "PCE.2",
+      "name": "Cost Center Account Number",
+      "description": "This field would contain the specific general ledger cost center account number associated with a department that may issue or charge for this item. Refer to HL7 Table 0319 - Department Cost Center in Chapter 4 for valid values.",
+      "length": "30",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "PCE.3",
+      "name": "Transaction Code",
+      "description": "This field contains a code that is used by a billing system to charge for the inventory supply item, the descriptive name of the patient charge for that system (as it may appear on a patient's bill or charge labels) and the name of the coding system that assigned the charge code. Refer to User-defined Table 0132 - Transaction Codes in Chapter 6for suggested values.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "PCE.4",
+      "name": "Transaction Amount - Unit",
+      "description": "The price that a department charges to a patient for this inventory supply item when using the Patient Charge Billing code present in this segment.",
+      "length": "12",
+      "data_type": "CP - Composite Price",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

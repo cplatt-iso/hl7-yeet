@@ -1,0 +1,205 @@
+{
+  "segment_id": "TXA",
+  "short_description": "Document notification segment",
+  "description": "The TXA segment contains information specific to a transcribed document but does not include the text of the document. The message is created as a result of a document status change. This information is used to update other healthcare systems to identify reports that are available in the transcription system. By maintaining the TXA message information in these systems, the information is available when constructing queries to the transcription system requesting the full document text.",
+  "fields": {
+    "1": {
+      "field_id": "TXA.1",
+      "name": "Set ID- TXA",
+      "description": "This field contains a number that uniquely identifies this transaction for the purpose of adding, changing, or deleting the transaction",
+      "length": "4",
+      "data_type": "SI - Sequence ID",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "TXA.10",
+      "name": "Assigned Document Authenticator",
+      "description": "This field identifies the person(s) responsible for authenticating the document, who may differ from the originator. Multiple persons may be responsible for authentication, especially in teaching facilities. This field is allowed to repeat an undefined number of times",
+      "length": "60",
+      "data_type": "XCN - Extended Composite ID Number And Name",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "11": {
+      "field_id": "TXA.11",
+      "name": "Transcriptionist Code/Name",
+      "description": "This field identifies the person transcribing the document. This is a conditional value; it is required on all transcribed documents",
+      "length": "48",
+      "data_type": "XCN - Extended Composite ID Number And Name",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "TXA.12",
+      "name": "Unique Document Number",
+      "description": "This field contains a unique document identification number assigned by the sending system. This document number is used to assist the receiving system in matching future updates to the document, as well as to identify the document in a query. When the vendor does not provide a unique document ID number, some type of document identifier should be entered here, or the Unique Document File name should be utilized. See Chapter 2, Section 2.8.49, \u201cXTN - extended telecommunication number.\u201d Where the system does not customarily have a document filler number, this number could serve as that value, as well",
+      "length": "30",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "TXA.13",
+      "name": "Parent Document Number",
+      "description": "This field contains a document number that identifies the parent document to which this document belongs. The parent document number can be used to assist the receiving system in matching future updates to this document. This is a conditional field that is always required on T05 (document addendum notification), T06 (document addendum notification and content), T09 (document replacement notification), and T10 (document replacement notification and content) events",
+      "length": "30",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "TXA.14",
+      "name": "Placer Order Number",
+      "description": "This field is the placer application\u2019s order number\n\nThis is a composite field. The first component is a string of characters that identifies an individual order (e.g., OBR). It is assigned by the placer (ordering application). It identifies an order uniquely among all orders from a particular ordering application. The second through fourth components contain the (filler) assigning authority of the placing application. The (filler) assigning authority is a string of characters that will be uniquely associated with an application. A given institution or group of intercommunicating institutions should establish a unique list of applications that may be potential placers and fillers and assign unique entity identifiers. The components are separated by component delimiters.",
+      "length": "22",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "15": {
+      "field_id": "TXA.15",
+      "name": "Filler Order Number",
+      "description": "This field is the order number associated with the filling application. Where a transcription service or similar organization creates the document and uses an internally unique identifier, that number should be inserted in this field. Its first component is a string of characters that identifies an order detail segment (e.g., OBR). This string must uniquely identify the order (as specified in the order detail segment) from other orders in a particular filling application (e.g., transcription service). This uniqueness must persist over time. Where a number is reused over time, a date can be affixed to the non-unique number to make it unique.\n\nThe second through fourth components contains the (filler) assigning authority. The (filler) assigning authority is a string of characters that uniquely defines the application from other applications on the network. The second through fourth components of the filler order number always identify the actual filler of an order.\n\nFor further details, please see the definitions provided in Chapter 4.",
+      "length": "22",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "16": {
+      "field_id": "TXA.16",
+      "name": "Unique Document File Name",
+      "description": "This field contains a unique name assigned to a document by the sending system. The file name is used to assist the receiving system in matching future updates to the document",
+      "length": "30",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "17": {
+      "field_id": "TXA.17",
+      "name": "Document Completion Status",
+      "description": "This field identifies the current completion state of the document. This is a required, tabledriven field. Refer to HL7 table 0271 - Document completion status for valid values",
+      "length": "2",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "18": {
+      "field_id": "TXA.18",
+      "name": "Document Confidentiality Status",
+      "description": "This is an optional field which identifies the degree to which special confidentiality protection should be applied to this information. The assignment of data elements to these categories is left to the discretion of the healthcare organization. Refer to HL7 table 0272 - Document confidentiality status for valid values",
+      "length": "2",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "19": {
+      "field_id": "TXA.19",
+      "name": "Document Availability Status",
+      "description": "This is an optional field which identifies a document\u2019s availability for use in patient care. If an organization\u2019s business rules allow a document to be used for patient care before it is authenticated, the value of this field should be set to \u201cAV.\u201d If a document has been made available for patient care, it cannot be changed or deleted. If an erroneous document has been made available at any point in time and a replacement is not appropriate, then it may be marked as \u201cCanceled\u201d and removed, as in the case of a document being assigned to the wrong patient. Additional information must be provided via an addendum, which is separately authenticated and date/time stamped. If the content of a document whose status is \u201cAvailable\u201d must be revised, this is done by issuing a replacement, which is separately authenticated and date/time stamped. Refer to HL7 table 0273 - Document availability status for valid values",
+      "length": "2",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "TXA.2",
+      "name": "Document Type",
+      "description": "This field identifies the type of document (as defined in the transcription system). Refer to userdefined table 0270 - Document type for suggested values. The organization is free to add more entries",
+      "length": "30",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "20": {
+      "field_id": "TXA.20",
+      "name": "Document Storage Status",
+      "description": "This optional field identifies the storage status of the document. Refer to HL7 table 0275 - Document storage status for valid values",
+      "length": "2",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "21": {
+      "field_id": "TXA.21",
+      "name": "Document Change Reason",
+      "description": "This free text field (limited to 30 characters) contains the reason for document status change",
+      "length": "30",
+      "data_type": "ST - String Data",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "22": {
+      "field_id": "TXA.22",
+      "name": "Authentication Person, Time Stamp",
+      "description": "This is a conditional field. When the status of TXA-17-document completion status is equal to AU (authenticated) or LA (legally authenticated), all components are required. This field contains a set of components describing by whom and when authentication was performed. Whenever any one of the ID number - Name type code component s is valued, the when authenticated component, which is time stamp, must be valued as non-null. If the time component of a set is valued as non-null, the person component becomes required. These subcomponents are normally delimited by an ampersand (&). See Chapter 2.",
+      "length": "60",
+      "data_type": "PPN - Performing Person Time Stamp",
+      "optionality": "Conditional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "23": {
+      "field_id": "TXA.23",
+      "name": "Distributed Copies",
+      "description": "This field identifies the persons who received a copy of this document",
+      "length": "60",
+      "data_type": "XCN - Extended Composite ID Number And Name",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "3": {
+      "field_id": "TXA.3",
+      "name": "Document Content Presentation",
+      "description": "This is a conditional field which is required whenever the message contains content as presented in one or more OBX segments. This field identifies the method by which this document was obtained or originated. Refer to HL7 table 0191 - Main type of referenced data for valid values",
+      "length": "2",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "TXA.4",
+      "name": "Activity Date/Time",
+      "description": "This field contains the date/time identified in the document as the date a procedure or activity was performed. This date can identify date of surgery, non-invasive procedure, consultation, examination, etc",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "TXA.5",
+      "name": "Primary Activity Provider Code/Name",
+      "description": "This field contains the name of the person identified in the document as being responsible for performing the procedure or activity. This field includes the code and name (if available) of the caregiver. This field is conditional based upon the presence of a value in TXA-4-activity date",
+      "length": "60",
+      "data_type": "XCN - Extended Composite ID Number And Name",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "TXA.6",
+      "name": "Origination Date/Time",
+      "description": "This field contains the date and time the document was created (i.e., dictated, recorded, etc.).",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "TXA.7",
+      "name": "Transcription Date/Time",
+      "description": "This field contains the date and time the input was actually transcribed. This field is conditional based upon the presence of a value in TXA-17-document status of anything except \u201cdictated.\u201d",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "TXA.8",
+      "name": "Edit Date/Time",
+      "description": "This field contains the date and time the document was edited",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    }
+  }
+}

@@ -1,0 +1,97 @@
+{
+  "segment_id": "DRG",
+  "short_description": "Diagnosis related group segment",
+  "description": "The DRG segment contains diagnoses-related grouping information of various types. The DRG segment is used to send the DRG information, for example, for billing and medical records encoding.",
+  "fields": {
+    "1": {
+      "field_id": "DRG.1",
+      "name": "Diagnostic Related Group",
+      "description": "This field contains the DRG for the transaction. Interim DRG's could be determined for an encounter. For the identifier component, user-defined table 0055-DRG is used as the identifier for the user-defined table of values for this field . For the name of coding system component, send the grouper version and type.",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "DRG.10",
+      "name": "Confidential Indicator",
+      "description": "This field indicates if the DRG contains a confidential diagnosis. Refer to HL7 table 0136 - Yes/no indicator for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "DRG.2",
+      "name": "DRG Assigned Date/Time",
+      "description": "This field contains the time stamp to indicate the date and time that the DRG was assigned.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "DRG.3",
+      "name": "DRG Approval Indicator",
+      "description": "This field indicates if the DRG has been approved by a reviewing entity. Refer to HL7 table 0136 - Yes/no indicator for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "DRG.4",
+      "name": "DRG Grouper Review Code",
+      "description": "User-defined table 0056 - DRG grouper review code is used as the HL7 identifier for the user-defined table of values for this field . This code indicates that the grouper results have been reviewed and approved.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "DRG.5",
+      "name": "Outlier Type",
+      "description": "Refer to user-defined table 0083 - Outlier type for suggested values. Refers to the type of outlier that has been paid.",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "DRG.6",
+      "name": "Outlier Days",
+      "description": "This field contains the number of days that have been approved as an outlier payment.",
+      "length": "3",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "DRG.7",
+      "name": "Outlier Cost",
+      "description": "This field contains the amount of money that has been approved for an outlier payment.",
+      "length": "12",
+      "data_type": "CP - Composite Price",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "DRG.8",
+      "name": "DRG Payor",
+      "description": "This field indicates the associated DRG Payor. Refer to user-defined table 0229 - DRG payor for suggested values.",
+      "length": "1",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "DRG.9",
+      "name": "Outlier Reimbursement",
+      "description": "Where applicable, the outlier reimbursement amount indicates the part of the total reimbursement designated for reimbursement of outlier conditions (day or cost).",
+      "length": "9",
+      "data_type": "CP - Composite Price",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

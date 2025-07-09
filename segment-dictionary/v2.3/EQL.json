@@ -1,0 +1,43 @@
+{
+  "segment_id": "EQL",
+  "short_description": "Embedded Query Language",
+  "description": "The EQL segment is used to define queries using select statements based on the query language of choice (e.g., SQL). Refer to the functional chapters for the lists of HL7-defined EQL select statements",
+  "fields": {
+    "1": {
+      "field_id": "EQL.1",
+      "name": "Query tag",
+      "description": "This field may be valued by the initiating system to identify the query, and may be used to match response messages to the originating query. If it is valued, the responding system is required to echo it back as the first field in the query acknowledgment segment (QAK). This field differs from MSA-2-message control ID in that its value remains constant for each message (i.e., all continuation messages) associated with the query, whereas MSA-2-message control ID may vary with each continuation message, since it is associated with each individual message, not the query as a whole",
+      "length": "32",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "EQL.2",
+      "name": "Query/ Response Format Code",
+      "description": "This field refers to HL7 table 0106 - Query/response format code for valid values",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "EQL.3",
+      "name": "EQL Query Name",
+      "description": "This field contains the name of the query. Where the default HL7 coding system is used, these names are assigned by the function-specific chapters of this specification. The values for this field are equivalent to those of SPR-3-stored procedure name (see Section 2.24.20, \u201cSPR - stored procedure request definition segment\u201d).",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "EQL.4",
+      "name": "EQL Query Statement",
+      "description": "This field contains the EQL select statement that is the basis of the query.\n\nFields are designated by the \u201c@\u201d symbol concatenated with the HL7 item number for the field. If the field is divided into components, the designation may be suffixed with \u201c.nn,\u201d to identify a particular component (a suffix of \u201c.3\u201d indicates the third component of the field); otherwise, the whole field is assumed. If the field is further divided into subcomponents, the designation is suffixed with \u201c.nn.mm,\u201d which identifies the component and subcomponent requested by relative position.\n\nSite-specific fields may be used, provided that they begin with the letter \u201cZ.\u201d Note that in this case sitedefined \u201cz\u201d-item numbers that do not conflict with HL7 items numbers must be negotiated as part of the site specification.\n\nValues for this field are defined in the function-specific chapters of this specification",
+      "length": "4096",
+      "data_type": "ST - String Data",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

@@ -1,0 +1,97 @@
+{
+  "segment_id": "ACC",
+  "short_description": "Accident",
+  "description": "The ACC segment contains patient information relative to an accident in which the patient has been involved.",
+  "fields": {
+    "1": {
+      "field_id": "ACC.1",
+      "name": "Accident Date/Time",
+      "description": "This field contains the date/time of the accident",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "ACC.10",
+      "name": "Police Notified Indicator",
+      "description": "This field indicates if the police were notified. Refer to HL7 Table 0136 - Yes/No indicator for valid values.\n\n- \u201cY\u201d the police were notified\n- \u201cN\u201d the police were not notified",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "ACC.2",
+      "name": "Accident Code",
+      "description": "This field contains the type of accident. Refer to User-defined Table 0050 - Accident code for suggested values. ICD accident codes are recommended",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "ACC.3",
+      "name": "Accident Location",
+      "description": "This field contains the location of the accident",
+      "length": "25",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "ACC.4",
+      "name": "Auto Accident State",
+      "description": "This field specifies the state in which the auto accident occurred. (HCFA 1500 requirement in the US.) Refer to User-defined Table 0347 - Auto accident state for suggested values",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "ACC.5",
+      "name": "Accident Job Related Indicator",
+      "description": "This field indicates if the accident was related to a job. Refer to HL7 table 0136 - Yes/no indicator for valid values.\n\n- Y the accident was job related\n- N the accident was not job related",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "ACC.6",
+      "name": "Accident Death Indicator",
+      "description": "This field indicates whether or not a patient has died as a result of an accident. Refer to HL7 table 0136 - Yes/no indicator for valid values.\n\n- Y the patient has died as a result of an accident\n- N the patient has not died as a result of an accident",
+      "length": "12",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "ACC.7",
+      "name": "Entered By",
+      "description": "This field identifies the person entering the accident information",
+      "length": "250",
+      "data_type": "XCN - Extended Composite ID Number And Name For Persons",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "ACC.8",
+      "name": "Accident Description",
+      "description": "Description of the accident",
+      "length": "25",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "ACC.9",
+      "name": "Brought In By",
+      "description": "This field identifies the person or organization that brought in the patient",
+      "length": "80",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

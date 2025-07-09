@@ -1,0 +1,88 @@
+{
+  "segment_id": "PRD",
+  "short_description": "Provider Data",
+  "description": "This segment will be employed as part of a patient referral message and its related transactions. The PRD segment contains data specifically focused on a referral, and it is inter-enterprise in nature. The justification for this new segment comes from the fact that we are dealing with referrals that are external to the facilities that received them. Therefore, using a segment such as the current PV1 would be inadequate for all the return information that may be required by the receiving facility or application. In addition, the PV1 does not always provide information sufficient to enable the external facility to make a complete identification of the referring entity. The information contained in the PRD segment will include the referring provider, the referred-to provider, the referred-to location or service, and the referring provider clinic address.",
+  "fields": {
+    "1": {
+      "field_id": "PRD.1",
+      "name": "Provider Role",
+      "description": "This field contains the contact role that defines the relationship of the person described in this segment to the patient being referred. When a referral is inter-enterprise in nature, there are several important relationships that must be identified. For example, the proper identification of both the referring and the referred-to provider is critical for proper processing of a referral. In addition, some enterprises may want information regarding a consulting provider or the identity of the person who actually prepared the referral. This contact role may also expand to represent affiliated persons to whom information regarding this referral must be forwarded or copied. Refer to User-defined Table 0286 - Provider role for suggested values.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Required",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "2": {
+      "field_id": "PRD.2",
+      "name": "Provider Name",
+      "description": "This field contains the name of the provider identified in this segment. Generally, this field will describe a physician associated with the referral. However, it is not limited to physicians. This field may contain the name of any valid healthcare provider associated with this referral. If this Provider Name is a physicians name, you may refer to PRD-7-Provider identifiers for the physician identifier.",
+      "length": "250",
+      "data_type": "XPN - Extended Person Name",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "3": {
+      "field_id": "PRD.3",
+      "name": "Provider Address",
+      "description": "This field contains the mailing address of the provider identified in this segment. One of the key components to completing the circle of care and provider/institution bonding is the issuance of follow-up correspondence to the referring provider.",
+      "length": "250",
+      "data_type": "XAD - Extended Address",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "4": {
+      "field_id": "PRD.4",
+      "name": "Provider Location",
+      "description": "This field contains the location of the provider as needed when a provider that may be external to a given enterprise must be referenced. For example, if this provider represented the referred-to physician, the PRD-4-Provider location should identify the clinic of the physician or provider to whom this referral has been sent. The identification of the providers location is specified by an application and facility identifier carried in the facility field. The application ID and facility ID would be used in the same manner as their corresponding fields in the MSH segment (MSH-3-Sending application, MSH-5-Receiving application, MSH-4-Sending facility, MSH-6-Receiving facility ). That is, the facility field will contain an application identifier and facility identifier which describe the location of this provider. However, it should be noted that they may describe a different location because the provider location being referenced in this field may not be the location from which the message originated, which is being described by the MSH.",
+      "length": "60",
+      "data_type": "PL - Person Location",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "PRD.5",
+      "name": "Provider Communication Information",
+      "description": "This field contains information, such as the phone number or electronic mail address, used to communicate with the provider or organization.",
+      "length": "250",
+      "data_type": "XTN - Extended Telecommunication Number",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "6": {
+      "field_id": "PRD.6",
+      "name": "Preferred Method of Contact",
+      "description": "This field contains the preferred method to use when communicating with the provider. Refer to User-defined Table 0185 - Preferred method of contact for suggested values.",
+      "length": "250",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "PRD.7",
+      "name": "Provider Identifiers",
+      "description": "This repeating field contains the providers unique identifiers such as UPIN, Medicare and Medicaid numbers. Refer to PRA-6-Practitioner ID numbers in Chapter 8 (Section 8.6.3.6, Practitioner ID numbers) for suggested values.",
+      "length": "100",
+      "data_type": "PI - Person Identifier",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "8": {
+      "field_id": "PRD.8",
+      "name": "Effective Start Date of Provider Role",
+      "description": "This field contains the date that the role of the provider effectively began. For example, this date may represent the date on which a physician was assigned as a patients primary care provider.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "PRD.9",
+      "name": "Effective End Date of Provider Role",
+      "description": "This field contains the date that the role of the provider effectively ended. For example, this date may represent the date that a physician was removed as a patients primary care provider.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

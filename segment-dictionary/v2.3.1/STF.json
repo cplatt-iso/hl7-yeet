@@ -1,0 +1,241 @@
+{
+  "segment_id": "STF",
+  "short_description": "Staff identification segment",
+  "description": "The STF segment can identify any personnel referenced by information systems. These can be providers, staff, system users, and referring agents. In a network environment, this segment can be used to define personnel to other applications; for example, order entry clerks, insurance verification clerks, admission clerks, as well as provider demographics. MFE-4-primary key value is used to link all the segments pertaining to the same master file entry. Therefore, in the MFE segment, MFE-4-primary key value must be filled in. Other segments may follow the STF segment to provide data for a particular type of staff member. The PRA segment (practitioner) is one such. It may optionally follow the STF segment in order to add practitioner-specific data. Other segments may be defined as needed.",
+  "fields": {
+    "1": {
+      "field_id": "STF.1",
+      "name": "Primary Key Value - STF",
+      "description": "This field must match MFE-4-primary key value to identify which entry is being referenced.",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "STF.10",
+      "name": "Phone",
+      "description": "This field contains the staff person's phone number. This is a repeating field with a component for indicating which phone number is which. It is recommended that the last part of the XTN, [C any text], start with a code from the table associated below with STF-16-preferred method of contact , in order to indicate the type of each phone number in this repeating field.",
+      "length": "40",
+      "data_type": "XTN - Extended Telecommunication Number",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "11": {
+      "field_id": "STF.11",
+      "name": "Office/Home Address",
+      "description": "This field contains the office address and home address of the staff person. This is a repeating field.",
+      "length": "106",
+      "data_type": "XAD - Extended Address",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "12": {
+      "field_id": "STF.12",
+      "name": "Institution Activation Date",
+      "description": "This field contains the date when staff became active for an institution. Repeats.",
+      "length": "26",
+      "data_type": "DIN - Activation Date",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "13": {
+      "field_id": "STF.13",
+      "name": "Institution Inactivation Date",
+      "description": "This field contains the date when staff became inactive for an institution. Repeats.",
+      "length": "26",
+      "data_type": "DIN - Activation Date",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "14": {
+      "field_id": "STF.14",
+      "name": "Backup Person ID",
+      "description": "This field contains the MFE-4-primary key value of the master file entry which corresponds to the designated backup person for this staff person.",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "15": {
+      "field_id": "STF.15",
+      "name": "E-Mail Address",
+      "description": "This field has been retained for backward compatibility. (It is now present in the fourth component of STF-10-phone).",
+      "length": "40",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "16": {
+      "field_id": "STF.16",
+      "name": "Preferred Method Of Contact",
+      "description": "This field indicates which of a group of multiple phone numbers is the preferred method of contact for this person. Note that all values of this code refer to this segment's phone field, except for the value 'E,' which refers to the E-mail address field. If more than one phone number of the preferred type exists in STF-10-phone, this field refers to the first such instance. Refer to HL7 table 0185 - Preferred method of contact for valid values.",
+      "length": "200",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "17": {
+      "field_id": "STF.17",
+      "name": "Marital Status",
+      "description": "This field contains the staff member's marital status. Refer to user-defined table 0002 - Marital status for suggested values. Same values as those for PID-16-marital status .",
+      "length": "80",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "18": {
+      "field_id": "STF.18",
+      "name": "Job Title",
+      "description": "This field contains a descriptive name of the staff member's occupation (e.g., Sr. Systems Analyst, Sr. Accountant).",
+      "length": "20",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "19": {
+      "field_id": "STF.19",
+      "name": "Job Code/Class",
+      "description": "This field contains the staff member's job code and employee classification. User-defined table 0327 - Job code and User-defined table0328 - Employee classification. are used as the HL7 identifiers for the user-defined table of values for this field.",
+      "length": "20",
+      "data_type": "JCC - Job Code/class",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "STF.2",
+      "name": "Staff ID Code",
+      "description": "This field contains a personnel identification code or institution user number, used by the institution to identify this person. Repeating field allows multiple ID codes per person, with the type of ID code indicated in the third component of the coded entry data type.",
+      "length": "60",
+      "data_type": "CX - Extended Composite ID With Check Digit",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "20": {
+      "field_id": "STF.20",
+      "name": "Employment Status",
+      "description": "This field contains the code that indicates the staff member's employment status, e.g., full-time, part-time, self-employed, etc. User-defined table 0066 - Employment status for suggested values is used as the HL7 identifier for the user-defined table of values for this field.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "21": {
+      "field_id": "STF.21",
+      "name": "Additional Insured on Auto",
+      "description": "This field contains an indicator for whether the present institution is named as an additional insured on the staff member's auto insurance, especially for use when staff is a driver for the institution. Refer to HL7 table 0136 - Yes/no indicator for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "22": {
+      "field_id": "STF.22",
+      "name": "Driver s License Number - Staff",
+      "description": "This field contains the driver's license information of staff, especially for use when staff is a driver for the institution. For state or province refer to official postal codes for that country; for country refer to ISO 3166 for codes.",
+      "length": "25",
+      "data_type": "DLN - Driver's License Number",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "23": {
+      "field_id": "STF.23",
+      "name": "Copy Auto Ins",
+      "description": "This field contains an indicator for whether the institution has on file a copy of the staff member's auto insurance, especially for use when staff is a driver for the institution. Refer to HL7 table 0136 - Yes/no indicator for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "24": {
+      "field_id": "STF.24",
+      "name": "Auto Ins. Expires",
+      "description": "This field contains the date on which the staff member's driver's license expires, especially for use when staff is a driver for the institution.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "25": {
+      "field_id": "STF.25",
+      "name": "Date Last DMV Review",
+      "description": "This field contains the date of the staff member's most recent Department of Motor Vehicles review, especially for use when staff is a driver for the institution.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "26": {
+      "field_id": "STF.26",
+      "name": "Date Next DMV Review",
+      "description": "This field contains the date of the staff member's next Department of Motor Vehicles review, especially for use when staff is a driver for the institution.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "STF.3",
+      "name": "Staff Name",
+      "description": "This field contains the staff person's name.",
+      "length": "48",
+      "data_type": "XPN - Extended Person Name",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "4": {
+      "field_id": "STF.4",
+      "name": "Staff Type",
+      "description": "This field contains a code identifying what type of staff. User-definedtable 0182 - Staff type is used as the HL7 identifier for the user-defined table of values for this field. Values may include codes for staff, practitioner (physician, nurse, therapist, etc.), referral agent or agency, etc.",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "5": {
+      "field_id": "STF.5",
+      "name": "Sex",
+      "description": "This field contains the staff person's sex. Refer to user-defined table 0001 - Sex for suggested values.",
+      "length": "1",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "STF.6",
+      "name": "Date/Time Of Birth",
+      "description": "This field contains a staff member's date and time of birth.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "STF.7",
+      "name": "Active/Inactive Flag",
+      "description": "This field indicates whether person is currently a valid staff member. Refer to HL7 table 0183 - Active/inactive for valid values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "STF.8",
+      "name": "Department",
+      "description": "This field contains the institution department to which this person reports or belongs. User-defined table 0184 - Department is used as the HL7 identifier for the user-defined table of values for this field. .",
+      "length": "200",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "9": {
+      "field_id": "STF.9",
+      "name": "Hospital Service",
+      "description": "This field contains the hospital or ancillary service with which this staff person is associated. User-defined table 0069 - Hospital service is used as the HL7 identifier for the user-defined table of values for this field.",
+      "length": "200",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    }
+  }
+}

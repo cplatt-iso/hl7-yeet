@@ -1,0 +1,61 @@
+{
+  "segment_id": "RXC",
+  "short_description": "Pharmacy/treatment component order segment",
+  "description": "If the drug or treatment ordered with the RXO segment is a compound drug OR an IV solution, AND there is not a coded value for OBR-4-universal service ID , which specifies the components (base and all additives), then the components (the base and additives) are specified by two or more RXC segments. The policy of the pharmacy or treatment application on substitutions at the RXC level is identical to that for the RXO level.",
+  "fields": {
+    "1": {
+      "field_id": "RXC.1",
+      "name": "RX Component Type",
+      "description": "No description found.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "RXC.2",
+      "name": "Component Code",
+      "description": "No description found.",
+      "length": "100",
+      "data_type": "CE - Coded Element",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "RXC.3",
+      "name": "Component Amount",
+      "description": "No description found.",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "RXC.4",
+      "name": "Component Units",
+      "description": "No description found.",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "RXC.5",
+      "name": "Component Strength",
+      "description": "No description found.",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "RXC.6",
+      "name": "Component Strength Units",
+      "description": "No description found.",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

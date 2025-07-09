@@ -1,0 +1,115 @@
+{
+  "segment_id": "BHS",
+  "short_description": "Batch Header",
+  "description": "The BHS segment defines the start of a batch",
+  "fields": {
+    "1": {
+      "field_id": "BHS.1",
+      "name": "Batch Field Separator",
+      "description": "has the same definition as the corresponding field in the MSH segment",
+      "length": "1",
+      "data_type": "ST - String Data",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "BHS.10",
+      "name": "Batch Comment",
+      "description": "comment field that is not further defined in the HL7 protocol",
+      "length": "80",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "BHS.11",
+      "name": "Batch Control Id",
+      "description": "used to uniquely identify a particular batch. It can be echoed back in BHS-12-reference batch control ID if an answering batch is needed",
+      "length": "20",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "BHS.12",
+      "name": "Reference Batch Control Id",
+      "description": "value of BHS-11-batch control ID when this batch was originally transmitted. Not present if this batch is being sent for the first time. See definition for BHS-11-batch control ID",
+      "length": "20",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "BHS.2",
+      "name": "Batch Encoding Characters",
+      "description": "has the same definition as the corresponding field in the MSH segment",
+      "length": "4",
+      "data_type": "ST - String Data",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "BHS.3",
+      "name": "Batch Sending Application",
+      "description": "has the same definition as the corresponding field in the MSH segment",
+      "length": "15",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "BHS.4",
+      "name": "Batch Sending Facility",
+      "description": "has the same definition as the corresponding field in the MSH segment",
+      "length": "20",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "BHS.5",
+      "name": "Batch Receiving Application",
+      "description": "has the same definition as the corresponding field in the MSH segment",
+      "length": "30",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "BHS.6",
+      "name": "Batch Receiving Facility",
+      "description": "has the same definition as the corresponding field in the MSH segment",
+      "length": "30",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "BHS.7",
+      "name": "Batch Creation Date / Time",
+      "description": "has the same definition as the corresponding field in the MSH segment",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "BHS.8",
+      "name": "Batch Security",
+      "description": "has the same definition as the corresponding field in the MSH segment",
+      "length": "40",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "BHS.9",
+      "name": "Batch Name / Id / Type",
+      "description": "can be used by the application processing the batch. It can have extra components if needed",
+      "length": "20",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

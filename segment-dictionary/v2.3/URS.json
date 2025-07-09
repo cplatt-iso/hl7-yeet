@@ -1,0 +1,88 @@
+{
+  "segment_id": "URS",
+  "short_description": "Unsolicited selection segment",
+  "description": "The URS segment is identical with the QRF segment, except that if the name of any field contains Query (of QRY), this word has been changed to Results (see URS-5-R/U other results subject definition).",
+  "fields": {
+    "1": {
+      "field_id": "URS.1",
+      "name": "R/U Where Subject Definition",
+      "description": "This field identifies the department, system, or subsystem to which the result pertains. This field may repeat as in LAB~HEMO, etc",
+      "length": "20",
+      "data_type": "ST - String Data",
+      "optionality": "Required",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "2": {
+      "field_id": "URS.2",
+      "name": "R/U When Data Start Date/Time",
+      "description": "No description found.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "URS.3",
+      "name": "R/U When Data End Date/Time",
+      "description": "This field contains the date/time the result ends (if applicable)",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "URS.4",
+      "name": "R/U What User Qualifier",
+      "description": "This field contains an identifier to define further the characteristics of the data that are of interest.",
+      "length": "20",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "5": {
+      "field_id": "URS.5",
+      "name": "R/U Other Results Subject Definition",
+      "description": "This field contains a further qualifier, defined locally, for use between two systems. This filter uses codes and field definitions that have specific meaning only to the application and/or site involved",
+      "length": "20",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "6": {
+      "field_id": "URS.6",
+      "name": "R/U Which Date/Time Qualifier",
+      "description": "This field specifies the type of date referred to in URS-2-when data start date/time and URS-3when data end date/time. Refer to HL7 table 0156 - Which date/time qualifier for valid values",
+      "length": "12",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "7": {
+      "field_id": "URS.7",
+      "name": "R/U Which Date/Time Status Qualifier",
+      "description": "This field specifies the status type of objects selected in date range defined by URS-2-when data start date/time and URS-3-when data end date/time. Refer to HL7 table 0157 - Date/time status qualifier for valid values",
+      "length": "12",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "8": {
+      "field_id": "URS.8",
+      "name": "R/U Date/Time Selection Qualifier",
+      "description": "This field allows the specification of certain types of values within the date/time range. Refer to HL7 table 0158 - Date/time selection qualifier for valid values",
+      "length": "12",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "9": {
+      "field_id": "URS.9",
+      "name": "R/U Quantity/Timing Qualifier",
+      "description": "This field allows an interval definition to be used for specifying multiple responses to a query. With the addition of this filter, new query specifications should no longer use URS-2-R/U when data start date/time and URS-3-R/U when data end date/time in future implementations",
+      "length": "60",
+      "data_type": "TQ - Timing Quantity",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

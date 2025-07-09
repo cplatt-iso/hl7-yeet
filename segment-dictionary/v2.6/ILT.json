@@ -1,0 +1,97 @@
+{
+  "segment_id": "ILT",
+  "short_description": "Material Lot Segment",
+  "description": "The Material Lot segment (ILT) contains material information specific to a lot within an inventory location associated with the item in the IVT segment. This segment is similar to the IIM segment used with the limited inventory item master message.",
+  "fields": {
+    "1": {
+      "field_id": "ILT.1",
+      "name": "Set Id - ILT",
+      "description": "This field contains the number that identifies this transaction. For the first occurrence of the segment, the sequence number shall be one; for the second occurrence, the sequence number shall be two; etc.",
+      "length": "4",
+      "data_type": "SI - Sequence ID",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "ILT.10",
+      "name": "Inventory On Hand Quantity Unit",
+      "description": "This field contains the quantity of this inventory item that was available for issue/use as of the date specified in ILT-8 - Inventory on Hand Date field. No adjustment has been made for subsequent use. See User-defined Table 0818 - Package in PKG-2 - Packaging Units for suggested values.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "ILT.2",
+      "name": "Inventory Lot Number",
+      "description": "This field contains the lot number of the service item in inventory.",
+      "length": "250",
+      "data_type": "ST - String Data",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "ILT.3",
+      "name": "Inventory Expiration Date",
+      "description": "This field contains the expiration date of the service item in inventory.",
+      "length": "24",
+      "data_type": "DTM - Date/Time",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "ILT.4",
+      "name": "Inventory Received Date",
+      "description": "This field contains the most recent date that the product in question was received into inventory.",
+      "length": "24",
+      "data_type": "DTM - Date/Time",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "ILT.5",
+      "name": "Inventory Received Quantity",
+      "description": "This field contains the quantity of this inventory item that was received on the date specific in ILT-4 - Inventory Received Date field.",
+      "length": "12",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "ILT.6",
+      "name": "Inventory Received Quantity Unit",
+      "description": "This field specifies the unit for the Inventory Received Quantity. See User-defined Table 0818 - Package in PKG-2 - Packaging Units for suggested values.",
+      "length": "250",
+      "data_type": "CWE - Coded with Exceptions",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "ILT.7",
+      "name": "Inventory Received Item Cost",
+      "description": "This field contains the per-unit cost of the inventory item at the time of receipt. ILT-6 - Inventory Received Quantity Unit field specifies the per-unit basis of this field.",
+      "length": "12",
+      "data_type": "MO - Money",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "ILT.8",
+      "name": "Inventory On Hand Date",
+      "description": "This field specifies the most recent date that an inventory count was performed for the inventory item.",
+      "length": "24",
+      "data_type": "DTM - Date/Time",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "ILT.9",
+      "name": "Inventory On Hand Quantity",
+      "description": "This field contains the quantity of this inventory item that was available for issue/use as of the date specified in ILT-8 - Inventory on Hand Date field. No adjustment has been made for subsequent use.",
+      "length": "12",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

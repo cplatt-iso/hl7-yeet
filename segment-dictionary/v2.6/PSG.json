@@ -1,0 +1,61 @@
+{
+  "segment_id": "PSG",
+  "short_description": "Product/Service Group",
+  "description": "The Product/Service Group segment is used to form a logical grouping of Product/Service Line Items, Patients and Response Summaries for a particular Invoice. For example, a Product/Service Group can be used to group all Product/Service Line Items that must be adjudicated as a group in order to be paid.",
+  "fields": {
+    "1": {
+      "field_id": "PSG.1",
+      "name": "Provider Product/Service Group Number",
+      "description": "Unique Product/Service Group Number assigned by the Provider Application.",
+      "length": "73",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "PSG.2",
+      "name": "Payer Product/Service Group Number",
+      "description": "Unique Product/Service Group Number assigned by the Payer Application",
+      "length": "73",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "PSG.3",
+      "name": "Product/Service Group Sequence Number",
+      "description": "Unique sequence number for the Product/Service Group (3) - starts with 1, then 2, etc. for each unique Product/Service Group in this Invoice.",
+      "length": "4",
+      "data_type": "SI - Sequence ID",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "PSG.4",
+      "name": "Adjudicate as Group",
+      "description": "Adjudicate all Product/Service Line Items together as a group (IPRs will be reported against the Product/Service Group). Refer to HL7-Table0136 - Yes/No-Indicator for suggested values.",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "PSG.5",
+      "name": "Product/Service Group Billed Amount",
+      "description": "Sum of all Product/Service Billed Amounts for all Product/Service Line Items for this Product/Service Group.",
+      "length": "254",
+      "data_type": "CP - Composite Price",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "PSG.6",
+      "name": "Product/Service Group Description",
+      "description": "Product/Service Group description or heading",
+      "length": "254",
+      "data_type": "ST - String Data",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "segment_id": "FHS",
+  "short_description": "File Header",
+  "description": "The FHS segment is used to head a file (group of batches) as defined in Section 2.9.3.",
+  "fields": {
+    "1": {
+      "field_id": "FHS.1",
+      "name": "File Field Separator",
+      "description": "has the same definition as the corresponding field in the MSH segment",
+      "length": "1",
+      "data_type": "ST - String Data",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "FHS.10",
+      "name": "File Header Comment",
+      "description": "free text field, the use of which is not further specified",
+      "length": "80",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "FHS.11",
+      "name": "File Control Id",
+      "description": "used to identify a particular file uniquely. It can be echoed back in FHS-12-reference file control ID",
+      "length": "20",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "FHS.12",
+      "name": "Reference File Control Id",
+      "description": "value of FHS-11-file control ID when this file was originally transmitted. Not present if this file is being transmitted for the first time",
+      "length": "20",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "FHS.2",
+      "name": "File Encoding Characters",
+      "description": "has the same definition as the corresponding field in the MSH segment",
+      "length": "4",
+      "data_type": "ST - String Data",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "FHS.3",
+      "name": "File Sending Application",
+      "description": "has the same definition as the corresponding field in the MSH segment",
+      "length": "15",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "FHS.4",
+      "name": "File Sending Facility",
+      "description": "has the same definition as the corresponding field in the MSH segment",
+      "length": "20",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "FHS.5",
+      "name": "File Receiving Application",
+      "description": "has the same definition as the corresponding field in the MSH segment",
+      "length": "30",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "FHS.6",
+      "name": "File Receiving Facility",
+      "description": "has the same definition as the corresponding field in the MSH segment",
+      "length": "30",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "FHS.7",
+      "name": "File Creation Date / Time",
+      "description": "field has the same definition as the corresponding field in the MSH segment",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "FHS.8",
+      "name": "File Security",
+      "description": "has the same definition as the corresponding field in the MSH segment",
+      "length": "40",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "FHS.9",
+      "name": "File Name / Id",
+      "description": "can be used by the application processing file. Its use is not further specified",
+      "length": "20",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

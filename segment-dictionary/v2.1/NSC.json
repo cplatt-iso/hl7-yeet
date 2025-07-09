@@ -1,0 +1,88 @@
+{
+  "segment_id": "NSC",
+  "short_description": "Status Change",
+  "description": "No description found.",
+  "fields": {
+    "1": {
+      "field_id": "NSC.1",
+      "name": "Network Change Type",
+      "description": "No description found.",
+      "length": "4",
+      "data_type": "ID - Coded Value",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "NSC.2",
+      "name": "Current Cpu",
+      "description": "No description found.",
+      "length": "30",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "NSC.3",
+      "name": "Current Fileserver",
+      "description": "No description found.",
+      "length": "30",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "NSC.4",
+      "name": "Current Application",
+      "description": "No description found.",
+      "length": "30",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "NSC.5",
+      "name": "Current Facility",
+      "description": "No description found.",
+      "length": "30",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "NSC.6",
+      "name": "New Cpu",
+      "description": "No description found.",
+      "length": "30",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "NSC.7",
+      "name": "New Fileserver",
+      "description": "No description found.",
+      "length": "30",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "NSC.8",
+      "name": "New Application",
+      "description": "No description found.",
+      "length": "30",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "NSC.9",
+      "name": "New Facility",
+      "description": "No description found.",
+      "length": "30",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

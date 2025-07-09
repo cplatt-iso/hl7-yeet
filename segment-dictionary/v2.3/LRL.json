@@ -1,0 +1,61 @@
+{
+  "segment_id": "LRL",
+  "short_description": "Location Relationship",
+  "description": "The LRL segment is used identify one location\u2019s relationship to another location, the nearest lab, pharmacy, etc.",
+  "fields": {
+    "1": {
+      "field_id": "LRL.1",
+      "name": "Primary Key Value",
+      "description": "This field contains the institution\u2019s identification code for the location. The identifying key value. This field has the same components as the patient location fields in the PV1 segment (except that bed status is not included here). At least the first component of this field is required. The contents of this field must exactly match the content of its preceding MFE ( MFE-4-primary key value), its preceding LOC (LOC1-LOC primary key value), and its preceding LDP (LDP-1-LDP primary key value).",
+      "length": "200",
+      "data_type": "PL - Person Location",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "LRL.2",
+      "name": "Segment Action Code",
+      "description": "This field indicates whether this repetition of the segment is being added, changed or deleted. This repetition of the repeating segment must be identified using FT1-25-segment unique key. The action code adds a validation check to indicate, from the point of view of the sending system, whether this repetition of a segment is being added, changed or deleted. This and the following field are used to implement the \u201cunique key\u201d mode of updating repeating segments. (See Chapter 2, Section 2.23.4.2, \u201cAction code/unique identifier mode update definition.\u201d) Refer to HL7 table 0206 - Segment action code for valid values.",
+      "length": "3",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "LRL.3",
+      "name": "Segment Unique Key",
+      "description": "This field contains a unique identifier for one of the multiple repetitions of this segment, to be used in conjunction with the preceding field. Each of the repetitions of the segment will be uniquely identified by this unique key field for the purposes of updates",
+      "length": "80",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "LRL.4",
+      "name": "Location Relationship ID",
+      "description": "This field contains an identifier code to show WHICH relationship is being communicated with this segment. Refer to user-defined table 0325 - Location relationship ID for suggested values",
+      "length": "80",
+      "data_type": "CE - Coded Element",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "LRL.5",
+      "name": "Organizational Location Relationship Value",
+      "description": "This field is conditional on the value of LRL-4-location relationship ID. When LRL-4-location relationship ID contains \u201cRX\u201d- Nearest Pharmacy, \u201cRX2\u201d- Other Pharmacy, \u201cLAB\u201d- Nearest Lab, \u201cLB2\u201d- Other Lab, or \u201cDTY\u201d- Dietary, this field holds that organization\u2019s extended name i.e., the value of this field is conditional on the value of LRL-4-location relation ID. For example, for an inpatient location, this could be an in-house department ID code using only the third component of this data type. For an outpatient location, this could be the nearest external pharmacy.",
+      "length": "80",
+      "data_type": "XON - Extended Composite Name And ID For Organizations",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "LRL.6",
+      "name": "Patient Location Relationship Value",
+      "description": "This field is conditional on the value of LRL-4-location relationship ID. When LRL-4-location relationship ID contains \u201cALI\u201d- Location aliases or \u201cPAR\u201d- Parent location this field holds the value of the associated patient location\n\nWhen LRL-4-location relationship ID contains \u201cPAR\u201d- Parent, this field holds the value of the parent location to allow for nested entries. For example, a bed entry can point to its containing room or nurse unit. The value for the parent location should match the LOC-1-IPL primary key value of the parent entry. Not intended to be used for multiple designations of the same physical location, but for identifying the larger physical locations (supersets) which include this physical location as a subset. Aliases should be put in LOC-20-location aliases.",
+      "length": "80",
+      "data_type": "PL - Person Location",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

@@ -1,0 +1,448 @@
+{
+  "segment_id": "PV1",
+  "short_description": "Patient Visit",
+  "description": "No description found.",
+  "fields": {
+    "1": {
+      "field_id": "PV1.1",
+      "name": "Set Id - Patient Visit",
+      "description": "No description found.",
+      "length": "4",
+      "data_type": "SI - Set Id",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "PV1.10",
+      "name": "Hospital Service",
+      "description": "No description found.",
+      "length": "3",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "PV1.11",
+      "name": "Temporary Location",
+      "description": "No description found.",
+      "length": "12",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "PV1.12",
+      "name": "Pre-admit Test Indicator",
+      "description": "No description found.",
+      "length": "2",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "13": {
+      "field_id": "PV1.13",
+      "name": "Re-admission Indicator",
+      "description": "No description found.",
+      "length": "2",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "14": {
+      "field_id": "PV1.14",
+      "name": "Admit Source",
+      "description": "No description found.",
+      "length": "3",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "15": {
+      "field_id": "PV1.15",
+      "name": "Ambulatory Status",
+      "description": "No description found.",
+      "length": "2",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "16": {
+      "field_id": "PV1.16",
+      "name": "Vip Indicator",
+      "description": "No description found.",
+      "length": "2",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "17": {
+      "field_id": "PV1.17",
+      "name": "Admitting Doctor",
+      "description": "No description found.",
+      "length": "60",
+      "data_type": "CN - Composite Id Number And Name",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "18": {
+      "field_id": "PV1.18",
+      "name": "Patient Type",
+      "description": "No description found.",
+      "length": "2",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "19": {
+      "field_id": "PV1.19",
+      "name": "Visit Number",
+      "description": "No description found.",
+      "length": "4",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "PV1.2",
+      "name": "Patient Class",
+      "description": "No description found.",
+      "length": "1",
+      "data_type": "ID - Coded Value",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "20": {
+      "field_id": "PV1.20",
+      "name": "Financial Class",
+      "description": "No description found.",
+      "length": "11",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Repeatable 4 times"
+    },
+    "21": {
+      "field_id": "PV1.21",
+      "name": "Charge Price Indicator",
+      "description": "No description found.",
+      "length": "2",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "22": {
+      "field_id": "PV1.22",
+      "name": "Courtesy Code",
+      "description": "No description found.",
+      "length": "2",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "23": {
+      "field_id": "PV1.23",
+      "name": "Credit Rating",
+      "description": "No description found.",
+      "length": "2",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "24": {
+      "field_id": "PV1.24",
+      "name": "Contract Code",
+      "description": "No description found.",
+      "length": "2",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "25": {
+      "field_id": "PV1.25",
+      "name": "Contract Effective Date",
+      "description": "No description found.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "26": {
+      "field_id": "PV1.26",
+      "name": "Contract Amount",
+      "description": "No description found.",
+      "length": "12",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "27": {
+      "field_id": "PV1.27",
+      "name": "Contract Period",
+      "description": "No description found.",
+      "length": "3",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "28": {
+      "field_id": "PV1.28",
+      "name": "Interest Code",
+      "description": "No description found.",
+      "length": "2",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "29": {
+      "field_id": "PV1.29",
+      "name": "Transfer To Bad Debt Code",
+      "description": "No description found.",
+      "length": "1",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "PV1.3",
+      "name": "Assigned Patient Location",
+      "description": "No description found.",
+      "length": "12",
+      "data_type": "ID - Coded Value",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "30": {
+      "field_id": "PV1.30",
+      "name": "Transfer To Bad Debt Date",
+      "description": "No description found.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "31": {
+      "field_id": "PV1.31",
+      "name": "Bad Debt Agency Code",
+      "description": "No description found.",
+      "length": "10",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "32": {
+      "field_id": "PV1.32",
+      "name": "Bad Debt Transfer Amount",
+      "description": "No description found.",
+      "length": "12",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "33": {
+      "field_id": "PV1.33",
+      "name": "Bad Debt Recovery Amount",
+      "description": "No description found.",
+      "length": "12",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "34": {
+      "field_id": "PV1.34",
+      "name": "Delete Account Indicator",
+      "description": "No description found.",
+      "length": "1",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "35": {
+      "field_id": "PV1.35",
+      "name": "Delete Account Date",
+      "description": "No description found.",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "36": {
+      "field_id": "PV1.36",
+      "name": "Discharge Disposition",
+      "description": "No description found.",
+      "length": "2",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "37": {
+      "field_id": "PV1.37",
+      "name": "Discharged To Location",
+      "description": "No description found.",
+      "length": "2",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "38": {
+      "field_id": "PV1.38",
+      "name": "Diet Type",
+      "description": "No description found.",
+      "length": "2",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "39": {
+      "field_id": "PV1.39",
+      "name": "Servicing Facility",
+      "description": "No description found.",
+      "length": "2",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "PV1.4",
+      "name": "Admission Type",
+      "description": "No description found.",
+      "length": "2",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "40": {
+      "field_id": "PV1.40",
+      "name": "Bed Status",
+      "description": "No description found.",
+      "length": "1",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "41": {
+      "field_id": "PV1.41",
+      "name": "Account Status",
+      "description": "No description found.",
+      "length": "2",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "42": {
+      "field_id": "PV1.42",
+      "name": "Pending Location",
+      "description": "No description found.",
+      "length": "12",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "43": {
+      "field_id": "PV1.43",
+      "name": "Prior Temporary Location",
+      "description": "No description found.",
+      "length": "12",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "44": {
+      "field_id": "PV1.44",
+      "name": "Admit Date/Time",
+      "description": "No description found.",
+      "length": "19",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "45": {
+      "field_id": "PV1.45",
+      "name": "Discharge Date/Time",
+      "description": "No description found.",
+      "length": "19",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "46": {
+      "field_id": "PV1.46",
+      "name": "Current Patient Balance",
+      "description": "No description found.",
+      "length": "12",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "47": {
+      "field_id": "PV1.47",
+      "name": "Total Charges",
+      "description": "No description found.",
+      "length": "12",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "48": {
+      "field_id": "PV1.48",
+      "name": "Total Adjustments",
+      "description": "No description found.",
+      "length": "12",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "49": {
+      "field_id": "PV1.49",
+      "name": "Total Payments",
+      "description": "No description found.",
+      "length": "12",
+      "data_type": "NM - Numeric",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "PV1.5",
+      "name": "Pre-admit Number",
+      "description": "No description found.",
+      "length": "20",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "PV1.6",
+      "name": "Prior Patient Location",
+      "description": "No description found.",
+      "length": "12",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "PV1.7",
+      "name": "Attending Doctor",
+      "description": "No description found.",
+      "length": "60",
+      "data_type": "CN - Composite Id Number And Name",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "PV1.8",
+      "name": "Referring Doctor",
+      "description": "No description found.",
+      "length": "60",
+      "data_type": "CN - Composite Id Number And Name",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "PV1.9",
+      "name": "Consulting Doctor",
+      "description": "No description found.",
+      "length": "60",
+      "data_type": "CN - Composite Id Number And Name",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    }
+  }
+}

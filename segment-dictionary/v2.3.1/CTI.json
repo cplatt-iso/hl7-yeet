@@ -1,0 +1,34 @@
+{
+  "segment_id": "CTI",
+  "short_description": "Clinical trial identification segment",
+  "description": "The CTI segment is an optional segment that contains information to identify the clinical trial, phase and time point with which an order or result is associated.",
+  "fields": {
+    "1": {
+      "field_id": "CTI.1",
+      "name": "Sponsor Study ID",
+      "description": "This field contains the universal identifier for the clinical trial. The coding system is as described in CSR-1-sponsor study ID .",
+      "length": "60",
+      "data_type": "EI - Entity Identifier",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "CTI.2",
+      "name": "Study Phase Identifier",
+      "description": "This field identifies the phase of the study that a patient has entered. See CSP-1-study phase identifier for details of coding systems.",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "CTI.3",
+      "name": "Study Scheduled Time Point",
+      "description": "This field identifies a time point in the clinical trial phase. CTI-2-study phase identifier must be valued if CTI-3-study scheduled time point is valued. Should correspond to CSS-1-study scheduled time point .",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

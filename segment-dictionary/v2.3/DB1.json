@@ -1,0 +1,79 @@
+{
+  "segment_id": "DB1",
+  "short_description": "Disability Segment",
+  "description": "The disability segment contains information related to the disability of a person. This segment was created instead of adding disability attributes to each segment that contains a person (to which disability may apply). This is an optional segment that can be used to send disability information about a person already defined by the Patient Administration Chapter. The disabled person code and identifier allow for the association of the disability information to the person.",
+  "fields": {
+    "1": {
+      "field_id": "DB1.1",
+      "name": "Set ID - DB1",
+      "description": "This field contains the number that identifies this transaction. For the first occurrence of the segment, the sequence number shall be one, for the second occurrence, the sequence number shall be two, etc",
+      "length": "4",
+      "data_type": "SI - Sequence ID",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "DB1.2",
+      "name": "Disabled person code",
+      "description": "The value of this field indicates to which person the disability information relates in the message. For example, if the value is PT, the disability information relates to the patient. Refer to user defined table 0334 - Disabled person for suggested values",
+      "length": "2",
+      "data_type": "IS - Coded value for user-defined tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "DB1.3",
+      "name": "Disabled person identifier",
+      "description": "This is the identifier (or identifiers) for the person whose disability information is sent on the segment",
+      "length": "32",
+      "data_type": "CX - Extended Composite ID With Check Digit",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "4": {
+      "field_id": "DB1.4",
+      "name": "Disabled Indicator",
+      "description": "This field indicates if the person\u2019s visit is a disability visit. Refer to HL7 table 0136 - Yes/No indicator for valid values",
+      "length": "1",
+      "data_type": "ID - Coded values for HL7 tables",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "DB1.5",
+      "name": "Disability start date",
+      "description": "This field specifies the date the person became disabled",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "DB1.6",
+      "name": "Disability end date",
+      "description": "This field specifies the ending date of the person\u2019s disability",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "DB1.7",
+      "name": "Disability return to work date",
+      "description": "This field indicates the authorized date on which the patient can return to work for a specified disability case",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "DB1.8",
+      "name": "Disability unable to work date",
+      "description": "This field specifies the first date in the date span that the patient is unable to work due to disability",
+      "length": "8",
+      "data_type": "DT - Date",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    }
+  }
+}

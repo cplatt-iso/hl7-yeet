@@ -1,0 +1,151 @@
+{
+  "segment_id": "STF",
+  "short_description": "Staff Identification Segment",
+  "description": "No description found.",
+  "fields": {
+    "1": {
+      "field_id": "STF.1",
+      "name": "Stf - Primary Key Value",
+      "description": "No description found.",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "STF.10",
+      "name": "Phone",
+      "description": "No description found.",
+      "length": "40",
+      "data_type": "TN - Telephone Number",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "11": {
+      "field_id": "STF.11",
+      "name": "Office / Home Address",
+      "description": "No description found.",
+      "length": "106",
+      "data_type": "AD - Address",
+      "optionality": "Optional",
+      "repeatability": "Repeatable twice"
+    },
+    "12": {
+      "field_id": "STF.12",
+      "name": "Activation Date",
+      "description": "No description found.",
+      "length": "19",
+      "data_type": "CM_DIN - Activation Date",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "13": {
+      "field_id": "STF.13",
+      "name": "Inactivation Date",
+      "description": "No description found.",
+      "length": "19",
+      "data_type": "CM_DIN - Activation Date",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "14": {
+      "field_id": "STF.14",
+      "name": "Backup Person Id",
+      "description": "No description found.",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "15": {
+      "field_id": "STF.15",
+      "name": "E-mail Address",
+      "description": "No description found.",
+      "length": "40",
+      "data_type": "ST - String Data",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "16": {
+      "field_id": "STF.16",
+      "name": "Preferred Method Of Contact",
+      "description": "No description found.",
+      "length": "1",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "STF.2",
+      "name": "Staff Id Code",
+      "description": "No description found.",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "3": {
+      "field_id": "STF.3",
+      "name": "Staff Name",
+      "description": "No description found.",
+      "length": "48",
+      "data_type": "PN - Person Name",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "STF.4",
+      "name": "Staff Type",
+      "description": "No description found.",
+      "length": "2",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "5": {
+      "field_id": "STF.5",
+      "name": "Sex",
+      "description": "No description found.",
+      "length": "1",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "STF.6",
+      "name": "Date Of Birth",
+      "description": "No description found.",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "STF.7",
+      "name": "Active / Inactive",
+      "description": "No description found.",
+      "length": "1",
+      "data_type": "ID - Coded Value",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "STF.8",
+      "name": "Department",
+      "description": "No description found.",
+      "length": "200",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    },
+    "9": {
+      "field_id": "STF.9",
+      "name": "Service",
+      "description": "No description found.",
+      "length": "200",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Repeatable indefinitely"
+    }
+  }
+}

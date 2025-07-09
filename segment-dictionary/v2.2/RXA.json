@@ -1,0 +1,115 @@
+{
+  "segment_id": "RXA",
+  "short_description": "Pharmacy Aadministration",
+  "description": "The ORC must have the filler order number and the order control code RE. As a site-specific variant, the RXO and associated RXCs and/or the RXE (and associated RXCs) may be present if the receiving application needs any of their data. The RXA carries the administration data.",
+  "fields": {
+    "1": {
+      "field_id": "RXA.1",
+      "name": "Give Sub-id Counter",
+      "description": "use if matching this RXA segment to its corresponding RXG segment. If the two applications are not matching RXG and RXA segments, this field's value is zero.",
+      "length": "4",
+      "data_type": "NM - Numeric",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "10": {
+      "field_id": "RXA.10",
+      "name": "Administering Provider",
+      "description": "provider ID of the person administering the pharmaceutical",
+      "length": "200",
+      "data_type": "CN_PERSON - Cn For Person",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "11": {
+      "field_id": "RXA.11",
+      "name": "Administered-at Location",
+      "description": "he first component contains the inpatient or outpatient location at which the drug was administered (if applicable). The default (null) value is the current census location for the patient. Site specific table. This component has the same form as PV1-3-assigned patient location.",
+      "length": "12",
+      "data_type": "CM_LA1 - Location With Address Information",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "12": {
+      "field_id": "RXA.12",
+      "name": "Administered Per (time Unit)",
+      "description": "No description found.",
+      "length": "20",
+      "data_type": "ST - String Data",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "2": {
+      "field_id": "RXA.2",
+      "name": "Administration Sub-id Counter",
+      "description": "starts with 1 the first time that medication is administered for this order. Increments by one with each additional administration of medication.\n\nNote:More than one RXA segment can be \"matched\" to a single RXG segment, as is the case when recording a change of the rate of adminstration of an IV solution",
+      "length": "4",
+      "data_type": "NM - Numeric",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "3": {
+      "field_id": "RXA.3",
+      "name": "Date / Time Start Of Administration",
+      "description": "if the order is for a continuous administration (such as an IV), and the rate is changed at a certain time after the start, an RAS message can be issued to record the change. For such an RAS message, this field records the time the rate was changed to the new value recorded in the Administered Per (Time Unit) field of the same message",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "4": {
+      "field_id": "RXA.4",
+      "name": "Date / Time End Of Administration",
+      "description": "If null, the date/time of RXA-3-date/time start of administration is assumed",
+      "length": "26",
+      "data_type": "TS - Time Stamp",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "5": {
+      "field_id": "RXA.5",
+      "name": "Administered Code",
+      "description": "identifier of the medical substance administered. It is equivalent to OBR-4-universal service ID code in function",
+      "length": "100",
+      "data_type": "CE - Coded Element",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "6": {
+      "field_id": "RXA.6",
+      "name": "Administered Amount",
+      "description": "amount administered",
+      "length": "20",
+      "data_type": "NM - Numeric",
+      "optionality": "Required",
+      "repeatability": "Not repeatable"
+    },
+    "7": {
+      "field_id": "RXA.7",
+      "name": "Administered Units",
+      "description": "must be in simple units that reflect the actual quantity of the substance administered. It does not include compound units",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Conditional",
+      "repeatability": "Not repeatable"
+    },
+    "8": {
+      "field_id": "RXA.8",
+      "name": "Administered Dosage Form",
+      "description": "use this field when the administered code does not specify the dosage form",
+      "length": "60",
+      "data_type": "CE - Coded Element",
+      "optionality": "Optional",
+      "repeatability": "Not repeatable"
+    },
+    "9": {
+      "field_id": "RXA.9",
+      "name": "Administration Notes",
+      "description": "free text notes from the provider administering the medication. This may contain free text describing a custom IV, mixture, or salve",
+      "length": "200",
+      "data_type": "ST - String Data",
+      "optionality": "Conditional",
+      "repeatability": "Repeatable indefinitely"
+    }
+  }
+}
