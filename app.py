@@ -16,6 +16,9 @@ from dotenv import load_dotenv
 import google.generativeai as genai
 import sqlite3
 
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit
@@ -26,6 +29,8 @@ from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_requir
 
 load_dotenv()
 logging.basicConfig(level=logging.INFO)
+
+logging.info(f"[HL7 Yeeter Backend] Google Client ID loaded: {os.getenv('GOOGLE_CLIENT_ID')}")
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}) 
@@ -269,6 +274,77 @@ def login():
 
     return jsonify({"error": "Invalid username or password"}), 401
 
+@app.route('/api/auth/google', methods=['POST'])
+def google_auth():
+    data = request.get_json()
+    token = data.get('token')
+    if not token:
+        return jsonify({"error": "Google token is missing"}), 400
+
+    google_client_id = os.getenv('GOOGLE_CLIENT_ID')
+    if not google_client_id:
+        logging.error("FATAL: GOOGLE_CLIENT_ID is not configured on the server.")
+        return jsonify({"error": "Server is not configured for Google login."}), 500
+
+    try:
+        # We will manually perform the audience check because the library's wrapper is being stupid.
+        # First, decode the token WITHOUT checking the audience. This checks signature and expiration.
+        id_info = id_token.verify_oauth2_token(token, google_requests.Request())
+
+        # Now, perform the audience check ourselves.
+        token_audience = id_info.get('aud')
+        
+        logging.info("================== AUDIENCE DEBUG ==================")
+        logging.info(f"  FROM TOKEN: >{token_audience}< (Length: {len(token_audience)})")
+        logging.info(f"FROM .env FILE: >{google_client_id}< (Length: {len(google_client_id)})")
+        logging.info(f"   ARE THEY EQUAL? {token_audience == google_client_id}")
+        logging.info("====================================================")
+
+        if token_audience != google_client_id:
+            raise ValueError(f"Token audience '{token_audience}' did not match expected client ID.")
+        
+        if token_audience.strip() != google_client_id.strip():
+            raise ValueError(f"Token audience did not match expected client ID after stripping whitespace.")
+
+        # If we get here, the token is valid AND for our client.
+        google_user_id = id_info['sub']
+        email = id_info['email']
+        username = id_info.get('name', email.split('@')[0])
+
+        conn = sqlite3.connect(DATABASE_FILE)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+
+        # Check if user exists by their Google ID
+        cursor.execute("SELECT * FROM users WHERE google_id = ?", (google_user_id,))
+        user = cursor.fetchone()
+
+        if not user:
+            placeholder_hash = bcrypt.generate_password_hash(os.urandom(24)).decode('utf-8')
+            cursor.execute("SELECT * FROM users WHERE email = ?", (email,))
+            if cursor.fetchone():
+                conn.close()
+                return jsonify({"error": "This email is already registered with a username/password. Please log in normally."}), 409
+            cursor.execute(
+                "INSERT INTO users (username, email, password_hash, google_id) VALUES (?, ?, ?, ?)",
+                (username, email, placeholder_hash, google_user_id)
+            )
+            user_id = cursor.lastrowid
+            conn.commit()
+            cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
+            user = cursor.fetchone()
+        
+        conn.close()
+
+        access_token = create_access_token(identity=str(user['id']))
+        return jsonify(access_token=access_token, username=user['username'])
+
+    except ValueError as e:
+        logging.exception("Google token verification failed:")
+        return jsonify({"error": f"Invalid Google token: {e}"}), 401
+    except Exception as e:
+        logging.exception(f"An unexpected error occurred during Google auth:")
+        return jsonify({"error": "An internal error occurred"}), 500
 
 # --- UNAUTHENTICATED PUBLIC ENDPOINTS ---
 

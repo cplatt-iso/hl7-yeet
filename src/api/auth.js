@@ -36,3 +36,12 @@ export const logoutApi = async () => {
     // This is a formality. The real work happens in the AuthContext.
     return Promise.resolve();
 };
+
+export const googleLoginApi = async (googleToken) => {
+    const response = await fetch(`${API_URL}/api/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: googleToken }),
+    });
+    return handleAuthResponse(response);
+};

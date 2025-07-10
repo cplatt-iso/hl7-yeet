@@ -1,7 +1,7 @@
 // --- START OF FILE src/context/AuthContext.jsx ---
 
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { loginApi, registerApi } from '../api/auth' // Adjust the import path as needed
+import { loginApi, registerApi, googleLoginApi } from '../api/auth' // Adjust the import path as needed
 
 // 1. Create the context
 const AuthContext = createContext(null);
@@ -52,6 +52,16 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('authUser');
     };
 
+    const googleLogin = async (googleToken) => {
+        // This function calls our backend with the token from Google
+        const data = await googleLoginApi(googleToken);
+        setToken(data.access_token);
+        const userData = { username: data.username };
+        setUser(userData);
+        localStorage.setItem('authToken', data.access_token);
+        localStorage.setItem('authUser', JSON.stringify(userData));
+    };
+
     // The value provided to consuming components
     const value = {
         user,
@@ -61,6 +71,7 @@ export const AuthProvider = ({ children }) => {
         login,
         register,
         logout,
+        googleLogin,
     };
 
     return (
