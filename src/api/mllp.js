@@ -1,68 +1,108 @@
-// --- START OF FILE mllp.js ---
+// --- START OF FILE src/api/mllp.js ---
 
-// By setting the base URL to an empty string, all fetch requests
-// will be relative to the current domain.
-const API_URL = ''; // This can be set via environment variables if needed
+const API_URL = ''; // Uses the Vite proxy
 
-// A helper to handle errors consistently, because we're professionals.
+// --- NEW: A helper to get the auth token from localStorage ---
+// This is the simplest way to do it without prop drilling or context here.
+// When an API call is made, it grabs the latest token directly.
+const getAuthHeaders = () => {
+    const token = localStorage.getItem('authToken');
+    const headers = {
+        'Content-Type': 'application/json',
+    };
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+}
+
 const handleResponse = async (response) => {
+    if (response.status === 401) {
+        // This means the token is invalid or expired.
+        // A more advanced implementation could trigger a logout here.
+        throw new Error('Unauthorized. Your session may have expired.');
+    }
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: response.statusText }));
         throw new Error(errorData.error || errorData.message || `Server responded with ${response.status}`);
     }
-    return response.json();
+    // Handle cases where the response might be empty (e.g., a 204 No Content)
+    const contentType = response.headers.get("content-type");
+    if (contentType && contentType.indexOf("application/json") !== -1) {
+        return response.json();
+    }
+    return;
 };
 
-// --- NEW function to get the list of supported HL7 versions ---
+// Public, no auth needed
 export const getSupportedVersions = async () => {
-    // This assumes your proxy is set up for /api
     const response = await fetch(`${API_URL}/api/get_supported_versions`);
     return handleResponse(response);
 };
 
-// --- UPDATED to send the HL7 version ---
+// Public, no auth needed
 export const parseHl7 = async (message, version) => {
     const response = await fetch(`${API_URL}/api/parse_hl7`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message, version }), // Pass the version
+        body: JSON.stringify({ message, version }),
     });
     const result = await handleResponse(response);
-    // The data now includes validation errors! No change needed here.
     return result.data;
 };
+
+// --- PROTECTED ENDPOINTS NOW USE getAuthHeaders() ---
 
 export const sendHl7 = async (host, port, message) => {
     const payload = { host, port, message };
     const response = await fetch(`${API_URL}/api/send_hl7`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(), // <-- The magic
         body: JSON.stringify(payload),
     });
     return handleResponse(response);
 };
 
-// --- UPDATED to send both model and HL7 version ---
 export const analyzeHl7 = async (message, modelName, hl7Version) => {
     const response = await fetch(`${API_URL}/api/analyze_hl7`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(), // <-- The magic
         body: JSON.stringify({ 
             message, 
             model: modelName, 
-            version: hl7Version  // Pass the version
+            version: hl7Version
         }), 
     });
     return handleResponse(response);
 };
 
+// These two could be public or private, but let's lock them down for consistency
 export const getUsageByModel = async () => {
-    const response = await fetch(`${API_URL}/api/get_usage_by_model`);
+    const response = await fetch(`${API_URL}/api/get_usage_by_model`, { headers: getAuthHeaders() });
     return handleResponse(response);
 };
 
 export const getTotalUsage = async () => {
-    const response = await fetch(`${API_URL}/api/get_total_token_usage`);
+    const response = await fetch(`${API_URL}/api/get_total_token_usage`, { headers: getAuthHeaders() });
     const data = await handleResponse(response);
     return data.total_usage;
+};
+
+// And we need to modify the listener API calls as well
+
+export const startListenerApi = async (port) => {
+    const response = await fetch(`${API_URL}/api/listener/start`, {
+        method: 'POST',
+        headers: getAuthHeaders(), // <-- The magic
+        body: JSON.stringify({ port }),
+    });
+    return handleResponse(response);
+};
+
+export const stopListenerApi = async () => {
+    const response = await fetch(`${API_URL}/api/listener/stop`, {
+        method: 'POST',
+        headers: getAuthHeaders(), // <-- The magic
+    });
+    return handleResponse(response);
 };
