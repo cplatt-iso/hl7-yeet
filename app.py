@@ -56,7 +56,7 @@ else:
     genai.configure(api_key=GEMINI_API_KEY) # type: ignore
 
 ALLOWED_MODELS = { 'gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.5-flash', 'gemini-2.5-pro' }
-DATABASE_FILE = 'yeeter_usage.db'
+DATABASE_FILE = '/data/yeeter_usage.db'
 VT = b'\x0b'
 FS = b'\x1c'
 CR = b'\x0d'
@@ -88,6 +88,16 @@ def init_db():
                 password_hash TEXT NOT NULL,
                 google_id TEXT UNIQUE,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS user_templates (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                name TEXT NOT NULL,
+                content TEXT NOT NULL,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
             )
         ''')
         conn.commit()
@@ -489,6 +499,62 @@ def get_usage_by_model():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/api/templates', methods=['GET'])
+@jwt_required()
+def get_templates():
+    user_id = get_jwt_identity()
+    conn = sqlite3.connect(DATABASE_FILE)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, name, content FROM user_templates WHERE user_id = ? ORDER BY name", (user_id,))
+    templates = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return jsonify(templates)
+
+@app.route('/api/templates', methods=['POST'])
+@jwt_required()
+def save_template():
+    user_id = get_jwt_identity()
+    data = request.get_json()
+    name = data.get('name')
+    content = data.get('content')
+
+    if not name or not content:
+        return jsonify({"error": "Template name and content are required"}), 400
+
+    conn = sqlite3.connect(DATABASE_FILE)
+    cursor = conn.cursor()
+    # Optional: Check if a template with the same name already exists for this user
+    cursor.execute("SELECT id FROM user_templates WHERE user_id = ? AND name = ?", (user_id, name))
+    if cursor.fetchone():
+        conn.close()
+        return jsonify({"error": "A template with this name already exists"}), 409
+
+    cursor.execute("INSERT INTO user_templates (user_id, name, content) VALUES (?, ?, ?)", (user_id, name, content))
+    template_id = cursor.lastrowid
+    conn.commit()
+    conn.close()
+    
+    return jsonify({"id": template_id, "name": name, "content": content}), 201
+
+@app.route('/api/templates/<int:template_id>', methods=['DELETE'])
+@jwt_required()
+def delete_template(template_id):
+    user_id = get_jwt_identity()
+    conn = sqlite3.connect(DATABASE_FILE)
+    cursor = conn.cursor()
+    # Important: Make sure the user can only delete their own templates
+    cursor.execute("SELECT id FROM user_templates WHERE id = ? AND user_id = ?", (template_id, user_id))
+    template = cursor.fetchone()
+    if not template:
+        conn.close()
+        return jsonify({"error": "Template not found or you do not have permission to delete it"}), 404
+
+    cursor.execute("DELETE FROM user_templates WHERE id = ?", (template_id,))
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message": "Template deleted successfully"}), 200
 
 if __name__ == '__main__':
     init_db()

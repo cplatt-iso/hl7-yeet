@@ -7,6 +7,7 @@ WORKDIR /app
 # Copy the requirements file first to leverage Docker's layer caching.
 # This means we only re-install dependencies if requirements.txt changes.
 RUN apt-get update && apt-get install -y libsqlite3-dev && rm -rf /var/lib/apt/lists/*
+RUN mkdir /data
 COPY requirements.txt .
 
 # Install the dependencies
