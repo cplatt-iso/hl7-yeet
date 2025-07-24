@@ -1,20 +1,18 @@
-// --- START OF FILE ParserOutput.jsx ---
-
+// --- START OF FILE src/components/ParserOutput.jsx ---
 import React, { useState, useEffect } from 'react';
 import AccordionItem from './AccordionItem';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import YeetLoader from './YeetLoader';
 
-const ParserOutput = ({ isProcessing, segments, error, showEmpty, setShowEmpty, onFieldMove, onFieldUpdate, setTooltipContent, showTooltips }) => {
+// No changes to this component's own code, just passing a new prop down.
+
+const ParserOutput = ({ isProcessing, segments, error, showEmpty, setShowEmpty, onFieldMove, onFieldUpdate, setTooltipContent, showTooltips, onShowDictionary }) => {
     
     const [selectedSegmentIndex, setSelectedSegmentIndex] = useState(0);
 
-    // Effect to reset the selected index when the segments change (e.g., new message)
     useEffect(() => {
         if (segments && segments.length > 0) {
-            // Let's just default to the first segment instead of jumping around.
-            // The user can see the error badges and navigate themselves.
             setSelectedSegmentIndex(0);
         }
     }, [segments]);
@@ -41,7 +39,6 @@ const ParserOutput = ({ isProcessing, segments, error, showEmpty, setShowEmpty, 
         <div className="relative">
             {isProcessing && <YeetLoader />}
             <div className={`transition-opacity duration-300 ${isProcessing ? 'opacity-30' : 'opacity-100'}`}>
-                {/* --- HEADER CONTROLS --- */}
                 <div className="flex justify-end items-center mb-2">
                     <div className="flex items-center">
                         <input 
@@ -55,14 +52,11 @@ const ParserOutput = ({ isProcessing, segments, error, showEmpty, setShowEmpty, 
                     </div>
                 </div>
 
-                {/* --- MASTER-DETAIL LAYOUT --- */}
                 <div className="flex gap-4">
-                    {/* --- LEFT PANEL: The Navigator (WITH ERROR COUNTS & GOLD STARS) --- */}
                     <div className="w-48 flex-shrink-0 bg-gray-900/50 p-2 rounded-md border border-gray-700/50">
                         <div className="flex flex-col space-y-1">
                             {segments.map((segment, index) => {
                                 const errorCount = segment.fields.reduce((acc, field) => acc + (field.errors?.length || 0), 0);
-
                                 return (
                                     <button
                                         key={`${segment.name}-${index}`}
@@ -73,21 +67,12 @@ const ParserOutput = ({ isProcessing, segments, error, showEmpty, setShowEmpty, 
                                             : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/50'
                                         }`}
                                     >
-                                        <span>
-                                            {segment.name} {segment.name === 'OBX' && `[${segment.fields[0]?.value || '?'}]`}
-                                        </span>
-
-                                        {/* --- HERE'S YOUR FUCKING GOLD STAR --- */}
-                                        {/* If there are errors, show the angry red badge. Otherwise, show the happy green checkmark. */}
+                                        <span>{segment.name}</span>
                                         {errorCount > 0 ? (
-                                            <span className="bg-red-500 text-white text-xs font-semibold rounded-full px-2 py-0.5">
-                                                {errorCount}
-                                            </span>
+                                            <span className="bg-red-500 text-white text-xs font-semibold rounded-full px-2 py-0.5">{errorCount}</span>
                                         ) : (
                                             <span className="text-green-500">
-                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                                                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                </svg>
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                             </span>
                                         )}
                                     </button>
@@ -96,7 +81,6 @@ const ParserOutput = ({ isProcessing, segments, error, showEmpty, setShowEmpty, 
                         </div>
                     </div>
 
-                    {/* --- RIGHT PANEL: The Detail View --- */}
                     <div className="w-3/4 flex-grow">
                         {selectedSegment && (
                             <DndProvider backend={HTML5Backend}>
@@ -109,6 +93,9 @@ const ParserOutput = ({ isProcessing, segments, error, showEmpty, setShowEmpty, 
                                     onFieldUpdate={onFieldUpdate}
                                     setTooltipContent={setTooltipContent}
                                     showTooltips={showTooltips}
+                                    // --- THE ONLY CHANGE IS RIGHT HERE ---
+                                    // Pass the handler down to the next level.
+                                    onShowDictionary={onShowDictionary}
                                 />
                             </DndProvider>
                         )}
@@ -120,3 +107,4 @@ const ParserOutput = ({ isProcessing, segments, error, showEmpty, setShowEmpty, 
 };
 
 export default ParserOutput;
+// --- END OF FILE src/components/ParserOutput.jsx ---

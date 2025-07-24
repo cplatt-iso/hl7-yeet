@@ -78,7 +78,7 @@ export const createORM_O01 = () => {
     const accessionNumber = `RIS-ACC-${faker.string.numeric(8)}`;
     const placerOrderNumber = `EMR-ORDER-${faker.string.alphanumeric(5)}`;
 
-    const modalities = ['CT', 'MRI', 'US', 'XA', 'CR', 'NM'];
+    const modalities = ['CT', 'MR', 'US', 'XA', 'CR', 'NM'];
     const randomModality = faker.helpers.arrayElement(modalities);
     const orderCode = faker.helpers.arrayElement([
         'CTCHEST^CT Chest W/O Contrast^C4',
@@ -104,6 +104,24 @@ export const createORM_O01 = () => {
         randomModality, // OBR-24: Diagnostic Serv Sect ID
     ].join('|');
 
+    const visitNum = faker.string.numeric(10);
+    const referringDoctor = createPhysician();
+    const orderingProvider = createPhysician();
+    const placerOrderNum = { id: faker.string.alphanumeric(10), namespace: 'EMR' };
+    const fillerOrderNum = { id: accessionNumber, namespace: 'LIS' };
+    const placerGroupNum = { id: faker.string.alphanumeric(10), namespace: 'EMR' };
+
+    const pv1 = [
+        'PV1', '1', 'O', 'RAD^R101^1^RADIOLOGY', 'R', '', '', `${referringDoctor.id}^${referringDoctor.lastName}^${referringDoctor.firstName}`, `${orderingProvider.id}^${orderingProvider.lastName}^${orderingProvider.firstName}`, '', 'RAD', '', '', 'R', '', '', 'A0', '', '', visitNum
+    ].join('|');
+
+    const orc = [
+        'ORC', 'NW', `${placerOrderNum.id}^${placerOrderNum.namespace}`, `${fillerOrderNum.id}^${fillerOrderNum.namespace}`, `${placerGroupNum.id}^${placerGroupNum.namespace}`, 'SC', '', '1^^^^^S', '', hl7Date(now), `U${faker.string.numeric(4)}^USER^TEST`, '', `${orderingProvider.id}^${orderingProvider.lastName}^${orderingProvider.firstName}`, 'UROLOGY_CLINIC^C1', `(555)${faker.string.numeric(7)}`, hl7Date(new Date(now.getTime() + 10 * 60000))
+    ].join('|');
+
+    const obr = [
+        'OBR', '1', placerOrderNumber, accessionNumber, orderCode, '', '', hl7Date(now), '', '', '', '', '', '', '', '', `${physician.id}^${physician.lastName}^${physician.firstName}`, '', '', '', '', '', '', randomModality
+    ].join('|');
 
     return `// ORM^O01: General Order Message (e.g., placing a new Radiology order)
 // MSH: Message Header.

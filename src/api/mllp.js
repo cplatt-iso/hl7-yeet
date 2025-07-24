@@ -34,6 +34,12 @@ const handleResponse = async (response) => {
     return;
 };
 
+export const getTableDefinitionsApi = async (tableId, version = '2.5.1') => {
+    const response = await fetch(`/api/tables/${tableId}?version=${version}`, {
+        headers: getAuthHeaders()
+    });
+    return handleResponse(response);
+};
 // Public, no auth needed
 export const getSupportedVersions = async () => {
     const response = await fetch(`${API_URL}/api/get_supported_versions`);
