@@ -1,0 +1,82 @@
+# --- START OF FILE app/routes/admin_routes.py ---
+
+import os
+import logging
+from functools import wraps
+from flask import Blueprint, jsonify, request, current_app
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from werkzeug.utils import secure_filename
+
+from ..extensions import db, socketio # <-- IMPORT socketio
+from .. import crud, schemas
+from ..util import definition_processor
+
+admin_bp = Blueprint('admin', __name__)
+
+def admin_required():
+    def wrapper(fn):
+        @wraps(fn)
+        @jwt_required()
+        def decorator(*args, **kwargs):
+            current_user_id = get_jwt_identity()
+            user = crud.get_user_by_id(db, current_user_id)
+            if not user or not user.is_admin:
+                logging.warning(f"Non-admin user {user.username if user else 'Unknown'} with ID {current_user_id} tried to access an admin route.")
+                return jsonify(msg="Admins only! Fuck off!"), 403
+            return fn(*args, **kwargs)
+        return decorator
+    return wrapper
+
+# ... (Version management routes are unchanged) ...
+@admin_bp.route('/versions', methods=['GET'])
+@admin_required()
+def get_versions():
+    versions = crud.get_all_hl7_versions(db)
+    return jsonify([schemas.Hl7VersionResponse.model_validate(v).model_dump() for v in versions]), 200
+
+@admin_bp.route('/versions/upload', methods=['POST'])
+@admin_required()
+def upload_version():
+    if 'file' not in request.files: return jsonify(error="No file part in the request"), 400
+    file = request.files['file']
+    version_string = request.form.get('version')
+    description = request.form.get('description', '')
+    if not file or not file.filename: return jsonify(error="No file selected for uploading"), 400
+    if not version_string: return jsonify(error="Version string is required"), 400
+    filename = secure_filename(file.filename)
+    if not filename.endswith('.zip'): return jsonify(error="Invalid file type. Please upload a ZIP file."), 400
+    upload_folder = current_app.config['UPLOAD_FOLDER']
+    saved_path = os.path.join(upload_folder, filename)
+    file.save(saved_path)
+    current_user_id = get_jwt_identity()
+    logging.info(f"Starting processing for version '{version_string}' uploaded by user {current_user_id}...")
+    result = definition_processor.process_version_upload(saved_path, version_string, description, current_user_id)
+    if result['status'] == 'success': return jsonify(result), 200
+    else: return jsonify(error=result['message']), 500
+
+@admin_bp.route('/versions/<int:version_id>/toggle', methods=['PATCH'])
+@admin_required()
+def toggle_version_status(version_id):
+    version = crud.toggle_hl7_version_status(db, version_id)
+    if not version: return jsonify(error="Version not found"), 404
+    return jsonify(schemas.Hl7VersionResponse.model_validate(version).model_dump()), 200
+
+# --- NEW ENDPOINT ---
+@admin_bp.route('/terminology/status', methods=['GET'])
+@admin_required()
+def get_terminology_status():
+    """Returns statistics about the currently loaded terminology."""
+    stats = crud.get_terminology_stats(db)
+    return jsonify(stats)
+
+@admin_bp.route('/terminology/refresh', methods=['POST'])
+@admin_required()
+def refresh_terminology():
+    """Triggers a full refresh of V2 terminology tables."""
+    current_user_id = get_jwt_identity()
+    logging.info(f"Admin user {current_user_id} triggered a terminology refresh.")
+    # MODIFIED: Pass the socketio instance to the processor
+    result = definition_processor.process_terminology_refresh(socketio)
+    if result['status'] == 'success': return jsonify(result), 202 # Return 202 Accepted
+    else: return jsonify(error=result['message']), 500
+# --- END OF FILE app/routes/admin_routes.py ---

@@ -29,9 +29,10 @@ import LogPanel from './LogPanel';
 import AuthTooltip from './AuthTooltip'; // Assuming this import exists now
 import TableDictionaryModal from './TableDictionaryModal';
 import DestinationsManager from './DestinationsManager'; // <-- Import new component
+import AdminPanel from './AdminPanel'; // <-- NEW IMPORT
 
 const HL7Parser = () => {
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, isAdmin } = useAuth(); // <-- MODIFIED: Get isAdmin from context
     const [activeTab, setActiveTab] = useState('sender');
     const [host, setHost] = useState('localhost');
     const [port, setPort] = useState('5001');
@@ -111,18 +112,16 @@ const HL7Parser = () => {
     };
 
     const handleSelectDictionaryValue = (value) => {
-        // Use the context we saved in the state to update the correct field
         handleFieldUpdate(dictionaryModalState.segmentIndex, dictionaryModalState.fieldIndex, value);
-        handleCloseDictionary(); // Close the modal after selection
+        handleCloseDictionary();
     }
 
-    // --- NEW: Destination selection handler ---
     const handleSelectDestination = (destination) => {
         setHost(destination.hostname);
         setPort(destination.port);
     };
 
-        const handlePing = async () => {
+    const handlePing = async () => {
         if (!host || !port) {
             toast.error("Hostname and Port are required to run a connection test.");
             return;
@@ -132,31 +131,26 @@ const HL7Parser = () => {
         
         try {
             const result = await pingMllpApi(host, port);
-            // The backend returns a status key now.
             if (result.status === 'success') {
                 const msaSegment = result.ack.split(/[\r\n]+/).find(seg => seg.startsWith('MSA'));
                 const ackCode = msaSegment ? msaSegment.split('|')[1] : 'Unknown';
                 toast.success(`Success! Received ACK (${ackCode})`, { id: toastId });
             } else {
-                // For controlled errors from the backend
                 toast.error(result.message || 'Ping failed with an unknown error.', { id: toastId });
             }
         } catch (e) {
-            // For network errors or other exceptions
             toast.error(`Ping failed: ${e.message}`, { id: toastId });
         }
     };
 
     return (
         <div onMouseMove={handleMouseMove}>
-            {/* NEW: Render the modal (it's invisible until isOpen is true) */}
             <TableDictionaryModal
                 isOpen={dictionaryModalState.isOpen}
                 tableId={dictionaryModalState.tableId}
                 onClose={handleCloseDictionary}
                 onSelectValue={handleSelectDictionaryValue}
             />
-            {/* --- NEW: Destination Manager Modal --- */}
             <DestinationsManager
                 show={isDestinationsManagerOpen}
                 onClose={() => setIsDestinationsManagerOpen(false)}
@@ -177,6 +171,7 @@ const HL7Parser = () => {
             <div className="border-b border-gray-700">
                 <TabButton name="sender" label="Sender & Parser" />
                 {isAuthenticated && <TabButton name="listener" label="MLLP Listener" />}
+                {isAdmin && <TabButton name="admin" label="Admin" />}
             </div>
 
             <div className="pt-6">
@@ -196,7 +191,7 @@ const HL7Parser = () => {
                                         setPort={setPort} 
                                         isSending={isSending} 
                                         handleSend={handleSend} 
-                                        onManageDestinations={() => setIsDestinationsManagerOpen(true)} // <-- Pass handler
+                                        onManageDestinations={() => setIsDestinationsManagerOpen(true)}
                                         handlePing={handlePing}
                                     />
                                     <div className={`transition-all duration-300 ease-in-out ${isLogCollapsed ? 'h-14' : 'h-48'}`}>
@@ -226,7 +221,6 @@ const HL7Parser = () => {
                                     onFieldUpdate={handleFieldUpdate}
                                     setTooltipContent={setTooltipContent}
                                     showTooltips={showTooltips}
-                                    // --- Pass the open handler down to the parser ---
                                     onShowDictionary={handleShowDictionary}
                                 />
                             </div>
@@ -244,9 +238,13 @@ const HL7Parser = () => {
                         <ListenerOutput messages={receivedMessages} onClear={handleClearListener} onLoadIntoParser={handleLoadIntoParser} />
                     </div>
                 )}
+                {activeTab === 'admin' && isAdmin && (
+                    <AdminPanel />
+                )}
             </div>
         </div>
     );
 };
 
 export default HL7Parser;
+// --- END OF FILE src/components/HL7Parser.jsx ---

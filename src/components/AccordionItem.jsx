@@ -1,21 +1,18 @@
-// --- START OF FILE src/components/AccordionItem.jsx ---
+
 import React, { useState } from 'react';
 import FieldRow from './FieldRow';
 
-// --- ADD onShowDictionary to the props ---
 const AccordionItem = ({ segment, segmentIndex, showEmpty, onFieldMove, onFieldUpdate, setTooltipContent, showTooltips, onShowDictionary }) => {
     const [isOpen, setIsOpen] = useState(true);
 
-    const visibleFields = showEmpty ? segment.fields : segment.fields.filter(field => field.value && field.value.trim() !== '');
+    const visibleFields = segment.fields;
 
-    // This check was slightly off, it should check the *filtered* list
     if (visibleFields.length === 0 && !showEmpty) {
         return null;
     }
 
     return (
         <div className="bg-gray-800 rounded-md">
-            {/* The header can stay the same */}
             <div className="flex justify-between items-center p-3 cursor-pointer bg-gray-700 hover:bg-gray-600 rounded-md" onClick={() => setIsOpen(!isOpen)}>
                 <span className="font-bold text-white">{segment.name}</span>
                 <svg className={`chevron h-5 w-5 text-gray-400 ${isOpen ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -37,21 +34,38 @@ const AccordionItem = ({ segment, segmentIndex, showEmpty, onFieldMove, onFieldU
                             </tr>
                         </thead>
                         <tbody>
-                            {segment.fields.map((field, fieldIndex) => {
-                                const isFieldEmpty = !field.value || field.value.trim() === '';
-                                if (!showEmpty && isFieldEmpty) return null;
-
+                            {visibleFields.map((field, fieldIndex) => {
+                                // Abbreviate optionality: 'R' = Required, 'O' = Optional, 'C' = Conditional, etc.
+                                let optAbbr = 'O';
+                                if (field.optionality) {
+                                    const opt = field.optionality.toUpperCase();
+                                    if (opt.startsWith('R')) optAbbr = 'R';
+                                    else if (opt.startsWith('C')) optAbbr = 'C';
+                                    else if (opt.startsWith('O')) optAbbr = 'O';
+                                    else optAbbr = opt[0];
+                                }
+                                // Abbreviate repeatability: 'Y' if repeatable, 'N' otherwise
+                                let rptAbbr = 'N';
+                                if (field.repeatable !== undefined && field.repeatable !== null) {
+                                    if (typeof field.repeatable === 'string') {
+                                        const rpt = field.repeatable.toLowerCase();
+                                        if (rpt.includes('repeatable') && !rpt.includes('not')) rptAbbr = 'Y';
+                                        else if (rpt.startsWith('y')) rptAbbr = 'Y';
+                                        else rptAbbr = 'N';
+                                    } else if (field.repeatable === true) {
+                                        rptAbbr = 'Y';
+                                    }
+                                }
                                 return (
                                     <FieldRow
-                                        key={field.field_id}
-                                        field={field}
+                                        key={field.field_id || fieldIndex}
+                                        field={{ ...field, optionality: optAbbr, repeatable: rptAbbr }}
                                         segmentIndex={segmentIndex}
                                         fieldIndex={fieldIndex}
                                         onFieldMove={onFieldMove}
                                         onFieldUpdate={onFieldUpdate}
                                         setTooltipContent={setTooltipContent}
                                         showTooltips={showTooltips}
-                                        // --- PASS THE PROP DOWN TO THE ROW ---
                                         onShowDictionary={onShowDictionary}
                                     />
                                 );
@@ -65,4 +79,3 @@ const AccordionItem = ({ segment, segmentIndex, showEmpty, onFieldMove, onFieldU
 };
 
 export default React.memo(AccordionItem);
-// --- END OF FILE src/components/AccordionItem.jsx ---

@@ -6,41 +6,43 @@ from flask import Flask
 from dotenv import load_dotenv
 from .commands import register_commands
 
-# --- PATCH: Only monkey_patch if not explicitly skipped ---
 if not os.environ.get("FLASK_SKIP_EVENTLET"):
     import eventlet
     eventlet.monkey_patch()
 
-# --- STEP 1: Import extensions from our extensions.py file ---
 from .extensions import db, cors, socketio, bcrypt, jwt
 
-# --- STEP 2: Import Blueprints ---
+# --- Import Blueprints ---
 from .routes.auth_routes import auth_bp
 from .routes.mllp_routes import mllp_bp
 from .routes.util_routes import util_bp
 from .routes.destination_routes import destinations_bp
+# --- NEW: Import the admin blueprint ---
+from .routes.admin_routes import admin_bp
 
-# Import models so that create_all knows about them
 from . import models
 
 def create_app():
-    """
-    The holy application factory. Creates and configures the Flask app.
-    This is the way.
-    """
     load_dotenv()
     logging.basicConfig(level=logging.INFO)
     logging.info("HL7 Yeeter Backend: Initializing application factory...")
 
     app = Flask(__name__)
 
-    # --- Configuration from Environment Variables ---
+    # --- Configuration ---
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY')
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = int(os.environ.get('JWT_ACCESS_TOKEN_EXPIRES_HOURS', 24)) * 3600
+    # --- NEW: Configuration for file uploads ---
+    # It's good practice to set a folder for uploads and a max size
+    app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads')
+    app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 # 16 MB max upload size
 
-    # --- Initialize Extensions with the App ---
+    # Create upload folder if it doesn't exist
+    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+    # --- Initialize Extensions ---
     db.init_app(app)
     cors.init_app(app, resources={r"/api/*": {"origins": "*"}})
     socketio.init_app(app, cors_allowed_origins="*")
@@ -53,8 +55,10 @@ def create_app():
     app.register_blueprint(mllp_bp, url_prefix='/api')
     app.register_blueprint(util_bp, url_prefix='/api')
     app.register_blueprint(destinations_bp, url_prefix='/api')
+    # --- NEW: Register the admin blueprint ---
+    app.register_blueprint(admin_bp, url_prefix='/api/admin')
 
-    # --- Create Database Tables ---
+    # --- Create/Update Database Tables ---
     with app.app_context():
         logging.info("Initializing database tables from models...")
         db.create_all()
@@ -64,4 +68,5 @@ def create_app():
 
     logging.info("HL7 Yeeter Backend: Application creation complete.")
     return app
+
 # --- END OF FILE app/__init__.py ---

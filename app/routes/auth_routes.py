@@ -8,7 +8,7 @@ from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 
 from .. import schemas, crud
-from ..extensions import db, bcrypt # Correct imports
+from ..extensions import db, bcrypt
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -17,13 +17,13 @@ def register():
     try:
         user_data = schemas.UserCreate.model_validate(request.get_json())
     except ValidationError as e:
-        # We can add logging here too, for good measure
         logging.error(f"Validation error on /register: {e.errors()}")
         return jsonify({"error": e.errors()}), 422
 
     if crud.get_user_by_username(db, user_data.username) or crud.get_user_by_email(db, user_data.email):
         return jsonify({"error": "Username or email already exists"}), 409
 
+    # The create_user function now handles the first-user-is-admin logic
     user = crud.create_user(db, user_data)
     return jsonify({"message": f"User {user.username} created successfully"}), 201
 
@@ -37,9 +37,13 @@ def login():
 
     user = crud.get_user_by_username(db, login_data.username)
     if user and bcrypt.check_password_hash(user.password_hash, login_data.password):
-        # --- FIX: Cast the user ID to a string ---
         access_token = create_access_token(identity=str(user.id))
-        return jsonify(access_token=access_token, username=user.username)
+        # --- MODIFIED: Return the is_admin flag ---
+        return jsonify(
+            access_token=access_token, 
+            username=user.username,
+            is_admin=user.is_admin 
+        )
     
     return jsonify({"error": "Invalid username or password"}), 401
 
@@ -67,11 +71,16 @@ def google_auth():
                 return jsonify({"error": "This email is already registered. Please log in normally."}), 409
             
             username = id_info.get('name', email.split('@')[0])
+            # The create_google_user function now handles the first-user-is-admin logic
             user = crud.create_google_user(db, email=email, username=username, google_id=google_user_id)
 
-        # --- FIX: Cast the user ID to a string ---
         access_token = create_access_token(identity=str(user.id))
-        return jsonify(access_token=access_token, username=user.username)
+        # --- MODIFIED: Return the is_admin flag ---
+        return jsonify(
+            access_token=access_token, 
+            username=user.username,
+            is_admin=user.is_admin
+        )
 
     except ValueError as e:
         logging.exception("Google token verification failed:")
@@ -79,4 +88,5 @@ def google_auth():
     except Exception as e:
         logging.exception(f"An unexpected error occurred during Google auth:")
         return jsonify({"error": "An internal server error occurred"}), 500
+
 # --- END OF FILE app/routes/auth_routes.py ---

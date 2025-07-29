@@ -5,9 +5,11 @@ import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 
 const UserStatus = () => {
-    const { user, logout } = useAuth();
+    // Get everything we need from the context
+    const { isAuthenticated, user, logout } = useAuth();
 
-    if (!user) {
+    if (!isAuthenticated || !user) {
+        // This is the state when the user is logged out
         return (
             <div className="flex items-center gap-4">
                 <Link to="/login" className="px-4 py-2 text-sm font-medium text-white bg-gray-700 rounded-md hover:bg-gray-600">
@@ -20,6 +22,7 @@ const UserStatus = () => {
         );
     }
 
+    // This is the state when the user is logged in
     return (
         <div className="flex items-center gap-4">
             <span className="text-gray-300">
@@ -36,3 +39,4 @@ const UserStatus = () => {
 };
 
 export default UserStatus;
+// --- END OF FILE src/components/UserStatus.jsx ---

@@ -28,7 +28,7 @@ const ParserOutput = ({ isProcessing, segments, error, showEmpty, setShowEmpty, 
     if (!segments.length && !isProcessing) {
         return (
             <div className="p-4 text-center text-gray-500 border-2 border-dashed border-gray-700 rounded-md">
-                No message parsed yet. Paste something in the box above, ya dingus.
+                No message parsed yet. Paste something in the box above.
             </div>
         );
     }

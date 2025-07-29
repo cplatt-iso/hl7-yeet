@@ -66,3 +66,5 @@ coverage.xml
 .cache/
 
 debug_*
+*segment-dictionary*
+*old_segment_dictionary*
