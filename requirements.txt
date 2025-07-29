@@ -21,3 +21,4 @@ pydantic
 pydantic-settings
 
 requests
+pydantic[email]

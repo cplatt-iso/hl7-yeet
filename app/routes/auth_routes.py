@@ -10,18 +10,16 @@ from google.auth.transport import requests as google_requests
 from .. import schemas, crud
 from ..extensions import db, bcrypt # Correct imports
 
-# NO IMPORT FROM .config HERE
-
 auth_bp = Blueprint('auth', __name__)
 
-# ... (rest of the file is the same as the last version I gave you) ...
-# --- CUT FOR BREVITY, NO CHANGES NEEDED IN THE ROUTES THEMSELVES ---
 @auth_bp.route('/register', methods=['POST'])
 def register():
     try:
         user_data = schemas.UserCreate.model_validate(request.get_json())
     except ValidationError as e:
-        return jsonify({"error": e.errors()}), 400
+        # We can add logging here too, for good measure
+        logging.error(f"Validation error on /register: {e.errors()}")
+        return jsonify({"error": e.errors()}), 422
 
     if crud.get_user_by_username(db, user_data.username) or crud.get_user_by_email(db, user_data.email):
         return jsonify({"error": "Username or email already exists"}), 409
@@ -34,11 +32,13 @@ def login():
     try:
         login_data = schemas.UserLogin.model_validate(request.get_json())
     except ValidationError as e:
-        return jsonify({"error": e.errors()}), 400
+        logging.error(f"Validation error on /login: {e.errors()}")
+        return jsonify({"error": e.errors()}), 422
 
     user = crud.get_user_by_username(db, login_data.username)
     if user and bcrypt.check_password_hash(user.password_hash, login_data.password):
-        access_token = create_access_token(identity=user.id)
+        # --- FIX: Cast the user ID to a string ---
+        access_token = create_access_token(identity=str(user.id))
         return jsonify(access_token=access_token, username=user.username)
     
     return jsonify({"error": "Invalid username or password"}), 401
@@ -48,7 +48,8 @@ def google_auth():
     try:
         token_data = schemas.GoogleToken.model_validate(request.get_json())
     except ValidationError as e:
-        return jsonify({"error": e.errors()}), 400
+        logging.error(f"Validation error on /google: {e.errors()}")
+        return jsonify({"error": e.errors()}), 422
     
     google_client_id = os.environ.get('GOOGLE_CLIENT_ID')
     if not google_client_id:
@@ -68,7 +69,8 @@ def google_auth():
             username = id_info.get('name', email.split('@')[0])
             user = crud.create_google_user(db, email=email, username=username, google_id=google_user_id)
 
-        access_token = create_access_token(identity=user.id)
+        # --- FIX: Cast the user ID to a string ---
+        access_token = create_access_token(identity=str(user.id))
         return jsonify(access_token=access_token, username=user.username)
 
     except ValueError as e:

@@ -1,66 +1,68 @@
-# --- START OF FILE app/commands.py ---
-import click
+import os
+import json
 import logging
-import requests  # <-- Our new weapon
+import click
 from flask.cli import with_appcontext
 from .extensions import db
 from .models import Hl7TableDefinition
 
-# The holy grail URL you discovered
-HL7_TABLES_URL = "https://terminology.hl7.org/1.0.0/CodeSystem-v2-tables.json"
+STATIC_DIR = "/app/app/static"  # inside container path
 
-@click.command(name='load_hl7_tables')
+@click.command(name="load_hl7_tables")
 @with_appcontext
 def load_hl7_tables():
     """
-    Fetches the official HL7 v2 table definitions from the HL7 terminology
-    server and loads them into the database.
+    Loads HL7 v2 table definitions from individual CodeSystem JSON files into DB.
     """
-    click.echo(f"Fetching HL7 table definitions from: {HL7_TABLES_URL}")
-    
-    try:
-        response = requests.get(HL7_TABLES_URL)
-        response.raise_for_status()  # This will raise an exception for bad status codes (4xx or 5xx)
-        data = response.json()
-    except requests.exceptions.RequestException as e:
-        logging.error(f"Failed to fetch data from HL7 terminology server: {e}")
-        return
-    except ValueError:
-        logging.error("Failed to parse JSON response from server.")
+    # Load master index first
+    index_path = os.path.join(STATIC_DIR, "CodeSystem-v2-tables.json")
+    if not os.path.exists(index_path):
+        click.echo(f"ERROR: Missing {index_path}")
         return
 
-    click.echo("Successfully fetched data. Clearing existing table definitions...")
+    with open(index_path, "r") as f:
+        tables_data = json.load(f)
+
+    top_concepts = tables_data.get("concept", [])
+    click.echo(f"Found {len(top_concepts)} tables in index. Clearing DB…")
+
     db.session.query(Hl7TableDefinition).delete()
     db.session.commit()
 
     loaded_count = 0
-    
-    # This JSON is a FHIR CodeSystem resource. The structure is a nested list of 'concept' objects.
-    # The top-level concepts are the tables themselves.
-    for table_concept in data.get('concept', []):
-        table_id = table_concept.get('code')
+
+    for table in top_concepts:
+        table_id = table.get("code")
         if not table_id:
             continue
-            
-        # The values of each table are in a nested 'concept' list.
-        for value_concept in table_concept.get('concept', []):
-            value = value_concept.get('code')
-            description = value_concept.get('display')
-            
+
+        file_path = os.path.join(STATIC_DIR, f"CodeSystem-v2-{table_id}.json")
+        if not os.path.exists(file_path):
+            logging.warning(f"[MISSING] {file_path}")
+            continue
+
+        with open(file_path, "r") as f:
+            table_data = json.load(f)
+
+        # Load value concepts
+        for value_concept in table_data.get("concept", []):
+            value = value_concept.get("code")
+            description = value_concept.get("display")
             if not value or not description:
                 continue
-            
-            definition = Hl7TableDefinition(
-                table_id=table_id,
-                value=value,
-                description=description,
-                version="2.5.1"  # We can hardcode this for now
+
+            db.session.add(
+                Hl7TableDefinition(
+                    table_id=table_id,
+                    value=value,
+                    description=description,
+                    version="2.5.1"
+                )
             )
-            db.session.add(definition)
             loaded_count += 1
-            
+
     db.session.commit()
-    click.echo(f'Fucking brilliant. Successfully loaded {loaded_count} definitions into the database.')
+    click.echo(f"Fucking brilliant. Successfully loaded {loaded_count} definitions into the database.")
 
 def register_commands(app):
     app.cli.add_command(load_hl7_tables)

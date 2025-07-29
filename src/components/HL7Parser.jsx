@@ -3,13 +3,15 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { io } from 'socket.io-client';
 
 // API Imports
-import { parseHl7, sendHl7, analyzeHl7, getTotalUsage, getUsageByModel, getSupportedVersions } from '../api/mllp';
+import { parseHl7, sendHl7, analyzeHl7, getTotalUsage, getUsageByModel, getSupportedVersions, pingMllpApi } from '../api/mllp';
 import { startListenerApi, stopListenerApi } from '../api/listener';
 import { getTemplatesApi, saveTemplateApi } from '../api/templates';
+import { getDestinations } from '../api/destinations'; // <-- Import destination API
 
 // Util Imports
 import { rebuildHl7Message, stripCommentsAndBlankLines } from '../utils/hl7';
 import { useAuth } from '../context/AuthContext';
+import { toast } from 'react-hot-toast';
 
 // Component Imports
 import ConnectionInputs from './ConnectionInputs';
@@ -26,6 +28,7 @@ import SaveTemplateModal from './SaveTemplateModal';
 import LogPanel from './LogPanel';
 import AuthTooltip from './AuthTooltip'; // Assuming this import exists now
 import TableDictionaryModal from './TableDictionaryModal';
+import DestinationsManager from './DestinationsManager'; // <-- Import new component
 
 const HL7Parser = () => {
     const { isAuthenticated } = useAuth();
@@ -61,6 +64,7 @@ const HL7Parser = () => {
     const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
     const [saveTemplateError, setSaveTemplateError] = useState('');
     const [isLogCollapsed, setIsLogCollapsed] = useState(false);
+    const [isDestinationsManagerOpen, setIsDestinationsManagerOpen] = useState(false); // <-- New state for modal
     const [dictionaryModalState, setDictionaryModalState] = useState({
         isOpen: false,
         tableId: null,
@@ -111,6 +115,38 @@ const HL7Parser = () => {
         handleFieldUpdate(dictionaryModalState.segmentIndex, dictionaryModalState.fieldIndex, value);
         handleCloseDictionary(); // Close the modal after selection
     }
+
+    // --- NEW: Destination selection handler ---
+    const handleSelectDestination = (destination) => {
+        setHost(destination.hostname);
+        setPort(destination.port);
+    };
+
+        const handlePing = async () => {
+        if (!host || !port) {
+            toast.error("Hostname and Port are required to run a connection test.");
+            return;
+        }
+
+        const toastId = toast.loading(`Pinging ${host}:${port}...`);
+        
+        try {
+            const result = await pingMllpApi(host, port);
+            // The backend returns a status key now.
+            if (result.status === 'success') {
+                const msaSegment = result.ack.split(/[\r\n]+/).find(seg => seg.startsWith('MSA'));
+                const ackCode = msaSegment ? msaSegment.split('|')[1] : 'Unknown';
+                toast.success(`Success! Received ACK (${ackCode})`, { id: toastId });
+            } else {
+                // For controlled errors from the backend
+                toast.error(result.message || 'Ping failed with an unknown error.', { id: toastId });
+            }
+        } catch (e) {
+            // For network errors or other exceptions
+            toast.error(`Ping failed: ${e.message}`, { id: toastId });
+        }
+    };
+
     return (
         <div onMouseMove={handleMouseMove}>
             {/* NEW: Render the modal (it's invisible until isOpen is true) */}
@@ -119,6 +155,12 @@ const HL7Parser = () => {
                 tableId={dictionaryModalState.tableId}
                 onClose={handleCloseDictionary}
                 onSelectValue={handleSelectDictionaryValue}
+            />
+            {/* --- NEW: Destination Manager Modal --- */}
+            <DestinationsManager
+                show={isDestinationsManagerOpen}
+                onClose={() => setIsDestinationsManagerOpen(false)}
+                onSelectDestination={handleSelectDestination}
             />
 
             <Tooltip content={tooltipContent} position={tooltipPos} />
@@ -147,7 +189,16 @@ const HL7Parser = () => {
                         <div className={`w-full ${analysisResult || isAnalyzing ? 'md:w-2/4 lg:w-2/5' : 'md:w-3/4 lg:w-4/5'} transition-all duration-300`}>
                             <div className="flex flex-col gap-8">
                                 <div className="sticky top-4 z-10 bg-gray-900 py-2 flex flex-col gap-4">
-                                    <ConnectionInputs host={host} setHost={setHost} port={port} setPort={setPort} isSending={isSending} handleSend={handleSend} />
+                                    <ConnectionInputs 
+                                        host={host} 
+                                        setHost={setHost} 
+                                        port={port} 
+                                        setPort={setPort} 
+                                        isSending={isSending} 
+                                        handleSend={handleSend} 
+                                        onManageDestinations={() => setIsDestinationsManagerOpen(true)} // <-- Pass handler
+                                        handlePing={handlePing}
+                                    />
                                     <div className={`transition-all duration-300 ease-in-out ${isLogCollapsed ? 'h-14' : 'h-48'}`}>
                                         <LogPanel logs={logs} onClear={handleClearLogs} isCollapsed={isLogCollapsed} onToggleCollapse={handleToggleLogCollapse} />
                                     </div>

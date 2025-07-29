@@ -2,6 +2,7 @@
 from datetime import datetime
 from sqlalchemy import Integer, String, Text, DateTime, ForeignKey, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+# --- THE FIX: Import Optional for Python 3.9 compatibility ---
 from typing import List, Any, Optional 
 
 from .extensions import db
@@ -14,14 +15,15 @@ class User(db.Model):
     email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     
-    # --- THE FIX: Use Optional[str] for Python 3.9 compatibility ---
+    # --- THE FIX: Use Optional[str] instead of str | None ---
     google_id: Mapped[Optional[str]] = mapped_column(String(255), unique=True, nullable=True)
     
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
     # Relationships
-    templates: Mapped[List["UserTemplate"]] = relationship("UserTemplate", back_populates="user", cascade="all, delete-orphan")
+    templates: Mapped[List["UserTemplate"]] = relationship(back_populates="user", cascade="all, delete-orphan")
     token_usages: Mapped[List["TokenUsage"]] = relationship("TokenUsage", back_populates="user", cascade="all, delete-orphan")
+    destinations: Mapped[List["Hl7Destination"]] = relationship(back_populates="user", cascade="all, delete-orphan")
 
     # --- THE FIX: Also update the type hint in the constructor ---
     def __init__(self, username: str, email: str, password_hash: str, google_id: Optional[str] = None, **kw: Any):
@@ -79,7 +81,40 @@ class TokenUsage(db.Model):
 
     def __repr__(self):
         return f'<TokenUsage user_id={self.user_id} model={self.model} tokens={self.total_tokens}>'
-    
+
+
+class Hl7Destination(db.Model):
+    __tablename__ = 'hl7_destinations'
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id', ondelete="CASCADE"), nullable=False)
+    name: Mapped[str] = mapped_column(String(100), nullable=False)
+    # The name in the request was `hostname`, but the model used `host`. Let's stick with `hostname` for clarity
+    hostname: Mapped[str] = mapped_column(String(255), nullable=False)
+    port: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    # Relationships
+    user: Mapped["User"] = relationship("User", back_populates="destinations")
+
+    def __init__(self, user_id: int, name: str, hostname: str, port: int, **kw: Any):
+        super().__init__(**kw)
+        self.user_id = user_id
+        self.name = name
+        self.hostname = hostname
+        self.port = port
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'hostname': self.hostname,
+            'port': self.port
+        }
+
+    def __repr__(self):
+        return f'<Hl7Destination {self.name} ({self.hostname}:{self.port})>'
+
+
 class Hl7TableDefinition(db.Model):
     __tablename__ = 'hl7_table_definitions'
 
@@ -98,5 +133,4 @@ class Hl7TableDefinition(db.Model):
 
     def __repr__(self):
         return f'<Hl7TableDefinition {self.table_id}:{self.value}>'
-
 # --- END OF FILE app/models.py ---

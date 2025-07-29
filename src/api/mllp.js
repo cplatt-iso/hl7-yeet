@@ -16,6 +16,21 @@ const getAuthHeaders = () => {
     return headers;
 }
 
+export const pingMllpApi = async (host, port) => {
+    const portAsInt = parseInt(port, 10);
+    if (isNaN(portAsInt)) {
+        throw new Error('Invalid port number provided for ping.');
+    }
+    const payload = { host, port: portAsInt };
+    const response = await fetch(`${API_URL}/api/ping_mllp`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(payload),
+    });
+    // We want the raw response data, even for errors, so handleResponse is perfect.
+    return handleResponse(response);
+};
+
 const handleResponse = async (response) => {
     if (response.status === 401) {
         // This means the token is invalid or expired.

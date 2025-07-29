@@ -11,12 +11,14 @@
   },
   "dependencies": {
     "@faker-js/faker": "^9.8.0",
+    "@heroicons/react": "^2.2.0",
     "@react-oauth/google": "^0.12.2",
     "react": "^19.1.0",
     "react-diff-viewer": "^3.1.1",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^19.1.0",
+    "react-hot-toast": "^2.5.2",
     "react-markdown": "^10.1.0",
     "react-router-dom": "^7.6.3",
     "socket.io-client": "^4.8.1"

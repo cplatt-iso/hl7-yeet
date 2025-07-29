@@ -26,10 +26,9 @@ class TokenResponse(BaseModel):
     username: str
 
 # --- Template Schemas ---
-class TemplateBase(BaseModel):
+class TemplateBase(AppBaseModel):
     name: str = Field(..., min_length=1, max_length=100)
     content: str = Field(..., min_length=1)
-
 class TemplateCreate(TemplateBase):
     pass
 
@@ -42,6 +41,9 @@ class MllpSendRequest(BaseModel):
     port: int
     message: str
 
+class MllpPingRequest(BaseModel):
+    host: str
+    port: int
 class ParseRequest(BaseModel):
     message: str
     version: str

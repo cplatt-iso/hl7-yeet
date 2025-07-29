@@ -6,9 +6,10 @@ from flask import Flask
 from dotenv import load_dotenv
 from .commands import register_commands
 
-# Fucking monkey patch first, always.
-import eventlet
-eventlet.monkey_patch()
+# --- PATCH: Only monkey_patch if not explicitly skipped ---
+if not os.environ.get("FLASK_SKIP_EVENTLET"):
+    import eventlet
+    eventlet.monkey_patch()
 
 # --- STEP 1: Import extensions from our extensions.py file ---
 from .extensions import db, cors, socketio, bcrypt, jwt
@@ -17,6 +18,7 @@ from .extensions import db, cors, socketio, bcrypt, jwt
 from .routes.auth_routes import auth_bp
 from .routes.mllp_routes import mllp_bp
 from .routes.util_routes import util_bp
+from .routes.destination_routes import destinations_bp
 
 # Import models so that create_all knows about them
 from . import models
@@ -31,13 +33,11 @@ def create_app():
     logging.info("HL7 Yeeter Backend: Initializing application factory...")
 
     app = Flask(__name__)
-    
+
     # --- Configuration from Environment Variables ---
-    # THIS IS THE ONE TRUE WAY FOR THIS PROJECT
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY')
-    # JWT_ACCESS_TOKEN_EXPIRES must be an integer (seconds)
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = int(os.environ.get('JWT_ACCESS_TOKEN_EXPIRES_HOURS', 24)) * 3600
 
     # --- Initialize Extensions with the App ---
@@ -52,7 +52,8 @@ def create_app():
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(mllp_bp, url_prefix='/api')
     app.register_blueprint(util_bp, url_prefix='/api')
-    
+    app.register_blueprint(destinations_bp, url_prefix='/api')
+
     # --- Create Database Tables ---
     with app.app_context():
         logging.info("Initializing database tables from models...")
