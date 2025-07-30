@@ -5,6 +5,7 @@ import logging
 from functools import wraps
 from flask import Blueprint, jsonify, request, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from pydantic import ValidationError
 from werkzeug.utils import secure_filename
 
 from ..extensions import db, socketio # <-- IMPORT socketio
@@ -79,4 +80,53 @@ def refresh_terminology():
     result = definition_processor.process_terminology_refresh(socketio)
     if result['status'] == 'success': return jsonify(result), 202 # Return 202 Accepted
     else: return jsonify(error=result['message']), 500
+
+@admin_bp.route('/terminology/tables', methods=['GET'])
+@admin_required()
+def get_all_table_ids():
+    """Returns a list of all unique table IDs."""
+    table_ids = crud.get_distinct_table_ids(db)
+    return jsonify(table_ids)
+
+@admin_bp.route('/terminology/tables/<string:table_id>', methods=['GET'])
+@admin_required()
+def get_table_details(table_id):
+    """Returns all definitions for a given table ID."""
+    definitions = crud.get_definitions_for_table(db, table_id)
+    return jsonify([schemas.Hl7TableDefinitionResponse.model_validate(d).model_dump() for d in definitions])
+
+@admin_bp.route('/terminology/definitions', methods=['POST'])
+@admin_required()
+def add_definition():
+    """Adds a new definition to a table."""
+    try:
+        data = schemas.DefinitionCreate.model_validate(request.get_json())
+    except ValidationError as e:
+        return jsonify({"error": e.errors()}), 422
+    
+    new_def = crud.create_definition(db, data)
+    return jsonify(schemas.Hl7TableDefinitionResponse.model_validate(new_def).model_dump()), 201
+
+@admin_bp.route('/terminology/definitions/<int:def_id>', methods=['PUT'])
+@admin_required()
+def edit_definition(def_id):
+    """Updates an existing definition."""
+    try:
+        data = schemas.DefinitionUpdate.model_validate(request.get_json())
+    except ValidationError as e:
+        return jsonify({"error": e.errors()}), 422
+
+    updated_def = crud.update_definition(db, def_id, data)
+    if not updated_def:
+        return jsonify({"error": "Definition not found"}), 404
+    return jsonify(schemas.Hl7TableDefinitionResponse.model_validate(updated_def).model_dump())
+
+@admin_bp.route('/terminology/definitions/<int:def_id>', methods=['DELETE'])
+@admin_required()
+def remove_definition(def_id):
+    """Deletes a definition."""
+    success = crud.delete_definition(db, def_id)
+    if not success:
+        return jsonify({"error": "Definition not found"}), 404
+    return '', 204 # No Content
 # --- END OF FILE app/routes/admin_routes.py ---

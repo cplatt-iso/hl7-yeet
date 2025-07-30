@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { refreshTerminologyApi, getTerminologyStatusApi } from '../api/admin';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-hot-toast';
+import TerminologyBrowser from './TerminologyBrowser'; // <-- NEW IMPORT
 
 const ProgressBar = ({ progress }) => (
     <div className="w-full bg-gray-700 rounded-full h-2.5 mt-2">
@@ -19,18 +20,19 @@ const TerminologyManagement = () => {
     const [stats, setStats] = useState(null);
     const [progress, setProgress] = useState(0);
     const [progressMessage, setProgressMessage] = useState('');
-    const { socket } = useAuth(); // Get the global socket instance
+    const [isBrowserOpen, setIsBrowserOpen] = useState(false); // <-- NEW STATE
+    const { socket } = useAuth();
+
+    const fetchStatus = async () => {
+        try {
+            const statusData = await getTerminologyStatusApi();
+            setStats(statusData);
+        } catch (error) {
+            toast.error(`Could not load terminology stats: ${error.message}`);
+        }
+    };
 
     useEffect(() => {
-        // Fetch initial stats when component mounts
-        const fetchStatus = async () => {
-            try {
-                const statusData = await getTerminologyStatusApi();
-                setStats(statusData);
-            } catch (error) {
-                toast.error(`Could not load terminology stats: ${error.message}`);
-            }
-        };
         fetchStatus();
     }, []);
 
@@ -45,8 +47,7 @@ const TerminologyManagement = () => {
             if (data.status === 'success' || data.status === 'error') {
                 setIsLoading(false);
                 toast[data.status](data.message, { duration: 5000 });
-                // Refresh stats after completion
-                getTerminologyStatusApi().then(setStats); 
+                fetchStatus();
             }
         };
 
@@ -73,11 +74,24 @@ const TerminologyManagement = () => {
 
     return (
         <div>
+            {isBrowserOpen && <TerminologyBrowser onClose={() => setIsBrowserOpen(false)} />}
+            
             <h3 className="text-xl font-semibold mb-3 text-gray-200">Global Terminology Tables</h3>
             <div className="mb-6 p-4 bg-gray-900/50 rounded-lg grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                    <p className="text-sm text-gray-400">Loaded Tables</p>
-                    <p className="text-2xl font-bold text-white">{stats ? stats.table_count.toLocaleString() : '...'}</p>
+                    <div className="flex items-center gap-4">
+                        <div>
+                            <p className="text-sm text-gray-400">Loaded Tables</p>
+                            <p className="text-2xl font-bold text-white">{stats ? stats.table_count.toLocaleString() : '...'}</p>
+                        </div>
+                        {/* --- THE NEW BUTTON --- */}
+                        <button 
+                            onClick={() => setIsBrowserOpen(true)}
+                            className="px-4 py-2 bg-gray-600 hover:bg-gray-500 text-white text-sm font-bold rounded-lg"
+                        >
+                            Browse
+                        </button>
+                    </div>
                 </div>
                 <div>
                     <p className="text-sm text-gray-400">Total Definitions</p>

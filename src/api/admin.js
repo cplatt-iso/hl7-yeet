@@ -4,10 +4,10 @@ import { getAuthHeaders, handleResponse } from './apiUtils';
 
 const API_URL = ''; // Uses Vite proxy
 
+// ... (getHl7VersionsApi, toggleVersionStatusApi, etc. are unchanged) ...
+
 /**
  * Fetches all processed HL7 versions from the server.
- * Requires admin privileges.
- * @returns {Promise<Array>} A promise that resolves to an array of version objects.
  */
 export const getHl7VersionsApi = async () => {
     const response = await fetch(`${API_URL}/api/admin/versions`, {
@@ -18,9 +18,6 @@ export const getHl7VersionsApi = async () => {
 
 /**
  * Toggles the 'is_active' status of a specific HL7 version.
- * Requires admin privileges.
- * @param {number} versionId - The ID of the version to toggle.
- * @returns {Promise<Object>} A promise that resolves to the updated version object.
  */
 export const toggleVersionStatusApi = async (versionId) => {
     const response = await fetch(`${API_URL}/api/admin/versions/${versionId}/toggle`, {
@@ -32,8 +29,6 @@ export const toggleVersionStatusApi = async (versionId) => {
 
 /**
  * Triggers a refresh of the global V2 terminology tables from HL7's servers.
- * Requires admin privileges.
- * @returns {Promise<Object>} A promise that resolves to the success message from the backend.
  */
 export const refreshTerminologyApi = async () => {
     const response = await fetch(`${API_URL}/api/admin/terminology/refresh`, {
@@ -45,11 +40,6 @@ export const refreshTerminologyApi = async () => {
 
 /**
  * Uploads a new HL7 version definition zip file.
- * Requires admin privileges.
- * @param {File} file - The zip file to upload.
- * @param {string} version - The version string for the new version (e.g., "2.8").
- * @param {string} description - An optional description for the version.
- * @returns {Promise<Object>} A promise that resolves to the success message.
  */
 export const uploadVersionApi = async (file, version, description) => {
     const formData = new FormData();
@@ -57,8 +47,6 @@ export const uploadVersionApi = async (file, version, description) => {
     formData.append('version', version);
     formData.append('description', description);
 
-    // Note: We don't set Content-Type for FormData. The browser does it correctly.
-    // We only need the auth header.
     const token = localStorage.getItem('authToken');
     const headers = {};
     if (token) {
@@ -67,11 +55,10 @@ export const uploadVersionApi = async (file, version, description) => {
 
     const response = await fetch(`${API_URL}/api/admin/versions/upload`, {
         method: 'POST',
-        headers: headers, // <-- No 'Content-Type': 'application/json'
+        headers: headers,
         body: formData,
     });
     
-    // The response could be success or a validation error, handleResponse is perfect
     return handleResponse(response);
 };
 
@@ -81,4 +68,73 @@ export const getTerminologyStatusApi = async () => {
     });
     return handleResponse(response);
 };
+
+
+// --- NEW BROWSER API FUNCTIONS ---
+
+/**
+ * Fetches a list of all unique table IDs.
+ * @returns {Promise<string[]>}
+ */
+export const getTablesListApi = async () => {
+    const response = await fetch(`${API_URL}/api/admin/terminology/tables`, {
+        headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+};
+
+/**
+ * Fetches the definitions for a single table.
+ * @param {string} tableId 
+ * @returns {Promise<Array>}
+ */
+export const getTableDetailsApi = async (tableId) => {
+    const response = await fetch(`${API_URL}/api/admin/terminology/tables/${tableId}`, {
+        headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+};
+
+/**
+ * Creates a new definition entry.
+ * @param {{table_id: string, value: string, description: string}} data
+ * @returns {Promise<Object>}
+ */
+export const createDefinitionApi = async (data) => {
+    const response = await fetch(`${API_URL}/api/admin/terminology/definitions`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(data),
+    });
+    return handleResponse(response);
+};
+
+/**
+ * Updates an existing definition.
+ * @param {number} defId
+ * @param {{value?: string, description?: string}} data
+ * @returns {Promise<Object>}
+ */
+export const updateDefinitionApi = async (defId, data) => {
+    const response = await fetch(`${API_URL}/api/admin/terminology/definitions/${defId}`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(data),
+    });
+    return handleResponse(response);
+};
+
+/**
+ * Deletes a definition.
+ * @param {number} defId
+ * @returns {Promise<void>}
+ */
+export const deleteDefinitionApi = async (defId) => {
+    const response = await fetch(`${API_URL}/api/admin/terminology/definitions/${defId}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+};
+
 // --- END OF FILE src/api/admin.js ---

@@ -102,12 +102,62 @@ def toggle_hl7_version_status(db: SQLAlchemy, version_id: int) -> models.Hl7Vers
         db.session.refresh(version)
     return version
 
-# --- Hl7TableDefinition CRUD & Metadata CRUD are unchanged ---
+def get_distinct_table_ids(db: SQLAlchemy) -> list[str]:
+    """Gets a sorted list of unique HL7 table IDs from the database."""
+    results = db.session.execute(
+        select(models.Hl7TableDefinition.table_id).distinct().order_by(models.Hl7TableDefinition.table_id)
+    ).scalars().all()
+    return list(results)
+
+def get_definitions_for_table(db: SQLAlchemy, table_id: str) -> list[models.Hl7TableDefinition]:
+    """Gets all definitions for a specific table ID."""
+    return list(db.session.execute(
+        db.select(models.Hl7TableDefinition).filter_by(table_id=table_id).order_by(models.Hl7TableDefinition.value)
+    ).scalars())
+
+def get_definition_by_id(db: SQLAlchemy, def_id: int) -> models.Hl7TableDefinition | None:
+    """Gets a single definition by its primary key."""
+    return db.session.get(models.Hl7TableDefinition, def_id)
+
+def create_definition(db: SQLAlchemy, definition: schemas.DefinitionCreate) -> models.Hl7TableDefinition:
+    """Creates a new table definition."""
+    db_def = models.Hl7TableDefinition(
+        table_id=definition.table_id,
+        value=definition.value,
+        description=definition.description
+    )
+    db.session.add(db_def)
+    db.session.commit()
+    db.session.refresh(db_def)
+    return db_def
+
+def update_definition(db: SQLAlchemy, def_id: int, definition_update: schemas.DefinitionUpdate) -> models.Hl7TableDefinition | None:
+    """Updates a table definition."""
+    db_def = get_definition_by_id(db, def_id)
+    if db_def:
+        update_data = definition_update.model_dump(exclude_unset=True)
+        for key, value in update_data.items():
+            setattr(db_def, key, value)
+        db.session.commit()
+        db.session.refresh(db_def)
+    return db_def
+
+def delete_definition(db: SQLAlchemy, def_id: int) -> bool:
+    """Deletes a table definition. Returns True if successful, False otherwise."""
+    db_def = get_definition_by_id(db, def_id)
+    if db_def:
+        db.session.delete(db_def)
+        db.session.commit()
+        return True
+    return False
+
 def clear_hl7_table_definitions(db: SQLAlchemy):
+    # This function is used by the refresh process
     db.session.query(models.Hl7TableDefinition).delete()
     db.session.commit()
 
 def bulk_add_hl7_table_definitions(db: SQLAlchemy, definitions: list[dict]):
+    # This function is used by the refresh process
     db.session.bulk_insert_mappings(models.Hl7TableDefinition, definitions) # type: ignore
     db.session.commit()
 
@@ -128,5 +178,7 @@ def get_terminology_stats(db: SQLAlchemy) -> dict:
     definition_count = db.session.execute(select(func.count(models.Hl7TableDefinition.id))).scalar()
     last_updated_obj = get_metadata(db, 'terminology_last_updated')
     return {"table_count": table_count or 0, "definition_count": definition_count or 0, "last_updated": last_updated_obj.value if last_updated_obj else None}
+
+# --- END OF FILE app/crud.py ---
 
 # --- END OF FILE app/crud.py ---

@@ -8,7 +8,7 @@ class AppBaseModel(BaseModel):
     class Config:
         from_attributes = True
 
-# --- Auth Schemas ---
+# --- Auth Schemas (unchanged) ---
 class UserCreate(BaseModel):
     username: str = Field(..., min_length=3, max_length=50)
     email: EmailStr
@@ -26,7 +26,7 @@ class TokenResponse(BaseModel):
     username: str
     is_admin: bool
 
-# --- Template Schemas ---
+# --- Template Schemas (unchanged) ---
 class TemplateBase(AppBaseModel):
     name: str = Field(..., min_length=1, max_length=100)
     content: str = Field(..., min_length=1)
@@ -37,7 +37,7 @@ class TemplateCreate(TemplateBase):
 class Template(TemplateBase):
     id: int
 
-# --- API Data Schemas ---
+# --- API Data Schemas (unchanged) ---
 class MllpSendRequest(BaseModel):
     host: str
     port: int
@@ -56,36 +56,41 @@ class AnalyzeRequest(BaseModel):
     model: str
     version: str
 
-# --- Listener Schemas ---
+# --- Listener Schemas (unchanged) ---
 class ListenerStartRequest(BaseModel):
     port: int
 
 # --- Admin Schemas ---
-
-# --- THIS IS THE FIX (PART 1) ---
-# A simple schema to represent the User object when it's nested.
-# Pydantic will use this to correctly validate the nested ORM object.
 class UserInVersionResponse(AppBaseModel):
     username: str
 
-# --- THIS IS THE FIX (PART 2) ---
 class Hl7VersionResponse(AppBaseModel):
     id: int
     version: str
     description: Optional[str] = None
     is_active: bool
     processed_at: datetime
-    
-    # We now tell Pydantic to expect a User object that conforms to our new schema.
-    # It will be validated but not included in the final JSON output.
     user: UserInVersionResponse = Field(exclude=True) 
 
     @computed_field
     @property
     def processed_by(self) -> str:
-        """Computes the 'processed_by' field from the validated, nested user object."""
-        # Because 'self.user' is now a validated Pydantic model,
-        # we can access its attributes directly.
         return self.user.username if self.user else 'Unknown'
+
+# --- NEW TERMINOLOGY SCHEMAS ---
+class DefinitionBase(AppBaseModel):
+    table_id: str = Field(..., max_length=10)
+    value: str = Field(..., max_length=100)
+    description: str = Field(..., max_length=255)
+
+class DefinitionCreate(DefinitionBase):
+    pass
+
+class DefinitionUpdate(BaseModel):
+    value: Optional[str] = Field(None, max_length=100)
+    description: Optional[str] = Field(None, max_length=255)
+
+class Hl7TableDefinitionResponse(DefinitionBase):
+    id: int
 
 # --- END OF FILE app/schemas.py ---
