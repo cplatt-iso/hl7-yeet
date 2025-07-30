@@ -5,6 +5,8 @@ import json
 import logging
 import re
 from typing import Any, Dict, List
+from flask_sqlalchemy import SQLAlchemy 
+from ..models import Hl7TableDefinition 
 
 DEFINITIONS_DIRECTORY = 'segment-dictionary'
 _hl7_definitions_cache: Dict[str, Dict] = {}
@@ -40,7 +42,6 @@ def load_hl7_definitions_for_version(version: str) -> Dict[str, Any]:
     if version in _hl7_definitions_cache:
         return _hl7_definitions_cache[version]
 
-    # Adjust path to be relative to the project root, assuming run.py is there
     base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
     version_path = os.path.join(base_dir, DEFINITIONS_DIRECTORY, version)
     
@@ -63,7 +64,7 @@ def load_hl7_definitions_for_version(version: str) -> Dict[str, Any]:
         logging.error(f"Error loading definitions for version {version}: {e}")
         return {}
 
-def _parse_hl7_string(hl7_message: str, definitions: Dict[str, Any]) -> List[Dict[str, Any]]:
+def _parse_hl7_string(hl7_message: str, definitions: Dict[str, Any], db: SQLAlchemy) -> List[Dict[str, Any]]:
     comment_prefixes = ('#', '//', '---')
     valid_lines = [line.strip() for line in hl7_message.splitlines() if line.strip() and not line.strip().startswith(comment_prefixes)]
     cleaned_message = '\r'.join(valid_lines)
@@ -93,12 +94,28 @@ def _parse_hl7_string(hl7_message: str, definitions: Dict[str, Any]) -> List[Dic
             if err := _validate_data_type(field_def.get("data_type"), value): errors.append(err)
             if err := _validate_length(field_def.get("length"), value): errors.append(err)
             if err := _validate_required(field_def.get("optionality"), value): errors.append(err)
+            
+            final_table_id = None
+            original_table_id = field_def.get("table")
+            if original_table_id:
+                match = re.search(r'\d{4}$', original_table_id)
+                if match:
+                    cleaned_id = match.group(0)
+                    # --- THE CHECK-THE-DATABASE FIX ---
+                    # We do a quick, efficient check to see if at least ONE row
+                    # exists for this table ID in our database.
+                    table_exists = db.session.query(Hl7TableDefinition.id).filter_by(table_id=cleaned_id).first()
+                    if table_exists:
+                        # Only if it exists do we pass the ID to the frontend.
+                        final_table_id = cleaned_id
+
             return {
                 "index": index,
                 "value": value,
                 "name": field_def.get("name", "Unknown Field"),
                 "description": field_def.get("description", "No description available."),
                 "field_id": f"{segment_name}.{index}",
+                "table": final_table_id, # <-- THIS IS NOW GUARANTEED TO BE VALID OR NULL
                 "length": field_def.get("length", "N/A"),
                 "data_type": field_def.get("data_type", "Unknown"),
                 "errors": errors,

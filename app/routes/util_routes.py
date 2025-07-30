@@ -1,16 +1,16 @@
 # --- START OF FILE app/routes/util_routes.py ---
 import os
+# import re # No longer needed here
+# import logging # No longer needed here
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from pydantic import ValidationError
 
 from .. import schemas, crud
 from ..extensions import db
-from ..models import Hl7TableDefinition
+# from ..models import Hl7TableDefinition # No longer needed here
 
 util_bp = Blueprint('utils', __name__)
-# The filesystem path is no longer the source of truth for versions
-# DEFINITIONS_DIRECTORY = ... (This can be removed or ignored)
 
 @util_bp.route('/get_supported_versions', methods=['GET'])
 def get_supported_versions():
@@ -18,9 +18,7 @@ def get_supported_versions():
     Gets a list of active, processed HL7 versions from the database.
     """
     try:
-        # --- MODIFIED: Read from the database via CRUD ---
         active_versions = crud.get_active_hl7_versions(db)
-        # The frontend just needs a list of version strings
         version_strings = [v.version for v in active_versions]
         return jsonify(sorted(version_strings, reverse=True))
     except Exception as e:
@@ -78,22 +76,6 @@ def get_usage_by_model():
     usage_data = crud.get_usage_by_model_for_user(db, user_id=user_id)
     return jsonify(usage_data)
 
-@util_bp.route('/tables/<string:table_id>', methods=['GET'])
-@jwt_required()
-def get_table_definitions(table_id: str):
-    """Fetches all values for a given HL7 table ID from the global table."""
-    # The version parameter is no longer needed here as the table is global
-    definitions = db.session.execute(
-        db.select(Hl7TableDefinition).filter_by(table_id=table_id)
-    ).scalars().all()
-
-    if not definitions:
-        return jsonify({"error": f"Table '{table_id}' not found."}), 404
-
-    results = [
-        {"value": d.value, "description": d.description}
-        for d in definitions
-    ]
-    return jsonify(results)
+# --- THE TABLE DEFINITION ROUTE HAS BEEN MOVED TO MLLP_ROUTES.PY ---
 
 # --- END OF FILE app/routes/util_routes.py ---

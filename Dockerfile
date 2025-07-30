@@ -35,5 +35,5 @@ EXPOSE 5001
 # -w 1: Use a single worker process with eventlet.
 # --bind 0.0.0.0:5001: Bind to all network interfaces on port 5001.
 # run:app: Tells Gunicorn to look in the `run.py` file for a variable named `app`.
-CMD ["gunicorn", "--worker-class", "eventlet", "-w", "1", "--timeout", "60", "--bind", "0.0.0.0:5001", "run:app"]
+CMD ["gunicorn", "--worker-class", "eventlet", "-w", "1", "--timeout", "60", "--bind", "0.0.0.0:5001", "--log-level", "debug", "--access-logfile", "-", "--error-logfile", "-", "run:app"]
 # --- END OF FILE Dockerfile ---

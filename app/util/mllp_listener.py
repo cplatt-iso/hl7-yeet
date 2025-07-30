@@ -1,4 +1,5 @@
 # --- START OF FILE app/util/mllp_listener.py ---
+
 import socket
 import logging
 import threading
@@ -11,10 +12,12 @@ CR = b'\x0d'
 # Global event to signal the listener thread to stop
 stop_listener_event = threading.Event()
 
-def mllp_server_worker(port: int, socketio_instance):
+# --- FIX: Accept the 'app' object as a parameter. ---
+def mllp_server_worker(port: int, socketio_instance, app):
     server_socket = None
-    # We need to get the app context to use socketio in a thread
-    app = socketio_instance.server.environ['werkzeug.request'].environ['flask.app']
+    # --- FIX: REMOVE THE BROKEN LINE. We no longer need this hack. ---
+    # We now have the real `app` object passed in directly.
+    
     try:
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -23,6 +26,7 @@ def mllp_server_worker(port: int, socketio_instance):
         server_socket.settimeout(1.0) # Timeout allows checking the stop_listener_event
         
         logging.info(f"MLLP Listener started on port {port}. Waiting for connections.")
+        # We need an app context to use extensions like socketio.emit correctly
         with app.app_context():
             socketio_instance.emit('listener_status', {'status': 'listening', 'port': port})
 
@@ -46,6 +50,7 @@ def mllp_server_worker(port: int, socketio_instance):
                         logging.info(f"Received message from {addr}")
                         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                         
+                        # We need an app context here too for the same reason.
                         with app.app_context():
                             socketio_instance.emit('incoming_message', { 
                                 'message': hl7_message_str, 

@@ -1,37 +1,34 @@
-# This is the full, complete, and correct file.
-# Replace your existing app/routes/mllp_routes.py with this.
+# --- START OF FILE app/routes/mllp_routes.py ---
 
 import os
 import json
 import socket
 import logging
 import threading
+import re
 import google.generativeai as genai
 from datetime import datetime
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from pydantic import ValidationError
 
 from .. import schemas, crud
 from ..extensions import db, socketio
+from ..models import Hl7TableDefinition
 from ..util.hl7_parser import _parse_hl7_string, load_hl7_definitions_for_version
 from ..util.mllp_listener import mllp_server_worker, stop_listener_event
 
-# Define the blueprint that all routes in this file will belong to.
 mllp_bp = Blueprint('mllp', __name__)
 
-# --- Yes, a global is still the simplest way to manage this thread. Don't @ me. ---
 listener_thread = None
 VT, FS, CR = b'\x0b', b'\x1c', b'\x0d'
 
-# Configure GenAI here if the key exists
 GEMINI_API_KEY = os.environ.get("GOOGLE_API_KEY")
 if GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY) # type: ignore
 else:
     logging.warning("CRITICAL: GOOGLE_API_KEY not found in environment. The AI Analyzer will not work.")
 
-# --- THE FIX IS HERE: UPDATE THE GUEST LIST ---
 ALLOWED_MODELS = {'gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.5-flash', 'gemini-2.5-pro'}
 
 
@@ -46,7 +43,7 @@ def parse_hl7_api():
     if not definitions:
         return jsonify({"status": "error", "message": f"Could not load definitions for HL7 version {data.version}."}), 500
     try:
-        structured_data = _parse_hl7_string(data.message, definitions)
+        structured_data = _parse_hl7_string(data.message, definitions, db)
         return jsonify({"status": "success", "data": structured_data})
     except Exception as e:
         logging.error(f"Error during parsing: {e}", exc_info=True)
@@ -94,7 +91,6 @@ def analyze_hl7_api():
         return jsonify({"error": e.errors()}), 422
     
     if data.model not in ALLOWED_MODELS:
-        # Also, let's add some logging here for our own sanity
         logging.warning(f"Rejected attempt to use unapproved model: {data.model}")
         return jsonify({"error": f"Invalid model: {data.model}"}), 400
 
@@ -102,7 +98,8 @@ def analyze_hl7_api():
     if not definitions:
         return jsonify({"error": f"Could not load definitions for HL7 version {data.version}"}), 500
     
-    parsed_data = _parse_hl7_string(data.message, definitions)
+    # --- THIS IS THE FIX. I FORGOT TO ADD `db` TO THIS CALL ---
+    parsed_data = _parse_hl7_string(data.message, definitions, db)
     breakdown_string = "\n".join([f"{s['name']}:\n" + "\n".join([f"- {f['field_id']}: {f['value'].strip()}" for f in s['fields']]) for s in parsed_data])
 
     try:
@@ -121,7 +118,6 @@ def analyze_hl7_api():
         
         analysis_result = json.loads(response.text)
         
-        # Reconstruct the HL7 message from the AI's JSON output
         if 'fixed_message' in analysis_result and isinstance(analysis_result['fixed_message'], dict):
             analysis_result['fixed_message'] = _reconstruct_hl7_from_json(analysis_result['fixed_message'])
 
@@ -149,7 +145,14 @@ def start_listener_api():
         listener_thread.join()
         
     stop_listener_event.clear()
-    listener_thread = threading.Thread(target=mllp_server_worker, args=(data.port, socketio), daemon=True)
+    
+    app = current_app._get_current_object() # type: ignore
+
+    listener_thread = threading.Thread(
+        target=mllp_server_worker, 
+        args=(data.port, socketio, app), 
+        daemon=True
+    )
     listener_thread.start()
     return jsonify({"message": f"Listener starting on port {data.port}"})
 
@@ -168,10 +171,6 @@ def stop_listener_api():
 @mllp_bp.route('/ping_mllp', methods=['POST'])
 @jwt_required()
 def ping_mllp():
-    """
-    Performs a simple MLLP connection test by sending a minimal,
-    hardcoded HL7 message and checking for any valid ACK response.
-    """
     try:
         data = schemas.MllpPingRequest.model_validate(request.get_json())
     except ValidationError as e:
@@ -214,46 +213,56 @@ def ping_mllp():
         logging.error(f"Error during MLLP ping: {e}", exc_info=True)
         return jsonify({"status": "error", "message": str(e)}), 500
 
+@mllp_bp.route('/tables/<string:table_id>', methods=['GET'])
+@jwt_required()
+def get_table_definitions(table_id: str):
+    """Fetches all values for a given HL7 table ID from the global table."""
+    logging.info(f"--- /tables lookup initiated for CLEAN table ID: '{table_id}' ---")
+
+    definitions = db.session.execute(
+        db.select(Hl7TableDefinition).filter_by(table_id=table_id)
+    ).scalars().all()
+
+    logging.info(f"Database query found {len(definitions)} definitions for '{table_id}'.")
+
+    if not definitions:
+        logging.warning(f"Returning 404 for table '{table_id}'.")
+        return jsonify({"error": f"Table '{table_id}' not found."}), 404
+
+    results = [
+        {"value": d.value, "description": d.description}
+        for d in definitions
+    ]
+    logging.info(f"--- Successfully returning {len(results)} rows for '{table_id}' ---")
+    return jsonify(results)
+
+
 def _reconstruct_hl7_from_json(fixed_message_json):
-    """
-    Reconstructs a standard HL7 message string from the JSON object
-    format provided by the AI model.
-    """
     reconstructed_segments = []
-    # The AI should return segments in order, and Python dicts preserve that.
     for segment_name, fields in fixed_message_json.items():
-        # Find the highest field number to determine the segment length
         max_field = 0
         for key in fields.keys():
             try:
-                # Assumes key format like "MSH.1", "PID.3", etc.
                 num = int(key.split('.')[-1])
                 if num > max_field:
                     max_field = num
             except (ValueError, IndexError):
-                # Ignore keys that don't match the expected format
                 continue
 
-        # Create a list to hold field values, initialized with empty strings
         field_values = [''] * max_field
         for key, value in fields.items():
             try:
                 num = int(key.split('.')[-1])
-                # Store value at the correct index (e.g., MSH.1 -> index 0)
                 if 1 <= num <= max_field:
                     field_values[num - 1] = str(value) if value is not None else ''
             except (ValueError, IndexError):
                 continue
         
-        # MSH is a special case. MSH.1 is the field separator itself.
         if segment_name == 'MSH':
-            # The separator is MSH.1, and it's not included in the field list.
             separator = field_values[0] if field_values else '|'
-            # The segment starts with the name, then the separator, then the fields.
             reconstructed_segments.append(f"{segment_name}{separator}{separator.join(field_values[1:])}")
         else:
-            # For all other segments, just join with a standard '|'
             reconstructed_segments.append(f"{segment_name}|{'|'.join(field_values)}")
 
-    # Join all reconstructed segments with a carriage return
     return '\r'.join(reconstructed_segments)
+# --- END OF FILE app/routes/mllp_routes.py ---
