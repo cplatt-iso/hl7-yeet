@@ -26,6 +26,13 @@ class TokenResponse(BaseModel):
     username: str
     is_admin: bool
 
+class UserSchema(AppBaseModel):
+    id: int
+    username: str
+    email: EmailStr
+    is_admin: bool
+    created_at: datetime
+
 # --- Template Schemas (unchanged) ---
 class TemplateBase(AppBaseModel):
     name: str = Field(..., min_length=1, max_length=100)

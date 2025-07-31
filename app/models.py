@@ -120,7 +120,6 @@ class Hl7Version(db.Model):
     def __repr__(self):
         return f'<Hl7Version {self.version} (Active: {self.is_active})>'
 
-# --- NEW MODEL ---
 class SystemMetadata(db.Model):
     __tablename__ = 'system_metadata'
     key: Mapped[str] = mapped_column(String(50), primary_key=True)
@@ -131,4 +130,30 @@ class SystemMetadata(db.Model):
         self.key = key
         self.value = value
 
+class ReceivedMessage(db.Model):
+    __tablename__ = 'received_messages'
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    timestamp: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), index=True)
+    raw_message: Mapped[str] = mapped_column(Text, nullable=False)
+    message_type: Mapped[str] = mapped_column(String(50), nullable=True, index=True)
+    control_id: Mapped[str] = mapped_column(String(100), nullable=True, index=True)
+    sending_app: Mapped[str] = mapped_column(String(100), nullable=True, index=True)
+    
+    # --- THIS IS THE FIX ---
+    # Adding an explicit __init__ makes Pylance happy and our code clearer.
+    def __init__(self, raw_message: str, message_type: str, control_id: str, sending_app: str, **kw: Any):
+        super().__init__(**kw)
+        self.raw_message = raw_message
+        self.message_type = message_type
+        self.control_id = control_id
+        self.sending_app = sending_app
+
+    def to_summary_dict(self):
+        return {
+            'id': self.id,
+            'timestamp': self.timestamp.isoformat(),
+            'message_type': self.message_type,
+            'control_id': self.control_id,
+            'sending_app': self.sending_app,
+        }
 # --- END OF FILE app/models.py ---

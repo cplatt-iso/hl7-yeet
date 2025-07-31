@@ -42,3 +42,29 @@ export const stopListenerApi = async () => {
     });
     return handleResponse(response);
 };
+
+export const getMessagesApi = async ({ page, perPage, search }) => {
+    const params = new URLSearchParams({ page, per_page: perPage });
+    if (search) {
+        params.append('search', search);
+    }
+    const response = await fetch(`${API_URL}/api/listener/messages?${params.toString()}`, {
+        headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+};
+
+export const getMessageDetailApi = async (messageId) => {
+    const response = await fetch(`${API_URL}/api/listener/messages/${messageId}`, {
+        headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+};
+
+export const clearMessagesApi = async () => {
+    const response = await fetch(`${API_URL}/api/listener/messages`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+};

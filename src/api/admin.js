@@ -137,4 +137,42 @@ export const deleteDefinitionApi = async (defId) => {
     return handleResponse(response);
 };
 
+/**
+ * Fetches all users from the server. (Admin only)
+ * @returns {Promise<Array>} A promise that resolves to an array of user objects.
+ */
+export const getUsersApi = async () => {
+    const response = await fetch(`${API_URL}/api/admin/users`, {
+        headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+};
+
+/**
+ * Updates a user's details, e.g., their admin status. (Admin only)
+ * @param {number} userId - The ID of the user to update.
+ * @param {{ is_admin: boolean }} data - The update data.
+ * @returns {Promise<Object>} A promise that resolves to the updated user object.
+ */
+export const updateUserApi = async (userId, data) => {
+    const response = await fetch(`${API_URL}/api/admin/users/${userId}`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(data),
+    });
+    return handleResponse(response);
+};
+
+/**
+ * Deletes a user. (Admin only)
+ * @param {number} userId - The ID of the user to delete.
+ * @returns {Promise<Object>} A promise that resolves to the success message.
+ */
+export const deleteUserApi = async (userId) => {
+    const response = await fetch(`${API_URL}/api/admin/users/${userId}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+};
 // --- END OF FILE src/api/admin.js ---

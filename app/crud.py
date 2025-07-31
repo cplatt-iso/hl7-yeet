@@ -1,8 +1,9 @@
 # --- START OF FILE app/crud.py ---
 
 from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import func, select
+from sqlalchemy import func, select, or_
 from flask_sqlalchemy import SQLAlchemy
+import logging 
 
 from . import models, schemas
 from .extensions import bcrypt
@@ -179,6 +180,53 @@ def get_terminology_stats(db: SQLAlchemy) -> dict:
     last_updated_obj = get_metadata(db, 'terminology_last_updated')
     return {"table_count": table_count or 0, "definition_count": definition_count or 0, "last_updated": last_updated_obj.value if last_updated_obj else None}
 
-# --- END OF FILE app/crud.py ---
+def add_received_message(db: SQLAlchemy, raw_message: str) -> models.ReceivedMessage:
+    """Parses key fields and adds a new received message to the database."""
+    message_type, control_id, sending_app = "Unknown", "Unknown", "Unknown"
+    try:
+        segments = raw_message.split('\r')
+        msh_segment = next((s for s in segments if s.startswith('MSH')), None)
+        if msh_segment:
+            fields = msh_segment.split('|')
+            sending_app = fields[2] if len(fields) > 2 else "Unknown"
+            message_type = fields[8] if len(fields) > 8 else "Unknown"
+            control_id = fields[9] if len(fields) > 9 else "Unknown"
+    except Exception as e:
+        logging.error(f"Failed to parse MSH for received message: {e}")
 
-# --- END OF FILE app/crud.py ---
+    db_message = models.ReceivedMessage(
+        raw_message=raw_message,
+        message_type=message_type,
+        control_id=control_id,
+        sending_app=sending_app
+    )
+    db.session.add(db_message)
+    db.session.commit()
+    db.session.refresh(db_message)
+    return db_message
+
+def get_received_messages(db: SQLAlchemy, page: int, per_page: int, search_term: str | None = None):
+    """Gets a paginated and filtered list of received messages."""
+    query = db.select(models.ReceivedMessage)
+    
+    if search_term:
+        st = f"%{search_term}%"
+        query = query.filter(or_(
+            models.ReceivedMessage.raw_message.ilike(st),
+            models.ReceivedMessage.message_type.ilike(st),
+            models.ReceivedMessage.sending_app.ilike(st),
+            models.ReceivedMessage.control_id.ilike(st)
+        ))
+
+    query = query.order_by(models.ReceivedMessage.timestamp.desc())
+    
+    paginated_query = db.paginate(query, page=page, per_page=per_page, error_out=False)
+    return paginated_query
+
+def get_received_message_by_id(db: SQLAlchemy, message_id: int) -> models.ReceivedMessage | None:
+    return db.session.get(models.ReceivedMessage, message_id)
+
+def clear_all_received_messages(db: SQLAlchemy):
+    """Deletes all records from the received_messages table."""
+    db.session.query(models.ReceivedMessage).delete()
+    db.session.commit()

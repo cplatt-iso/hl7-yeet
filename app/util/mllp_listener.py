@@ -5,28 +5,26 @@ import logging
 import threading
 from datetime import datetime
 
+from .. import crud
+from ..extensions import db
+
 VT = b'\x0b'
 FS = b'\x1c'
 CR = b'\x0d'
 
-# Global event to signal the listener thread to stop
 stop_listener_event = threading.Event()
 
-# --- FIX: Accept the 'app' object as a parameter. ---
 def mllp_server_worker(port: int, socketio_instance, app):
     server_socket = None
-    # --- FIX: REMOVE THE BROKEN LINE. We no longer need this hack. ---
-    # We now have the real `app` object passed in directly.
     
     try:
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         server_socket.bind(('', port))
         server_socket.listen(1)
-        server_socket.settimeout(1.0) # Timeout allows checking the stop_listener_event
+        server_socket.settimeout(1.0) 
         
         logging.info(f"MLLP Listener started on port {port}. Waiting for connections.")
-        # We need an app context to use extensions like socketio.emit correctly
         with app.app_context():
             socketio_instance.emit('listener_status', {'status': 'listening', 'port': port})
 
@@ -48,17 +46,13 @@ def mllp_server_worker(port: int, socketio_instance, app):
                         hl7_message_bytes = buffer[start_index + 1:end_index]
                         hl7_message_str = hl7_message_bytes.decode('utf-8', errors='ignore')
                         logging.info(f"Received message from {addr}")
-                        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                         
-                        # We need an app context here too for the same reason.
                         with app.app_context():
-                            socketio_instance.emit('incoming_message', { 
-                                'message': hl7_message_str, 
-                                'timestamp': timestamp, 
-                                'from': f"{addr[0]}:{addr[1]}" 
-                            })
+                            # --- THE FIX: Use `db` which we now import, or `app.db` works too.
+                            # Using the direct import is cleaner.
+                            crud.add_received_message(db, hl7_message_str)
+                            socketio_instance.emit('new_message_received', { 'message': f'New message from {addr[0]}' })
 
-                        # Create and send ACK
                         msh_segments = [s for s in hl7_message_str.split('\r') if s.startswith('MSH')]
                         control_id = "UNKNOWN"
                         if msh_segments:
@@ -71,9 +65,14 @@ def mllp_server_worker(port: int, socketio_instance, app):
                         logging.info(f"Sent ACK for message {control_id}")
 
             except socket.timeout:
-                continue # This is normal, just loop again to check stop_listener_event
+                continue 
             except Exception as e:
                 logging.error(f"Error in listener connection loop: {e}")
+
+        with app.app_context():
+            logging.info("Listener stopping, clearing received messages table as requested.")
+            # --- THE FIX: Use `db` here as well ---
+            crud.clear_all_received_messages(db)
 
     except Exception as e:
         logging.error(f"Could not start MLLP listener on port {port}: {e}")

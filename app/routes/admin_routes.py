@@ -11,6 +11,8 @@ from werkzeug.utils import secure_filename
 from ..extensions import db, socketio # <-- IMPORT socketio
 from .. import crud, schemas
 from ..util import definition_processor
+from ..models import User
+from ..schemas import UserSchema
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -129,4 +131,47 @@ def remove_definition(def_id):
     if not success:
         return jsonify({"error": "Definition not found"}), 404
     return '', 204 # No Content
+
+@admin_bp.route('/users', methods=['GET'])
+@admin_required()
+def get_users():
+    """Gets a list of all users."""
+    users = User.query.all()
+    # Use the UserSchema you imported to serialize the data
+    return jsonify([UserSchema.from_orm(u).model_dump() for u in users])
+
+@admin_bp.route('/users/<int:user_id>', methods=['DELETE'])
+@admin_required()
+def delete_user(user_id):
+    """Deletes a user by their ID."""
+    # The admin_required decorator already confirms the current user is an admin.
+    user_to_delete = User.query.get(user_id)
+    if not user_to_delete:
+        return jsonify({"msg": "User not found"}), 404
+    
+    # Prevent an admin from deleting themselves
+    current_user_id = get_jwt_identity()
+    if user_to_delete.id == int(current_user_id):
+         return jsonify({"msg": "Admin cannot delete themselves."}), 400
+
+    db.session.delete(user_to_delete)
+    db.session.commit()
+    return jsonify({"msg": "User deleted successfully"}), 200
+
+@admin_bp.route('/users/<int:user_id>', methods=['PUT'])
+@admin_required()
+def update_user(user_id):
+    """Updates a user's admin status."""
+    user_to_update = User.query.get(user_id)
+    if not user_to_update:
+        return jsonify({"msg": "User not found"}), 404
+
+    data = request.get_json()
+    if 'is_admin' in data and isinstance(data['is_admin'], bool):
+        user_to_update.is_admin = data['is_admin']
+    else:
+        return jsonify({"msg": "Invalid request. 'is_admin' field must be a boolean."}), 400
+    
+    db.session.commit()
+    return jsonify(UserSchema.from_orm(user_to_update).model_dump())
 # --- END OF FILE app/routes/admin_routes.py ---

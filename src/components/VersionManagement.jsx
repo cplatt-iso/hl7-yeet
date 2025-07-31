@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { getHl7VersionsApi, toggleVersionStatusApi, uploadVersionApi } from '../api/admin';
 import { toast } from 'react-hot-toast';
 import YeetLoader from './YeetLoader';
+import InfoCallout from './InfoCallout';
 
 const VersionManagement = () => {
     const [versions, setVersions] = useState([]);
@@ -110,6 +111,18 @@ const VersionManagement = () => {
             {/* Right side: Upload new version form */}
             <div>
                  <h3 className="text-xl font-semibold mb-3 text-gray-200">Upload New Version</h3>
+                 <InfoCallout>
+                    <p className="font-semibold mb-2">Expected File Format:</p>
+                    <p>
+                        Please upload the official HL7 V2.x Messaging Standard as a ZIP file. You can find these on the official HL7 website:
+                        <a href="https://www.hl7.org/implement/standards/product_brief.cfm?product_id=185" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 underline ml-1">
+                            HL7 V2 Product Page
+                        </a>.
+                    </p>
+                    <p className="mt-2">
+                        From the list, select a version and download the "XML Schema" zip file. The system expects this zip file to contain the chapter-specific XSD files (e.g., `datatypes.xsd`, `segments.xsd`, etc.).
+                    </p>
+                </InfoCallout>
                  <form id="file-upload-form" onSubmit={handleUpload} className="p-4 bg-gray-900/50 rounded-lg space-y-4">
                     <div>
                         <label htmlFor="version-string" className="block text-sm font-medium text-gray-300">Version (e.g., 2.5.1)</label>
