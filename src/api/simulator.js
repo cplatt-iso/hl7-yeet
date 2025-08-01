@@ -77,11 +77,11 @@ export const deleteSimulationTemplateApi = async (id) => {
 
 // --- Simulation Run ---
 
-export const runSimulationApi = async (templateId) => {
+export const runSimulationApi = async (templateId, patientCount = 1) => {
     const response = await fetch(`${API_URL}/api/simulator/run`, {
         method: 'POST',
         headers: getAuthHeaders(),
-        body: JSON.stringify({ template_id: templateId }),
+        body: JSON.stringify({ template_id: templateId, patient_count: patientCount }),
     });
     return handleResponse(response);
 };

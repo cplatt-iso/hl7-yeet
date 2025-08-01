@@ -163,33 +163,31 @@ class SimulationRunner:
         # --- THIS IS THE NEW LOGGING LINE ---
         logging.info(f"--- Generated HL7 for Context Extraction ---\n{generated_message}\n--------------------------------------------")
 
-        # --- Context Extraction Example ---
+        # --- Context Extraction Example (Optional) ---
         try:
             # hl7apy expects \r, not \n. Let's be sure.
             # Also, some parsers are picky about trailing newlines.
             clean_message = generated_message.replace('\n', '\r').strip()
             msg = parse_message(clean_message)
 
-            # Check for ORM to get Accession - use try/except for hl7apy dynamic attributes
+            # Try to extract useful context, but don't fail if it doesn't work
             try:
                 # hl7apy has dynamic attributes that pylance can't analyze
                 if msg.msh.msh_9.message_code.value == 'ORM':  # type: ignore
-                    # Use the correct method to get ORC segment
+                    # Use the correct method to get ORC segment - hl7apy uses callable syntax
                     orc_segment = msg('ORC')  # type: ignore
                     if orc_segment and orc_segment.orc_3.placer_group_number:  # type: ignore
                         accession = orc_segment.orc_3.placer_group_number.value  # type: ignore
                         if accession:
                             self.run_context.setdefault('order', {})['accession_number'] = accession
                             self._log_event(step.step_order, patient_iter, repeat_iter, 'INFO', f"Extracted Accession Number '{accession}' into context.")
-            except (AttributeError, IndexError, TypeError):
-                # hl7apy parsing can fail on malformed messages or missing fields
-                pass
-
-            # Add more context extraction logic here if needed...
+            except Exception:
+                # Context extraction failed, but that's OK - just continue without it
+                self._log_event(step.step_order, patient_iter, repeat_iter, 'INFO', "Context extraction skipped - message structure not as expected.")
 
         except Exception as e:
-            self._log_event(step.step_order, patient_iter, repeat_iter, 'FAILURE', f"Failed to parse generated HL7 for context extraction: {e}")
-            return False
+            # Even if parsing fails completely, we should continue - context extraction is optional
+            self._log_event(step.step_order, patient_iter, repeat_iter, 'INFO', f"HL7 parsing for context extraction failed: {e}")
 
         self._log_event(step.step_order, patient_iter, repeat_iter, 'SUCCESS', f"Generated {gen_template.message_type} message.")
         return True

@@ -18,7 +18,7 @@ def perform_c_store(file_paths: list[str], endpoint: dict) -> dict:
     results = {'success': [], 'failure': []}
     # Use the endpoint's configured 'Our AE Title' or a default
     our_aet = endpoint.get('aet_title') or 'YEETER_SCU'
-    # Ensure our_aet is always a string
+    # Ensure our_aet is always a string and not None
     if not isinstance(our_aet, str):
         our_aet = 'YEETER_SCU'
     ae = AE(ae_title=our_aet)
