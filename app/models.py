@@ -1,12 +1,10 @@
 # --- START OF FILE app/models.py ---
 from datetime import datetime
-from sqlalchemy import Integer, String, Text, DateTime, ForeignKey, func, Boolean
+from sqlalchemy import Integer, String, Text, DateTime, ForeignKey, func, Boolean, JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import List, Any, Optional 
 
 from .extensions import db
-
-# ... (User, UserTemplate, TokenUsage, Hl7Destination, Hl7TableDefinition models are unchanged) ...
 
 class User(db.Model):
     __tablename__ = "users"
@@ -19,8 +17,17 @@ class User(db.Model):
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     templates: Mapped[List["UserTemplate"]] = relationship(back_populates="user", cascade="all, delete-orphan")
     token_usages: Mapped[List["TokenUsage"]] = relationship("TokenUsage", back_populates="user", cascade="all, delete-orphan")
-    destinations: Mapped[List["Hl7Destination"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    
+    # --- RENAMED RELATIONSHIP ---
+    endpoints: Mapped[List["Endpoint"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    
     hl7_versions: Mapped[List["Hl7Version"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+
+    # --- NEW RELATIONSHIPS FOR SIMULATOR ---
+    generator_templates: Mapped[List["GeneratorTemplate"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    simulation_templates: Mapped[List["SimulationTemplate"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    simulation_runs: Mapped[List["SimulationRun"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+
     def __init__(self, username: str, email: str, password_hash: str, google_id: Optional[str] = None, is_admin: bool = False, **kw: Any):
         super().__init__(**kw)
         self.username = username
@@ -67,24 +74,38 @@ class TokenUsage(db.Model):
     def __repr__(self):
         return f'<TokenUsage user_id={self.user_id} model={self.model} tokens={self.total_tokens}>'
 
-class Hl7Destination(db.Model):
-    __tablename__ = 'hl7_destinations'
+# --- RENAMED FROM Hl7Destination ---
+class Endpoint(db.Model):
+    __tablename__ = 'endpoints'
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id', ondelete="CASCADE"), nullable=False)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
+    
+    # --- NEW FIELDS ---
+    endpoint_type: Mapped[str] = mapped_column(String(20), nullable=False, default='MLLP') # 'MLLP', 'DICOM_SCP'
     hostname: Mapped[str] = mapped_column(String(255), nullable=False)
     port: Mapped[int] = mapped_column(Integer, nullable=False)
-    user: Mapped["User"] = relationship("User", back_populates="destinations")
-    def __init__(self, user_id: int, name: str, hostname: str, port: int, **kw: Any):
+    ae_title: Mapped[Optional[str]] = mapped_column(String(64), nullable=True) # For DICOM
+    aet_title: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)  # Our AE Title when calling
+
+    user: Mapped["User"] = relationship("User", back_populates="endpoints")
+
+    def __init__(self, user_id: int, name: str, endpoint_type: str, hostname: str, port: int, ae_title: Optional[str] = None, aet_title: Optional[str] = None, **kw: Any):
         super().__init__(**kw)
         self.user_id = user_id
         self.name = name
+        self.endpoint_type = endpoint_type
         self.hostname = hostname
         self.port = port
+        self.ae_title = ae_title
+        self.aet_title = aet_title
+
     def to_dict(self):
-        return {'id': self.id, 'name': self.name, 'hostname': self.hostname, 'port': self.port}
+        return {'id': self.id, 'user_id': self.user_id, 'name': self.name, 'endpoint_type': self.endpoint_type, 'hostname': self.hostname, 'port': self.port, 'ae_title': self.ae_title, 'aet_title': self.aet_title}
+
     def __repr__(self):
-        return f'<Hl7Destination {self.name} ({self.hostname}:{self.port})>'
+        return f'<Endpoint {self.name} ({self.endpoint_type}@{self.hostname}:{self.port})>'
+
 
 class Hl7TableDefinition(db.Model):
     __tablename__ = 'hl7_table_definitions'
@@ -120,7 +141,7 @@ class Hl7Version(db.Model):
     def to_dict(self):
         return {'id': self.id, 'version': self.version, 'description': self.description, 'is_active': self.is_active, 'is_default': self.is_default, 'processed_at': self.processed_at.isoformat(), 'processed_by': self.user.username if self.user else 'Unknown'} # <-- MODIFY
     def __repr__(self):
-        return f'<Hl7Version {self.version} (Active: {self.is_active}, Default: {self.is_default})>' # <-- MODIFY
+        return f'<Hl7Version {self.version} (Active: {self.is_active}, Default: {self.is_default})>' 
 
 class SystemMetadata(db.Model):
     __tablename__ = 'system_metadata'
@@ -141,8 +162,6 @@ class ReceivedMessage(db.Model):
     control_id: Mapped[str] = mapped_column(String(100), nullable=True, index=True)
     sending_app: Mapped[str] = mapped_column(String(100), nullable=True, index=True)
     
-    # --- THIS IS THE FIX ---
-    # Adding an explicit __init__ makes Pylance happy and our code clearer.
     def __init__(self, raw_message: str, message_type: str, control_id: str, sending_app: str, **kw: Any):
         super().__init__(**kw)
         self.raw_message = raw_message
@@ -158,4 +177,68 @@ class ReceivedMessage(db.Model):
             'control_id': self.control_id,
             'sending_app': self.sending_app,
         }
+
+# --- NEW SIMULATOR MODELS ---
+
+class GeneratorTemplate(db.Model):
+    __tablename__ = "generator_templates"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    name: Mapped[str] = mapped_column(String(100), nullable=False)
+    message_type: Mapped[str] = mapped_column(String(50), nullable=False)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    user: Mapped["User"] = relationship("User", back_populates="generator_templates")
+
+class SimulationTemplate(db.Model):
+    __tablename__ = "simulation_templates"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    name: Mapped[str] = mapped_column(String(100), nullable=False)
+    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    user: Mapped["User"] = relationship("User", back_populates="simulation_templates")
+    steps: Mapped[List["SimulationStep"]] = relationship(back_populates="template", cascade="all, delete-orphan", order_by="SimulationStep.step_order")
+
+class SimulationStep(db.Model):
+    __tablename__ = "simulation_steps"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    template_id: Mapped[int] = mapped_column(Integer, ForeignKey("simulation_templates.id"), nullable=False)
+    step_order: Mapped[int] = mapped_column(Integer, nullable=False)
+    step_type: Mapped[str] = mapped_column(String(50), nullable=False)
+    parameters: Mapped[dict] = mapped_column(JSON, nullable=False)
+    template: Mapped["SimulationTemplate"] = relationship("SimulationTemplate", back_populates="steps")
+
+class SimulationRun(db.Model):
+    __tablename__ = "simulation_runs"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    template_id: Mapped[int] = mapped_column(Integer, ForeignKey("simulation_templates.id"), nullable=False)
+    patient_count: Mapped[int] = mapped_column(Integer, nullable=False, default=1, server_default="1")
+    template: Mapped["SimulationTemplate"] = relationship("SimulationTemplate")
+    status: Mapped[str] = mapped_column(String(20), default='PENDING', nullable=False)
+    started_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    user: Mapped["User"] = relationship("User", back_populates="simulation_runs")
+    events: Mapped[List["SimulationRunEvent"]] = relationship(back_populates="run", cascade="all, delete-orphan", order_by="SimulationRunEvent.timestamp")
+
+class SimulationRunEvent(db.Model):
+    __tablename__ = "simulation_run_events"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    run_id: Mapped[int] = mapped_column(Integer, ForeignKey("simulation_runs.id"), nullable=False)
+    timestamp: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    step_order: Mapped[int] = mapped_column(Integer, nullable=False)
+    iteration: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    status: Mapped[str] = mapped_column(String(20), nullable=False) # 'SUCCESS', 'FAILURE', 'INFO'
+    details: Mapped[str] = mapped_column(Text, nullable=False)
+    run: Mapped["SimulationRun"] = relationship("SimulationRun", back_populates="events")
+
+    def __init__(self, run_id: int, step_order: int, iteration: int, status: str, details: str, **kw: Any):
+        super().__init__(**kw)
+        self.run_id = run_id
+        self.step_order = step_order
+        self.iteration = iteration
+        self.status = status
+        self.details = details
+
 # --- END OF FILE app/models.py ---

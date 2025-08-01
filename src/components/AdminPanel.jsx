@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import VersionManagement from './VersionManagement';
 import TerminologyManagement from './TerminologyManagement';
 import UserManagement from './UserManagement';
+import EndpointManager from './EndpointManager'; // <-- NEW IMPORT
 
 const AdminPanel = () => {
     const [activeSubTab, setActiveSubTab] = useState('versions');
@@ -27,12 +28,14 @@ const AdminPanel = () => {
             <div className="flex items-center gap-4 mb-6 border-b border-gray-700 pb-4">
                 <SubTabButton name="versions" label="Version Management" />
                 <SubTabButton name="terminology" label="Terminology Management" />
+                <SubTabButton name="endpoints" label="Endpoint Management" /> {/* <-- NEW BUTTON */}
                 <SubTabButton name="users" label="User Management" />
             </div>
 
             <div>
                 {activeSubTab === 'versions' && <VersionManagement />}
                 {activeSubTab === 'terminology' && <TerminologyManagement />}
+                {activeSubTab === 'endpoints' && <EndpointManager />} {/* <-- NEW COMPONENT RENDER */}
                 {activeSubTab === 'users' && <UserManagement />}
             </div>
         </div>

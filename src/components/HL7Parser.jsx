@@ -6,7 +6,6 @@ import { io } from 'socket.io-client';
 import { parseHl7, sendHl7, analyzeHl7, getTotalUsage, getUsageByModel, getSupportedVersions, pingMllpApi } from '../api/mllp';
 import { startListenerApi, stopListenerApi } from '../api/listener';
 import { getTemplatesApi, saveTemplateApi } from '../api/templates';
-import { getDestinations } from '../api/destinations'; // <-- Import destination API
 
 // Util Imports
 import { rebuildHl7Message, stripCommentsAndBlankLines } from '../utils/hl7';
@@ -28,8 +27,8 @@ import SaveTemplateModal from './SaveTemplateModal';
 import LogPanel from './LogPanel';
 import AuthTooltip from './AuthTooltip'; // Assuming this import exists now
 import TableDictionaryModal from './TableDictionaryModal';
-import DestinationsManager from './DestinationsManager'; // <-- Import new component
-import AdminPanel from './AdminPanel'; // <-- NEW IMPORT
+import AdminPanel from './AdminPanel';
+import Simulator from './Simulator';
 
 const HL7Parser = () => {
     const { isAuthenticated, isAdmin } = useAuth(); // <-- MODIFIED: Get isAdmin from context
@@ -65,7 +64,6 @@ const HL7Parser = () => {
     const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
     const [saveTemplateError, setSaveTemplateError] = useState('');
     const [isLogCollapsed, setIsLogCollapsed] = useState(false);
-    const [isDestinationsManagerOpen, setIsDestinationsManagerOpen] = useState(false); // <-- New state for modal
     const [dictionaryModalState, setDictionaryModalState] = useState({
         isOpen: false,
         tableId: null,
@@ -81,7 +79,7 @@ const HL7Parser = () => {
     const handleToggleLogCollapse = () => { setIsLogCollapsed(prevState => !prevState); };
     const handleSend = async () => { if (!isAuthenticated) { addLog('error', 'You must be logged in to send messages.'); return; } setIsSending(true); try { const result = await sendHl7(host, port, rebuildHl7Message(segments)); addLog('success', `ACK Received from ${host}:${port}:\n\n${result.ack}`); } catch (e) { addLog('error', `Failed to connect to ${host}:${port}:\n\n${e.message}`); } finally { setIsSending(false); } };
     const fetchUserTemplates = useCallback(async () => { if (isAuthenticated) { try { const templates = await getTemplatesApi(); setUserTemplates(templates); } catch (error) { console.error("Failed to fetch user templates:", error); } } else { setUserTemplates([]); } }, [isAuthenticated]);
-    useEffect(() => { if (!isAuthenticated) return; const socket = io(import.meta.env.VITE_API_URL || 'http://localhost:5001'); socketRef.current = socket; socket.on('connect', () => {}); socket.on('disconnect', () => {}); socket.on('listener_status', (data) => { setListenerStatus(data.status); setIsListening(data.status === 'listening'); }); socket.on('incoming_message', (data) => { setReceivedMessages(prev => [data, ...prev]); }); return () => { if (socket) socket.disconnect(); }; }, [isAuthenticated]);
+    useEffect(() => { if (!isAuthenticated) return; const socket = io(import.meta.env.VITE_API_URL || 'http://localhost:5001'); socketRef.current = socket; socket.on('connect', () => { }); socket.on('disconnect', () => { }); socket.on('listener_status', (data) => { setListenerStatus(data.status); setIsListening(data.status === 'listening'); }); socket.on('incoming_message', (data) => { setReceivedMessages(prev => [data, ...prev]); }); return () => { if (socket) socket.disconnect(); }; }, [isAuthenticated]);
     useEffect(() => {
         const fetchInitialData = async () => {
             try {
@@ -108,8 +106,8 @@ const HL7Parser = () => {
     useEffect(() => { if (scrollRef.current > 0) { window.scrollTo(0, scrollRef.current); scrollRef.current = 0; } }, [segments]);
     const updateHl7MessageText = useCallback((newState) => { if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current); debounceTimerRef.current = setTimeout(() => { setHl7Message(rebuildHl7Message(newState)); }, 300); }, []);
     const handleFieldInteraction = (updateLogic) => { scrollRef.current = window.scrollY; setIsProcessing(true); setTimeout(() => { const newSegments = updateLogic(segments); setSegments(newSegments); updateHl7MessageText(newSegments); setIsProcessing(false); }, 0); };
-    const handleStartListener = async () => { try { await startListenerApi(listenerPort); } catch (error) { console.error("API Error starting listener:", error); setListenerStatus('error'); }};
-    const handleStopListener = async () => { try { await stopListenerApi(); } catch (error) { console.error("API Error stopping listener:", error); setListenerStatus('error'); }};
+    const handleStartListener = async () => { try { await startListenerApi(listenerPort); } catch (error) { console.error("API Error starting listener:", error); setListenerStatus('error'); } };
+    const handleStopListener = async () => { try { await stopListenerApi(); } catch (error) { console.error("API Error stopping listener:", error); setListenerStatus('error'); } };
     const handleClearListener = () => { setReceivedMessages([]); };
     const handleLoadIntoParser = (messageToLoad) => { setHl7Message(messageToLoad); setActiveTab('sender'); };
     const handleAnalyze = async () => { if (!hl7Message || isAnalyzing || !isAuthenticated) return; setOriginalMessageForDiff(hl7Message); setIsAnalyzing(true); setAnalysisResult(null); try { const result = await analyzeHl7(hl7Message, selectedModel, selectedHl7Version); setAnalysisResult(result); if (result.usage?.total_tokens) { const tokens = result.usage.total_tokens; setTotalTokenUsage(pt => pt + tokens); setModelUsage(pu => ({ ...pu, [selectedModel]: (pu[selectedModel] || 0) + tokens })); } } catch (e) { setAnalysisResult({ explanation: `**Error:** ${e.message}` }); } finally { setIsAnalyzing(false); } };
@@ -122,8 +120,8 @@ const HL7Parser = () => {
     const handleShowDiff = (fixedMessage) => { setNewMessageForDiff(fixedMessage); setIsDiffModalOpen(true); };
     const handleConfirmFix = () => { setHl7Message(newMessageForDiff); setIsDiffModalOpen(false); setAnalysisResult(null); };
     const handleMouseMove = (e) => { if (tooltipContent) setTooltipPos({ x: e.pageX, y: e.pageY }); };
-    const handleSaveTemplate = async (templateName) => { setSaveTemplateError(''); if (!hl7Message.trim() || !templateName.trim()) { setSaveTemplateError("Template name and message content cannot be empty."); return; } try { await saveTemplateApi(templateName, hl7Message); setIsSaveModalOpen(false); await fetchUserTemplates(); } catch (error) { setSaveTemplateError(error.message || "Failed to save template."); } };    
-    const TabButton = ({ name, label }) => ( <button onClick={() => setActiveTab(name)} className={`px-6 py-2 text-sm font-medium rounded-t-lg transition-colors border-b-2 ${activeTab === name ? 'border-indigo-500 text-white' : 'border-transparent text-gray-400 hover:border-gray-500 hover:text-gray-200'}`} > {label} </button> );
+    const handleSaveTemplate = async (templateName) => { setSaveTemplateError(''); if (!hl7Message.trim() || !templateName.trim()) { setSaveTemplateError("Template name and message content cannot be empty."); return; } try { await saveTemplateApi(templateName, hl7Message); setIsSaveModalOpen(false); await fetchUserTemplates(); } catch (error) { setSaveTemplateError(error.message || "Failed to save template."); } };
+    const TabButton = ({ name, label }) => (<button onClick={() => setActiveTab(name)} className={`px-6 py-2 text-sm font-medium rounded-t-lg transition-colors border-b-2 ${activeTab === name ? 'border-indigo-500 text-white' : 'border-transparent text-gray-400 hover:border-gray-500 hover:text-gray-200'}`} > {label} </button>);
     const handleShowDictionary = (tableId, segmentIndex, fieldIndex) => {
         setDictionaryModalState({ isOpen: true, tableId, segmentIndex, fieldIndex });
     };
@@ -149,7 +147,7 @@ const HL7Parser = () => {
         }
 
         const toastId = toast.loading(`Pinging ${host}:${port}...`);
-        
+
         try {
             const result = await pingMllpApi(host, port);
             if (result.status === 'success') {
@@ -172,11 +170,6 @@ const HL7Parser = () => {
                 onClose={handleCloseDictionary}
                 onSelectValue={handleSelectDictionaryValue}
             />
-            <DestinationsManager
-                show={isDestinationsManagerOpen}
-                onClose={() => setIsDestinationsManagerOpen(false)}
-                onSelectDestination={handleSelectDestination}
-            />
 
             <Tooltip content={tooltipContent} position={tooltipPos} />
             <DiffModal isOpen={isDiffModalOpen} onClose={() => setIsDiffModalOpen(false)} onConfirm={handleConfirmFix} originalText={originalMessageForDiff} newText={newMessageForDiff} />
@@ -192,6 +185,7 @@ const HL7Parser = () => {
             <div className="border-b border-gray-700">
                 <TabButton name="sender" label="Sender & Parser" />
                 {isAuthenticated && <TabButton name="listener" label="MLLP Listener" />}
+                {isAuthenticated && <TabButton name="simulator" label="Simulator" />}
                 {isAdmin && <TabButton name="admin" label="Admin" />}
             </div>
 
@@ -205,14 +199,13 @@ const HL7Parser = () => {
                         <div className={`w-full ${analysisResult || isAnalyzing ? 'md:w-2/4 lg:w-2/5' : 'md:w-3/4 lg:w-4/5'} transition-all duration-300`}>
                             <div className="flex flex-col gap-8">
                                 <div className="sticky top-4 z-10 bg-gray-900 py-2 flex flex-col gap-4">
-                                    <ConnectionInputs 
-                                        host={host} 
-                                        setHost={setHost} 
-                                        port={port} 
-                                        setPort={setPort} 
-                                        isSending={isSending} 
-                                        handleSend={handleSend} 
-                                        onManageDestinations={() => setIsDestinationsManagerOpen(true)}
+                                    <ConnectionInputs
+                                        host={host}
+                                        setHost={setHost}
+                                        port={port}
+                                        setPort={setPort}
+                                        isSending={isSending}
+                                        handleSend={handleSend}
                                         handlePing={handlePing}
                                     />
                                     <div className={`transition-all duration-300 ease-in-out ${isLogCollapsed ? 'h-14' : 'h-48'}`}>
@@ -258,6 +251,9 @@ const HL7Parser = () => {
                         <ListenerPanel port={listenerPort} setPort={setListenerPort} isListening={isListening} status={listenerStatus} onStart={handleStartListener} onStop={handleStopListener} />
                         <ListenerOutput messages={receivedMessages} onClear={handleClearListener} onLoadIntoParser={handleLoadIntoParser} />
                     </div>
+                )}
+                {activeTab === 'simulator' && isAuthenticated && (
+                    <Simulator />
                 )}
                 {activeTab === 'admin' && isAdmin && (
                     <AdminPanel />

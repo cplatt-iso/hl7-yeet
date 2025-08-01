@@ -10,6 +10,12 @@ google-generativeai
 google-auth
 python-dotenv
 
+pydicom
+pynetdicom
+
+faker 
+numpy
+
 eventlet
 gunicorn
 

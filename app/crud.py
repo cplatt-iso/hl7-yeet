@@ -1,14 +1,14 @@
 # --- START OF FILE app/crud.py ---
 
-from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import func, select, or_
+from sqlalchemy.orm import Session, joinedload, contains_eager
+from sqlalchemy import func, select, or_, delete
 from flask_sqlalchemy import SQLAlchemy
 import logging 
 
 from . import models, schemas
 from .extensions import bcrypt
 
-# --- User CRUD ---
+# --- User CRUD (unchanged) ---
 
 def get_user_by_id(db: SQLAlchemy, user_id: int) -> models.User | None:
     return db.session.get(models.User, user_id)
@@ -42,7 +42,7 @@ def create_google_user(db: SQLAlchemy, email: str, username: str, google_id: str
     db.session.refresh(db_user)
     return db_user
 
-# --- Template CRUD ---
+# --- Template CRUD (unchanged) ---
 
 def get_templates_for_user(db: SQLAlchemy, user_id: int) -> list[models.UserTemplate]:
     return list(db.session.execute(db.select(models.UserTemplate).filter_by(user_id=user_id).order_by(models.UserTemplate.name)).scalars())
@@ -61,7 +61,7 @@ def delete_template(db: SQLAlchemy, user_id: int, template_id: int) -> models.Us
         db.session.commit()
     return db_template
 
-# --- Token Usage CRUD ---
+# --- Token Usage CRUD (unchanged) ---
 
 def record_token_usage(db: SQLAlchemy, user_id: int, model_name: str, usage_data: dict) -> models.TokenUsage:
     db_usage = models.TokenUsage(user_id=user_id, model=model_name, input_tokens=usage_data.get('input_tokens', 0), output_tokens=usage_data.get('output_tokens', 0), total_tokens=usage_data.get('total_tokens', 0))
@@ -78,7 +78,7 @@ def get_usage_by_model_for_user(db: SQLAlchemy, user_id: int) -> dict:
     results = db.session.execute(db.select(models.TokenUsage.model, func.sum(models.TokenUsage.total_tokens)).filter_by(user_id=user_id).group_by(models.TokenUsage.model)).all()
     return {model: total for model, total in results}
 
-# --- Hl7Version CRUD ---
+# --- Hl7Version CRUD (unchanged) ---
 
 def get_all_hl7_versions(db: SQLAlchemy) -> list[models.Hl7Version]:
     return list(db.session.execute(
@@ -130,25 +130,23 @@ def set_default_hl7_version(db: SQLAlchemy, version_id: int) -> models.Hl7Versio
     
     return new_default_version
 
+# --- Hl7TableDefinition CRUD (unchanged) ---
+
 def get_distinct_table_ids(db: SQLAlchemy) -> list[str]:
-    """Gets a sorted list of unique HL7 table IDs from the database."""
     results = db.session.execute(
         select(models.Hl7TableDefinition.table_id).distinct().order_by(models.Hl7TableDefinition.table_id)
     ).scalars().all()
     return list(results)
 
 def get_definitions_for_table(db: SQLAlchemy, table_id: str) -> list[models.Hl7TableDefinition]:
-    """Gets all definitions for a specific table ID."""
     return list(db.session.execute(
         db.select(models.Hl7TableDefinition).filter_by(table_id=table_id).order_by(models.Hl7TableDefinition.value)
     ).scalars())
 
 def get_definition_by_id(db: SQLAlchemy, def_id: int) -> models.Hl7TableDefinition | None:
-    """Gets a single definition by its primary key."""
     return db.session.get(models.Hl7TableDefinition, def_id)
 
 def create_definition(db: SQLAlchemy, definition: schemas.DefinitionCreate) -> models.Hl7TableDefinition:
-    """Creates a new table definition."""
     db_def = models.Hl7TableDefinition(
         table_id=definition.table_id,
         value=definition.value,
@@ -160,7 +158,6 @@ def create_definition(db: SQLAlchemy, definition: schemas.DefinitionCreate) -> m
     return db_def
 
 def update_definition(db: SQLAlchemy, def_id: int, definition_update: schemas.DefinitionUpdate) -> models.Hl7TableDefinition | None:
-    """Updates a table definition."""
     db_def = get_definition_by_id(db, def_id)
     if db_def:
         update_data = definition_update.model_dump(exclude_unset=True)
@@ -171,7 +168,6 @@ def update_definition(db: SQLAlchemy, def_id: int, definition_update: schemas.De
     return db_def
 
 def delete_definition(db: SQLAlchemy, def_id: int) -> bool:
-    """Deletes a table definition. Returns True if successful, False otherwise."""
     db_def = get_definition_by_id(db, def_id)
     if db_def:
         db.session.delete(db_def)
@@ -180,14 +176,14 @@ def delete_definition(db: SQLAlchemy, def_id: int) -> bool:
     return False
 
 def clear_hl7_table_definitions(db: SQLAlchemy):
-    # This function is used by the refresh process
     db.session.query(models.Hl7TableDefinition).delete()
     db.session.commit()
 
 def bulk_add_hl7_table_definitions(db: SQLAlchemy, definitions: list[dict]):
-    # This function is used by the refresh process
     db.session.bulk_insert_mappings(models.Hl7TableDefinition, definitions) # type: ignore
     db.session.commit()
+
+# --- SystemMetadata CRUD (unchanged) ---
 
 def get_metadata(db: SQLAlchemy, key: str) -> models.SystemMetadata | None:
     return db.session.get(models.SystemMetadata, key)
@@ -207,8 +203,9 @@ def get_terminology_stats(db: SQLAlchemy) -> dict:
     last_updated_obj = get_metadata(db, 'terminology_last_updated')
     return {"table_count": table_count or 0, "definition_count": definition_count or 0, "last_updated": last_updated_obj.value if last_updated_obj else None}
 
+# --- ReceivedMessage CRUD (unchanged) ---
+
 def add_received_message(db: SQLAlchemy, raw_message: str) -> models.ReceivedMessage:
-    """Parses key fields and adds a new received message to the database."""
     message_type, control_id, sending_app = "Unknown", "Unknown", "Unknown"
     try:
         segments = raw_message.split('\r')
@@ -231,9 +228,32 @@ def add_received_message(db: SQLAlchemy, raw_message: str) -> models.ReceivedMes
     db.session.commit()
     db.session.refresh(db_message)
     return db_message
+    message_type = control_id = sending_app = "UNKNOWN"
+    try:
+        lines = raw_message.split('\r')
+        msh = next((l for l in lines if l.startswith('MSH')), None)
+        if msh:
+            fields = msh.split('|')
+            if len(fields) > 8:
+                message_type = fields[8]
+            if len(fields) > 9:
+                control_id = fields[9]
+            if len(fields) > 2:
+                sending_app = fields[2]
+    except Exception:
+        pass
+    db_message = models.ReceivedMessage(
+        raw_message=raw_message,
+        message_type=message_type,
+        control_id=control_id,
+        sending_app=sending_app
+    )
+    db.session.add(db_message)
+    db.session.commit()
+    db.session.refresh(db_message)
+    return db_message
 
 def get_received_messages(db: SQLAlchemy, page: int, per_page: int, search_term: str | None = None):
-    """Gets a paginated and filtered list of received messages."""
     query = db.select(models.ReceivedMessage)
     
     if search_term:
@@ -254,6 +274,172 @@ def get_received_message_by_id(db: SQLAlchemy, message_id: int) -> models.Receiv
     return db.session.get(models.ReceivedMessage, message_id)
 
 def clear_all_received_messages(db: SQLAlchemy):
-    """Deletes all records from the received_messages table."""
     db.session.query(models.ReceivedMessage).delete()
     db.session.commit()
+
+# --- NEW SIMULATOR CRUDS ---
+
+# --- Endpoint (Destination) CRUD ---
+def create_endpoint(db: SQLAlchemy, user_id: int, endpoint_data: schemas.EndpointCreate) -> models.Endpoint:
+    endpoint_dict = endpoint_data.model_dump()
+    endpoint_dict['user_id'] = user_id
+    db_endpoint = models.Endpoint(**endpoint_dict)
+    db.session.add(db_endpoint)
+    db.session.commit()
+    db.session.refresh(db_endpoint)
+    return db_endpoint
+
+def get_endpoint_by_id(db: SQLAlchemy, endpoint_id: int) -> models.Endpoint | None:
+    return db.session.get(models.Endpoint, endpoint_id)
+
+def get_all_endpoints(db: SQLAlchemy) -> list[models.Endpoint]:
+    return list(db.session.execute(db.select(models.Endpoint).order_by(models.Endpoint.name)).scalars())
+
+def update_endpoint(db: SQLAlchemy, endpoint_id: int, update_data: schemas.EndpointUpdate) -> models.Endpoint | None:
+    db_endpoint = get_endpoint_by_id(db, endpoint_id)
+    if db_endpoint:
+        for key, value in update_data.model_dump(exclude_unset=True).items():
+            setattr(db_endpoint, key, value)
+        db.session.commit()
+        db.session.refresh(db_endpoint)
+    return db_endpoint
+
+def delete_endpoint(db: SQLAlchemy, endpoint_id: int) -> bool:
+    db_endpoint = get_endpoint_by_id(db, endpoint_id)
+    if db_endpoint:
+        db.session.delete(db_endpoint)
+        db.session.commit()
+        return True
+    return False
+
+# --- Generator Template CRUD ---
+def create_generator_template(db: SQLAlchemy, user_id: int, template_data: schemas.GeneratorTemplateCreate) -> models.GeneratorTemplate:
+    db_template = models.GeneratorTemplate(**template_data.model_dump())
+    db_template.user_id = user_id
+    db.session.add(db_template)
+    db.session.commit()
+    db.session.refresh(db_template)
+    return db_template
+
+def get_generator_template_by_id(db: SQLAlchemy, template_id: int) -> models.GeneratorTemplate | None:
+    return db.session.get(models.GeneratorTemplate, template_id)
+
+def get_all_generator_templates(db: SQLAlchemy) -> list[models.GeneratorTemplate]:
+    return list(db.session.execute(db.select(models.GeneratorTemplate).order_by(models.GeneratorTemplate.name)).scalars())
+
+def update_generator_template(db: SQLAlchemy, template_id: int, update_data: schemas.GeneratorTemplateCreate) -> models.GeneratorTemplate | None:
+    db_template = get_generator_template_by_id(db, template_id)
+    if db_template:
+        for key, value in update_data.model_dump().items():
+            setattr(db_template, key, value)
+        db.session.commit()
+        db.session.refresh(db_template)
+    return db_template
+
+def delete_generator_template(db: SQLAlchemy, template_id: int) -> bool:
+    db_template = get_generator_template_by_id(db, template_id)
+    if db_template:
+        db.session.delete(db_template)
+        db.session.commit()
+        return True
+    return False
+
+# --- Simulation Template CRUD ---
+def create_simulation_template(db: SQLAlchemy, user_id: int, template_data: schemas.SimulationTemplateCreate) -> models.SimulationTemplate:
+    """Creates a new simulation template with associated steps."""
+    db_template = models.SimulationTemplate()
+    db_template.user_id = user_id
+    db_template.name = template_data.name
+    db_template.description = template_data.description
+    
+    db.session.add(db_template)
+    db.session.flush()  # Flush to get the template ID for the steps
+    
+    # Add steps
+    for step_data in template_data.steps:
+        db_step = models.SimulationStep(**step_data.model_dump())
+        db_step.template_id = db_template.id
+        db.session.add(db_step)
+    
+    db.session.commit()
+    db.session.refresh(db_template)
+    return db_template
+
+def create_simulation_run(db: SQLAlchemy, user_id: int, template_id: int, patient_count: int) -> models.SimulationRun:
+    """Creates a new record for a simulation run and returns it."""
+    db_run = models.SimulationRun()
+    db_run.user_id = user_id
+    db_run.template_id = template_id
+    db_run.patient_count = patient_count
+    db_run.status = 'PENDING'
+    db.session.add(db_run)
+    db.session.commit()
+    db.session.refresh(db_run)
+    return db_run
+
+def get_simulation_template_by_id(db: SQLAlchemy, template_id: int) -> models.SimulationTemplate | None:
+    return db.session.query(models.SimulationTemplate).options(joinedload(models.SimulationTemplate.steps)).filter(models.SimulationTemplate.id == template_id).one_or_none()
+
+def get_simulation_templates_for_user(db: SQLAlchemy, user_id: int) -> list[models.SimulationTemplate]:
+    return list(db.session.execute(
+        db.select(models.SimulationTemplate)
+        .options(joinedload(models.SimulationTemplate.steps))
+        .filter_by(user_id=user_id)
+        .order_by(models.SimulationTemplate.name)
+    ).scalars().unique()) # <-- THIS IS THE ENTIRE FIX
+
+def update_simulation_template(db: SQLAlchemy, template_id: int, user_id: int, is_admin: bool, update_data: schemas.SimulationTemplateUpdate) -> models.SimulationTemplate | None:
+    db_template = get_simulation_template_by_id(db, template_id)
+    if not db_template:
+        return None
+    if not is_admin and db_template.user_id != user_id:
+        return None # Unauthorized, you bastard
+
+    # Update template fields
+    update_dict = update_data.model_dump(exclude_unset=True)
+    if 'name' in update_dict:
+        db_template.name = update_dict['name']
+    if 'description' in update_dict:
+        db_template.description = update_dict['description']
+
+    # Handle steps - this is a full replacement for simplicity
+    if 'steps' in update_dict:
+        # Delete old steps
+        db.session.query(models.SimulationStep).filter_by(template_id=template_id).delete()
+        # Add new steps
+        for step_data in update_data.steps: # type: ignore
+            db_step = models.SimulationStep(**step_data.model_dump())
+            db_step.template_id = template_id
+            db.session.add(db_step)
+
+    db.session.commit()
+    db.session.refresh(db_template)
+    return db_template
+
+def delete_simulation_template(db: SQLAlchemy, template_id: int, user_id: int, is_admin: bool) -> bool:
+    db_template = get_simulation_template_by_id(db, template_id)
+    if not db_template:
+        return False
+    if not is_admin and db_template.user_id != user_id:
+        return False
+
+    db.session.delete(db_template)
+    db.session.commit()
+    return True
+
+def get_simulation_run_by_id(db: SQLAlchemy, run_id: int) -> models.SimulationRun | None:
+    """Gets a simulation run, eagerly loading the template and its steps."""
+    return db.session.query(models.SimulationRun).options(
+        joinedload(models.SimulationRun.events),
+        joinedload(models.SimulationRun.template).joinedload(models.SimulationTemplate.steps)
+    ).filter(models.SimulationRun.id == run_id).one_or_none()
+
+def get_simulation_runs_for_user(db: SQLAlchemy, user_id: int) -> list[models.SimulationRun]:
+    """Gets all simulation run summaries for a user."""
+    return list(db.session.execute(
+        db.select(models.SimulationRun)
+        .filter_by(user_id=user_id)
+        .order_by(models.SimulationRun.started_at.desc().nulls_last(), models.SimulationRun.id.desc())
+    ).scalars())
+
+# --- END OF FILE app/crud.py ---

@@ -1,6 +1,6 @@
 # --- START OF FILE app/schemas.py ---
 from pydantic import BaseModel, Field, EmailStr, computed_field
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from datetime import datetime
 
 # --- Pydantic Config ---
@@ -85,7 +85,7 @@ class Hl7VersionResponse(AppBaseModel):
     def processed_by(self) -> str:
         return self.user.username if self.user else 'Unknown'
 
-# --- NEW TERMINOLOGY SCHEMAS ---
+# --- Terminology Schemas (unchanged) ---
 class DefinitionBase(AppBaseModel):
     table_id: str = Field(..., max_length=10)
     value: str = Field(..., max_length=100)
@@ -100,5 +100,102 @@ class DefinitionUpdate(BaseModel):
 
 class Hl7TableDefinitionResponse(DefinitionBase):
     id: int
+    
+# --- NEW/UPDATED SCHEMAS FOR SIMULATOR ---
+
+# --- Endpoint (formerly Hl7Destination) ---
+class EndpointBase(AppBaseModel):
+    name: str = Field(..., min_length=1, max_length=100)
+    endpoint_type: str = Field(..., pattern=r'^(MLLP|DICOM_SCP)$')
+    hostname: str
+    port: int
+    ae_title: Optional[str] = Field(None, max_length=64)
+    aet_title: Optional[str] = Field(None, max_length=64)
+
+class EndpointCreate(EndpointBase):
+    pass
+
+class EndpointUpdate(BaseModel):
+    name: Optional[str] = Field(None, min_length=1, max_length=100)
+    endpoint_type: Optional[str] = Field(None, pattern=r'^(MLLP|DICOM_SCP)$')
+    hostname: Optional[str] = None
+    port: Optional[int] = None
+    ae_title: Optional[str] = Field(None, max_length=64)
+    aet_title: Optional[str] = Field(None, max_length=64)
+
+class EndpointResponse(EndpointBase):
+    id: int
+    user_id: int
+
+# --- Generator Template ---
+class GeneratorTemplateBase(AppBaseModel):
+    name: str = Field(..., min_length=1, max_length=100)
+    message_type: str = Field(..., max_length=50)
+    content: str
+
+class GeneratorTemplateCreate(GeneratorTemplateBase):
+    pass
+
+class GeneratorTemplateResponse(GeneratorTemplateBase):
+    id: int
+    user_id: int
+    created_at: datetime
+
+# --- Simulation Step ---
+class SimulationStepBase(AppBaseModel):
+    step_order: int
+    step_type: str
+    parameters: Dict[str, Any]
+
+class SimulationStepCreate(SimulationStepBase):
+    pass
+
+class SimulationStepResponse(SimulationStepBase):
+    id: int
+
+# --- Simulation Template ---
+class SimulationTemplateBase(AppBaseModel):
+    name: str = Field(..., min_length=1, max_length=100)
+    description: Optional[str] = None
+
+class SimulationTemplateCreate(SimulationTemplateBase):
+    steps: List[SimulationStepCreate]
+
+class SimulationTemplateResponse(SimulationTemplateBase):
+    id: int
+    user_id: int
+    created_at: datetime
+    steps: List[SimulationStepResponse]
+
+class SimulationTemplateUpdate(BaseModel):
+    name: Optional[str] = Field(None, min_length=1, max_length=100)
+    description: Optional[str] = None
+    steps: Optional[List[SimulationStepCreate]] = None
+
+# --- Simulation Run ---
+class SimulationRunCreate(BaseModel):
+    template_id: int
+    # --- ADD THIS FIELD ---
+    patient_count: int = Field(1, gt=0) # Default to 1, must be greater than 0
+
+class SimulationRunEventResponse(AppBaseModel):
+    id: int
+    timestamp: datetime
+    step_order: int
+    iteration: int
+    status: str
+    details: str
+
+class SimulationRunResponse(AppBaseModel):
+    id: int
+    user_id: int
+    template_id: int
+    # --- ADD THIS FIELD ---
+    patient_count: int
+    status: str
+    started_at: Optional[datetime] = None
+    completed_at: Optional[datetime] = None
+    events: List[SimulationRunEventResponse]
+
 
 # --- END OF FILE app/schemas.py ---
