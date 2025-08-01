@@ -81,8 +81,29 @@ const HL7Parser = () => {
     const handleToggleLogCollapse = () => { setIsLogCollapsed(prevState => !prevState); };
     const handleSend = async () => { if (!isAuthenticated) { addLog('error', 'You must be logged in to send messages.'); return; } setIsSending(true); try { const result = await sendHl7(host, port, rebuildHl7Message(segments)); addLog('success', `ACK Received from ${host}:${port}:\n\n${result.ack}`); } catch (e) { addLog('error', `Failed to connect to ${host}:${port}:\n\n${e.message}`); } finally { setIsSending(false); } };
     const fetchUserTemplates = useCallback(async () => { if (isAuthenticated) { try { const templates = await getTemplatesApi(); setUserTemplates(templates); } catch (error) { console.error("Failed to fetch user templates:", error); } } else { setUserTemplates([]); } }, [isAuthenticated]);
-    useEffect(() => { if (!isAuthenticated) return; const socket = io(import.meta.env.VITE_API_URL || 'http://localhost:5001'); socketRef.current = socket; socket.on('connect', () => console.log('Socket.IO Client Connected')); socket.on('disconnect', () => console.log('Socket.IO Client Disconnected')); socket.on('listener_status', (data) => { setListenerStatus(data.status); setIsListening(data.status === 'listening'); }); socket.on('incoming_message', (data) => { setReceivedMessages(prev => [data, ...prev]); }); return () => { if (socket) socket.disconnect(); }; }, [isAuthenticated]);
-    useEffect(() => { const fetchInitialData = async () => { const PREFERRED_DEFAULT = 'v2.5.1'; try { const versions = await getSupportedVersions(); setSupportedVersions(versions); if (versions.length > 0) { if (versions.includes(PREFERRED_DEFAULT)) { setSelectedHl7Version(PREFERRED_DEFAULT); } else { setSelectedHl7Version(versions[0]); } } if (isAuthenticated) { const [total, byModel] = await Promise.all([getTotalUsage(), getUsageByModel()]); setTotalTokenUsage(total); setModelUsage(byModel); fetchUserTemplates(); } } catch (error) { console.error("Couldn't fetch initial data:", error); } }; fetchInitialData(); }, [isAuthenticated, fetchUserTemplates]);
+    useEffect(() => { if (!isAuthenticated) return; const socket = io(import.meta.env.VITE_API_URL || 'http://localhost:5001'); socketRef.current = socket; socket.on('connect', () => {}); socket.on('disconnect', () => {}); socket.on('listener_status', (data) => { setListenerStatus(data.status); setIsListening(data.status === 'listening'); }); socket.on('incoming_message', (data) => { setReceivedMessages(prev => [data, ...prev]); }); return () => { if (socket) socket.disconnect(); }; }, [isAuthenticated]);
+    useEffect(() => {
+        const fetchInitialData = async () => {
+            try {
+                const versions = await getSupportedVersions();
+                const activeVersions = Array.isArray(versions) ? versions.filter(v => v.is_active) : [];
+                setSupportedVersions(activeVersions);
+                if (activeVersions.length > 0) {
+                    const defaultVersion = activeVersions.find(v => v.is_default);
+                    setSelectedHl7Version(defaultVersion ? defaultVersion.version : activeVersions[0].version);
+                }
+                if (isAuthenticated) {
+                    const [total, byModel] = await Promise.all([getTotalUsage(), getUsageByModel()]);
+                    setTotalTokenUsage(total);
+                    setModelUsage(byModel);
+                    fetchUserTemplates();
+                }
+            } catch (error) {
+                toast.error("Failed to load initial app data. Some features may not work.");
+            }
+        };
+        fetchInitialData();
+    }, [isAuthenticated, fetchUserTemplates]);
     useEffect(() => { if (activeTab !== 'sender' || !hl7Message.trim()) { setSegments([]); setError(''); return; } const handler = setTimeout(() => { setIsProcessing(true); parseHl7(hl7Message, selectedHl7Version).then(data => { setSegments(data); setError(''); }).catch(err => { setSegments([]); setError(err.message); }).finally(() => { setIsProcessing(false); }); }, 500); return () => clearTimeout(handler); }, [hl7Message, selectedHl7Version, activeTab]);
     useEffect(() => { if (scrollRef.current > 0) { window.scrollTo(0, scrollRef.current); scrollRef.current = 0; } }, [segments]);
     const updateHl7MessageText = useCallback((newState) => { if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current); debounceTimerRef.current = setTimeout(() => { setHl7Message(rebuildHl7Message(newState)); }, 300); }, []);

@@ -76,6 +76,7 @@ class Hl7VersionResponse(AppBaseModel):
     version: str
     description: Optional[str] = None
     is_active: bool
+    is_default: bool # <-- ADD THIS
     processed_at: datetime
     user: UserInVersionResponse = Field(exclude=True) 
 

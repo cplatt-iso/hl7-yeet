@@ -106,19 +106,21 @@ class Hl7Version(db.Model):
     version: Mapped[str] = mapped_column(String(20), unique=True, nullable=False)
     description: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    is_default: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False) # <-- ADD THIS
     processed_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
     user: Mapped["User"] = relationship("User", back_populates="hl7_versions")
-    def __init__(self, version: str, description: Optional[str], user_id: int, is_active: bool = True, **kw: Any):
+    def __init__(self, version: str, description: Optional[str], user_id: int, is_active: bool = True, is_default: bool = False, **kw: Any): # <-- MODIFY
         super().__init__(**kw)
         self.version = version
         self.description = description
         self.user_id = user_id
         self.is_active = is_active
+        self.is_default = is_default # <-- ADD THIS
     def to_dict(self):
-        return {'id': self.id, 'version': self.version, 'description': self.description, 'is_active': self.is_active, 'processed_at': self.processed_at.isoformat(), 'processed_by': self.user.username if self.user else 'Unknown'}
+        return {'id': self.id, 'version': self.version, 'description': self.description, 'is_active': self.is_active, 'is_default': self.is_default, 'processed_at': self.processed_at.isoformat(), 'processed_by': self.user.username if self.user else 'Unknown'} # <-- MODIFY
     def __repr__(self):
-        return f'<Hl7Version {self.version} (Active: {self.is_active})>'
+        return f'<Hl7Version {self.version} (Active: {self.is_active}, Default: {self.is_default})>' # <-- MODIFY
 
 class SystemMetadata(db.Model):
     __tablename__ = 'system_metadata'

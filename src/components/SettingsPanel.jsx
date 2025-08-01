@@ -30,6 +30,8 @@ const SettingsPanel = ({
     setSelectedHl7Version
 }) => {
 
+    // Debug logs removed
+
     const availableModels = [
         'gemini-1.5-flash',
         'gemini-1.5-pro',
@@ -61,8 +63,8 @@ const SettingsPanel = ({
                 >
                     {supportedHl7Versions && supportedHl7Versions.length > 0 ? (
                         supportedHl7Versions.map(version => (
-                            <option key={version} value={version}>
-                                {version}
+                            <option key={version.id} value={version.version}>
+                                {version.version}
                             </option>
                         ))
                     ) : (

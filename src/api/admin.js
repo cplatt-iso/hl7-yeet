@@ -175,4 +175,17 @@ export const deleteUserApi = async (userId) => {
     });
     return handleResponse(response);
 };
+
+/**
+ * Sets a specific HL7 version as the default.
+ * @param {number} versionId The ID of the version to set as default.
+ * @returns {Promise<Object>}
+ */
+export const setDefaultVersionApi = async (versionId) => {
+    const response = await fetch(`${API_URL}/api/admin/versions/${versionId}/default`, {
+        method: 'PATCH',
+        headers: getAuthHeaders()
+    });
+    return handleResponse(response);
+};
 // --- END OF FILE src/api/admin.js ---

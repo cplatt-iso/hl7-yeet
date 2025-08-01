@@ -12,6 +12,7 @@ if not os.environ.get("FLASK_SKIP_EVENTLET"):
     eventlet.monkey_patch()
 
 from .extensions import db, cors, socketio, bcrypt, jwt
+# from flask_migrate import Migrate
 
 # --- Import Blueprints ---
 from .routes.auth_routes import auth_bp
@@ -47,6 +48,7 @@ def create_app():
 
     # --- Initialize Extensions ---
     db.init_app(app)
+    # migrate = Migrate(app, db)  # Initialize Flask-Migrate
     cors.init_app(app, resources={r"/api/*": {"origins": "*"}})
     socketio.init_app(app, cors_allowed_origins="*")
     bcrypt.init_app(app)

@@ -1,7 +1,8 @@
 // --- START OF FILE src/components/VersionManagement.jsx ---
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { getHl7VersionsApi, toggleVersionStatusApi, uploadVersionApi } from '../api/admin';
+
+import { getHl7VersionsApi, toggleVersionStatusApi, uploadVersionApi, setDefaultVersionApi } from '../api/admin';
 import { toast } from 'react-hot-toast';
 import YeetLoader from './YeetLoader';
 import InfoCallout from './InfoCallout';
@@ -18,6 +19,7 @@ const VersionManagement = () => {
 
     const fetchVersions = useCallback(async () => {
         try {
+            setIsLoading(true);
             const data = await getHl7VersionsApi();
             setVersions(data);
         } catch (error) {
@@ -40,10 +42,25 @@ const VersionManagement = () => {
         try {
             await toggleVersionStatusApi(versionId);
             toast.success('Version status updated!');
+            // If we are deactivating the default version, we need to refresh
+            const deactivatedVersion = versions.find(v => v.id === versionId);
+            if (deactivatedVersion?.is_default) {
+                fetchVersions();
+            }
         } catch (error) {
             toast.error(`Failed to update status: ${error.message}`);
             // Revert optimistic update on failure
             fetchVersions(); 
+        }
+    };
+
+    const handleSetDefault = async (versionId) => {
+        try {
+            await setDefaultVersionApi(versionId);
+            toast.success('Version set as default!');
+            fetchVersions(); // Refresh to show the new default status
+        } catch (error) {
+            toast.error(`Failed to set default: ${error.message}`);
         }
     };
 
@@ -64,7 +81,9 @@ const VersionManagement = () => {
             setFile(null);
             setVersionString('');
             setDescription('');
-            document.getElementById('file-upload-form').reset();
+            if (document.getElementById('file-upload-form')) {
+                document.getElementById('file-upload-form').reset();
+            }
             fetchVersions();
         } catch (error) {
             toast.error(`Upload failed: ${error.message}`, { id: toastId });
@@ -82,17 +101,24 @@ const VersionManagement = () => {
             {/* Left side: List of existing versions */}
             <div>
                 <h3 className="text-xl font-semibold mb-3 text-gray-200">Processed HL7 Versions</h3>
-                <div className="space-y-2 max-h-96 overflow-y-auto pr-2">
+                <div className="space-y-2 max-h-[450px] overflow-y-auto pr-2">
                     {versions.map(v => (
                         <div key={v.id} className="p-3 bg-gray-900/50 rounded-lg flex items-center justify-between">
                             <div>
-                                <p className="font-bold text-white">{v.version}</p>
+                                <div className="flex items-center gap-2">
+                                    <p className="font-bold text-white">{v.version}</p>
+                                    {v.is_default && (
+                                        <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-yellow-500/50 text-yellow-200" title="This is the default version for the parser.">
+                                            Default
+                                        </span>
+                                    )}
+                                </div>
                                 <p className="text-xs text-gray-400">{v.description || 'No description'}</p>
                                 <p className="text-xs text-gray-500 mt-1">
                                     Processed by {v.processed_by} on {new Date(v.processed_at).toLocaleDateString()}
                                 </p>
                             </div>
-                            <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2">
                                 <span className={`px-2 py-1 text-xs font-semibold rounded-full ${v.is_active ? 'bg-green-600/50 text-green-300' : 'bg-red-600/50 text-red-300'}`}>
                                     {v.is_active ? 'Active' : 'Inactive'}
                                 </span>
@@ -101,6 +127,14 @@ const VersionManagement = () => {
                                     className="px-3 py-1 text-sm bg-gray-700 hover:bg-gray-600 rounded-md"
                                 >
                                     Toggle
+                                </button>
+                                <button
+                                    onClick={() => handleSetDefault(v.id)}
+                                    disabled={v.is_default || !v.is_active}
+                                    title={!v.is_active ? "Cannot set an inactive version as default" : "Set as default version"}
+                                    className="px-3 py-1 text-sm bg-indigo-700 hover:bg-indigo-600 rounded-md disabled:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    Set Default
                                 </button>
                             </div>
                         </div>

@@ -64,6 +64,14 @@ def toggle_version_status(version_id):
     if not version: return jsonify(error="Version not found"), 404
     return jsonify(schemas.Hl7VersionResponse.model_validate(version).model_dump()), 200
 
+@admin_bp.route('/versions/<int:version_id>/default', methods=['PATCH'])
+@admin_required()
+def set_default_version(version_id):
+    version = crud.set_default_hl7_version(db, version_id)
+    if not version:
+        return jsonify(error="Version not found or could not be set as default"), 404
+    return jsonify(schemas.Hl7VersionResponse.model_validate(version).model_dump()), 200
+
 # --- NEW ENDPOINT ---
 @admin_bp.route('/terminology/status', methods=['GET'])
 @admin_required()

@@ -19,8 +19,12 @@ def get_supported_versions():
     """
     try:
         active_versions = crud.get_active_hl7_versions(db)
-        version_strings = [v.version for v in active_versions]
-        return jsonify(sorted(version_strings, reverse=True))
+        # Return full version objects, sorted by version descending
+        from ..schemas import Hl7VersionResponse
+        response = [Hl7VersionResponse.model_validate(v).model_dump() for v in active_versions]
+        # Sort by version descending (string sort)
+        response = sorted(response, key=lambda x: x['version'], reverse=True)
+        return jsonify(response)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

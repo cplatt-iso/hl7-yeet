@@ -99,9 +99,36 @@ def toggle_hl7_version_status(db: SQLAlchemy, version_id: int) -> models.Hl7Vers
     version = get_hl7_version_by_id(db, version_id)
     if version:
         version.is_active = not version.is_active
+        # If we are deactivating a default version, it can no longer be default.
+        if not version.is_active and version.is_default:
+            version.is_default = False
         db.session.commit()
         db.session.refresh(version)
     return version
+
+def set_default_hl7_version(db: SQLAlchemy, version_id: int) -> models.Hl7Version | None:
+    """Sets a specific version as the default, ensuring it's active and removing default from others."""
+    new_default_version = get_hl7_version_by_id(db, version_id)
+    
+    # Can't set an inactive version as default
+    if not new_default_version or not new_default_version.is_active:
+        return None
+
+    # Find the current default and unset it
+    current_default = db.session.execute(
+        db.select(models.Hl7Version).filter_by(is_default=True)
+    ).scalar_one_or_none()
+
+    if current_default and current_default.id != new_default_version.id:
+        current_default.is_default = False
+
+    # Set the new default
+    new_default_version.is_default = True
+    
+    db.session.commit()
+    db.session.refresh(new_default_version)
+    
+    return new_default_version
 
 def get_distinct_table_ids(db: SQLAlchemy) -> list[str]:
     """Gets a sorted list of unique HL7 table IDs from the database."""
