@@ -1,4 +1,4 @@
-// --- CREATE NEW FILE: src/components/SimulationStepEditor.jsx ---
+// --- START OF FILE src/components/SimulationStepEditor.jsx ---
 import React from 'react';
 import { TrashIcon, ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/outline';
 
@@ -50,6 +50,53 @@ const SimulationStepEditor = ({ step, index, onUpdate, onDelete, onMove, isFirst
                         </select>
                     </div>
                 );
+            case 'DMWL_FIND':
+                return (
+                    <div className="flex flex-col gap-2">
+                        <label className="text-xs text-gray-400">Query Target (DICOM SCP)</label>
+                        <select
+                            name="endpoint_id"
+                            value={step.parameters.endpoint_id || ''}
+                            onChange={handleParamChange}
+                            className="bg-gray-700 p-2 rounded border border-gray-600"
+                        >
+                            <option value="">-- Select an Endpoint --</option>
+                            {endpoints.filter(e => e.endpoint_type === 'DICOM_SCP').map(ep => <option key={ep.id} value={ep.id}>{ep.name}</option>)}
+                        </select>
+                         <p className="text-xs text-gray-500 mt-1">Queries using the Accession Number from the current context.</p>
+                    </div>
+                );
+            case 'MPPS_UPDATE':
+                 return (
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="flex flex-col gap-2">
+                            <label className="text-xs text-gray-400">Destination (DICOM SCP)</label>
+                            <select
+                                name="endpoint_id"
+                                value={step.parameters.endpoint_id || ''}
+                                onChange={handleParamChange}
+                                className="bg-gray-700 p-2 rounded border border-gray-600"
+                            >
+                                <option value="">-- Select --</option>
+                                {endpoints.filter(e => e.endpoint_type === 'DICOM_SCP').map(ep => <option key={ep.id} value={ep.id}>{ep.name}</option>)}
+                            </select>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                            <label className="text-xs text-gray-400">Set Status To</label>
+                             <select
+                                name="mpps_status"
+                                value={step.parameters.mpps_status || ''}
+                                onChange={handleParamChange}
+                                className="bg-gray-700 p-2 rounded border border-gray-600"
+                            >
+                                <option value="">-- Select Status --</option>
+                                <option value="IN PROGRESS">IN PROGRESS (N-CREATE)</option>
+                                <option value="COMPLETED">COMPLETED (N-SET)</option>
+                                <option value="DISCONTINUED">DISCONTINUED (N-SET)</option>
+                            </select>
+                        </div>
+                    </div>
+                );
             case 'GENERATE_DICOM':
                 return (
                     <div className="grid grid-cols-2 gap-4">
@@ -65,6 +112,7 @@ const SimulationStepEditor = ({ step, index, onUpdate, onDelete, onMove, isFirst
                             <label className="text-xs text-gray-400">Study Description</label>
                             <input type="text" name="study_description" value={step.parameters.study_description || ''} onChange={handleParamChange} placeholder="e.g., CT CHEST W/O CONTRAST" className="bg-gray-700 p-2 rounded border border-gray-600" />
                         </div>
+                         <p className="text-xs text-gray-500 col-span-2">Note: Modality and Study Description will be overridden by values from HL7 ORM context if available.</p>
                     </div>
                 );
             case 'SEND_DICOM':
@@ -107,18 +155,26 @@ const SimulationStepEditor = ({ step, index, onUpdate, onDelete, onMove, isFirst
                         <label className="text-xs text-gray-400">Step Type</label>
                         <select value={step.step_type} onChange={handleTypeChange} className="w-full bg-gray-700 p-2 rounded border border-gray-600">
                             <option value="">-- Select Type --</option>
-                            <option value="GENERATE_HL7">Generate HL7 Message</option>
-                            <option value="SEND_MLLP">Send HL7 (MLLP)</option>
-                            <option value="GENERATE_DICOM">Generate DICOM Series</option>
-                            <option value="SEND_DICOM">Send DICOM (C-STORE)</option>
-                            <option value="WAIT">Wait</option>
+                            <optgroup label="HL7">
+                                <option value="GENERATE_HL7">Generate HL7 Message</option>
+                                <option value="SEND_MLLP">Send HL7 (MLLP)</option>
+                            </optgroup>
+                            <optgroup label="DICOM">
+                                <option value="DMWL_FIND">Query Modality Worklist (DMWL)</option>
+                                <option value="MPPS_UPDATE">Update Procedure Step (MPPS)</option>
+                                <option value="GENERATE_DICOM">Generate DICOM Series</option>
+                                <option value="SEND_DICOM">Send DICOM (C-STORE)</option>
+                            </optgroup>
+                            <optgroup label="Utility">
+                                <option value="WAIT">Wait</option>
+                            </optgroup>
                         </select>
                     </div>
                     <button onClick={() => onDelete(index)} className="mt-5 p-2 text-red-400 hover:bg-gray-700 rounded"><TrashIcon className="h-5 w-5"/></button>
                 </div>
                 <div>
                     <h5 className="font-semibold text-sm mb-2 text-gray-300">Parameters</h5>
-                    <div className="p-3 bg-gray-900/50 rounded-md">
+                    <div className="p-3 bg-gray-900/50 rounded-md min-h-[5rem]">
                         {renderParameters()}
                     </div>
                 </div>
@@ -128,4 +184,4 @@ const SimulationStepEditor = ({ step, index, onUpdate, onDelete, onMove, isFirst
 };
 
 export default SimulationStepEditor;
-// --- END OF FILE: src/components/SimulationStepEditor.jsx ---
+// --- END OF FILE src/components/SimulationStepEditor.jsx ---

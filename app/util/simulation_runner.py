@@ -11,7 +11,7 @@ from ..extensions import db, socketio
 from .. import crud, models
 from .faker_parser import process_faker_string
 from .dicom_generator import create_study_files
-from .dicom_actions import perform_c_store
+from .dicom_actions import perform_c_store, perform_dmwl_find, perform_mpps_action
 
 # MLLP Constants
 VT = b'\x0b'
@@ -25,6 +25,8 @@ STEP_HANDLERS = {
     'SEND_MLLP': 'handle_send_mllp',
     'SEND_DICOM': 'handle_send_dicom',
     'WAIT': 'handle_wait',
+    'DMWL_FIND': 'handle_dmwl_find',
+    'MPPS_UPDATE': 'handle_mpps_update',
 }
 
 class SimulationRunner:
@@ -48,7 +50,7 @@ class SimulationRunner:
             db.session.add(event)
             db.session.commit()
             
-            # Emit to client
+            # Emit to client room
             socketio.emit('sim_log_update', {
                 'run_id': self.run_id,
                 'event': {
@@ -59,8 +61,13 @@ class SimulationRunner:
                     'status': status.upper(),
                     'details': details
                 }
-            })
+            }, to=f'run-{self.run_id}')
             logging.info(f"[SimRun-{self.run_id}] Patient {patient_iter}, Step {step_order}, Repeat {repeat_iter}: {status} - {details}")
+            
+    def _emit_status_update(self, status: str):
+        """Emits a general status update for the run."""
+        socketio.emit('sim_run_status_update', {'run_id': self.run_id, 'status': status}, to=f'run-{self.run_id}')
+        logging.info(f"Emitted status update for Run {self.run_id}: {status}")
 
     def _get_or_create_patient(self, patient_iter: int):
         """Ensures a patient exists in the context for the current iteration."""
@@ -87,11 +94,11 @@ class SimulationRunner:
                 run.status = 'RUNNING'
                 run.started_at = datetime.utcnow()
                 db.session.commit()
+                self._emit_status_update(run.status)
                 
                 patient_count = run.patient_count or 1
                 self._log_event(0, 0, 0, 'INFO', f"Simulation run starting for template '{run.template.name}' with {patient_count} patient iteration(s).")
             
-            # --- THE REST OF THE TRY BLOCK IS THE SAME ---
             for i in range(1, patient_count + 1):
                 self.run_context = {} 
                 self._log_event(0, i, 0, 'INFO', f"--- Starting Iteration {i} of {patient_count} ---")
@@ -115,26 +122,25 @@ class SimulationRunner:
                             self._log_event(step.step_order, i, j, 'INFO', f"Delaying for {delay_ms}ms...")
                             time.sleep(delay_ms / 1000.0)
 
-            # This code will only be reached if the try block completes without error
             with self.app_context():
                 run = crud.get_simulation_run_by_id(db, self.run_id) # Re-fetch to be safe
                 if run:
                     run.status = 'COMPLETED'
                     db.session.commit()
+                    self._emit_status_update(run.status)
             self._log_event(999, patient_count, 1, 'SUCCESS', "Simulation run completed successfully.")
 
         except Exception as e:
             logging.error(f"SimulationRun-{self.run_id} failed: {e}", exc_info=True)
-            # THIS IS THE CRITICAL PART. UPDATE THE STATUS *INSIDE* THE EXCEPT BLOCK
             with self.app_context():
                 run = crud.get_simulation_run_by_id(db, self.run_id)
                 if run:
                     run.status = 'ERROR'
                     db.session.commit()
+                    self._emit_status_update(run.status)
             self._log_event(999, 0, 0, 'FAILURE', f"Critical error: {e}")
         
         finally:
-            # --- THE FINAL, GUARANTEED UPDATE ---
             with self.app_context():
                 run = crud.get_simulation_run_by_id(db, self.run_id)
                 if run:
@@ -160,36 +166,63 @@ class SimulationRunner:
         generated_message = process_faker_string(gen_template.content, self.run_context)
         self.run_context['last_hl7_message'] = generated_message
         
-        # --- THIS IS THE NEW LOGGING LINE ---
-        logging.info(f"--- Generated HL7 for Context Extraction ---\n{generated_message}\n--------------------------------------------")
-
-        # --- Context Extraction Example (Optional) ---
+        accession_extracted = False
         try:
-            # hl7apy expects \r, not \n. Let's be sure.
-            # Also, some parsers are picky about trailing newlines.
             clean_message = generated_message.replace('\n', '\r').strip()
             msg = parse_message(clean_message)
 
-            # Try to extract useful context, but don't fail if it doesn't work
-            try:
-                # hl7apy has dynamic attributes that pylance can't analyze
-                if msg.msh.msh_9.message_code.value == 'ORM':  # type: ignore
-                    # Use the correct method to get ORC segment - hl7apy uses callable syntax
-                    orc_segment = msg('ORC')  # type: ignore
-                    if orc_segment and orc_segment.orc_3.placer_group_number:  # type: ignore
-                        accession = orc_segment.orc_3.placer_group_number.value  # type: ignore
-                        if accession:
-                            self.run_context.setdefault('order', {})['accession_number'] = accession
-                            self._log_event(step.step_order, patient_iter, repeat_iter, 'INFO', f"Extracted Accession Number '{accession}' into context.")
-            except Exception:
-                # Context extraction failed, but that's OK - just continue without it
-                self._log_event(step.step_order, patient_iter, repeat_iter, 'INFO', "Context extraction skipped - message structure not as expected.")
+            msh = getattr(msg, 'MSH', None)
+            is_orm = msh and hasattr(msh, 'msh_9') and msh.msh_9.message_code.value == 'ORM'
 
+            if is_orm:
+                self.run_context.setdefault('order', {})
+                
+                # --- THIS IS THE FIX: Access segments through the ORDER group ---
+                order_groups = getattr(msg, 'ORM_O01_ORDER', [])
+                if not order_groups:
+                    self._log_event(step.step_order, patient_iter, repeat_iter, 'WARN', "Message is ORM but has no ORDER group.")
+                else:
+                    first_order_group = order_groups[0]
+                    orc_segment = getattr(first_order_group, 'ORC', None)
+                    obr_segment = getattr(first_order_group, 'OBR', None)
+
+                    if orc_segment:
+                        try:
+                            acc = str(orc_segment.orc_3.entity_identifier.value)
+                            if acc and acc.strip():
+                                self.run_context['order']['accession_number'] = acc
+                                self._log_event(step.step_order, patient_iter, repeat_iter, 'INFO', f"Extracted Accession: '{acc}'")
+                                accession_extracted = True
+                        except (AttributeError, TypeError):
+                            self._log_event(step.step_order, patient_iter, repeat_iter, 'WARN', "Could not extract Accession from ORC-3.")
+                    else:
+                        self._log_event(step.step_order, patient_iter, repeat_iter, 'WARN', "ORDER group found, but it has no ORC segment.")
+
+                    if obr_segment:
+                        try:
+                            modality = str(obr_segment.obr_24.value)
+                            if modality and modality.strip():
+                                self.run_context['order']['modality'] = modality
+                                self._log_event(step.step_order, patient_iter, repeat_iter, 'INFO', f"Extracted Modality: '{modality}'")
+                        except (AttributeError, TypeError):
+                            self._log_event(step.step_order, patient_iter, repeat_iter, 'INFO', "Modality (OBR-24) not found.")
+
+                        try:
+                            desc = str(obr_segment.obr_4.text.value)
+                            if desc and desc.strip():
+                                self.run_context['order']['study_description'] = desc
+                                self._log_event(step.step_order, patient_iter, repeat_iter, 'INFO', f"Extracted Study Desc: '{desc}'")
+                        except (AttributeError, TypeError):
+                            self._log_event(step.step_order, patient_iter, repeat_iter, 'INFO', "Study Description (OBR-4) not found.")
+        
         except Exception as e:
-            # Even if parsing fails completely, we should continue - context extraction is optional
-            self._log_event(step.step_order, patient_iter, repeat_iter, 'INFO', f"HL7 parsing for context extraction failed: {e}")
+            self._log_event(step.step_order, patient_iter, repeat_iter, 'WARN', f"HL7 parsing failed: {e}")
 
-        self._log_event(step.step_order, patient_iter, repeat_iter, 'SUCCESS', f"Generated {gen_template.message_type} message.")
+        if accession_extracted:
+            self._log_event(step.step_order, patient_iter, repeat_iter, 'SUCCESS', f"Generated {gen_template.message_type} message and extracted context.")
+        else:
+            self._log_event(step.step_order, patient_iter, repeat_iter, 'SUCCESS', f"Generated {gen_template.message_type}, but FAILED to extract a valid Accession Number.")
+
         return True
 
 
@@ -233,15 +266,16 @@ class SimulationRunner:
 
         params = step.parameters
         output_dir = f"/data/sim_runs/{self.run_id}/patient_{patient_iter}"
+        order_context = self.run_context.get('order', {})
 
         overrides = {
             "PatientName": f"{self.run_context['patient']['last_name']}^{self.run_context['patient']['first_name']}",
             "PatientID": self.run_context['patient']['mrn'],
             "PatientBirthDate": self.run_context['patient']['dob'],
             "PatientSex": self.run_context['patient']['sex'],
-            "AccessionNumber": self.run_context.get('order', {}).get('accession_number', f'ACC{self.faker.random_number(digits=8)}'),
-            "Modality": params.get('modality', 'CT'),
-            "StudyDescription": params.get('study_description', 'Generated Study'),
+            "AccessionNumber": order_context.get('accession_number', f'ACC{self.faker.random_number(digits=8)}'),
+            "Modality": order_context.get('modality') or params.get('modality', 'CT'),
+            "StudyDescription": order_context.get('study_description') or params.get('study_description', 'Generated Study'),
         }
 
         file_paths = create_study_files(
@@ -252,7 +286,7 @@ class SimulationRunner:
         )
         
         self.run_context['last_dicom_files'] = file_paths
-        self._log_event(step.step_order, patient_iter, repeat_iter, 'SUCCESS', f"Generated {len(file_paths)} DICOM files.")
+        self._log_event(step.step_order, patient_iter, repeat_iter, 'SUCCESS', f"Generated {len(file_paths)} DICOM files using modality '{overrides['Modality']}'.")
         return True
         
     def handle_send_dicom(self, step: models.SimulationStep, patient_iter: int, repeat_iter: int) -> bool:
@@ -292,6 +326,64 @@ class SimulationRunner:
         self._log_event(step.step_order, patient_iter, repeat_iter, 'SUCCESS', "Wait completed.")
         return True
 
+    def handle_dmwl_find(self, step: models.SimulationStep, patient_iter: int, repeat_iter: int) -> bool:
+        self._log_event(step.step_order, patient_iter, repeat_iter, 'INFO', "Executing step: DMWL_FIND")
+        endpoint_id = step.parameters.get('endpoint_id')
+        accession = self.run_context.get('order', {}).get('accession_number')
+        if not endpoint_id or not accession:
+            self._log_event(step.step_order, patient_iter, repeat_iter, 'FAILURE', "DMWL_FIND requires an endpoint and an accession number in context.")
+            return False
+            
+        with self.app_context():
+            endpoint = crud.get_endpoint_by_id(db, endpoint_id)
+            if not endpoint or endpoint.endpoint_type != 'DICOM_SCP':
+                raise ValueError(f"Endpoint ID {endpoint_id} is not a valid DICOM_SCP endpoint.")
+
+        try:
+            query_params = {"AccessionNumber": accession, "ScheduledProcedureStepStatus": ""}
+            results = perform_dmwl_find(endpoint.to_dict(), query_params)
+            if len(results) == 1:
+                self.run_context['worklist_item'] = results[0]
+                self._log_event(step.step_order, patient_iter, repeat_iter, 'SUCCESS', f"Found 1 worklist item for accession '{accession}'.")
+                return True
+            else:
+                details = f"Expected 1 worklist item for accession '{accession}', but found {len(results)}."
+                self._log_event(step.step_order, patient_iter, repeat_iter, 'FAILURE', details)
+                return False
+        except Exception as e:
+            self._log_event(step.step_order, patient_iter, repeat_iter, 'FAILURE', f"DMWL C-FIND query failed: {e}")
+            return False
+
+    def handle_mpps_update(self, step: models.SimulationStep, patient_iter: int, repeat_iter: int) -> bool:
+        self._log_event(step.step_order, patient_iter, repeat_iter, 'INFO', "Executing step: MPPS_UPDATE")
+        endpoint_id = step.parameters.get('endpoint_id')
+        mpps_status = step.parameters.get('mpps_status')
+        worklist_item = self.run_context.get('worklist_item')
+
+        if not endpoint_id or not mpps_status or not worklist_item:
+            self._log_event(step.step_order, patient_iter, repeat_iter, 'FAILURE', "MPPS_UPDATE requires an endpoint, status, and a worklist item in context.")
+            return False
+
+        with self.app_context():
+            endpoint = crud.get_endpoint_by_id(db, endpoint_id)
+            if not endpoint or endpoint.endpoint_type != 'DICOM_SCP':
+                raise ValueError(f"Endpoint ID {endpoint_id} is not a valid DICOM_SCP endpoint.")
+        
+        mpps_uid_from_context = self.run_context.get('mpps_sop_instance_uid') if mpps_status != "IN PROGRESS" else None
+
+        try:
+            result = perform_mpps_action(endpoint.to_dict(), worklist_item, mpps_status, mpps_uid_from_context)
+            if result['status'] == 'SUCCESS':
+                if mpps_status == 'IN PROGRESS':
+                    self.run_context['mpps_sop_instance_uid'] = result['mpps_uid']
+                self._log_event(step.step_order, patient_iter, repeat_iter, 'SUCCESS', f"MPPS {mpps_status} action successful. {result['details']}")
+                return True
+            else:
+                self._log_event(step.step_order, patient_iter, repeat_iter, 'FAILURE', f"MPPS {mpps_status} action failed. {result['details']}")
+                return False
+        except Exception as e:
+            self._log_event(step.step_order, patient_iter, repeat_iter, 'FAILURE', f"MPPS action threw an exception: {e}")
+            return False
 
 def run_simulation_task(run_id, app_context):
     """The entry point for the background task."""
@@ -299,5 +391,4 @@ def run_simulation_task(run_id, app_context):
     runner = SimulationRunner(run_id, app_context)
     runner.execute()
     logging.info(f"Background simulation task for Run ID: {run_id} has finished.")
-
 # --- END OF FILE app/util/simulation_runner.py ---

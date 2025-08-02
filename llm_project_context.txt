@@ -1,0 +1,3141 @@
+
+You are an expert in HL7, DICOM, Python, and modern web development (Flask/React). You are being provided with the full context of the HL7 Yeeter project. This project is a hybrid backend/frontend system for simulating, generating, and transmitting HL7 and DICOM messages, with a focus on healthcare interoperability and workflow automation. The backend is primarily Python (Flask, SQLAlchemy, Pydantic), and the frontend is a Vite/React app. The system supports simulation runs, patient context generation, HL7 message generation, MLLP transmission, DICOM file creation and C-STORE, and event logging. Please use the following file list and critical code to understand the architecture, data models, and main workflows.
+
+
+--- PROJECT FILE LIST ---
+Dockerfile
+README.md
+app/__init__.py
+app/commands.py
+app/crud.py
+app/database.py
+app/extensions.py
+app/models.py
+app/routes/admin_routes.py
+app/routes/auth_routes.py
+app/routes/endpoint_routes.py
+app/routes/listener_routes.py
+app/routes/mllp_routes.py
+app/routes/simulator_routes.py
+app/routes/util_routes.py
+app/schemas.py
+app/util/__init__.py
+app/util/definition_processor.py
+app/util/dicom_actions.py
+app/util/dicom_generator.py
+app/util/faker_parser.py
+app/util/hl7_parser.py
+app/util/mllp_listener.py
+app/util/simulation_runner.py
+build_llm_context.py
+eslint.config.js
+filelist.txt
+hl7_defs_scraper.py
+hl7_field_defs.json
+index.html
+package-lock.json
+package.json
+public/vite.svg
+requirements.txt
+run.py
+src/App.css
+src/App.jsx
+src/api/admin.js
+src/api/apiUtils.js
+src/api/auth.js
+src/api/endpoints.js
+src/api/fakerTemplates.js
+src/api/listener.js
+src/api/mllp.js
+src/api/simulator.js
+src/api/templates.js
+src/assets/react.svg
+src/components/AccordionItem.jsx
+src/components/AdminPanel.jsx
+src/components/AnalysisLoader.jsx
+src/components/AnalysisPanel.jsx
+src/components/AuthTooltip.jsx
+src/components/ConnectionInputs.jsx
+src/components/DiffModal.jsx
+src/components/EndpointManager.jsx
+src/components/FieldRow.jsx
+src/components/GeneratorTemplateManager.jsx
+src/components/HL7Parser.jsx
+src/components/InfoCallout.jsx
+src/components/ListenerOutput.jsx
+src/components/ListenerPanel.jsx
+src/components/LogPanel.jsx
+src/components/Login.jsx
+src/components/MessageDetailModal.jsx
+src/components/MessageTemplates.jsx
+src/components/ParserOutput.jsx
+src/components/Register.jsx
+src/components/ResponseDisplay.jsx
+src/components/SaveTemplateModal.jsx
+src/components/SendButton.jsx
+src/components/SettingsPanel.jsx
+src/components/SimulationRunDashboard.jsx
+src/components/SimulationRunLog.jsx
+src/components/SimulationStepEditor.jsx
+src/components/SimulationWorkflowManager.jsx
+src/components/Simulator.jsx
+src/components/TableDetailView.jsx
+src/components/TableDictionaryModal.jsx
+src/components/TableListView.jsx
+src/components/TerminologyBrowser.jsx
+src/components/TerminologyManagement.jsx
+src/components/Tooltip.jsx
+src/components/UserManagement.jsx
+src/components/UserStatus.jsx
+src/components/VersionManagement.jsx
+src/components/YeetLoader.jsx
+src/context/AuthContext.jsx
+src/index.css
+src/main.jsx
+src/utils/ackParser.js
+src/utils/hl7.js
+src/utils/messageGenerator.js
+templates/index.html
+vite.config.js
+
+--- CRITICAL FILES CONTENT ---
+
+--- START OF FILE app/models.py ---
+
+# --- START OF FILE app/models.py ---
+from datetime import datetime
+from sqlalchemy import Integer, String, Text, DateTime, ForeignKey, func, Boolean, JSON
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from typing import List, Any, Optional 
+
+from .extensions import db
+
+class User(db.Model):
+    __tablename__ = "users"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    username: Mapped[str] = mapped_column(String(80), unique=True, nullable=False)
+    email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
+    password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
+    google_id: Mapped[Optional[str]] = mapped_column(String(255), unique=True, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    is_admin: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    templates: Mapped[List["UserTemplate"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    token_usages: Mapped[List["TokenUsage"]] = relationship("TokenUsage", back_populates="user", cascade="all, delete-orphan")
+    
+    # --- RENAMED RELATIONSHIP ---
+    endpoints: Mapped[List["Endpoint"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    
+    hl7_versions: Mapped[List["Hl7Version"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+
+    # --- NEW RELATIONSHIPS FOR SIMULATOR ---
+    generator_templates: Mapped[List["GeneratorTemplate"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    simulation_templates: Mapped[List["SimulationTemplate"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    simulation_runs: Mapped[List["SimulationRun"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+
+    def __init__(self, username: str, email: str, password_hash: str, google_id: Optional[str] = None, is_admin: bool = False, **kw: Any):
+        super().__init__(**kw)
+        self.username = username
+        self.email = email
+        self.password_hash = password_hash
+        self.google_id = google_id
+        self.is_admin = is_admin
+    def __repr__(self):
+        return f'<User {self.username} (Admin: {self.is_admin})>'
+
+class UserTemplate(db.Model):
+    __tablename__ = "user_templates"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    name: Mapped[str] = mapped_column(String(100), nullable=False)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    user: Mapped["User"] = relationship("User", back_populates="templates")
+    def __init__(self, user_id: int, name: str, content: str, **kw: Any):
+        super().__init__(**kw)
+        self.user_id = user_id
+        self.name = name
+        self.content = content
+    def __repr__(self):
+        return f'<UserTemplate {self.name}>'
+
+class TokenUsage(db.Model):
+    __tablename__ = "token_usage"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    model: Mapped[str] = mapped_column(String(50), nullable=False)
+    input_tokens: Mapped[int] = mapped_column(Integer, default=0)
+    output_tokens: Mapped[int] = mapped_column(Integer, default=0)
+    total_tokens: Mapped[int] = mapped_column(Integer, default=0)
+    timestamp: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    user: Mapped["User"] = relationship("User", back_populates="token_usages")
+    def __init__(self, user_id: int, model: str, input_tokens: int, output_tokens: int, total_tokens: int, **kw: Any):
+        super().__init__(**kw)
+        self.user_id = user_id
+        self.model = model
+        self.input_tokens = input_tokens
+        self.output_tokens = output_tokens
+        self.total_tokens = total_tokens
+    def __repr__(self):
+        return f'<TokenUsage user_id={self.user_id} model={self.model} tokens={self.total_tokens}>'
+
+# --- RENAMED FROM Hl7Destination ---
+class Endpoint(db.Model):
+    __tablename__ = 'endpoints'
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id', ondelete="CASCADE"), nullable=False)
+    name: Mapped[str] = mapped_column(String(100), nullable=False)
+    
+    # --- NEW FIELDS ---
+    endpoint_type: Mapped[str] = mapped_column(String(20), nullable=False, default='MLLP') # 'MLLP', 'DICOM_SCP'
+    hostname: Mapped[str] = mapped_column(String(255), nullable=False)
+    port: Mapped[int] = mapped_column(Integer, nullable=False)
+    ae_title: Mapped[Optional[str]] = mapped_column(String(64), nullable=True) # For DICOM
+    aet_title: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)  # Our AE Title when calling
+
+    user: Mapped["User"] = relationship("User", back_populates="endpoints")
+
+    def __init__(self, user_id: int, name: str, endpoint_type: str, hostname: str, port: int, ae_title: Optional[str] = None, aet_title: Optional[str] = None, **kw: Any):
+        super().__init__(**kw)
+        self.user_id = user_id
+        self.name = name
+        self.endpoint_type = endpoint_type
+        self.hostname = hostname
+        self.port = port
+        self.ae_title = ae_title
+        self.aet_title = aet_title
+
+    def to_dict(self):
+        return {'id': self.id, 'user_id': self.user_id, 'name': self.name, 'endpoint_type': self.endpoint_type, 'hostname': self.hostname, 'port': self.port, 'ae_title': self.ae_title, 'aet_title': self.aet_title}
+
+    def __repr__(self):
+        return f'<Endpoint {self.name} ({self.endpoint_type}@{self.hostname}:{self.port})>'
+
+
+class Hl7TableDefinition(db.Model):
+    __tablename__ = 'hl7_table_definitions'
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    table_id: Mapped[str] = mapped_column(String(10), index=True, nullable=False)
+    value: Mapped[str] = mapped_column(String(100), nullable=False)
+    description: Mapped[str] = mapped_column(String(255), nullable=False)
+    def __init__(self, table_id: str, value: str, description: str, **kw: Any):
+        super().__init__(**kw)
+        self.table_id = table_id
+        self.value = value
+        self.description = description
+    def __repr__(self):
+        return f'<Hl7TableDefinition {self.table_id}:{self.value}>'
+
+class Hl7Version(db.Model):
+    __tablename__ = 'hl7_versions'
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    version: Mapped[str] = mapped_column(String(20), unique=True, nullable=False)
+    description: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    is_default: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False) # <-- ADD THIS
+    processed_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    user: Mapped["User"] = relationship("User", back_populates="hl7_versions")
+    def __init__(self, version: str, description: Optional[str], user_id: int, is_active: bool = True, is_default: bool = False, **kw: Any): # <-- MODIFY
+        super().__init__(**kw)
+        self.version = version
+        self.description = description
+        self.user_id = user_id
+        self.is_active = is_active
+        self.is_default = is_default # <-- ADD THIS
+    def to_dict(self):
+        return {'id': self.id, 'version': self.version, 'description': self.description, 'is_active': self.is_active, 'is_default': self.is_default, 'processed_at': self.processed_at.isoformat(), 'processed_by': self.user.username if self.user else 'Unknown'} # <-- MODIFY
+    def __repr__(self):
+        return f'<Hl7Version {self.version} (Active: {self.is_active}, Default: {self.is_default})>' 
+
+class SystemMetadata(db.Model):
+    __tablename__ = 'system_metadata'
+    key: Mapped[str] = mapped_column(String(50), primary_key=True)
+    value: Mapped[str] = mapped_column(String(255), nullable=False)
+
+    def __init__(self, key: str, value: str, **kw: Any):
+        super().__init__(**kw)
+        self.key = key
+        self.value = value
+
+class ReceivedMessage(db.Model):
+    __tablename__ = 'received_messages'
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    timestamp: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), index=True)
+    raw_message: Mapped[str] = mapped_column(Text, nullable=False)
+    message_type: Mapped[str] = mapped_column(String(50), nullable=True, index=True)
+    control_id: Mapped[str] = mapped_column(String(100), nullable=True, index=True)
+    sending_app: Mapped[str] = mapped_column(String(100), nullable=True, index=True)
+    
+    def __init__(self, raw_message: str, message_type: str, control_id: str, sending_app: str, **kw: Any):
+        super().__init__(**kw)
+        self.raw_message = raw_message
+        self.message_type = message_type
+        self.control_id = control_id
+        self.sending_app = sending_app
+
+    def to_summary_dict(self):
+        return {
+            'id': self.id,
+            'timestamp': self.timestamp.isoformat(),
+            'message_type': self.message_type,
+            'control_id': self.control_id,
+            'sending_app': self.sending_app,
+        }
+
+# --- NEW SIMULATOR MODELS ---
+
+class GeneratorTemplate(db.Model):
+    __tablename__ = "generator_templates"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    name: Mapped[str] = mapped_column(String(100), nullable=False)
+    message_type: Mapped[str] = mapped_column(String(50), nullable=False)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    user: Mapped["User"] = relationship("User", back_populates="generator_templates")
+
+class SimulationTemplate(db.Model):
+    __tablename__ = "simulation_templates"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    name: Mapped[str] = mapped_column(String(100), nullable=False)
+    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    user: Mapped["User"] = relationship("User", back_populates="simulation_templates")
+    steps: Mapped[List["SimulationStep"]] = relationship(back_populates="template", cascade="all, delete-orphan", order_by="SimulationStep.step_order")
+
+class SimulationStep(db.Model):
+    __tablename__ = "simulation_steps"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    template_id: Mapped[int] = mapped_column(Integer, ForeignKey("simulation_templates.id"), nullable=False)
+    step_order: Mapped[int] = mapped_column(Integer, nullable=False)
+    step_type: Mapped[str] = mapped_column(String(50), nullable=False)
+    parameters: Mapped[dict] = mapped_column(JSON, nullable=False)
+    template: Mapped["SimulationTemplate"] = relationship("SimulationTemplate", back_populates="steps")
+
+class SimulationRun(db.Model):
+    __tablename__ = "simulation_runs"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    template_id: Mapped[int] = mapped_column(Integer, ForeignKey("simulation_templates.id"), nullable=False)
+    patient_count: Mapped[int] = mapped_column(Integer, nullable=False, default=1, server_default="1")
+    template: Mapped["SimulationTemplate"] = relationship("SimulationTemplate")
+    status: Mapped[str] = mapped_column(String(20), default='PENDING', nullable=False)
+    started_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    user: Mapped["User"] = relationship("User", back_populates="simulation_runs")
+    events: Mapped[List["SimulationRunEvent"]] = relationship(back_populates="run", cascade="all, delete-orphan", order_by="SimulationRunEvent.timestamp")
+
+class SimulationRunEvent(db.Model):
+    __tablename__ = "simulation_run_events"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    run_id: Mapped[int] = mapped_column(Integer, ForeignKey("simulation_runs.id"), nullable=False)
+    timestamp: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    step_order: Mapped[int] = mapped_column(Integer, nullable=False)
+    iteration: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    status: Mapped[str] = mapped_column(String(20), nullable=False) # 'SUCCESS', 'FAILURE', 'INFO'
+    details: Mapped[str] = mapped_column(Text, nullable=False)
+    run: Mapped["SimulationRun"] = relationship("SimulationRun", back_populates="events")
+
+    def __init__(self, run_id: int, step_order: int, iteration: int, status: str, details: str, **kw: Any):
+        super().__init__(**kw)
+        self.run_id = run_id
+        self.step_order = step_order
+        self.iteration = iteration
+        self.status = status
+        self.details = details
+
+# --- END OF FILE app/models.py ---
+
+--- END OF FILE app/models.py ---
+
+
+--- START OF FILE app/schemas.py ---
+
+# --- START OF FILE app/schemas.py ---
+from pydantic import BaseModel, Field, EmailStr, computed_field
+from typing import List, Optional, Dict, Any
+from datetime import datetime
+
+# --- Pydantic Config ---
+class AppBaseModel(BaseModel):
+    class Config:
+        from_attributes = True
+
+# --- Auth Schemas (unchanged) ---
+class UserCreate(BaseModel):
+    username: str = Field(..., min_length=3, max_length=50)
+    email: EmailStr
+    password: str = Field(..., min_length=8)
+
+class UserLogin(BaseModel):
+    username: str
+    password: str
+
+class GoogleToken(BaseModel):
+    token: str
+
+class TokenResponse(BaseModel):
+    access_token: str
+    username: str
+    is_admin: bool
+
+class UserSchema(AppBaseModel):
+    id: int
+    username: str
+    email: EmailStr
+    is_admin: bool
+    created_at: datetime
+
+# --- Template Schemas (unchanged) ---
+class TemplateBase(AppBaseModel):
+    name: str = Field(..., min_length=1, max_length=100)
+    content: str = Field(..., min_length=1)
+
+class TemplateCreate(TemplateBase):
+    pass
+
+class Template(TemplateBase):
+    id: int
+
+# --- API Data Schemas (unchanged) ---
+class MllpSendRequest(BaseModel):
+    host: str
+    port: int
+    message: str
+
+class MllpPingRequest(BaseModel):
+    host: str
+    port: int
+
+class ParseRequest(BaseModel):
+    message: str
+    version: str
+
+class AnalyzeRequest(BaseModel):
+    message: str
+    model: str
+    version: str
+
+# --- Listener Schemas (unchanged) ---
+class ListenerStartRequest(BaseModel):
+    port: int
+
+# --- Admin Schemas ---
+class UserInVersionResponse(AppBaseModel):
+    username: str
+
+class Hl7VersionResponse(AppBaseModel):
+    id: int
+    version: str
+    description: Optional[str] = None
+    is_active: bool
+    is_default: bool # <-- ADD THIS
+    processed_at: datetime
+    user: UserInVersionResponse = Field(exclude=True) 
+
+    @computed_field
+    @property
+    def processed_by(self) -> str:
+        return self.user.username if self.user else 'Unknown'
+
+# --- Terminology Schemas (unchanged) ---
+class DefinitionBase(AppBaseModel):
+    table_id: str = Field(..., max_length=10)
+    value: str = Field(..., max_length=100)
+    description: str = Field(..., max_length=255)
+
+class DefinitionCreate(DefinitionBase):
+    pass
+
+class DefinitionUpdate(BaseModel):
+    value: Optional[str] = Field(None, max_length=100)
+    description: Optional[str] = Field(None, max_length=255)
+
+class Hl7TableDefinitionResponse(DefinitionBase):
+    id: int
+    
+# --- NEW/UPDATED SCHEMAS FOR SIMULATOR ---
+
+# --- Endpoint (formerly Hl7Destination) ---
+class EndpointBase(AppBaseModel):
+    name: str = Field(..., min_length=1, max_length=100)
+    endpoint_type: str = Field(..., pattern=r'^(MLLP|DICOM_SCP)$')
+    hostname: str
+    port: int
+    ae_title: Optional[str] = Field(None, max_length=64)
+    aet_title: Optional[str] = Field(None, max_length=64)
+
+class EndpointCreate(EndpointBase):
+    pass
+
+class EndpointUpdate(BaseModel):
+    name: Optional[str] = Field(None, min_length=1, max_length=100)
+    endpoint_type: Optional[str] = Field(None, pattern=r'^(MLLP|DICOM_SCP)$')
+    hostname: Optional[str] = None
+    port: Optional[int] = None
+    ae_title: Optional[str] = Field(None, max_length=64)
+    aet_title: Optional[str] = Field(None, max_length=64)
+
+class EndpointResponse(EndpointBase):
+    id: int
+    user_id: int
+
+# --- Generator Template ---
+class GeneratorTemplateBase(AppBaseModel):
+    name: str = Field(..., min_length=1, max_length=100)
+    message_type: str = Field(..., max_length=50)
+    content: str
+
+class GeneratorTemplateCreate(GeneratorTemplateBase):
+    pass
+
+class GeneratorTemplateResponse(GeneratorTemplateBase):
+    id: int
+    user_id: int
+    created_at: datetime
+
+# --- Simulation Step ---
+class SimulationStepBase(AppBaseModel):
+    step_order: int
+    step_type: str
+    parameters: Dict[str, Any]
+
+class SimulationStepCreate(SimulationStepBase):
+    pass
+
+class SimulationStepResponse(SimulationStepBase):
+    id: int
+
+# --- Simulation Template ---
+class SimulationTemplateBase(AppBaseModel):
+    name: str = Field(..., min_length=1, max_length=100)
+    description: Optional[str] = None
+
+class SimulationTemplateCreate(SimulationTemplateBase):
+    steps: List[SimulationStepCreate]
+
+class SimulationTemplateResponse(SimulationTemplateBase):
+    id: int
+    user_id: int
+    created_at: datetime
+    steps: List[SimulationStepResponse]
+
+class SimulationTemplateUpdate(BaseModel):
+    name: Optional[str] = Field(None, min_length=1, max_length=100)
+    description: Optional[str] = None
+    steps: Optional[List[SimulationStepCreate]] = None
+
+# --- Simulation Run ---
+class SimulationRunCreate(BaseModel):
+    template_id: int
+    # --- ADD THIS FIELD ---
+    patient_count: int = Field(1, gt=0) # Default to 1, must be greater than 0
+
+class SimulationRunEventResponse(AppBaseModel):
+    id: int
+    timestamp: datetime
+    step_order: int
+    iteration: int
+    status: str
+    details: str
+
+class SimulationRunResponse(AppBaseModel):
+    id: int
+    user_id: int
+    template_id: int
+    # --- ADD THIS FIELD ---
+    patient_count: int
+    status: str
+    started_at: Optional[datetime] = None
+    completed_at: Optional[datetime] = None
+    events: List[SimulationRunEventResponse]
+
+
+# --- END OF FILE app/schemas.py ---
+
+--- END OF FILE app/schemas.py ---
+
+
+--- START OF FILE app/crud.py ---
+
+# --- START OF FILE app/crud.py ---
+
+from sqlalchemy.orm import Session, joinedload, contains_eager
+from sqlalchemy import func, select, or_, delete
+from flask_sqlalchemy import SQLAlchemy
+import logging 
+
+from . import models, schemas
+from .extensions import bcrypt
+
+# --- User CRUD (unchanged) ---
+
+def get_user_by_id(db: SQLAlchemy, user_id: int) -> models.User | None:
+    return db.session.get(models.User, user_id)
+
+def get_user_by_username(db: SQLAlchemy, username: str) -> models.User | None:
+    return db.session.execute(db.select(models.User).filter(func.lower(models.User.username) == func.lower(username))).scalar_one_or_none()
+
+def get_user_by_email(db: SQLAlchemy, email: str) -> models.User | None:
+    return db.session.execute(db.select(models.User).filter(func.lower(models.User.email) == func.lower(email))).scalar_one_or_none()
+
+def get_user_by_google_id(db: SQLAlchemy, google_id: str) -> models.User | None:
+    return db.session.execute(db.select(models.User).filter(models.User.google_id == google_id)).scalar_one_or_none()
+
+def create_user(db: SQLAlchemy, user: schemas.UserCreate) -> models.User:
+    user_count = db.session.execute(select(func.count(models.User.id))).scalar()
+    is_first_user = (user_count == 0)
+    hashed_password = bcrypt.generate_password_hash(user.password).decode('utf-8')
+    db_user = models.User(username=user.username, email=user.email, password_hash=hashed_password, is_admin=is_first_user)
+    db.session.add(db_user)
+    db.session.commit()
+    db.session.refresh(db_user)
+    return db_user
+
+def create_google_user(db: SQLAlchemy, email: str, username: str, google_id: str) -> models.User:
+    user_count = db.session.execute(select(func.count(models.User.id))).scalar()
+    is_first_user = (user_count == 0)
+    placeholder_hash = bcrypt.generate_password_hash("!@#$Unusabl3P@ssw0rdForG00gl3Log!n#@$!").decode('utf-8')
+    db_user = models.User(username=username, email=email, password_hash=placeholder_hash, google_id=google_id, is_admin=is_first_user)
+    db.session.add(db_user)
+    db.session.commit()
+    db.session.refresh(db_user)
+    return db_user
+
+# --- Template CRUD (unchanged) ---
+
+def get_templates_for_user(db: SQLAlchemy, user_id: int) -> list[models.UserTemplate]:
+    return list(db.session.execute(db.select(models.UserTemplate).filter_by(user_id=user_id).order_by(models.UserTemplate.name)).scalars())
+
+def create_template(db: SQLAlchemy, user_id: int, template: schemas.TemplateCreate) -> models.UserTemplate:
+    db_template = models.UserTemplate(user_id=user_id, name=template.name, content=template.content)
+    db.session.add(db_template)
+    db.session.commit()
+    db.session.refresh(db_template)
+    return db_template
+
+def delete_template(db: SQLAlchemy, user_id: int, template_id: int) -> models.UserTemplate | None:
+    db_template = db.session.execute(db.select(models.UserTemplate).filter_by(id=template_id, user_id=user_id)).scalar_one_or_none()
+    if db_template:
+        db.session.delete(db_template)
+        db.session.commit()
+    return db_template
+
+# --- Token Usage CRUD (unchanged) ---
+
+def record_token_usage(db: SQLAlchemy, user_id: int, model_name: str, usage_data: dict) -> models.TokenUsage:
+    db_usage = models.TokenUsage(user_id=user_id, model=model_name, input_tokens=usage_data.get('input_tokens', 0), output_tokens=usage_data.get('output_tokens', 0), total_tokens=usage_data.get('total_tokens', 0))
+    db.session.add(db_usage)
+    db.session.commit()
+    db.session.refresh(db_usage)
+    return db_usage
+
+def get_total_usage_for_user(db: SQLAlchemy, user_id: int) -> int:
+    total = db.session.scalar(db.select(func.sum(models.TokenUsage.total_tokens)).filter_by(user_id=user_id))
+    return total or 0
+
+def get_usage_by_model_for_user(db: SQLAlchemy, user_id: int) -> dict:
+    results = db.session.execute(db.select(models.TokenUsage.model, func.sum(models.TokenUsage.total_tokens)).filter_by(user_id=user_id).group_by(models.TokenUsage.model)).all()
+    return {model: total for model, total in results}
+
+# --- Hl7Version CRUD (unchanged) ---
+
+def get_all_hl7_versions(db: SQLAlchemy) -> list[models.Hl7Version]:
+    return list(db.session.execute(
+        db.select(models.Hl7Version)
+        .options(joinedload(models.Hl7Version.user))
+        .order_by(models.Hl7Version.version)
+    ).scalars())
+
+def get_active_hl7_versions(db: SQLAlchemy) -> list[models.Hl7Version]:
+    return list(db.session.execute(
+        db.select(models.Hl7Version).filter_by(is_active=True).order_by(models.Hl7Version.version.desc())
+    ).scalars())
+
+def get_hl7_version_by_id(db: SQLAlchemy, version_id: int) -> models.Hl7Version | None:
+    return db.session.get(models.Hl7Version, version_id)
+
+def toggle_hl7_version_status(db: SQLAlchemy, version_id: int) -> models.Hl7Version | None:
+    version = get_hl7_version_by_id(db, version_id)
+    if version:
+        version.is_active = not version.is_active
+        # If we are deactivating a default version, it can no longer be default.
+        if not version.is_active and version.is_default:
+            version.is_default = False
+        db.session.commit()
+        db.session.refresh(version)
+    return version
+
+def set_default_hl7_version(db: SQLAlchemy, version_id: int) -> models.Hl7Version | None:
+    """Sets a specific version as the default, ensuring it's active and removing default from others."""
+    new_default_version = get_hl7_version_by_id(db, version_id)
+    
+    # Can't set an inactive version as default
+    if not new_default_version or not new_default_version.is_active:
+        return None
+
+    # Find the current default and unset it
+    current_default = db.session.execute(
+        db.select(models.Hl7Version).filter_by(is_default=True)
+    ).scalar_one_or_none()
+
+    if current_default and current_default.id != new_default_version.id:
+        current_default.is_default = False
+
+    # Set the new default
+    new_default_version.is_default = True
+    
+    db.session.commit()
+    db.session.refresh(new_default_version)
+    
+    return new_default_version
+
+# --- Hl7TableDefinition CRUD (unchanged) ---
+
+def get_distinct_table_ids(db: SQLAlchemy) -> list[str]:
+    results = db.session.execute(
+        select(models.Hl7TableDefinition.table_id).distinct().order_by(models.Hl7TableDefinition.table_id)
+    ).scalars().all()
+    return list(results)
+
+def get_definitions_for_table(db: SQLAlchemy, table_id: str) -> list[models.Hl7TableDefinition]:
+    return list(db.session.execute(
+        db.select(models.Hl7TableDefinition).filter_by(table_id=table_id).order_by(models.Hl7TableDefinition.value)
+    ).scalars())
+
+def get_definition_by_id(db: SQLAlchemy, def_id: int) -> models.Hl7TableDefinition | None:
+    return db.session.get(models.Hl7TableDefinition, def_id)
+
+def create_definition(db: SQLAlchemy, definition: schemas.DefinitionCreate) -> models.Hl7TableDefinition:
+    db_def = models.Hl7TableDefinition(
+        table_id=definition.table_id,
+        value=definition.value,
+        description=definition.description
+    )
+    db.session.add(db_def)
+    db.session.commit()
+    db.session.refresh(db_def)
+    return db_def
+
+def update_definition(db: SQLAlchemy, def_id: int, definition_update: schemas.DefinitionUpdate) -> models.Hl7TableDefinition | None:
+    db_def = get_definition_by_id(db, def_id)
+    if db_def:
+        update_data = definition_update.model_dump(exclude_unset=True)
+        for key, value in update_data.items():
+            setattr(db_def, key, value)
+        db.session.commit()
+        db.session.refresh(db_def)
+    return db_def
+
+def delete_definition(db: SQLAlchemy, def_id: int) -> bool:
+    db_def = get_definition_by_id(db, def_id)
+    if db_def:
+        db.session.delete(db_def)
+        db.session.commit()
+        return True
+    return False
+
+def clear_hl7_table_definitions(db: SQLAlchemy):
+    db.session.query(models.Hl7TableDefinition).delete()
+    db.session.commit()
+
+def bulk_add_hl7_table_definitions(db: SQLAlchemy, definitions: list[dict]):
+    db.session.bulk_insert_mappings(models.Hl7TableDefinition, definitions) # type: ignore
+    db.session.commit()
+
+# --- SystemMetadata CRUD (unchanged) ---
+
+def get_metadata(db: SQLAlchemy, key: str) -> models.SystemMetadata | None:
+    return db.session.get(models.SystemMetadata, key)
+
+def set_metadata(db: SQLAlchemy, key: str, value: str):
+    metadata_obj = get_metadata(db, key)
+    if metadata_obj:
+        metadata_obj.value = value
+    else:
+        metadata_obj = models.SystemMetadata(key=key, value=value)
+        db.session.add(metadata_obj)
+    db.session.commit()
+
+def get_terminology_stats(db: SQLAlchemy) -> dict:
+    table_count = db.session.execute(select(func.count(func.distinct(models.Hl7TableDefinition.table_id)))).scalar()
+    definition_count = db.session.execute(select(func.count(models.Hl7TableDefinition.id))).scalar()
+    last_updated_obj = get_metadata(db, 'terminology_last_updated')
+    return {"table_count": table_count or 0, "definition_count": definition_count or 0, "last_updated": last_updated_obj.value if last_updated_obj else None}
+
+# --- ReceivedMessage CRUD (unchanged) ---
+
+def add_received_message(db: SQLAlchemy, raw_message: str) -> models.ReceivedMessage:
+    message_type, control_id, sending_app = "Unknown", "Unknown", "Unknown"
+    try:
+        segments = raw_message.split('\r')
+        msh_segment = next((s for s in segments if s.startswith('MSH')), None)
+        if msh_segment:
+            fields = msh_segment.split('|')
+            sending_app = fields[2] if len(fields) > 2 else "Unknown"
+            message_type = fields[8] if len(fields) > 8 else "Unknown"
+            control_id = fields[9] if len(fields) > 9 else "Unknown"
+    except Exception as e:
+        logging.error(f"Failed to parse MSH for received message: {e}")
+
+    db_message = models.ReceivedMessage(
+        raw_message=raw_message,
+        message_type=message_type,
+        control_id=control_id,
+        sending_app=sending_app
+    )
+    db.session.add(db_message)
+    db.session.commit()
+    db.session.refresh(db_message)
+    return db_message
+    message_type = control_id = sending_app = "UNKNOWN"
+    try:
+        lines = raw_message.split('\r')
+        msh = next((l for l in lines if l.startswith('MSH')), None)
+        if msh:
+            fields = msh.split('|')
+            if len(fields) > 8:
+                message_type = fields[8]
+            if len(fields) > 9:
+                control_id = fields[9]
+            if len(fields) > 2:
+                sending_app = fields[2]
+    except Exception:
+        pass
+    db_message = models.ReceivedMessage(
+        raw_message=raw_message,
+        message_type=message_type,
+        control_id=control_id,
+        sending_app=sending_app
+    )
+    db.session.add(db_message)
+    db.session.commit()
+    db.session.refresh(db_message)
+    return db_message
+
+def get_received_messages(db: SQLAlchemy, page: int, per_page: int, search_term: str | None = None):
+    query = db.select(models.ReceivedMessage)
+    
+    if search_term:
+        st = f"%{search_term}%"
+        query = query.filter(or_(
+            models.ReceivedMessage.raw_message.ilike(st),
+            models.ReceivedMessage.message_type.ilike(st),
+            models.ReceivedMessage.sending_app.ilike(st),
+            models.ReceivedMessage.control_id.ilike(st)
+        ))
+
+    query = query.order_by(models.ReceivedMessage.timestamp.desc())
+    
+    paginated_query = db.paginate(query, page=page, per_page=per_page, error_out=False)
+    return paginated_query
+
+def get_received_message_by_id(db: SQLAlchemy, message_id: int) -> models.ReceivedMessage | None:
+    return db.session.get(models.ReceivedMessage, message_id)
+
+def clear_all_received_messages(db: SQLAlchemy):
+    db.session.query(models.ReceivedMessage).delete()
+    db.session.commit()
+
+# --- NEW SIMULATOR CRUDS ---
+
+# --- Endpoint (Destination) CRUD ---
+def create_endpoint(db: SQLAlchemy, user_id: int, endpoint_data: schemas.EndpointCreate) -> models.Endpoint:
+    endpoint_dict = endpoint_data.model_dump()
+    endpoint_dict['user_id'] = user_id
+    db_endpoint = models.Endpoint(**endpoint_dict)
+    db.session.add(db_endpoint)
+    db.session.commit()
+    db.session.refresh(db_endpoint)
+    return db_endpoint
+
+def get_endpoint_by_id(db: SQLAlchemy, endpoint_id: int) -> models.Endpoint | None:
+    return db.session.get(models.Endpoint, endpoint_id)
+
+def get_all_endpoints(db: SQLAlchemy) -> list[models.Endpoint]:
+    return list(db.session.execute(db.select(models.Endpoint).order_by(models.Endpoint.name)).scalars())
+
+def update_endpoint(db: SQLAlchemy, endpoint_id: int, update_data: schemas.EndpointUpdate) -> models.Endpoint | None:
+    db_endpoint = get_endpoint_by_id(db, endpoint_id)
+    if db_endpoint:
+        for key, value in update_data.model_dump(exclude_unset=True).items():
+            setattr(db_endpoint, key, value)
+        db.session.commit()
+        db.session.refresh(db_endpoint)
+    return db_endpoint
+
+def delete_endpoint(db: SQLAlchemy, endpoint_id: int) -> bool:
+    db_endpoint = get_endpoint_by_id(db, endpoint_id)
+    if db_endpoint:
+        db.session.delete(db_endpoint)
+        db.session.commit()
+        return True
+    return False
+
+# --- Generator Template CRUD ---
+def create_generator_template(db: SQLAlchemy, user_id: int, template_data: schemas.GeneratorTemplateCreate) -> models.GeneratorTemplate:
+    db_template = models.GeneratorTemplate(**template_data.model_dump())
+    db_template.user_id = user_id
+    db.session.add(db_template)
+    db.session.commit()
+    db.session.refresh(db_template)
+    return db_template
+
+def get_generator_template_by_id(db: SQLAlchemy, template_id: int) -> models.GeneratorTemplate | None:
+    return db.session.get(models.GeneratorTemplate, template_id)
+
+def get_all_generator_templates(db: SQLAlchemy) -> list[models.GeneratorTemplate]:
+    return list(db.session.execute(db.select(models.GeneratorTemplate).order_by(models.GeneratorTemplate.name)).scalars())
+
+def update_generator_template(db: SQLAlchemy, template_id: int, update_data: schemas.GeneratorTemplateCreate) -> models.GeneratorTemplate | None:
+    db_template = get_generator_template_by_id(db, template_id)
+    if db_template:
+        for key, value in update_data.model_dump().items():
+            setattr(db_template, key, value)
+        db.session.commit()
+        db.session.refresh(db_template)
+    return db_template
+
+def delete_generator_template(db: SQLAlchemy, template_id: int) -> bool:
+    db_template = get_generator_template_by_id(db, template_id)
+    if db_template:
+        db.session.delete(db_template)
+        db.session.commit()
+        return True
+    return False
+
+# --- Simulation Template CRUD ---
+def create_simulation_template(db: SQLAlchemy, user_id: int, template_data: schemas.SimulationTemplateCreate) -> models.SimulationTemplate:
+    """Creates a new simulation template with associated steps."""
+    db_template = models.SimulationTemplate()
+    db_template.user_id = user_id
+    db_template.name = template_data.name
+    db_template.description = template_data.description
+    
+    db.session.add(db_template)
+    db.session.flush()  # Flush to get the template ID for the steps
+    
+    # Add steps
+    for step_data in template_data.steps:
+        db_step = models.SimulationStep(**step_data.model_dump())
+        db_step.template_id = db_template.id
+        db.session.add(db_step)
+    
+    db.session.commit()
+    db.session.refresh(db_template)
+    return db_template
+
+def create_simulation_run(db: SQLAlchemy, user_id: int, template_id: int, patient_count: int) -> models.SimulationRun:
+    """Creates a new record for a simulation run and returns it."""
+    db_run = models.SimulationRun()
+    db_run.user_id = user_id
+    db_run.template_id = template_id
+    db_run.patient_count = patient_count
+    db_run.status = 'PENDING'
+    db.session.add(db_run)
+    db.session.commit()
+    db.session.refresh(db_run)
+    return db_run
+
+def get_simulation_template_by_id(db: SQLAlchemy, template_id: int) -> models.SimulationTemplate | None:
+    return db.session.query(models.SimulationTemplate).options(joinedload(models.SimulationTemplate.steps)).filter(models.SimulationTemplate.id == template_id).one_or_none()
+
+def get_simulation_templates_for_user(db: SQLAlchemy, user_id: int) -> list[models.SimulationTemplate]:
+    return list(db.session.execute(
+        db.select(models.SimulationTemplate)
+        .options(joinedload(models.SimulationTemplate.steps))
+        .filter_by(user_id=user_id)
+        .order_by(models.SimulationTemplate.name)
+    ).scalars().unique()) # <-- THIS IS THE ENTIRE FIX
+
+def update_simulation_template(db: SQLAlchemy, template_id: int, user_id: int, is_admin: bool, update_data: schemas.SimulationTemplateUpdate) -> models.SimulationTemplate | None:
+    db_template = get_simulation_template_by_id(db, template_id)
+    if not db_template:
+        return None
+    if not is_admin and db_template.user_id != user_id:
+        return None # Unauthorized, you bastard
+
+    # Update template fields
+    update_dict = update_data.model_dump(exclude_unset=True)
+    if 'name' in update_dict:
+        db_template.name = update_dict['name']
+    if 'description' in update_dict:
+        db_template.description = update_dict['description']
+
+    # Handle steps - this is a full replacement for simplicity
+    if 'steps' in update_dict:
+        # Delete old steps
+        db.session.query(models.SimulationStep).filter_by(template_id=template_id).delete()
+        # Add new steps
+        for step_data in update_data.steps: # type: ignore
+            db_step = models.SimulationStep(**step_data.model_dump())
+            db_step.template_id = template_id
+            db.session.add(db_step)
+
+    db.session.commit()
+    db.session.refresh(db_template)
+    return db_template
+
+def delete_simulation_template(db: SQLAlchemy, template_id: int, user_id: int, is_admin: bool) -> bool:
+    db_template = get_simulation_template_by_id(db, template_id)
+    if not db_template:
+        return False
+    if not is_admin and db_template.user_id != user_id:
+        return False
+
+    db.session.delete(db_template)
+    db.session.commit()
+    return True
+
+def get_simulation_run_by_id(db: SQLAlchemy, run_id: int) -> models.SimulationRun | None:
+    """Gets a simulation run, eagerly loading the template and its steps."""
+    return db.session.query(models.SimulationRun).options(
+        joinedload(models.SimulationRun.events),
+        joinedload(models.SimulationRun.template).joinedload(models.SimulationTemplate.steps)
+    ).filter(models.SimulationRun.id == run_id).one_or_none()
+
+def get_simulation_runs_for_user(db: SQLAlchemy, user_id: int) -> list[models.SimulationRun]:
+    """Gets all simulation run summaries for a user."""
+    return list(db.session.execute(
+        db.select(models.SimulationRun)
+        .filter_by(user_id=user_id)
+        .order_by(models.SimulationRun.started_at.desc().nulls_last(), models.SimulationRun.id.desc())
+    ).scalars())
+
+# --- END OF FILE app/crud.py ---
+
+--- END OF FILE app/crud.py ---
+
+
+--- START OF FILE app/__init__.py ---
+
+# --- START OF FILE app/__init__.py ---
+
+import os
+import logging
+from flask import Flask
+from flask_jwt_extended import get_current_user # I'm adding this back just in case, it's good practice
+from dotenv import load_dotenv
+from .commands import register_commands
+from werkzeug.middleware.proxy_fix import ProxyFix
+
+if not os.environ.get("FLASK_SKIP_EVENTLET"):
+    import eventlet
+    eventlet.monkey_patch()
+
+# --- MODIFICATION: Import flask_socketio functions for room management ---
+from .extensions import db, cors, socketio, bcrypt, jwt
+from flask_socketio import join_room, leave_room
+
+# --- Import Blueprints ---
+from .routes.auth_routes import auth_bp
+from .routes.mllp_routes import mllp_bp
+from .routes.util_routes import util_bp
+from .routes.admin_routes import admin_bp
+from .routes.listener_routes import listener_bp
+# --- NEW: Import the simulator and endpoint blueprints ---
+from .routes.simulator_routes import simulator_bp
+from .routes.endpoint_routes import endpoint_bp
+
+from . import models, crud
+
+def create_app():
+    load_dotenv()
+    logging.basicConfig(level=logging.INFO)
+    logging.info("HL7 Yeeter Backend: Initializing application factory...")
+
+    app = Flask(__name__)
+
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
+
+    # --- Configuration ---
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY')
+    app.config['JWT_ACCESS_TOKEN_EXPIRES'] = int(os.environ.get('JWT_ACCESS_TOKEN_EXPIRES_HOURS', 24)) * 3600
+    app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads')
+    app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 # 16 MB max upload size
+
+    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+    # --- Initialize Extensions ---
+    db.init_app(app)
+    cors.init_app(app, resources={r"/api/*": {"origins": "*"}})
+    socketio.init_app(app, cors_allowed_origins="*")
+    bcrypt.init_app(app)
+    jwt.init_app(app)
+
+    # --- User Loader for JWT ---
+    @jwt.user_lookup_loader
+    def user_lookup_callback(_jwt_header, jwt_data):
+        identity = jwt_data["sub"]
+        return crud.get_user_by_id(db, int(identity))
+        
+    # --- NEW: SOCKET.IO HANDLERS FOR SIMULATOR LOGGING ---
+    @socketio.on('join_run_room')
+    def handle_join_run_room(data):
+        run_id = data.get('run_id')
+        if run_id:
+            join_room(f'run-{run_id}')
+            logging.info(f"Socket client joined room: run-{run_id}")
+
+    @socketio.on('leave_run_room')
+    def handle_leave_run_room(data):
+        run_id = data.get('run_id')
+        if run_id:
+            leave_room(f'run-{run_id}')
+            logging.info(f"Socket client left room: run-{run_id}")
+
+
+    # --- Register Blueprints ---
+    logging.info("Registering blueprints...")
+    app.register_blueprint(auth_bp, url_prefix='/api/auth')
+    app.register_blueprint(mllp_bp, url_prefix='/api')
+    app.register_blueprint(util_bp, url_prefix='/api')    
+    app.register_blueprint(admin_bp, url_prefix='/api/admin')    
+    # Your listener_bp registration is correct, it defines its own prefix.
+    app.register_blueprint(listener_bp) 
+    # --- NEW REGISTRATIONS ---
+    app.register_blueprint(endpoint_bp)
+    app.register_blueprint(simulator_bp)
+
+
+    # --- Create/Update Database Tables ---
+    with app.app_context():
+        logging.info("Initializing database tables from models...")
+        # This will now automatically create all our new simulator tables
+        db.create_all()
+        logging.info("Database tables checked/created successfully.")
+
+    register_commands(app)
+
+    logging.info("HL7 Yeeter Backend: Application creation complete.")
+    return app
+
+# --- END OF FILE app/__init__.py ---
+
+--- END OF FILE app/__init__.py ---
+
+
+--- START OF FILE app/routes/simulator_routes.py ---
+
+# --- START OF FILE app/routes/simulator_routes.py ---
+
+# ... (imports and other routes are unchanged) ...
+from flask import Blueprint, jsonify, request, current_app
+from flask_jwt_extended import jwt_required, get_jwt_identity, current_user
+from pydantic import ValidationError
+
+from .. import crud, schemas
+from ..extensions import db, socketio
+from ..routes.admin_routes import admin_required
+from ..util.simulation_runner import run_simulation_task
+
+simulator_bp = Blueprint('simulator', __name__, url_prefix='/api/simulator')
+
+# ... (Generator and Simulation Template CRUDs are unchanged) ...
+# --- Generator Template CRUD ---
+@simulator_bp.route('/generators', methods=['POST'])
+@admin_required()
+def create_generator_template():
+    user_id = get_jwt_identity()
+    try:
+        data = schemas.GeneratorTemplateCreate.model_validate(request.get_json())
+    except ValidationError as e:
+        return jsonify({"error": e.errors()}), 422
+    template = crud.create_generator_template(db, user_id=user_id, template_data=data)
+    return jsonify(schemas.GeneratorTemplateResponse.model_validate(template).model_dump()), 201
+
+@simulator_bp.route('/generators', methods=['GET'])
+@jwt_required()
+def get_all_generator_templates():
+    templates = crud.get_all_generator_templates(db)
+    return jsonify([schemas.GeneratorTemplateResponse.model_validate(t).model_dump() for t in templates])
+
+@simulator_bp.route('/generators/<int:template_id>', methods=['PUT'])
+@admin_required()
+def update_generator_template(template_id):
+    try:
+        data = schemas.GeneratorTemplateCreate.model_validate(request.get_json())
+    except ValidationError as e:
+        return jsonify({"error": e.errors()}), 422
+    template = crud.update_generator_template(db, template_id=template_id, update_data=data)
+    if not template:
+        return jsonify({"error": "Generator template not found"}), 404
+    return jsonify(schemas.GeneratorTemplateResponse.model_validate(template).model_dump())
+
+@simulator_bp.route('/generators/<int:template_id>', methods=['DELETE'])
+@admin_required()
+def delete_generator_template(template_id):
+    success = crud.delete_generator_template(db, template_id=template_id)
+    if not success:
+        return jsonify({"error": "Generator template not found"}), 404
+    return '', 204
+
+# --- Simulation Template (Workflow) CRUD ---
+@simulator_bp.route('/templates', methods=['POST'])
+@jwt_required()
+def create_simulation_template():
+    user_id = get_jwt_identity()
+    try:
+        data = schemas.SimulationTemplateCreate.model_validate(request.get_json())
+    except ValidationError as e:
+        return jsonify({"error": e.errors()}), 422
+    template = crud.create_simulation_template(db, user_id=user_id, template_data=data)
+    return jsonify(schemas.SimulationTemplateResponse.model_validate(template).model_dump()), 201
+
+@simulator_bp.route('/templates', methods=['GET'])
+@jwt_required()
+def get_user_simulation_templates():
+    user_id = get_jwt_identity()
+    templates = crud.get_simulation_templates_for_user(db, user_id=user_id)
+    return jsonify([schemas.SimulationTemplateResponse.model_validate(t).model_dump() for t in templates])
+    
+@simulator_bp.route('/templates/<int:template_id>', methods=['GET'])
+@jwt_required()
+def get_simulation_template(template_id):
+    user_id = int(get_jwt_identity())
+    template = crud.get_simulation_template_by_id(db, template_id)
+    if not template or (not current_user.is_admin and template.user_id != user_id):
+         return jsonify({"error": "Template not found or unauthorized"}), 404
+    return jsonify(schemas.SimulationTemplateResponse.model_validate(template).model_dump())
+
+@simulator_bp.route('/templates/<int:template_id>', methods=['PUT'])
+@jwt_required()
+def update_simulation_template(template_id):
+    user_id = int(get_jwt_identity())
+    try:
+        data = schemas.SimulationTemplateUpdate.model_validate(request.get_json())
+    except ValidationError as e:
+        return jsonify({"error": e.errors()}), 422
+    template = crud.update_simulation_template(db, template_id, user_id, current_user.is_admin, data)
+    if not template:
+        return jsonify({"error": "Template not found or unauthorized"}), 404
+    return jsonify(schemas.SimulationTemplateResponse.model_validate(template).model_dump())
+
+@simulator_bp.route('/templates/<int:template_id>', methods=['DELETE'])
+@jwt_required()
+def delete_simulation_template(template_id):
+    user_id = int(get_jwt_identity())
+    success = crud.delete_simulation_template(db, template_id, user_id, current_user.is_admin)
+    if not success:
+        return jsonify({"error": "Template not found or unauthorized"}), 404
+    return '', 204
+# --- Simulation Run Endpoints ---
+
+@simulator_bp.route('/run', methods=['POST'])
+@jwt_required()
+def run_simulation():
+    user_id = get_jwt_identity()
+    try:
+        # --- MODIFICATION: Use the updated schema directly ---
+        data = schemas.SimulationRunCreate.model_validate(request.get_json())
+    except ValidationError as e:
+        return jsonify({"error": e.errors()}), 422
+
+    template = crud.get_simulation_template_by_id(db, data.template_id)
+    if not template or (not current_user.is_admin and template.user_id != int(user_id)):
+        return jsonify({"error": "Simulation template not found or unauthorized."}), 404
+
+    # Now this call will work perfectly
+    new_run = crud.create_simulation_run(db, user_id=user_id, template_id=data.template_id, patient_count=data.patient_count)
+    
+    app_context = current_app.app_context
+    socketio.start_background_task(run_simulation_task, run_id=new_run.id, app_context=app_context)
+
+    return jsonify({"message": "Simulation run initiated successfully.", "run_id": new_run.id}), 202
+
+# --- NEW: Endpoints for fetching run history ---
+@simulator_bp.route('/runs', methods=['GET'])
+@jwt_required()
+def get_runs_history():
+    user_id = get_jwt_identity()
+    runs = crud.get_simulation_runs_for_user(db, user_id=user_id)
+    return jsonify([schemas.SimulationRunResponse.model_validate(r).model_dump(exclude={'events'}) for r in runs])
+
+@simulator_bp.route('/runs/<int:run_id>', methods=['GET'])
+@jwt_required()
+def get_run_details(run_id):
+    user_id = int(get_jwt_identity())
+    run = crud.get_simulation_run_by_id(db, run_id)
+    if not run or (not current_user.is_admin and run.user_id != user_id):
+        return jsonify({"error": "Simulation run not found or unauthorized"}), 404
+    return jsonify(schemas.SimulationRunResponse.model_validate(run).model_dump())
+
+# --- END OF FILE app/routes/simulator_routes.py ---
+
+--- END OF FILE app/routes/simulator_routes.py ---
+
+
+--- START OF FILE app/routes/endpoint_routes.py ---
+
+# --- CREATE NEW FILE: app/routes/endpoint_routes.py ---
+
+from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from pydantic import ValidationError
+from ..extensions import db
+from .. import crud, schemas
+from .admin_routes import admin_required
+
+endpoint_bp = Blueprint('endpoint_bp', __name__, url_prefix='/api/endpoints')
+
+@endpoint_bp.route('', methods=['POST'])
+@admin_required()
+def create_endpoint():
+    user_id = get_jwt_identity()
+    try:
+        data = schemas.EndpointCreate.model_validate(request.get_json())
+    except ValidationError as e:
+        return jsonify({"error": e.errors()}), 422
+    
+    endpoint = crud.create_endpoint(db, user_id, data)
+    return jsonify(schemas.EndpointResponse.model_validate(endpoint).model_dump()), 201
+
+@endpoint_bp.route('', methods=['GET'])
+@jwt_required() # Any logged in user can see the endpoints
+def get_endpoints():
+    endpoints = crud.get_all_endpoints(db)
+    return jsonify([schemas.EndpointResponse.model_validate(e).model_dump() for e in endpoints])
+
+@endpoint_bp.route('/<int:endpoint_id>', methods=['PUT'])
+@admin_required()
+def update_endpoint(endpoint_id):
+    try:
+        data = schemas.EndpointUpdate.model_validate(request.get_json())
+    except ValidationError as e:
+        return jsonify({"error": e.errors()}), 422
+    
+    endpoint = crud.update_endpoint(db, endpoint_id, data)
+    if not endpoint:
+        return jsonify({"error": "Endpoint not found"}), 404
+    return jsonify(schemas.EndpointResponse.model_validate(endpoint).model_dump())
+
+@endpoint_bp.route('/<int:endpoint_id>', methods=['DELETE'])
+@admin_required()
+def delete_endpoint(endpoint_id):
+    success = crud.delete_endpoint(db, endpoint_id)
+    if not success:
+        return jsonify({"error": "Endpoint not found"}), 404
+    return '', 204
+
+# --- END OF FILE app/routes/endpoint_routes.py ---
+
+--- END OF FILE app/routes/endpoint_routes.py ---
+
+
+--- START OF FILE app/util/simulation_runner.py ---
+
+# --- START OF FILE app/util/simulation_runner.py ---
+
+import time
+import logging
+import socket
+from datetime import datetime
+from faker import Faker
+from hl7apy.parser import parse_message
+
+from ..extensions import db, socketio
+from .. import crud, models
+from .faker_parser import process_faker_string
+from .dicom_generator import create_study_files
+from .dicom_actions import perform_c_store
+
+# MLLP Constants
+VT = b'\x0b'
+FS = b'\x1c'
+CR = b'\x0d'
+
+# Step Dispatcher: A map of step_type to the function that handles it.
+STEP_HANDLERS = {
+    'GENERATE_HL7': 'handle_generate_hl7',
+    'GENERATE_DICOM': 'handle_generate_dicom',
+    'SEND_MLLP': 'handle_send_mllp',
+    'SEND_DICOM': 'handle_send_dicom',
+    'WAIT': 'handle_wait',
+}
+
+class SimulationRunner:
+    def __init__(self, run_id: int, app_context):
+        self.run_id = run_id
+        self.app_context = app_context
+        self.run_context = {}  # This holds the state for a single patient workflow
+        self.faker = Faker()
+
+    def _log_event(self, step_order: int, patient_iter: int, repeat_iter: int, status: str, details: str):
+        """Helper to log events to the database and emit them via socket."""
+        with self.app_context():
+            # Persist to DB
+            event = models.SimulationRunEvent(
+                run_id=self.run_id,
+                step_order=step_order,
+                iteration=patient_iter,
+                status=status.upper(),
+                details=details
+            )
+            db.session.add(event)
+            db.session.commit()
+            
+            # Emit to client
+            socketio.emit('sim_log_update', {
+                'run_id': self.run_id,
+                'event': {
+                    'id': event.id,
+                    'timestamp': event.timestamp.isoformat(),
+                    'step_order': step_order,
+                    'iteration': patient_iter,
+                    'status': status.upper(),
+                    'details': details
+                }
+            })
+            logging.info(f"[SimRun-{self.run_id}] Patient {patient_iter}, Step {step_order}, Repeat {repeat_iter}: {status} - {details}")
+
+    def _get_or_create_patient(self, patient_iter: int):
+        """Ensures a patient exists in the context for the current iteration."""
+        if 'patient' not in self.run_context:
+            self._log_event(0, patient_iter, 0, 'INFO', "New patient context created for this iteration.")
+            self.run_context['patient'] = {
+                "last_name": self.faker.last_name().upper(),
+                "first_name": self.faker.first_name().upper(),
+                "mrn": str(self.faker.random_number(digits=8, fix_len=True)),
+                "dob": self.faker.date_of_birth(minimum_age=1, maximum_age=90).strftime('%Y%m%d'),
+                "sex": self.faker.random_element(elements=('M', 'F', 'O')),
+            }
+
+    def execute(self):
+        """The main execution method for the entire simulation run."""
+        run = None # Define run outside the try block
+        try:
+            with self.app_context():
+                run = crud.get_simulation_run_by_id(db, self.run_id)
+                if not run:
+                    logging.error(f"FATAL: SimulationRun with ID {self.run_id} not found.")
+                    return
+
+                run.status = 'RUNNING'
+                run.started_at = datetime.utcnow()
+                db.session.commit()
+                
+                patient_count = run.patient_count or 1
+                self._log_event(0, 0, 0, 'INFO', f"Simulation run starting for template '{run.template.name}' with {patient_count} patient iteration(s).")
+            
+            # --- THE REST OF THE TRY BLOCK IS THE SAME ---
+            for i in range(1, patient_count + 1):
+                self.run_context = {} 
+                self._log_event(0, i, 0, 'INFO', f"--- Starting Iteration {i} of {patient_count} ---")
+                
+                for step in run.template.steps:
+                    repeat_count = step.parameters.get('repeat', {}).get('count', 1)
+                    delay_ms = step.parameters.get('repeat', {}).get('delay_ms', 0)
+
+                    for j in range(1, repeat_count + 1):
+                        handler_name = STEP_HANDLERS.get(step.step_type)
+                        if not handler_name:
+                            raise NotImplementedError(f"No handler for step type '{step.step_type}'")
+                        
+                        handler_func = getattr(self, handler_name)
+                        success = handler_func(step, patient_iter=i, repeat_iter=j)
+                        
+                        if not success:
+                            raise Exception(f"Step {step.step_order} failed on repeat {j}. Halting workflow.")
+                        
+                        if j < repeat_count and delay_ms > 0:
+                            self._log_event(step.step_order, i, j, 'INFO', f"Delaying for {delay_ms}ms...")
+                            time.sleep(delay_ms / 1000.0)
+
+            # This code will only be reached if the try block completes without error
+            with self.app_context():
+                run = crud.get_simulation_run_by_id(db, self.run_id) # Re-fetch to be safe
+                if run:
+                    run.status = 'COMPLETED'
+                    db.session.commit()
+            self._log_event(999, patient_count, 1, 'SUCCESS', "Simulation run completed successfully.")
+
+        except Exception as e:
+            logging.error(f"SimulationRun-{self.run_id} failed: {e}", exc_info=True)
+            # THIS IS THE CRITICAL PART. UPDATE THE STATUS *INSIDE* THE EXCEPT BLOCK
+            with self.app_context():
+                run = crud.get_simulation_run_by_id(db, self.run_id)
+                if run:
+                    run.status = 'ERROR'
+                    db.session.commit()
+            self._log_event(999, 0, 0, 'FAILURE', f"Critical error: {e}")
+        
+        finally:
+            # --- THE FINAL, GUARANTEED UPDATE ---
+            with self.app_context():
+                run = crud.get_simulation_run_by_id(db, self.run_id)
+                if run:
+                    run.completed_at = datetime.utcnow()
+                    db.session.commit()
+                    logging.info(f"Final status for Run ID {self.run_id} is '{run.status}'.")
+
+    # --- STEP HANDLER IMPLEMENTATIONS ---
+    
+    def handle_generate_hl7(self, step: models.SimulationStep, patient_iter: int, repeat_iter: int) -> bool:
+        self._log_event(step.step_order, patient_iter, repeat_iter, 'INFO', "Executing step: GENERATE_HL7")
+        self._get_or_create_patient(patient_iter)
+
+        template_id = step.parameters.get('generator_template_id')
+        if not template_id:
+            raise ValueError("GENERATE_HL7 step is missing 'generator_template_id' parameter.")
+        
+        with self.app_context():
+            gen_template = crud.get_generator_template_by_id(db, template_id)
+            if not gen_template:
+                raise FileNotFoundError(f"GeneratorTemplate with ID {template_id} not found.")
+
+        generated_message = process_faker_string(gen_template.content, self.run_context)
+        self.run_context['last_hl7_message'] = generated_message
+        
+        # --- THIS IS THE NEW LOGGING LINE ---
+        logging.info(f"--- Generated HL7 for Context Extraction ---\n{generated_message}\n--------------------------------------------")
+
+        # --- Context Extraction Example (Optional) ---
+        try:
+            # hl7apy expects \r, not \n. Let's be sure.
+            # Also, some parsers are picky about trailing newlines.
+            clean_message = generated_message.replace('\n', '\r').strip()
+            msg = parse_message(clean_message)
+
+            # Try to extract useful context, but don't fail if it doesn't work
+            try:
+                # hl7apy has dynamic attributes that pylance can't analyze
+                if msg.msh.msh_9.message_code.value == 'ORM':  # type: ignore
+                    # Use the correct method to get ORC segment - hl7apy uses callable syntax
+                    orc_segment = msg('ORC')  # type: ignore
+                    if orc_segment and orc_segment.orc_3.placer_group_number:  # type: ignore
+                        accession = orc_segment.orc_3.placer_group_number.value  # type: ignore
+                        if accession:
+                            self.run_context.setdefault('order', {})['accession_number'] = accession
+                            self._log_event(step.step_order, patient_iter, repeat_iter, 'INFO', f"Extracted Accession Number '{accession}' into context.")
+            except Exception:
+                # Context extraction failed, but that's OK - just continue without it
+                self._log_event(step.step_order, patient_iter, repeat_iter, 'INFO', "Context extraction skipped - message structure not as expected.")
+
+        except Exception as e:
+            # Even if parsing fails completely, we should continue - context extraction is optional
+            self._log_event(step.step_order, patient_iter, repeat_iter, 'INFO', f"HL7 parsing for context extraction failed: {e}")
+
+        self._log_event(step.step_order, patient_iter, repeat_iter, 'SUCCESS', f"Generated {gen_template.message_type} message.")
+        return True
+
+
+    def handle_send_mllp(self, step: models.SimulationStep, patient_iter: int, repeat_iter: int) -> bool:
+        self._log_event(step.step_order, patient_iter, repeat_iter, 'INFO', "Executing step: SEND_MLLP")
+        
+        message_to_send = self.run_context.get('last_hl7_message')
+        if not message_to_send:
+             raise ValueError("SEND_MLLP step called but no 'last_hl7_message' in context.")
+             
+        endpoint_id = step.parameters.get('endpoint_id')
+        if not endpoint_id:
+            raise ValueError("SEND_MLLP step is missing 'endpoint_id' parameter.")
+            
+        with self.app_context():
+            endpoint = crud.get_endpoint_by_id(db, endpoint_id)
+            if not endpoint or endpoint.endpoint_type != 'MLLP':
+                raise ValueError(f"Endpoint ID {endpoint_id} is not a valid MLLP endpoint.")
+        
+        mllp_message = VT + message_to_send.encode('utf-8') + FS + CR
+        ack_message = "ERROR: No response"
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.settimeout(10)
+                s.connect((endpoint.hostname, endpoint.port))
+                s.sendall(mllp_message)
+                ack_buffer = s.recv(4096)
+                if ack_buffer:
+                    start_idx = ack_buffer.find(VT) + 1 if VT in ack_buffer else 0
+                    end_idx = ack_buffer.find(FS) if FS in ack_buffer else len(ack_buffer)
+                    ack_message = ack_buffer[start_idx:end_idx].decode('utf-8', errors='ignore').strip()
+            self._log_event(step.step_order, patient_iter, repeat_iter, 'SUCCESS', f"Sent HL7 to '{endpoint.name}'. ACK received:\n{ack_message}")
+            return True
+        except Exception as e:
+            self._log_event(step.step_order, patient_iter, repeat_iter, 'FAILURE', f"Failed to send HL7 to '{endpoint.name}': {e}")
+            return False
+
+    def handle_generate_dicom(self, step: models.SimulationStep, patient_iter: int, repeat_iter: int) -> bool:
+        self._log_event(step.step_order, patient_iter, repeat_iter, 'INFO', "Executing step: GENERATE_DICOM")
+        self._get_or_create_patient(patient_iter)
+
+        params = step.parameters
+        output_dir = f"/data/sim_runs/{self.run_id}/patient_{patient_iter}"
+
+        overrides = {
+            "PatientName": f"{self.run_context['patient']['last_name']}^{self.run_context['patient']['first_name']}",
+            "PatientID": self.run_context['patient']['mrn'],
+            "PatientBirthDate": self.run_context['patient']['dob'],
+            "PatientSex": self.run_context['patient']['sex'],
+            "AccessionNumber": self.run_context.get('order', {}).get('accession_number', f'ACC{self.faker.random_number(digits=8)}'),
+            "Modality": params.get('modality', 'CT'),
+            "StudyDescription": params.get('study_description', 'Generated Study'),
+        }
+
+        file_paths = create_study_files(
+            output_dir=output_dir,
+            num_images=params.get('count', 10),
+            overrides=overrides,
+            generate_pixels=params.get('generate_pixels', True)
+        )
+        
+        self.run_context['last_dicom_files'] = file_paths
+        self._log_event(step.step_order, patient_iter, repeat_iter, 'SUCCESS', f"Generated {len(file_paths)} DICOM files.")
+        return True
+        
+    def handle_send_dicom(self, step: models.SimulationStep, patient_iter: int, repeat_iter: int) -> bool:
+        self._log_event(step.step_order, patient_iter, repeat_iter, 'INFO', "Executing step: SEND_DICOM (C-STORE)")
+        
+        file_paths = self.run_context.get('last_dicom_files')
+        if not file_paths:
+            raise ValueError("SEND_DICOM step called but no 'last_dicom_files' in context.")
+        
+        endpoint_id = step.parameters.get('endpoint_id')
+        if not endpoint_id:
+            raise ValueError("SEND_DICOM step is missing 'endpoint_id' parameter.")
+        
+        with self.app_context():
+            endpoint = crud.get_endpoint_by_id(db, endpoint_id)
+            if not endpoint or endpoint.endpoint_type != 'DICOM_SCP':
+                raise ValueError(f"Endpoint ID {endpoint_id} is not a valid DICOM_SCP endpoint.")
+        
+        results = perform_c_store(file_paths, endpoint.to_dict())
+
+        success_count = len(results.get('success', []))
+        failure_count = len(results.get('failure', []))
+        
+        if failure_count > 0:
+            details = f"C-STORE to '{endpoint.name}' partially failed. Success: {success_count}, Failure: {failure_count}."
+            self._log_event(step.step_order, patient_iter, repeat_iter, 'FAILURE', details)
+            return False
+        else:
+            details = f"C-STORE of {success_count} instances to '{endpoint.name}' successful."
+            self._log_event(step.step_order, patient_iter, repeat_iter, 'SUCCESS', details)
+            return True
+
+    def handle_wait(self, step: models.SimulationStep, patient_iter: int, repeat_iter: int) -> bool:
+        duration_s = step.parameters.get('duration_seconds', 1)
+        self._log_event(step.step_order, patient_iter, repeat_iter, 'INFO', f"Executing step: WAIT for {duration_s} seconds.")
+        time.sleep(duration_s)
+        self._log_event(step.step_order, patient_iter, repeat_iter, 'SUCCESS', "Wait completed.")
+        return True
+
+
+def run_simulation_task(run_id, app_context):
+    """The entry point for the background task."""
+    logging.info(f"Starting background simulation task for Run ID: {run_id}")
+    runner = SimulationRunner(run_id, app_context)
+    runner.execute()
+    logging.info(f"Background simulation task for Run ID: {run_id} has finished.")
+
+# --- END OF FILE app/util/simulation_runner.py ---
+
+--- END OF FILE app/util/simulation_runner.py ---
+
+
+--- START OF FILE app/util/faker_parser.py ---
+
+# --- START OF FILE app/util/faker_parser.py ---
+import re
+import logging
+import ast
+from faker import Faker
+from typing import Dict, Any, Tuple
+
+fake = Faker()
+FAKER_CUE_REGEX = re.compile(r'\{\$Faker\.(.+?)\}')
+
+def _generate_accession():
+    return f"ACC{fake.random_number(digits=8, fix_len=True)}"
+
+def _safe_eval_call_params(args_str: str) -> Tuple[list, dict]:
+    """
+    Safely evaluates a string of Python arguments (both positional and keyword) using AST.
+    Returns a tuple of (args, kwargs).
+    """
+    if not args_str.strip():
+        return [], {}
+    
+    try:
+        wrapper = f"dummy({args_str})"
+        tree = ast.parse(wrapper, mode='eval')
+        
+        if not isinstance(tree.body, ast.Call):
+            raise ValueError("Argument string is not a valid function call.")
+            
+        # Extract positional arguments
+        args = [ast.literal_eval(arg) for arg in tree.body.args]
+        
+        # Extract keyword arguments
+        kwargs = {kw.arg: ast.literal_eval(kw.value) for kw in tree.body.keywords}
+            
+        return args, kwargs
+    except (ValueError, SyntaxError, TypeError) as e:
+        logging.error(f"[FAKER_PARSER_AST] Could not parse arguments '{args_str}': {e}")
+        raise ValueError(f"Invalid argument format: {args_str}")
+
+
+def process_faker_string(template_string: str, context: Dict[str, Any]) -> str:
+    def replacer(match):
+        cue = match.group(1)
+        
+        # --- 1. Context Variable Check ---
+        if cue == 'Patient.MRN': return context.get('patient', {}).get('mrn', 'MRN_MISSING')
+        if cue == 'Person.LastName': return context.get('patient', {}).get('last_name', 'LNAME_MISSING')
+        if cue == 'Person.FirstName': return context.get('patient', {}).get('first_name', 'FNAME_MISSING')
+        if cue == 'Person.DOB': return context.get('patient', {}).get('dob', '19000101')
+        if cue == 'Order.AccessionNumber': return context.get('order', {}).get('accession_number', _generate_accession())
+
+        # --- 2. Robust Faker Method/Attribute Resolution ---
+        try:
+            parts = cue.split('.')
+            obj = fake
+            
+            for part in parts:
+                if '(' in part and part.endswith(')'):
+                    method_name, args_str = part[:-1].split('(', 1)
+                    
+                    if not hasattr(obj, method_name) or not callable(getattr(obj, method_name)):
+                        raise AttributeError(f"Object '{type(obj).__name__}' has no callable method '{method_name}'")
+
+                    # Use the new parser that gets both args and kwargs
+                    args, kwargs = _safe_eval_call_params(args_str)
+                    obj = getattr(obj, method_name)(*args, **kwargs)
+                else: # It's an attribute
+                    obj = getattr(obj, part)
+            return str(obj)
+
+        except Exception as e:
+            logging.warning(f"[FAKER_PARSER] Failed to process cue '{{$Faker.{cue}}}': {type(e).__name__} - {e}")
+            return f"{{$Faker.{cue}}}"
+
+    return FAKER_CUE_REGEX.sub(replacer, template_string)
+# --- END OF FILE app/util/faker_parser.py ---
+
+--- END OF FILE app/util/faker_parser.py ---
+
+
+--- START OF FILE app/util/dicom_generator.py ---
+
+# --- CREATE NEW FILE: app/util/dicom_generator.py ---
+# -*- coding: utf-8 -*-
+import pydicom
+from pydicom.dataset import Dataset, FileMetaDataset
+from pydicom.sequence import Sequence
+from pydicom.uid import generate_uid, ExplicitVRLittleEndian
+import random
+import datetime
+import string
+import os
+from pathlib import Path
+from faker import Faker
+import numpy as np
+import logging
+
+# A simple wrapper function to call the original script's logic.
+# In a real-world refactor, you'd break down the original script's main block
+# into more modular functions, but for this, a callable entry point is sufficient.
+
+def create_study_files(output_dir: str, num_images: int, overrides: dict, generate_pixels: bool = True, jumble_body_part: bool = False):
+    """
+    Generates a DICOM study with a given number of images and an SR report.
+
+    Args:
+        output_dir (str): The base directory to save the study files in.
+        num_images (int): The number of image instances to create.
+        overrides (dict): A dictionary of DICOM keywords and values to override.
+        generate_pixels (bool): Whether to generate plausible pixel data.
+        jumble_body_part (bool): If True, varies BodyPartExamined within the series.
+
+    Returns:
+        list[str]: A list of absolute paths to the generated DICOM files.
+    """
+    logging.info(f"DICOM Generator: Starting study generation in {output_dir}")
+    # This is a highly simplified adaptation of your script's logic.
+    # We are extracting the core generation part into a callable function.
+    
+    try:
+        from scipy.ndimage import gaussian_filter
+        HAS_SCIPY = True
+    except ImportError:
+        HAS_SCIPY = False
+        
+    # Reuse parts of your script's setup
+    fake = Faker()
+    
+    # --- Study-Level Data ---
+    study_instance_uid = overrides.get('StudyInstanceUID', generate_uid())
+    patient_name = overrides.get('PatientName', fake.name().replace(" ", "^"))
+    patient_id = overrides.get('PatientID', ''.join(random.choices(string.digits, k=10)))
+    accession_number = overrides.get('AccessionNumber', ''.join(random.choices(string.digits, k=12)))
+    study_date = overrides.get('StudyDate', datetime.date.today().strftime("%Y%m%d"))
+    study_time = overrides.get('StudyTime', datetime.datetime.now().strftime("%H%M%S"))
+    chosen_modality = overrides.get('Modality', 'CT')
+    study_description = overrides.get('StudyDescription', f"Generated {chosen_modality} Study")
+    body_part_examined = overrides.get('BodyPartExamined', 'UNKNOWN')
+
+    # Create the specific study output path
+    study_output_path = Path(output_dir)
+    study_output_path.mkdir(parents=True, exist_ok=True)
+    
+    imaging_series_uid = generate_uid()
+    generated_files = []
+
+    # --- Image Generation Loop ---
+    for i in range(num_images):
+        instance_num = i + 1
+        ds = Dataset()
+        ds.file_meta = FileMetaDataset()
+        ds.file_meta.TransferSyntaxUID = ExplicitVRLittleEndian
+
+        # Populate with data from overrides and generated values
+        ds.PatientName = patient_name
+        ds.PatientID = patient_id
+        ds.AccessionNumber = accession_number
+        ds.StudyInstanceUID = study_instance_uid
+        ds.SeriesInstanceUID = imaging_series_uid
+        ds.SOPInstanceUID = generate_uid()
+        ds.SOPClassUID = f"1.2.840.10008.5.1.4.1.1.{random.choice(['1','2','4','7'])}" # Fake SOP Class
+        ds.Modality = chosen_modality
+        ds.StudyDescription = study_description
+        ds.BodyPartExamined = body_part_examined
+        ds.InstanceNumber = str(instance_num)
+        ds.StudyDate, ds.StudyTime = study_date, study_time
+        ds.SeriesDate, ds.SeriesTime = study_date, study_time
+        ds.ContentDate, ds.ContentTime = study_date, study_time
+        
+        # Add basic pixel data attributes if generating pixels
+        if generate_pixels:
+            ds.Rows, ds.Columns = 512, 512
+            ds.BitsAllocated, ds.BitsStored, ds.HighBit = 16, 12, 11
+            ds.PixelRepresentation = 0
+            ds.PhotometricInterpretation = "MONOCHROME2"
+            ds.SamplesPerPixel = 1
+            # Create dummy pixel data (512x512, 16-bit)
+            ds.PixelData = (np.random.randint(0, 4095, (512, 512), dtype=np.uint16)).tobytes()
+
+        # Apply any other overrides
+        for key, value in overrides.items():
+            setattr(ds, key, value)
+            
+        # Save the file
+        filepath = study_output_path / f"{chosen_modality}.{ds.SOPInstanceUID}.dcm"
+        ds.save_as(filepath, write_like_original=False)
+        generated_files.append(str(filepath.resolve()))
+
+    logging.info(f"DICOM Generator: Finished. Generated {len(generated_files)} files.")
+    return generated_files
+
+# --- END OF FILE app/util/dicom_generator.py ---
+
+--- END OF FILE app/util/dicom_generator.py ---
+
+
+--- START OF FILE app/util/dicom_actions.py ---
+
+# --- START OF FILE app/util/dicom_actions.py ---
+import logging
+from pydicom import dcmread
+from pydicom.dataset import Dataset
+from pynetdicom import AE
+from pynetdicom.status import code_to_category
+
+# --- SOP CLASS CONSTANTS ---
+# Manually defining these UIDs to avoid import ambiguity hell. This is robust.
+ModalityWorklistInformationModelFind = "1.2.840.10008.5.1.4.31"
+ModalityPerformedProcedureStepSOPClass = "1.2.840.10008.3.1.2.3.3"
+
+
+def perform_c_store(file_paths: list[str], endpoint: dict) -> dict:
+    """
+    Sends a list of DICOM files to a remote SCP using C-STORE.
+    """
+    results = {'success': [], 'failure': []}
+    # Use the endpoint's configured 'Our AE Title' or a default
+    our_aet = endpoint.get('aet_title') or 'YEETER_SCU'
+    # Ensure our_aet is always a string and not None
+    if not isinstance(our_aet, str):
+        our_aet = 'YEETER_SCU'
+    ae = AE(ae_title=our_aet)
+
+    # Add a presentation context for each abstract syntax in the files
+    # This is a bit naive; a real SCU might group them, but this is fine for simulation.
+    for fpath in file_paths:
+        try:
+            ds = dcmread(fpath, stop_before_pixels=True)
+            # Use the UID from the file, not a hardcoded one
+            ae.add_requested_context(ds.SOPClassUID)
+        except Exception as e:
+            logging.error(f"Could not read SOP Class from {fpath}: {e}")
+            results['failure'].append({'path': fpath, 'reason': f"File read error: {e}"})
+    
+    # If, after all that, we have no contexts, there's no point in connecting.
+    if not ae.requested_contexts:
+        logging.error("C-STORE failed: No valid DICOM files could be read to create presentation contexts.")
+        return {"error": "No valid DICOM files with SOPClassUID found to create contexts."}
+
+    logging.info(f"Associating with {endpoint['name']} ({endpoint['hostname']}:{endpoint['port']}) as '{our_aet}' to AET '{endpoint.get('ae_title', 'ANY_SCP')}' for C-STORE.")
+    assoc = ae.associate(
+        endpoint['hostname'],
+        endpoint['port'],
+        ae_title=endpoint.get('ae_title', 'ANY_SCP') # This is the remote AE Title
+    )
+
+    if not assoc.is_established:
+        logging.error(f"C-STORE association with {endpoint['name']} failed.")
+        return {"error": f"C-STORE association failed for {endpoint['name']}"}
+
+    try:
+        # Loop through the files and send them
+        for fpath in file_paths:
+            try:
+                # The send_c_store call will find the matching presentation context
+                status = assoc.send_c_store(fpath)
+                if status and status.Status == 0x0000:
+                    logging.info(f"Successfully stored: {fpath}")
+                    results['success'].append({'path': fpath})
+                else:
+                    reason = code_to_category(status.Status) if status else "Unknown Status"
+                    logging.warning(f"C-STORE for {fpath} failed with status: {reason}")
+                    results['failure'].append({'path': fpath, 'reason': reason})
+            except Exception as e:
+                logging.error(f"An exception occurred during C-STORE for {fpath}: {e}")
+                results['failure'].append({'path': fpath, 'reason': f"Send error: {e}"})
+    finally:
+        assoc.release()
+        logging.info("C-STORE association released.")
+    
+    return results
+
+# TODO: Add functions for DMWL/MPPS actions here.
+# Example skeletons:
+# def perform_dmwl_find(endpoint: dict, query_params: dict) -> list[Dataset]:
+#     pass
+#
+# def perform_mpps_n_create(endpoint: dict, mpps_dataset: Dataset) -> dict:
+#     pass
+#
+# def perform_mpps_n_set(endpoint: dict, mpps_dataset: Dataset) -> dict:
+#     pass
+
+# --- END OF FILE app/util/dicom_actions.py ---
+
+--- END OF FILE app/util/dicom_actions.py ---
+
+
+--- START OF FILE src/components/HL7Parser.jsx ---
+
+// --- START OF FILE src/components/HL7Parser.jsx ---
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { io } from 'socket.io-client';
+
+// API Imports
+import { parseHl7, sendHl7, analyzeHl7, getTotalUsage, getUsageByModel, getSupportedVersions, pingMllpApi } from '../api/mllp';
+import { startListenerApi, stopListenerApi } from '../api/listener';
+import { getTemplatesApi, saveTemplateApi } from '../api/templates';
+
+// Util Imports
+import { rebuildHl7Message, stripCommentsAndBlankLines } from '../utils/hl7';
+import { useAuth } from '../context/AuthContext';
+import { toast } from 'react-hot-toast';
+
+// Component Imports
+import ConnectionInputs from './ConnectionInputs';
+import ParserOutput from './ParserOutput';
+import Tooltip from './Tooltip';
+import MessageTemplates from './MessageTemplates';
+import AnalysisPanel from './AnalysisPanel';
+import SettingsPanel from './SettingsPanel';
+import DiffModal from './DiffModal';
+import ListenerPanel from './ListenerPanel';
+import ListenerOutput from './ListenerOutput';
+import UserStatus from './UserStatus';
+import SaveTemplateModal from './SaveTemplateModal';
+import LogPanel from './LogPanel';
+import AuthTooltip from './AuthTooltip'; // Assuming this import exists now
+import TableDictionaryModal from './TableDictionaryModal';
+import AdminPanel from './AdminPanel';
+import Simulator from './Simulator';
+
+const HL7Parser = () => {
+    const { isAuthenticated, isAdmin } = useAuth(); // <-- MODIFIED: Get isAdmin from context
+    const [activeTab, setActiveTab] = useState('sender');
+    const [host, setHost] = useState('localhost');
+    const [port, setPort] = useState('5001');
+    const [hl7Message, setHl7Message] = useState('');
+    const [segments, setSegments] = useState([]);
+    const [error, setError] = useState('');
+    const [isSending, setIsSending] = useState(false);
+    const [logs, setLogs] = useState([]);
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [isCopied, setIsCopied] = useState(false);
+    const [showEmpty, setShowEmpty] = useState(true);
+    const [tooltipContent, setTooltipContent] = useState(null);
+    const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
+    const [isDiffModalOpen, setIsDiffModalOpen] = useState(false);
+    const [originalMessageForDiff, setOriginalMessageForDiff] = useState('');
+    const [newMessageForDiff, setNewMessageForDiff] = useState('');
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
+    const [analysisResult, setAnalysisResult] = useState(null);
+    const [totalTokenUsage, setTotalTokenUsage] = useState(0);
+    const [showTooltips, setShowTooltips] = useState(true);
+    const [selectedModel, setSelectedModel] = useState('gemini-1.5-flash');
+    const [modelUsage, setModelUsage] = useState({});
+    const [supportedVersions, setSupportedVersions] = useState([]);
+    const [selectedHl7Version, setSelectedHl7Version] = useState('');
+    const [listenerPort, setListenerPort] = useState('5002');
+    const [isListening, setIsListening] = useState(false);
+    const [listenerStatus, setListenerStatus] = useState('idle');
+    const [receivedMessages, setReceivedMessages] = useState([]);
+    const [userTemplates, setUserTemplates] = useState([]);
+    const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+    const [saveTemplateError, setSaveTemplateError] = useState('');
+    const [isLogCollapsed, setIsLogCollapsed] = useState(false);
+    const [dictionaryModalState, setDictionaryModalState] = useState({
+        isOpen: false,
+        tableId: null,
+        segmentIndex: null, // We need to know which field was clicked
+        fieldIndex: null,
+    });
+    const socketRef = useRef(null);
+    const scrollRef = useRef(null);
+    const debounceTimerRef = useRef(null);
+
+    const addLog = (type, message) => { const newLog = { id: Date.now() + Math.random(), timestamp: new Date().toLocaleTimeString(), type, message }; setLogs(prevLogs => [newLog, ...prevLogs]); };
+    const handleClearLogs = () => { setLogs([]); };
+    const handleToggleLogCollapse = () => { setIsLogCollapsed(prevState => !prevState); };
+    const handleSend = async () => { if (!isAuthenticated) { addLog('error', 'You must be logged in to send messages.'); return; } setIsSending(true); try { const result = await sendHl7(host, port, rebuildHl7Message(segments)); addLog('success', `ACK Received from ${host}:${port}:\n\n${result.ack}`); } catch (e) { addLog('error', `Failed to connect to ${host}:${port}:\n\n${e.message}`); } finally { setIsSending(false); } };
+    const fetchUserTemplates = useCallback(async () => { if (isAuthenticated) { try { const templates = await getTemplatesApi(); setUserTemplates(templates); } catch (error) { console.error("Failed to fetch user templates:", error); } } else { setUserTemplates([]); } }, [isAuthenticated]);
+    useEffect(() => { if (!isAuthenticated) return; const socket = io(import.meta.env.VITE_API_URL || 'http://localhost:5001'); socketRef.current = socket; socket.on('connect', () => { }); socket.on('disconnect', () => { }); socket.on('listener_status', (data) => { setListenerStatus(data.status); setIsListening(data.status === 'listening'); }); socket.on('incoming_message', (data) => { setReceivedMessages(prev => [data, ...prev]); }); return () => { if (socket) socket.disconnect(); }; }, [isAuthenticated]);
+    useEffect(() => {
+        const fetchInitialData = async () => {
+            try {
+                const versions = await getSupportedVersions();
+                const activeVersions = Array.isArray(versions) ? versions.filter(v => v.is_active) : [];
+                setSupportedVersions(activeVersions);
+                if (activeVersions.length > 0) {
+                    const defaultVersion = activeVersions.find(v => v.is_default);
+                    setSelectedHl7Version(defaultVersion ? defaultVersion.version : activeVersions[0].version);
+                }
+                if (isAuthenticated) {
+                    const [total, byModel] = await Promise.all([getTotalUsage(), getUsageByModel()]);
+                    setTotalTokenUsage(total);
+                    setModelUsage(byModel);
+                    fetchUserTemplates();
+                }
+            } catch (error) {
+                toast.error("Failed to load initial app data. Some features may not work.");
+            }
+        };
+        fetchInitialData();
+    }, [isAuthenticated, fetchUserTemplates]);
+    useEffect(() => { if (activeTab !== 'sender' || !hl7Message.trim()) { setSegments([]); setError(''); return; } const handler = setTimeout(() => { setIsProcessing(true); parseHl7(hl7Message, selectedHl7Version).then(data => { setSegments(data); setError(''); }).catch(err => { setSegments([]); setError(err.message); }).finally(() => { setIsProcessing(false); }); }, 500); return () => clearTimeout(handler); }, [hl7Message, selectedHl7Version, activeTab]);
+    useEffect(() => { if (scrollRef.current > 0) { window.scrollTo(0, scrollRef.current); scrollRef.current = 0; } }, [segments]);
+    const updateHl7MessageText = useCallback((newState) => { if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current); debounceTimerRef.current = setTimeout(() => { setHl7Message(rebuildHl7Message(newState)); }, 300); }, []);
+    const handleFieldInteraction = (updateLogic) => { scrollRef.current = window.scrollY; setIsProcessing(true); setTimeout(() => { const newSegments = updateLogic(segments); setSegments(newSegments); updateHl7MessageText(newSegments); setIsProcessing(false); }, 0); };
+    const handleStartListener = async () => { try { await startListenerApi(listenerPort); } catch (error) { console.error("API Error starting listener:", error); setListenerStatus('error'); } };
+    const handleStopListener = async () => { try { await stopListenerApi(); } catch (error) { console.error("API Error stopping listener:", error); setListenerStatus('error'); } };
+    const handleClearListener = () => { setReceivedMessages([]); };
+    const handleLoadIntoParser = (messageToLoad) => { setHl7Message(messageToLoad); setActiveTab('sender'); };
+    const handleAnalyze = async () => { if (!hl7Message || isAnalyzing || !isAuthenticated) return; setOriginalMessageForDiff(hl7Message); setIsAnalyzing(true); setAnalysisResult(null); try { const result = await analyzeHl7(hl7Message, selectedModel, selectedHl7Version); setAnalysisResult(result); if (result.usage?.total_tokens) { const tokens = result.usage.total_tokens; setTotalTokenUsage(pt => pt + tokens); setModelUsage(pu => ({ ...pu, [selectedModel]: (pu[selectedModel] || 0) + tokens })); } } catch (e) { setAnalysisResult({ explanation: `**Error:** ${e.message}` }); } finally { setIsAnalyzing(false); } };
+    const handleFieldMove = useCallback((source, destination) => { handleFieldInteraction((cs) => cs.map((s, si) => (si === source.segmentIndex || si === destination.segmentIndex) ? { ...s, fields: s.fields.map((f, fi) => (si === source.segmentIndex && fi === source.fieldIndex) ? { ...f, value: '' } : (si === destination.segmentIndex && fi === destination.fieldIndex) ? { ...f, value: cs[source.segmentIndex].fields[source.fieldIndex].value } : f) } : s)); }, [segments, updateHl7MessageText]);
+    const handleFieldUpdate = useCallback((segmentIndex, fieldIndex, newValue) => { handleFieldInteraction((cs) => cs.map((s, si) => (si === segmentIndex) ? { ...s, fields: s.fields.map((f, fi) => (fi === fieldIndex) ? { ...f, value: newValue } : f) } : s)); }, [segments, updateHl7MessageText]);
+    const handleCopy = async () => { if (!hl7Message || isCopied) return; await navigator.clipboard.writeText(hl7Message); setIsCopied(true); setTimeout(() => setIsCopied(false), 2000); };
+    const handleStrip = () => { if (!hl7Message) return; setHl7Message(stripCommentsAndBlankLines(hl7Message)); };
+    const handleClear = () => { setHl7Message(''); };
+    const handleTemplateSelect = (message) => { setHl7Message(message); setActiveTab('sender'); };
+    const handleShowDiff = (fixedMessage) => { setNewMessageForDiff(fixedMessage); setIsDiffModalOpen(true); };
+    const handleConfirmFix = () => { setHl7Message(newMessageForDiff); setIsDiffModalOpen(false); setAnalysisResult(null); };
+    const handleMouseMove = (e) => { if (tooltipContent) setTooltipPos({ x: e.pageX, y: e.pageY }); };
+    const handleSaveTemplate = async (templateName) => { setSaveTemplateError(''); if (!hl7Message.trim() || !templateName.trim()) { setSaveTemplateError("Template name and message content cannot be empty."); return; } try { await saveTemplateApi(templateName, hl7Message); setIsSaveModalOpen(false); await fetchUserTemplates(); } catch (error) { setSaveTemplateError(error.message || "Failed to save template."); } };
+    const TabButton = ({ name, label }) => (<button onClick={() => setActiveTab(name)} className={`px-6 py-2 text-sm font-medium rounded-t-lg transition-colors border-b-2 ${activeTab === name ? 'border-indigo-500 text-white' : 'border-transparent text-gray-400 hover:border-gray-500 hover:text-gray-200'}`} > {label} </button>);
+    const handleShowDictionary = (tableId, segmentIndex, fieldIndex) => {
+        setDictionaryModalState({ isOpen: true, tableId, segmentIndex, fieldIndex });
+    };
+
+    const handleCloseDictionary = () => {
+        setDictionaryModalState({ isOpen: false, tableId: null, segmentIndex: null, fieldIndex: null });
+    };
+
+    const handleSelectDictionaryValue = (value) => {
+        handleFieldUpdate(dictionaryModalState.segmentIndex, dictionaryModalState.fieldIndex, value);
+        handleCloseDictionary();
+    }
+
+    const handleSelectDestination = (destination) => {
+        setHost(destination.hostname);
+        setPort(destination.port);
+    };
+
+    const handlePing = async () => {
+        if (!host || !port) {
+            toast.error("Hostname and Port are required to run a connection test.");
+            return;
+        }
+
+        const toastId = toast.loading(`Pinging ${host}:${port}...`);
+
+        try {
+            const result = await pingMllpApi(host, port);
+            if (result.status === 'success') {
+                const msaSegment = result.ack.split(/[\r\n]+/).find(seg => seg.startsWith('MSA'));
+                const ackCode = msaSegment ? msaSegment.split('|')[1] : 'Unknown';
+                toast.success(`Success! Received ACK (${ackCode})`, { id: toastId });
+            } else {
+                toast.error(result.message || 'Ping failed with an unknown error.', { id: toastId });
+            }
+        } catch (e) {
+            toast.error(`Ping failed: ${e.message}`, { id: toastId });
+        }
+    };
+
+    return (
+        <div onMouseMove={handleMouseMove}>
+            <TableDictionaryModal
+                isOpen={dictionaryModalState.isOpen}
+                tableId={dictionaryModalState.tableId}
+                onClose={handleCloseDictionary}
+                onSelectValue={handleSelectDictionaryValue}
+            />
+
+            <Tooltip content={tooltipContent} position={tooltipPos} />
+            <DiffModal isOpen={isDiffModalOpen} onClose={() => setIsDiffModalOpen(false)} onConfirm={handleConfirmFix} originalText={originalMessageForDiff} newText={newMessageForDiff} />
+            <SaveTemplateModal isOpen={isSaveModalOpen} onClose={() => { setIsSaveModalOpen(false); setSaveTemplateError(''); }} onSave={handleSaveTemplate} error={saveTemplateError} />
+
+            <div className="flex items-center justify-between gap-4 mb-6">
+                <div className="flex items-center gap-4">
+                    <h1 className="text-4xl font-bold">HL7 Yeeter</h1><span className="text-4xl">🚀</span>
+                </div>
+                <UserStatus />
+            </div>
+
+            <div className="border-b border-gray-700">
+                <TabButton name="sender" label="Sender & Parser" />
+                {isAuthenticated && <TabButton name="listener" label="MLLP Listener" />}
+                {isAuthenticated && <TabButton name="simulator" label="Simulator" />}
+                {isAdmin && <TabButton name="admin" label="Admin" />}
+            </div>
+
+            <div className="pt-6">
+                {activeTab === 'sender' && (
+                    <div className="flex flex-col md:flex-row gap-8">
+                        <div className="w-full md:w-1/4 lg:w-1/5 flex flex-col gap-8">
+                            <MessageTemplates onTemplateSelect={handleTemplateSelect} userTemplates={userTemplates} onDeleteSuccess={fetchUserTemplates} />
+                            <SettingsPanel showTooltips={showTooltips} setShowTooltips={setShowTooltips} selectedModel={selectedModel} setSelectedModel={setSelectedModel} supportedHl7Versions={supportedVersions} selectedHl7Version={selectedHl7Version} setSelectedHl7Version={setSelectedHl7Version} />
+                        </div>
+                        <div className={`w-full ${analysisResult || isAnalyzing ? 'md:w-2/4 lg:w-2/5' : 'md:w-3/4 lg:w-4/5'} transition-all duration-300`}>
+                            <div className="flex flex-col gap-8">
+                                <div className="sticky top-4 z-10 bg-gray-900 py-2 flex flex-col gap-4">
+                                    <ConnectionInputs
+                                        host={host}
+                                        setHost={setHost}
+                                        port={port}
+                                        setPort={setPort}
+                                        isSending={isSending}
+                                        handleSend={handleSend}
+                                        handlePing={handlePing}
+                                    />
+                                    <div className={`transition-all duration-300 ease-in-out ${isLogCollapsed ? 'h-14' : 'h-48'}`}>
+                                        <LogPanel logs={logs} onClear={handleClearLogs} isCollapsed={isLogCollapsed} onToggleCollapse={handleToggleLogCollapse} />
+                                    </div>
+                                </div>
+                                <div>
+                                    <div className="flex justify-between items-center mb-1">
+                                        <label htmlFor="hl7-message" className="block text-sm font-medium text-gray-400">HL7 Message</label>
+                                        <div className="flex items-center gap-2">
+                                            <AuthTooltip isAuthRequired={!isAuthenticated} message="Login to save as a template"><button onClick={() => setIsSaveModalOpen(true)} disabled={!isAuthenticated || !hl7Message} title="Save as Template" className="p-1.5 bg-gray-700 rounded-md hover:bg-gray-600 disabled:opacity-50"><svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg></button></AuthTooltip>
+                                            <AuthTooltip isAuthRequired={!isAuthenticated} message="Login to use AI Analyzer"><button onClick={handleAnalyze} disabled={!hl7Message || isAnalyzing || !isAuthenticated} className="p-1.5 bg-gray-700 rounded-md hover:bg-gray-600 disabled:opacity-50"><svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 text-gray-300 ${isAnalyzing ? 'animate-pulse text-indigo-400' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg></button></AuthTooltip>
+                                            <button onClick={handleClear} disabled={!hl7Message} title="Clear message" className="p-1.5 bg-gray-700 rounded-md hover:bg-gray-600 disabled:opacity-50"><svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-4v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                                            <button onClick={handleStrip} disabled={!hl7Message} title="Strip comments & blank lines" className="p-1.5 bg-gray-700 rounded-md hover:bg-gray-600 disabled:opacity-50"><svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-2.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg></button>
+                                            <button onClick={handleCopy} disabled={!hl7Message} title={isCopied ? "Copied!" : "Copy to clipboard"} className="p-1.5 bg-gray-700 rounded-md hover:bg-gray-600 disabled:opacity-50">{isCopied ? <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg> : <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>}</button>
+                                        </div>
+                                    </div>
+                                    <textarea id="hl7-message" rows="10" className="mt-1 block w-full bg-gray-800 border-gray-700 rounded-md shadow-sm p-2 font-mono" value={hl7Message} onChange={(e) => setHl7Message(e.target.value)} />
+                                </div>
+                                <ParserOutput
+                                    isProcessing={isProcessing}
+                                    segments={segments}
+                                    error={error}
+                                    showEmpty={showEmpty}
+                                    setShowEmpty={setShowEmpty}
+                                    onFieldMove={handleFieldMove}
+                                    onFieldUpdate={handleFieldUpdate}
+                                    setTooltipContent={setTooltipContent}
+                                    showTooltips={showTooltips}
+                                    onShowDictionary={handleShowDictionary}
+                                />
+                            </div>
+                        </div>
+                        {(analysisResult || isAnalyzing) && (
+                            <div className="w-full md:w-2/4 lg:w-2/5 transition-all duration-300">
+                                <AnalysisPanel analysisResult={analysisResult} onShowDiff={handleShowDiff} onClear={() => setAnalysisResult(null)} onRetry={handleAnalyze} isLoading={isAnalyzing} totalTokenUsage={totalTokenUsage} selectedModel={selectedModel} modelUsage={modelUsage} />
+                            </div>
+                        )}
+                    </div>
+                )}
+                {activeTab === 'listener' && isAuthenticated && (
+                    <div>
+                        <ListenerPanel port={listenerPort} setPort={setListenerPort} isListening={isListening} status={listenerStatus} onStart={handleStartListener} onStop={handleStopListener} />
+                        <ListenerOutput messages={receivedMessages} onClear={handleClearListener} onLoadIntoParser={handleLoadIntoParser} />
+                    </div>
+                )}
+                {activeTab === 'simulator' && isAuthenticated && (
+                    <Simulator />
+                )}
+                {activeTab === 'admin' && isAdmin && (
+                    <AdminPanel />
+                )}
+            </div>
+        </div>
+    );
+};
+
+export default HL7Parser;
+// --- END OF FILE src/components/HL7Parser.jsx ---
+
+--- END OF FILE src/components/HL7Parser.jsx ---
+
+
+--- START OF FILE src/components/Simulator.jsx ---
+
+// --- START OF FILE src/components/Simulator.jsx ---
+import React, { useState } from 'react';
+
+import GeneratorTemplateManager from './GeneratorTemplateManager';
+import SimulationWorkflowManager from './SimulationWorkflowManager';
+import SimulationRunDashboard from './SimulationRunDashboard'; // <-- IMPORT IT
+
+const Simulator = () => {
+    const [activeSubTab, setActiveSubTab] = useState('workflows');
+
+    const SubTabButton = ({ name, label }) => (
+        <button
+            onClick={() => setActiveSubTab(name)}
+            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                activeSubTab === name 
+                ? 'bg-indigo-600 text-white' 
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            }`}
+        >
+            {label}
+        </button>
+    );
+
+    return (
+        <div className="p-6 bg-gray-800 rounded-lg shadow-xl">
+            <h2 className="text-2xl font-bold mb-4 text-white">Clinical Workflow Simulator</h2>
+            <div className="flex items-center gap-4 mb-6 border-b border-gray-700 pb-4">
+                <SubTabButton name="workflows" label="Workflow Templates" />
+                <SubTabButton name="runs" label="Run Dashboard" />
+                <SubTabButton name="generators" label="HL7 Generators" />
+            </div>
+
+            <div>
+                {activeSubTab === 'workflows' && <SimulationWorkflowManager />}
+                {activeSubTab === 'runs' && <SimulationRunDashboard />} {/* <-- RENDER IT */}
+                {activeSubTab === 'generators' && <GeneratorTemplateManager />}
+            </div>
+        </div>
+    );
+};
+
+export default Simulator;
+// --- END OF FILE: src/components/Simulator.jsx ---
+
+--- END OF FILE src/components/Simulator.jsx ---
+
+
+--- START OF FILE src/components/SimulationWorkflowManager.jsx ---
+
+// --- CREATE NEW FILE: src/components/SimulationWorkflowManager.jsx ---
+import React, { useState, useEffect } from 'react';
+import { toast } from 'react-hot-toast';
+import { getSimulationTemplatesApi, createSimulationTemplateApi, updateSimulationTemplateApi, deleteSimulationTemplateApi } from '../api/simulator';
+import { getGeneratorTemplatesApi } from '../api/simulator';
+import { getEndpointsApi } from '../api/endpoints';
+import SimulationStepEditor from './SimulationStepEditor';
+import { PlusIcon } from '@heroicons/react/24/outline';
+
+const SimulationWorkflowManager = () => {
+    const [templates, setTemplates] = useState([]);
+    const [selectedTemplate, setSelectedTemplate] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+    // Dependencies needed for the step editor dropdowns
+    const [generatorTemplates, setGeneratorTemplates] = useState([]);
+    const [endpoints, setEndpoints] = useState([]);
+
+    const fetchAllData = async () => {
+        setIsLoading(true);
+        try {
+            const [simTemplates, genTemplates, endpointsData] = await Promise.all([
+                getSimulationTemplatesApi(),
+                getGeneratorTemplatesApi(),
+                getEndpointsApi(),
+            ]);
+            setTemplates(simTemplates);
+            setGeneratorTemplates(genTemplates);
+            setEndpoints(endpointsData);
+        } catch (error) {
+            toast.error(`Failed to load workflow data: ${error.message}`);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchAllData();
+    }, []);
+
+    const handleSelectTemplate = (template) => {
+        // Make a deep copy to avoid editing the original state directly
+        setSelectedTemplate(JSON.parse(JSON.stringify(template)));
+    };
+
+    const handleCreateNew = () => {
+        setSelectedTemplate({ name: 'New Workflow Template', description: '', steps: [] });
+    };
+
+    const handleFieldChange = (e) => {
+        const { name, value } = e.target;
+        setSelectedTemplate(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleStepUpdate = (index, updatedStep) => {
+        const newSteps = [...selectedTemplate.steps];
+        newSteps[index] = updatedStep;
+        setSelectedTemplate(prev => ({ ...prev, steps: newSteps }));
+    };
+
+    const handleAddStep = () => {
+        const newStep = { step_order: selectedTemplate.steps.length + 1, step_type: '', parameters: {} };
+        setSelectedTemplate(prev => ({ ...prev, steps: [...prev.steps, newStep] }));
+    };
+
+    const handleStepDelete = (index) => {
+        const newSteps = selectedTemplate.steps.filter((_, i) => i !== index);
+        // Re-order the steps
+        const reorderedSteps = newSteps.map((step, i) => ({ ...step, step_order: i + 1 }));
+        setSelectedTemplate(prev => ({ ...prev, steps: reorderedSteps }));
+    };
+
+    const handleStepMove = (index, direction) => {
+        const newSteps = [...selectedTemplate.steps];
+        const targetIndex = direction === 'up' ? index - 1 : index + 1;
+        if (targetIndex < 0 || targetIndex >= newSteps.length) return;
+        
+        // Swap
+        [newSteps[index], newSteps[targetIndex]] = [newSteps[targetIndex], newSteps[index]];
+        
+        // Update step_order
+        const reorderedSteps = newSteps.map((step, i) => ({ ...step, step_order: i + 1 }));
+        setSelectedTemplate(prev => ({ ...prev, steps: reorderedSteps }));
+    };
+
+    const handleSave = async () => {
+        const isCreating = !selectedTemplate.id;
+        const toastId = toast.loading(isCreating ? 'Creating workflow...' : 'Updating workflow...');
+        try {
+            const payload = {
+                name: selectedTemplate.name,
+                description: selectedTemplate.description,
+                steps: selectedTemplate.steps.map(({id, ...step}) => step) // Remove temp ID for create/update
+            };
+
+            if (isCreating) {
+                await createSimulationTemplateApi(payload);
+            } else {
+                await updateSimulationTemplateApi(selectedTemplate.id, payload);
+            }
+            toast.success('Workflow saved!', { id: toastId });
+            setSelectedTemplate(null); // Close editor
+            fetchAllData(); // Refresh list
+        } catch (error) {
+            toast.error(`Save failed: ${error.message}`, { id: toastId });
+        }
+    };
+    
+    const handleDelete = async () => {
+        if (!selectedTemplate.id || !window.confirm("Are you sure? This will permanently delete the workflow template.")) return;
+         const toastId = toast.loading('Deleting workflow...');
+        try {
+            await deleteSimulationTemplateApi(selectedTemplate.id);
+            toast.success('Workflow deleted.', { id: toastId });
+            setSelectedTemplate(null);
+            fetchAllData();
+        } catch(error) {
+             toast.error(`Delete failed: ${error.message}`, { id: toastId });
+        }
+    }
+
+    return (
+        <div className="flex gap-8">
+            <div className="w-1/4">
+                <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-bold">Workflows</h3>
+                    <button onClick={handleCreateNew} className="px-3 py-1 bg-indigo-600 text-sm rounded hover:bg-indigo-700">New</button>
+                </div>
+                <div className="space-y-2">
+                    {isLoading ? <p>Loading...</p> : templates.map(t => (
+                        <div key={t.id} onClick={() => handleSelectTemplate(t)} className={`p-3 rounded cursor-pointer ${selectedTemplate?.id === t.id ? 'bg-indigo-600 text-white' : 'bg-gray-700 hover:bg-gray-600'}`}>
+                            <p className="font-semibold">{t.name}</p>
+                            <p className="text-xs">{t.steps.length} steps</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+            <div className="w-3/4">
+                {selectedTemplate ? (
+                    <div className="space-y-6">
+                        <div>
+                             <label className="text-sm text-gray-400">Workflow Name</label>
+                             <input type="text" name="name" value={selectedTemplate.name} onChange={handleFieldChange} className="w-full bg-gray-900 p-2 rounded text-xl font-bold" />
+                        </div>
+                        <div>
+                             <label className="text-sm text-gray-400">Description</label>
+                             <textarea name="description" value={selectedTemplate.description} onChange={handleFieldChange} className="w-full bg-gray-900 p-2 rounded mt-1" rows="2" />
+                        </div>
+                        
+                        <h3 className="text-lg font-bold">Steps</h3>
+                        <div className="space-y-4">
+                           {selectedTemplate.steps.map((step, index) => (
+                               <SimulationStepEditor 
+                                    key={index} // Using index is OK here as we don't have stable IDs until saved
+                                    step={step}
+                                    index={index}
+                                    onUpdate={handleStepUpdate}
+                                    onDelete={handleStepDelete}
+                                    onMove={handleStepMove}
+                                    isFirst={index === 0}
+                                    isLast={index === selectedTemplate.steps.length - 1}
+                                    generatorTemplates={generatorTemplates}
+                                    endpoints={endpoints}
+                               />
+                           ))}
+                        </div>
+                        <button onClick={handleAddStep} className="flex items-center gap-2 w-full justify-center p-3 border-2 border-dashed border-gray-600 hover:border-indigo-500 hover:text-indigo-400 rounded-lg text-gray-400">
+                           <PlusIcon className="h-6 w-6" /> Add Step
+                        </button>
+                        
+                        <div className="flex justify-between items-center pt-4 border-t border-gray-700">
+                            <button onClick={handleDelete} disabled={!selectedTemplate.id} className="px-4 py-2 text-sm bg-red-800 hover:bg-red-700 rounded disabled:opacity-50">Delete Workflow</button>
+                            <div className="flex gap-4">
+                                <button onClick={() => setSelectedTemplate(null)} className="px-4 py-2 text-sm bg-gray-600 hover:bg-gray-500 rounded">Cancel</button>
+                                <button onClick={handleSave} className="px-6 py-2 font-bold bg-green-600 hover:bg-green-500 rounded">Save Workflow</button>
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="flex items-center justify-center h-96 border-2 border-dashed border-gray-700 rounded-lg">
+                        <p className="text-gray-500">Select a workflow to edit or create a new one.</p>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+export default SimulationWorkflowManager;
+// --- END OF FILE: src/components/SimulationWorkflowManager.jsx ---
+
+--- END OF FILE src/components/SimulationWorkflowManager.jsx ---
+
+
+--- START OF FILE src/components/SimulationStepEditor.jsx ---
+
+// --- CREATE NEW FILE: src/components/SimulationStepEditor.jsx ---
+import React from 'react';
+import { TrashIcon, ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/outline';
+
+const SimulationStepEditor = ({ step, index, onUpdate, onDelete, onMove, isFirst, isLast, generatorTemplates, endpoints }) => {
+    
+    const handleParamChange = (e) => {
+        const { name, value, type, checked } = e.target;
+        const newParams = {
+            ...step.parameters,
+            [name]: type === 'checkbox' ? checked : (type === 'number' ? parseInt(value, 10) : value)
+        };
+        onUpdate(index, { ...step, parameters: newParams });
+    };
+    
+    const handleTypeChange = (e) => {
+        // When type changes, reset parameters to avoid carrying over old settings
+        onUpdate(index, { ...step, step_type: e.target.value, parameters: {} });
+    };
+
+    const renderParameters = () => {
+        switch (step.step_type) {
+            case 'GENERATE_HL7':
+                return (
+                    <div className="flex flex-col gap-2">
+                        <label className="text-xs text-gray-400">HL7 Generator Template</label>
+                        <select
+                            name="generator_template_id"
+                            value={step.parameters.generator_template_id || ''}
+                            onChange={handleParamChange}
+                            className="bg-gray-700 p-2 rounded border border-gray-600"
+                        >
+                            <option value="">-- Select a Generator --</option>
+                            {generatorTemplates.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                        </select>
+                    </div>
+                );
+            case 'SEND_MLLP':
+                 return (
+                    <div className="flex flex-col gap-2">
+                        <label className="text-xs text-gray-400">Destination MLLP Endpoint</label>
+                        <select
+                            name="endpoint_id"
+                            value={step.parameters.endpoint_id || ''}
+                            onChange={handleParamChange}
+                            className="bg-gray-700 p-2 rounded border border-gray-600"
+                        >
+                            <option value="">-- Select an Endpoint --</option>
+                            {endpoints.filter(e => e.endpoint_type === 'MLLP').map(ep => <option key={ep.id} value={ep.id}>{ep.name}</option>)}
+                        </select>
+                    </div>
+                );
+            case 'GENERATE_DICOM':
+                return (
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="flex flex-col gap-2">
+                            <label className="text-xs text-gray-400">Modality</label>
+                            <input type="text" name="modality" value={step.parameters.modality || 'CT'} onChange={handleParamChange} className="bg-gray-700 p-2 rounded border border-gray-600" />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                            <label className="text-xs text-gray-400">Image Count</label>
+                            <input type="number" name="count" value={step.parameters.count || 10} onChange={handleParamChange} className="bg-gray-700 p-2 rounded border border-gray-600" />
+                        </div>
+                        <div className="col-span-2 flex flex-col gap-2">
+                            <label className="text-xs text-gray-400">Study Description</label>
+                            <input type="text" name="study_description" value={step.parameters.study_description || ''} onChange={handleParamChange} placeholder="e.g., CT CHEST W/O CONTRAST" className="bg-gray-700 p-2 rounded border border-gray-600" />
+                        </div>
+                    </div>
+                );
+            case 'SEND_DICOM':
+                 return (
+                    <div className="flex flex-col gap-2">
+                        <label className="text-xs text-gray-400">Destination DICOM SCP</label>
+                        <select
+                            name="endpoint_id"
+                            value={step.parameters.endpoint_id || ''}
+                            onChange={handleParamChange}
+                            className="bg-gray-700 p-2 rounded border border-gray-600"
+                        >
+                            <option value="">-- Select an Endpoint --</option>
+                            {endpoints.filter(e => e.endpoint_type === 'DICOM_SCP').map(ep => <option key={ep.id} value={ep.id}>{ep.name}</option>)}
+                        </select>
+                    </div>
+                );
+            case 'WAIT':
+                return (
+                    <div className="flex flex-col gap-2">
+                        <label className="text-xs text-gray-400">Duration (seconds)</label>
+                        <input type="number" name="duration_seconds" value={step.parameters.duration_seconds || 1} onChange={handleParamChange} className="bg-gray-700 p-2 rounded border border-gray-600" />
+                    </div>
+                );
+            default:
+                return <p className="text-gray-500">Select a step type to configure parameters.</p>;
+        }
+    };
+
+    return (
+        <div className="bg-gray-800/50 p-4 rounded-lg border border-gray-700 flex gap-4">
+            <div className="flex flex-col items-center gap-2 text-gray-400">
+                <span className="font-bold text-lg">{index + 1}</span>
+                <button onClick={() => onMove(index, 'up')} disabled={isFirst} className="disabled:opacity-20"><ArrowUpIcon className="h-5 w-5"/></button>
+                <button onClick={() => onMove(index, 'down')} disabled={isLast} className="disabled:opacity-20"><ArrowDownIcon className="h-5 w-5"/></button>
+            </div>
+            <div className="flex-grow space-y-4">
+                <div className="flex gap-4 items-start">
+                    <div className="flex-grow">
+                        <label className="text-xs text-gray-400">Step Type</label>
+                        <select value={step.step_type} onChange={handleTypeChange} className="w-full bg-gray-700 p-2 rounded border border-gray-600">
+                            <option value="">-- Select Type --</option>
+                            <option value="GENERATE_HL7">Generate HL7 Message</option>
+                            <option value="SEND_MLLP">Send HL7 (MLLP)</option>
+                            <option value="GENERATE_DICOM">Generate DICOM Series</option>
+                            <option value="SEND_DICOM">Send DICOM (C-STORE)</option>
+                            <option value="WAIT">Wait</option>
+                        </select>
+                    </div>
+                    <button onClick={() => onDelete(index)} className="mt-5 p-2 text-red-400 hover:bg-gray-700 rounded"><TrashIcon className="h-5 w-5"/></button>
+                </div>
+                <div>
+                    <h5 className="font-semibold text-sm mb-2 text-gray-300">Parameters</h5>
+                    <div className="p-3 bg-gray-900/50 rounded-md">
+                        {renderParameters()}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default SimulationStepEditor;
+// --- END OF FILE: src/components/SimulationStepEditor.jsx ---
+
+--- END OF FILE src/components/SimulationStepEditor.jsx ---
+
+
+--- START OF FILE src/components/SimulationRunDashboard.jsx ---
+
+// --- REPLACE src/components/SimulationRunDashboard.jsx ---
+import React, { useState, useEffect } from 'react';
+import { toast } from 'react-hot-toast';
+import { getSimulationTemplatesApi, runSimulationApi, getSimulationRunsApi } from '../api/simulator';
+import SimulationRunLog from './SimulationRunLog';
+
+const SimulationRunDashboard = () => {
+    const [templates, setTemplates] = useState([]);
+    const [runs, setRuns] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [selectedTemplateId, setSelectedTemplateId] = useState('');
+    const [patientCount, setPatientCount] = useState(1);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [viewingRunId, setViewingRunId] = useState(null);
+
+    const fetchDashboardData = () => {
+        setIsLoading(true);
+        Promise.all([
+            getSimulationTemplatesApi(),
+            getSimulationRunsApi()
+        ]).then(([templatesData, runsData]) => {
+            setTemplates(templatesData);
+            setRuns(runsData);
+        }).catch(err => {
+            toast.error(`Failed to load dashboard data: ${err.message}`);
+        }).finally(() => {
+            setIsLoading(false);
+        });
+    };
+
+    useEffect(() => {
+        fetchDashboardData();
+    }, []);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!selectedTemplateId) {
+            toast.error("Please select a workflow template.");
+            return;
+        }
+        setIsSubmitting(true);
+        const toastId = toast.loading('Initiating simulation...');
+        try {
+            const result = await runSimulationApi(selectedTemplateId, patientCount);
+            toast.success(`Run #${result.run_id} started!`, { id: toastId });
+            setViewingRunId(result.run_id);
+            fetchDashboardData(); // Refresh history
+        } catch (error) {
+            toast.error(`Failed to start: ${error.message}`, { id: toastId });
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    if (viewingRunId) {
+        return <SimulationRunLog runId={viewingRunId} onBack={() => setViewingRunId(null)} />;
+    }
+
+    return (
+        <div>
+            {/* ... (form is the same) ... */}
+            <h3 className="text-xl font-bold mb-4 text-gray-200">Run a Simulation</h3>
+            <form onSubmit={handleSubmit} className="p-4 bg-gray-900 rounded-lg grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                <div className="flex flex-col gap-2">
+                    <label className="text-sm font-medium text-gray-400">Workflow Template</label>
+                    <select value={selectedTemplateId} onChange={(e) => setSelectedTemplateId(e.target.value)} className="bg-gray-800 p-2 rounded border border-gray-700 h-10">
+                        <option value="">-- Select a Workflow --</option>
+                        {templates.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                    </select>
+                </div>
+                <div className="flex flex-col gap-2">
+                    <label className="text-sm font-medium text-gray-400">Patient Count</label>
+                    <input type="number" value={patientCount} onChange={(e) => setPatientCount(parseInt(e.target.value, 10))} min="1" className="bg-gray-800 p-2 rounded border border-gray-700 h-10"/>
+                </div>
+                <button type="submit" disabled={isSubmitting || !selectedTemplateId} className="p-2 h-10 bg-green-600 hover:bg-green-700 rounded font-bold disabled:bg-gray-600">
+                    {isSubmitting ? 'Starting...' : 'Run Simulation'}
+                </button>
+            </form>
+
+            <h3 className="text-xl font-bold mt-8 mb-4 text-gray-200">Run History</h3>
+            <div className="bg-gray-900 rounded-lg overflow-hidden">
+                <table className="w-full text-left text-sm">
+                     <thead className="bg-gray-950 text-xs text-gray-400 uppercase">
+                         <tr>
+                            <th className="p-3">Run ID</th>
+                            <th className="p-3">Template ID</th>
+                            <th className="p-3">Status</th>
+                            <th className="p-3">Started At (UTC)</th>
+                            <th className="p-3">Actions</th>
+                         </tr>
+                     </thead>
+                     <tbody>
+                        {isLoading ? (
+                             <tr><td colSpan="5" className="p-4 text-center">Loading...</td></tr>
+                        ) : runs.length === 0 ? (
+                            <tr><td colSpan="5" className="p-4 text-center text-gray-500">No simulation runs found.</td></tr>
+                        ) : (
+                            runs.map(run => (
+                                <tr key={run.id} className="border-b border-gray-800 hover:bg-gray-800/50">
+                                    <td className="p-3 font-mono">{run.id}</td>
+                                    <td className="p-3">{run.template_id}</td>
+                                    <td className="p-3 font-semibold">{run.status}</td>
+                                    <td className="p-3">{run.started_at ? new Date(run.started_at).toLocaleString('en-GB', { timeZone: 'UTC' }) : 'N/A'}</td>
+                                    <td className="p-3">
+                                        <button onClick={() => setViewingRunId(run.id)} className="text-indigo-400 hover:underline">View Log</button>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
+                     </tbody>
+                </table>
+            </div>
+        </div>
+    );
+};
+
+export default SimulationRunDashboard;
+
+--- END OF FILE src/components/SimulationRunDashboard.jsx ---
+
+
+--- START OF FILE src/components/SimulationRunLog.jsx ---
+
+// --- REPLACE src/components/SimulationRunLog.jsx ---
+import React, { useState, useEffect, useRef } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { getSimulationRunApi } from '../api/simulator';
+import { toast } from 'react-hot-toast';
+
+const SimulationRunLog = ({ runId, onBack }) => {
+    const { socket } = useAuth();
+    const [runDetails, setRunDetails] = useState(null);
+    const [events, setEvents] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const logContainerRef = useRef(null);
+
+    useEffect(() => {
+        const fetchInitialData = async () => {
+            setIsLoading(true);
+            try {
+                const data = await getSimulationRunApi(runId);
+                setRunDetails(data);
+                setEvents(data.events);
+            } catch(error) {
+                toast.error(`Failed to load run details: ${error.message}`);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchInitialData();
+    }, [runId]);
+
+    useEffect(() => {
+        if (socket) {
+            socket.emit('join_run_room', { run_id: runId });
+            const handleLogUpdate = (data) => {
+                if (data.run_id === runId) {
+                    setEvents(prev => [...prev, data.event]);
+                }
+            };
+            socket.on('sim_log_update', handleLogUpdate);
+            return () => {
+                socket.emit('leave_run_room', { run_id: runId });
+                socket.off('sim_log_update', handleLogUpdate);
+            };
+        }
+    }, [socket, runId]);
+
+    useEffect(() => {
+        if (logContainerRef.current) {
+            logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
+        }
+    }, [events]);
+
+    const getStatusColor = (status) => {
+        if (status === 'SUCCESS') return 'text-green-400';
+        if (status === 'FAILURE') return 'text-red-400';
+        if (status === 'INFO') return 'text-blue-400';
+        return 'text-gray-400';
+    };
+
+    return (
+        <div>
+            <button onClick={onBack} className="mb-4 text-sm text-indigo-400 hover:text-indigo-300">← Back to Dashboard</button>
+            <div className="bg-gray-900 rounded-lg p-4 border border-gray-700">
+                <h3 className="text-xl font-bold">Log for Run #{runDetails?.id}</h3>
+                <p className="text-sm text-gray-400">Status: <span className="font-semibold">{runDetails?.status}</span></p>
+                <div ref={logContainerRef} className="mt-4 h-[60vh] bg-black rounded p-2 font-mono text-xs overflow-y-auto">
+                    {isLoading ? <p>Loading log history...</p> : events.map(event => (
+                        <div key={event.id} className="flex gap-2 items-start">
+                            <span className="text-gray-500 flex-shrink-0">{new Date(event.timestamp).toLocaleTimeString()}</span>
+                            <span className={`${getStatusColor(event.status)} font-bold w-16 text-right flex-shrink-0`}>{event.status}</span>
+                            <span className="text-gray-600">(Iter:{event.iteration}, Step:{event.step_order})</span>
+                            <span className="text-gray-300 whitespace-pre-wrap break-words">{event.details}</span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default SimulationRunLog;
+
+--- END OF FILE src/components/SimulationRunLog.jsx ---
+
+
+--- START OF FILE src/components/EndpointManager.jsx ---
+
+// --- CREATE NEW FILE: src/components/EndpointManager.jsx ---
+import React, { useState, useEffect } from 'react';
+import { toast } from 'react-hot-toast';
+import { getEndpointsApi, createEndpointApi, updateEndpointApi, deleteEndpointApi } from '../api/endpoints';
+
+const EndpointManager = () => {
+    const [endpoints, setEndpoints] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isEditing, setIsEditing] = useState(null); // Holds the ID of the endpoint being edited
+    const [editFormData, setEditFormData] = useState({});
+
+    const initialFormState = {
+        name: '',
+        endpoint_type: 'MLLP',
+        hostname: '',
+        port: '',
+        ae_title: '',
+        aet_title: ''
+    };
+    const [newEndpoint, setNewEndpoint] = useState(initialFormState);
+
+    const fetchEndpoints = async () => {
+        setIsLoading(true);
+        try {
+            const data = await getEndpointsApi();
+            setEndpoints(data);
+        } catch (error) {
+            toast.error(`Failed to fetch endpoints: ${error.message}`);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchEndpoints();
+    }, []);
+
+    const handleNewChange = (e) => {
+        const { name, value } = e.target;
+        setNewEndpoint(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleEditChange = (e) => {
+        const { name, value } = e.target;
+        setEditFormData(prev => ({ ...prev, [name]: value }));
+    }
+
+    const handleCreate = async (e) => {
+        e.preventDefault();
+        const toastId = toast.loading('Adding endpoint...');
+        try {
+            const created = await createEndpointApi(newEndpoint);
+            setEndpoints(prev => [...prev, created]);
+            setNewEndpoint(initialFormState);
+            toast.success(`Endpoint "${created.name}" created.`, { id: toastId });
+        } catch (error) {
+            toast.error(`Failed to create endpoint: ${error.message}`, { id: toastId });
+        }
+    };
+    
+    const handleUpdate = async (id) => {
+        const toastId = toast.loading('Updating endpoint...');
+        try {
+            const updated = await updateEndpointApi(id, editFormData);
+            setEndpoints(prev => prev.map(ep => (ep.id === id ? updated : ep)));
+            setIsEditing(null);
+            toast.success(`Endpoint "${updated.name}" updated.`, { id: toastId });
+        } catch (error) {
+            toast.error(`Failed to update endpoint: ${error.message}`, { id: toastId });
+        }
+    };
+    
+    const handleDelete = async (id) => {
+        if (!window.confirm("Are you sure you want to permanently delete this endpoint?")) return;
+        const toastId = toast.loading('Deleting endpoint...');
+        try {
+            await deleteEndpointApi(id);
+            setEndpoints(prev => prev.filter(ep => ep.id !== id));
+            toast.success('Endpoint deleted.', { id: toastId });
+        } catch (error) {
+            toast.error(`Failed to delete endpoint: ${error.message}`, { id: toastId });
+        }
+    };
+
+    const startEditing = (endpoint) => {
+        setIsEditing(endpoint.id);
+        setEditFormData(endpoint);
+    };
+
+    const renderRow = (endpoint) => {
+        const isCurrentEditing = isEditing === endpoint.id;
+        const data = isCurrentEditing ? editFormData : endpoint;
+        const changeHandler = isCurrentEditing ? handleEditChange : () => {};
+
+        return (
+            <tr key={endpoint.id} className="bg-gray-800 hover:bg-gray-700/50">
+                <td className="p-3"><input type="text" name="name" value={data.name} onChange={changeHandler} disabled={!isCurrentEditing} className="w-full bg-transparent disabled:bg-transparent p-1 rounded border border-transparent disabled:border-transparent focus:bg-gray-900 focus:border-indigo-500"/></td>
+                <td className="p-3">
+                    <select name="endpoint_type" value={data.endpoint_type} onChange={changeHandler} disabled={!isCurrentEditing} className="w-full bg-transparent disabled:bg-transparent p-1 rounded border border-transparent disabled:border-transparent focus:bg-gray-900 focus:border-indigo-500">
+                        <option value="MLLP">MLLP</option>
+                        <option value="DICOM_SCP">DICOM_SCP</option>
+                    </select>
+                </td>
+                <td className="p-3"><input type="text" name="hostname" value={data.hostname} onChange={changeHandler} disabled={!isCurrentEditing} className="w-full bg-transparent disabled:bg-transparent p-1 rounded border border-transparent disabled:border-transparent focus:bg-gray-900 focus:border-indigo-500"/></td>
+                <td className="p-3"><input type="number" name="port" value={data.port} onChange={changeHandler} disabled={!isCurrentEditing} className="w-20 bg-transparent disabled:bg-transparent p-1 rounded border border-transparent disabled:border-transparent focus:bg-gray-900 focus:border-indigo-500"/></td>
+                <td className="p-3"><input type="text" name="ae_title" value={data.ae_title || ''} onChange={changeHandler} disabled={!isCurrentEditing || data.endpoint_type !== 'DICOM_SCP'} className="w-full bg-transparent disabled:bg-transparent p-1 rounded border border-transparent disabled:border-transparent focus:bg-gray-900 focus:border-indigo-500"/></td>
+                <td className="p-3"><input type="text" name="aet_title" value={data.aet_title || ''} onChange={changeHandler} disabled={!isCurrentEditing || data.endpoint_type !== 'DICOM_SCP'} className="w-full bg-transparent disabled:bg-transparent p-1 rounded border border-transparent disabled:border-transparent focus:bg-gray-900 focus:border-indigo-500"/></td>
+                <td className="p-3">
+                    <div className="flex gap-2">
+                        {isCurrentEditing ? (
+                            <>
+                                <button onClick={() => handleUpdate(endpoint.id)} className="text-green-400 hover:text-green-300">Save</button>
+                                <button onClick={() => setIsEditing(null)} className="text-gray-400 hover:text-gray-300">Cancel</button>
+                            </>
+                        ) : (
+                            <>
+                                <button onClick={() => startEditing(endpoint)} className="text-indigo-400 hover:text-indigo-300">Edit</button>
+                                <button onClick={() => handleDelete(endpoint.id)} className="text-red-400 hover:text-red-300">Delete</button>
+                            </>
+                        )}
+                    </div>
+                </td>
+            </tr>
+        )
+    };
+
+    return (
+        <div>
+            <h3 className="text-xl font-bold mb-4 text-gray-200">Manage Endpoints</h3>
+            
+            <div className="bg-gray-900 rounded-lg overflow-hidden mb-8">
+                <table className="w-full text-left text-sm">
+                    <thead className="bg-gray-950 text-xs text-gray-400 uppercase">
+                        <tr>
+                            <th className="p-3">Name</th>
+                            <th className="p-3">Type</th>
+                            <th className="p-3">Hostname</th>
+                            <th className="p-3">Port</th>
+                            <th className="p-3">Remote AE Title</th>
+                            <th className="p-3">Our AE Title</th>
+                            <th className="p-3">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {isLoading ? (
+                             <tr><td colSpan="7" className="p-4 text-center text-gray-500">Loading...</td></tr>
+                        ) : endpoints.map(renderRow) }
+                    </tbody>
+                </table>
+            </div>
+
+            <h3 className="text-xl font-bold mb-4 text-gray-200">Add New Endpoint</h3>
+            <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4 bg-gray-900 rounded-lg">
+                <input name="name" value={newEndpoint.name} onChange={handleNewChange} placeholder="Unique Name" className="bg-gray-800 p-2 rounded border border-gray-700 focus:border-indigo-500" required />
+                <select name="endpoint_type" value={newEndpoint.endpoint_type} onChange={handleNewChange} className="bg-gray-800 p-2 rounded border border-gray-700 focus:border-indigo-500">
+                    <option value="MLLP">MLLP</option>
+                    <option value="DICOM_SCP">DICOM_SCP</option>
+                </select>
+                <input name="hostname" value={newEndpoint.hostname} onChange={handleNewChange} placeholder="Hostname or IP" className="bg-gray-800 p-2 rounded border border-gray-700 focus:border-indigo-500" required />
+                <input name="port" type="number" value={newEndpoint.port} onChange={handleNewChange} placeholder="Port" className="bg-gray-800 p-2 rounded border border-gray-700 focus:border-indigo-500" required />
+                {newEndpoint.endpoint_type === 'DICOM_SCP' && (
+                    <>
+                         <input name="ae_title" value={newEndpoint.ae_title} onChange={handleNewChange} placeholder="Remote AE Title" className="bg-gray-800 p-2 rounded border border-gray-700 focus:border-indigo-500" />
+                         <input name="aet_title" value={newEndpoint.aet_title} onChange={handleNewChange} placeholder="Our AE Title (Optional)" className="bg-gray-800 p-2 rounded border border-gray-700 focus:border-indigo-500" />
+                    </>
+                )}
+                 <button type="submit" className="md:col-start-1 lg:col-start-auto bg-indigo-600 hover:bg-indigo-700 rounded p-2 font-bold">Add Endpoint</button>
+            </form>
+        </div>
+    );
+};
+
+export default EndpointManager;
+// --- END OF FILE: src/components/EndpointManager.jsx ---
+
+--- END OF FILE src/components/EndpointManager.jsx ---
+
+
+--- START OF FILE src/api/simulator.js ---
+
+// --- CREATE NEW FILE: src/api/simulator.js ---
+import { getAuthHeaders, handleResponse } from './apiUtils';
+
+const API_URL = ''; // Uses Vite proxy
+
+// --- Generator Template (HL7 Message Templates) ---
+
+export const getGeneratorTemplatesApi = async () => {
+    const response = await fetch(`${API_URL}/api/simulator/generators`, {
+        headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+};
+
+export const createGeneratorTemplateApi = async (templateData) => {
+    const response = await fetch(`${API_URL}/api/simulator/generators`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(templateData),
+    });
+    return handleResponse(response);
+};
+
+export const updateGeneratorTemplateApi = async (id, templateData) => {
+    const response = await fetch(`${API_URL}/api/simulator/generators/${id}`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(templateData),
+    });
+    return handleResponse(response);
+};
+
+export const deleteGeneratorTemplateApi = async (id) => {
+    const response = await fetch(`${API_URL}/api/simulator/generators/${id}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+};
+
+
+// --- Simulation Template (Workflow Templates) ---
+
+export const getSimulationTemplatesApi = async () => {
+    const response = await fetch(`${API_URL}/api/simulator/templates`, {
+        headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+};
+
+export const createSimulationTemplateApi = async (templateData) => {
+    const response = await fetch(`${API_URL}/api/simulator/templates`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(templateData),
+    });
+    return handleResponse(response);
+};
+
+export const updateSimulationTemplateApi = async (id, templateData) => {
+    const response = await fetch(`${API_URL}/api/simulator/templates/${id}`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(templateData),
+    });
+    return handleResponse(response);
+};
+
+export const deleteSimulationTemplateApi = async (id) => {
+    const response = await fetch(`${API_URL}/api/simulator/templates/${id}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+};
+
+
+// --- Simulation Run ---
+
+export const runSimulationApi = async (templateId, patientCount = 1) => {
+    const response = await fetch(`${API_URL}/api/simulator/run`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ template_id: templateId, patient_count: patientCount }),
+    });
+    return handleResponse(response);
+};
+
+export const getSimulationRunsApi = async () => {
+    const response = await fetch(`${API_URL}/api/simulator/runs`, {
+        headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+};
+
+export const getSimulationRunApi = async (runId) => {
+    const response = await fetch(`${API_URL}/api/simulator/runs/${runId}`, {
+        headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+};
+
+// --- END OF FILE: src/api/simulator.js ---
+
+--- END OF FILE src/api/simulator.js ---
+
+
+--- START OF FILE src/api/endpoints.js ---
+
+// --- CREATE NEW FILE: src/api/endpoints.js ---
+import { getAuthHeaders, handleResponse } from './apiUtils';
+
+const API_URL = ''; // Uses Vite proxy
+
+/**
+ * Fetches all saved endpoints. (Admin or User)
+ * @returns {Promise<Array>} A promise that resolves to an array of endpoints.
+ */
+export const getEndpointsApi = async () => {
+    const response = await fetch(`${API_URL}/api/endpoints`, {
+        headers: getAuthHeaders()
+    });
+    return handleResponse(response);
+};
+
+/**
+ * Creates a new endpoint. (Admin only)
+ * @param {object} endpointData - The full endpoint object.
+ * @returns {Promise<Object>} A promise that resolves to the newly created endpoint object.
+ */
+export const createEndpointApi = async (endpointData) => {
+    const response = await fetch(`${API_URL}/api/endpoints`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(endpointData)
+    });
+    return handleResponse(response);
+};
+
+/**
+ * Updates an existing endpoint. (Admin only)
+ * @param {number} id - The ID of the endpoint to update.
+ * @param {object} endpointData - The fields to update.
+ * @returns {Promise<Object>} A promise that resolves to the updated endpoint object.
+ */
+export const updateEndpointApi = async (id, endpointData) => {
+    const response = await fetch(`${API_URL}/api/endpoints/${id}`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(endpointData)
+    });
+    return handleResponse(response);
+};
+
+/**
+ * Deletes an endpoint by its ID. (Admin only)
+ * @param {number} id - The ID of the endpoint to delete.
+ * @returns {Promise<void>} A promise that resolves on success.
+ */
+export const deleteEndpointApi = async (id) => {
+    const response = await fetch(`${API_URL}/api/endpoints/${id}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+    });
+    // This expects a 204 No Content, which our handleResponse can deal with.
+    return handleResponse(response);
+};
+// --- END OF FILE src/api/endpoints.js ---
+
+--- END OF FILE src/api/endpoints.js ---
