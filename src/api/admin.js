@@ -188,4 +188,26 @@ export const setDefaultVersionApi = async (versionId) => {
     });
     return handleResponse(response);
 };
+
+export const getApiKeysApi = async () => {
+    const response = await fetch(`${API_URL}/api/admin/apikeys`, { headers: getAuthHeaders() });
+    return handleResponse(response);
+};
+
+export const createApiKeyApi = async (name) => {
+    const response = await fetch(`${API_URL}/api/admin/apikeys`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ name }),
+    });
+    return handleResponse(response);
+};
+
+export const deleteApiKeyApi = async (keyId) => {
+    const response = await fetch(`${API_URL}/api/admin/apikeys/${keyId}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+};
 // --- END OF FILE src/api/admin.js ---

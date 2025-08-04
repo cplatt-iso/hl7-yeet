@@ -1,21 +1,52 @@
-// --- START OF FILE src/components/SimulationStepEditor.jsx ---
+// --- REPLACE src/components/SimulationStepEditor.jsx ---
 import React from 'react';
-import { TrashIcon, ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/outline';
 
 const SimulationStepEditor = ({ step, index, onUpdate, onDelete, onMove, isFirst, isLast, generatorTemplates, endpoints }) => {
     
     const handleParamChange = (e) => {
         const { name, value, type, checked } = e.target;
+
+        let finalValue;
+        if (name === 'generator_template_id' || name === 'endpoint_id') {
+            const parsed = parseInt(value, 10);
+            finalValue = isNaN(parsed) ? '' : parsed;
+        } else if (type === 'number') {
+            const parsed = parseInt(value, 10);
+            finalValue = isNaN(parsed) ? 0 : parsed;
+        } else if (type === 'checkbox') {
+            finalValue = checked;
+        } else {
+            finalValue = value;
+        }
+        
         const newParams = {
             ...step.parameters,
-            [name]: type === 'checkbox' ? checked : (type === 'number' ? parseInt(value, 10) : value)
+            [name]: finalValue
         };
         onUpdate(index, { ...step, parameters: newParams });
     };
     
     const handleTypeChange = (e) => {
-        // When type changes, reset parameters to avoid carrying over old settings
-        onUpdate(index, { ...step, step_type: e.target.value, parameters: {} });
+        const newType = e.target.value;
+        let defaultParams = {};
+
+        switch (newType) {
+            case 'GENERATE_DICOM':
+                // Set blank defaults to encourage using context
+                defaultParams = { count: 10, modality: '', study_description: '', generate_pixels: true };
+                break;
+            case 'WAIT':
+                defaultParams = { duration_seconds: 5 };
+                break;
+            case 'MPPS_UPDATE':
+                defaultParams = { mpps_status: 'IN PROGRESS' };
+                break;
+            default:
+                defaultParams = {};
+                break;
+        }
+        
+        onUpdate(index, { ...step, step_type: newType, parameters: defaultParams });
     };
 
     const renderParameters = () => {
@@ -102,17 +133,29 @@ const SimulationStepEditor = ({ step, index, onUpdate, onDelete, onMove, isFirst
                     <div className="grid grid-cols-2 gap-4">
                         <div className="flex flex-col gap-2">
                             <label className="text-xs text-gray-400">Modality</label>
-                            <input type="text" name="modality" value={step.parameters.modality || 'CT'} onChange={handleParamChange} className="bg-gray-700 p-2 rounded border border-gray-600" />
+                            <input type="text" name="modality" value={step.parameters.modality || ''} onChange={handleParamChange} placeholder="(Uses context if blank)" className="bg-gray-700 p-2 rounded border border-gray-600 placeholder:text-gray-500" />
                         </div>
                         <div className="flex flex-col gap-2">
                             <label className="text-xs text-gray-400">Image Count</label>
-                            <input type="number" name="count" value={step.parameters.count || 10} onChange={handleParamChange} className="bg-gray-700 p-2 rounded border border-gray-600" />
+                            <input type="number" name="count" value={step.parameters.count ?? 10} onChange={handleParamChange} className="bg-gray-700 p-2 rounded border border-gray-600" />
                         </div>
                         <div className="col-span-2 flex flex-col gap-2">
                             <label className="text-xs text-gray-400">Study Description</label>
-                            <input type="text" name="study_description" value={step.parameters.study_description || ''} onChange={handleParamChange} placeholder="e.g., CT CHEST W/O CONTRAST" className="bg-gray-700 p-2 rounded border border-gray-600" />
+                            <input type="text" name="study_description" value={step.parameters.study_description || ''} onChange={handleParamChange} placeholder="(Uses context if blank)" className="bg-gray-700 p-2 rounded border border-gray-600 placeholder:text-gray-500" />
                         </div>
-                         <p className="text-xs text-gray-500 col-span-2">Note: Modality and Study Description will be overridden by values from HL7 ORM context if available.</p>
+                        {/* --- NEW CHECKBOX --- */}
+                        <div className="col-span-2 flex items-center gap-2 mt-2">
+                             <input 
+                                type="checkbox" 
+                                id={`gen-pixels-${index}`}
+                                name="generate_pixels"
+                                checked={step.parameters.generate_pixels ?? true}
+                                onChange={handleParamChange}
+                                className="h-4 w-4 rounded bg-gray-700 border-gray-600 text-indigo-600 focus:ring-indigo-500"
+                            />
+                            <label htmlFor={`gen-pixels-${index}`} className="text-sm text-gray-300">Generate realistic pixel data</label>
+                        </div>
+                         <p className="text-xs text-gray-500 col-span-2">Values from an HL7 Order or DMWL query will be used if fields are left blank.</p>
                     </div>
                 );
             case 'SEND_DICOM':
@@ -134,7 +177,7 @@ const SimulationStepEditor = ({ step, index, onUpdate, onDelete, onMove, isFirst
                 return (
                     <div className="flex flex-col gap-2">
                         <label className="text-xs text-gray-400">Duration (seconds)</label>
-                        <input type="number" name="duration_seconds" value={step.parameters.duration_seconds || 1} onChange={handleParamChange} className="bg-gray-700 p-2 rounded border border-gray-600" />
+                        <input type="number" name="duration_seconds" value={step.parameters.duration_seconds || 5} onChange={handleParamChange} className="bg-gray-700 p-2 rounded border border-gray-600" />
                     </div>
                 );
             default:
@@ -144,12 +187,7 @@ const SimulationStepEditor = ({ step, index, onUpdate, onDelete, onMove, isFirst
 
     return (
         <div className="bg-gray-800/50 p-4 rounded-lg border border-gray-700 flex gap-4">
-            <div className="flex flex-col items-center gap-2 text-gray-400">
-                <span className="font-bold text-lg">{index + 1}</span>
-                <button onClick={() => onMove(index, 'up')} disabled={isFirst} className="disabled:opacity-20"><ArrowUpIcon className="h-5 w-5"/></button>
-                <button onClick={() => onMove(index, 'down')} disabled={isLast} className="disabled:opacity-20"><ArrowDownIcon className="h-5 w-5"/></button>
-            </div>
-            <div className="flex-grow space-y-4">
+             <div className="flex-grow space-y-4">
                 <div className="flex gap-4 items-start">
                     <div className="flex-grow">
                         <label className="text-xs text-gray-400">Step Type</label>
@@ -170,7 +208,6 @@ const SimulationStepEditor = ({ step, index, onUpdate, onDelete, onMove, isFirst
                             </optgroup>
                         </select>
                     </div>
-                    <button onClick={() => onDelete(index)} className="mt-5 p-2 text-red-400 hover:bg-gray-700 rounded"><TrashIcon className="h-5 w-5"/></button>
                 </div>
                 <div>
                     <h5 className="font-semibold text-sm mb-2 text-gray-300">Parameters</h5>
@@ -184,4 +221,3 @@ const SimulationStepEditor = ({ step, index, onUpdate, onDelete, onMove, isFirst
 };
 
 export default SimulationStepEditor;
-// --- END OF FILE src/components/SimulationStepEditor.jsx ---

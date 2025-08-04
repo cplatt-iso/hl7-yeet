@@ -177,7 +177,6 @@ class SimulationRunner:
             if is_orm:
                 self.run_context.setdefault('order', {})
                 
-                # --- THIS IS THE FIX: Access segments through the ORDER group ---
                 order_groups = getattr(msg, 'ORM_O01_ORDER', [])
                 if not order_groups:
                     self._log_event(step.step_order, patient_iter, repeat_iter, 'WARN', "Message is ORM but has no ORDER group.")
@@ -200,7 +199,10 @@ class SimulationRunner:
 
                     if obr_segment:
                         try:
-                            modality = str(obr_segment.obr_24.value)
+                            # --- THIS IS THE FIX ---
+                            # OBR-24 is a primitive 'ID' field, it has no sub-components.
+                            # We access its value by just getting the field itself.
+                            modality = str(obr_segment.obr_24)
                             if modality and modality.strip():
                                 self.run_context['order']['modality'] = modality
                                 self._log_event(step.step_order, patient_iter, repeat_iter, 'INFO', f"Extracted Modality: '{modality}'")
@@ -266,7 +268,41 @@ class SimulationRunner:
 
         params = step.parameters
         output_dir = f"/data/sim_runs/{self.run_id}/patient_{patient_iter}"
+        
+        user_modality = params.get('modality', '').strip()
+        worklist_item = self.run_context.get('worklist_item')
         order_context = self.run_context.get('order', {})
+        
+        final_modality = ''
+        if user_modality:
+            final_modality = user_modality
+            self._log_event(step.step_order, patient_iter, repeat_iter, 'INFO', f"Using Modality ('{final_modality}') from user-defined step parameter.")
+        elif worklist_item and hasattr(worklist_item, 'ScheduledProcedureStepSequence') and worklist_item.ScheduledProcedureStepSequence[0].Modality:
+            final_modality = worklist_item.ScheduledProcedureStepSequence[0].Modality
+            self._log_event(step.step_order, patient_iter, repeat_iter, 'INFO', f"Using Modality ('{final_modality}') from DMWL context.")
+        elif order_context.get('modality'):
+            final_modality = order_context['modality']
+            self._log_event(step.step_order, patient_iter, repeat_iter, 'INFO', f"Using Modality ('{final_modality}') from HL7 Order context.")
+        
+        if not final_modality:
+            self._log_event(step.step_order, patient_iter, repeat_iter, 'FAILURE', "Cannot generate DICOM. Modality is not defined and could not be found in workflow context.")
+            return False
+
+        user_desc = params.get('study_description', '').strip()
+        final_desc = ''
+        if user_desc:
+            final_desc = user_desc
+            self._log_event(step.step_order, patient_iter, repeat_iter, 'INFO', f"Using Study Description ('{final_desc}') from user-defined step parameter.")
+        elif worklist_item and hasattr(worklist_item, 'RequestedProcedureDescription') and worklist_item.RequestedProcedureDescription:
+            final_desc = worklist_item.RequestedProcedureDescription
+            self._log_event(step.step_order, patient_iter, repeat_iter, 'INFO', f"Using Study Description ('{final_desc}') from DMWL context.")
+        elif order_context.get('study_description'):
+            final_desc = order_context['study_description']
+            self._log_event(step.step_order, patient_iter, repeat_iter, 'INFO', f"Using Study Description ('{final_desc}') from HL7 Order context.")
+        else:
+            final_desc = f"Generated {final_modality} Study"
+            self._log_event(step.step_order, patient_iter, repeat_iter, 'INFO', f"Study Description not found in context; using generated default: '{final_desc}'.")
+
 
         overrides = {
             "PatientName": f"{self.run_context['patient']['last_name']}^{self.run_context['patient']['first_name']}",
@@ -274,8 +310,8 @@ class SimulationRunner:
             "PatientBirthDate": self.run_context['patient']['dob'],
             "PatientSex": self.run_context['patient']['sex'],
             "AccessionNumber": order_context.get('accession_number', f'ACC{self.faker.random_number(digits=8)}'),
-            "Modality": order_context.get('modality') or params.get('modality', 'CT'),
-            "StudyDescription": order_context.get('study_description') or params.get('study_description', 'Generated Study'),
+            "Modality": final_modality,
+            "StudyDescription": final_desc,
         }
 
         file_paths = create_study_files(

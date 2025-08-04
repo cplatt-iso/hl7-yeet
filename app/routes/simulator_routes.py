@@ -141,4 +141,19 @@ def get_run_details(run_id):
         return jsonify({"error": "Simulation run not found or unauthorized"}), 404
     return jsonify(schemas.SimulationRunResponse.model_validate(run).model_dump())
 
+@simulator_bp.route('/runs/<int:run_id>', methods=['DELETE'])
+@jwt_required()
+def delete_run(run_id):
+    user_id = int(get_jwt_identity())
+    success = crud.delete_simulation_run(db, run_id, user_id, current_user.is_admin)
+    if not success:
+        return jsonify({"error": "Simulation run not found or you're not authorized to delete it."}), 404
+    return '', 204
+
+@simulator_bp.route('/runs', methods=['DELETE'])
+@jwt_required()
+def delete_all_runs():
+    user_id = get_jwt_identity()
+    crud.delete_all_simulation_runs_for_user(db, user_id=user_id)
+    return '', 204
 # --- END OF FILE app/routes/simulator_routes.py ---

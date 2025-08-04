@@ -100,4 +100,20 @@ export const getSimulationRunApi = async (runId) => {
     return handleResponse(response);
 };
 
+export const deleteSimulationRunApi = async (runId) => {
+    const response = await fetch(`${API_URL}/api/simulator/runs/${runId}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+};
+
+export const deleteAllSimulationRunsApi = async () => {
+    const response = await fetch(`${API_URL}/api/simulator/runs`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+};
+
 // --- END OF FILE: src/api/simulator.js ---

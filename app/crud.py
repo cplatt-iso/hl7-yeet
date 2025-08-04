@@ -1,4 +1,4 @@
-# --- START OF FILE app/crud.py ---
+# --- REPLACE app/crud.py ---
 
 from sqlalchemy.orm import Session, joinedload, contains_eager
 from sqlalchemy import func, select, or_, delete
@@ -7,6 +7,8 @@ import logging
 
 from . import models, schemas
 from .extensions import bcrypt
+from datetime import datetime
+import secrets
 
 # --- User CRUD (unchanged) ---
 
@@ -442,4 +444,75 @@ def get_simulation_runs_for_user(db: SQLAlchemy, user_id: int) -> list[models.Si
         .order_by(models.SimulationRun.started_at.desc().nulls_last(), models.SimulationRun.id.desc())
     ).scalars())
 
+def delete_simulation_run(db: SQLAlchemy, run_id: int, user_id: int, is_admin: bool) -> bool:
+    """Deletes a single simulation run by its ID, checking for ownership."""
+    db_run = get_simulation_run_by_id(db, run_id)
+    if not db_run:
+        return False # Not found
+    
+    # Check if the user owns this run or is an admin
+    if not is_admin and db_run.user_id != user_id:
+        return False # Unauthorized, you sneak
+
+    db.session.delete(db_run)
+    db.session.commit()
+    return True
+
+def delete_all_simulation_runs_for_user(db: SQLAlchemy, user_id: int):
+    """
+    Deletes all simulation runs for a user, respecting ORM cascade rules.
+    """
+    # --- THIS IS THE FIX ---
+    # Fetch all the runs for the user first.
+    runs_to_delete = db.session.scalars(
+        db.select(models.SimulationRun).filter_by(user_id=user_id)
+    ).all()
+    
+    # Loop and delete them one by one. This allows the ORM to see the
+    # cascade rule and delete the associated events for each run.
+    for run in runs_to_delete:
+        db.session.delete(run)
+    
+    db.session.commit()
+
+
+def create_api_key(db: SQLAlchemy, user_id: int, name: str) -> tuple[models.ApiKey, str]:
+    """Generates a new API key, stores its hash, and returns the key object and the raw key."""
+    raw_key = f"ytr_{secrets.token_urlsafe(32)}"
+    key_prefix = raw_key[:8]
+    key_hash = bcrypt.generate_password_hash(raw_key).decode('utf-8')
+    
+    db_key = models.ApiKey(user_id=user_id, name=name, key_hash=key_hash, key_prefix=key_prefix)
+    db.session.add(db_key)
+    db.session.commit()
+    db.session.refresh(db_key)
+    return db_key, raw_key
+
+def get_api_key_by_prefix(db: SQLAlchemy, key_prefix: str) -> models.ApiKey | None:
+    """Finds an API key by its non-secret prefix."""
+    return db.session.execute(
+        db.select(models.ApiKey).filter_by(key_prefix=key_prefix)
+    ).scalar_one_or_none()
+    
+def get_api_keys_for_user(db: SQLAlchemy, user_id: int) -> list[models.ApiKey]:
+    """Gets all API keys for a given user."""
+    return list(db.session.scalars(
+        db.select(models.ApiKey).filter_by(user_id=user_id).order_by(models.ApiKey.created_at.desc())
+    ))
+
+def delete_api_key(db: SQLAlchemy, key_id: int, user_id: int) -> bool:
+    """Deletes an API key, ensuring the user has ownership."""
+    db_key = db.session.get(models.ApiKey, key_id)
+    if db_key and db_key.user_id == user_id:
+        db.session.delete(db_key)
+        db.session.commit()
+        return True
+    return False
+
+def update_api_key_last_used(db: SQLAlchemy, key_prefix: str):
+    """Updates the last_used timestamp for a key."""
+    db_key = get_api_key_by_prefix(db, key_prefix)
+    if db_key:
+        db_key.last_used = datetime.utcnow()
+        db.session.commit()
 # --- END OF FILE app/crud.py ---

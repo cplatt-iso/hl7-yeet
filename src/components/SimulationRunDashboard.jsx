@@ -1,12 +1,19 @@
-// --- START OF FILE src/components/SimulationRunDashboard.jsx ---
+// --- REPLACE src/components/SimulationRunDashboard.jsx ---
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
-import { getSimulationTemplatesApi, runSimulationApi, getSimulationRunsApi } from '../api/simulator';
+import { 
+    getSimulationTemplatesApi, 
+    runSimulationApi, 
+    getSimulationRunsApi,
+    deleteSimulationRunApi,      // <-- IMPORT
+    deleteAllSimulationRunsApi   // <-- IMPORT
+} from '../api/simulator';
 import SimulationRunLog from './SimulationRunLog';
-import { useAuth } from '../context/AuthContext'; // <-- Import useAuth
+import { useAuth } from '../context/AuthContext';
+import { TrashIcon } from '@heroicons/react/24/outline'; // <-- IMPORT
 
 const SimulationRunDashboard = () => {
-    const { socket } = useAuth(); // <-- Get socket from context
+    const { socket } = useAuth();
     const [templates, setTemplates] = useState([]);
     const [runs, setRuns] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -34,7 +41,6 @@ const SimulationRunDashboard = () => {
         fetchDashboardData();
     }, []);
 
-    // --- NEW: Real-time status update listener ---
     useEffect(() => {
         if (socket) {
             const handleStatusUpdate = (data) => {
@@ -53,7 +59,6 @@ const SimulationRunDashboard = () => {
         }
     }, [socket]);
 
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!selectedTemplateId) {
@@ -65,7 +70,6 @@ const SimulationRunDashboard = () => {
         try {
             const result = await runSimulationApi(selectedTemplateId, patientCount);
             toast.success(`Run #${result.run_id} started!`, { id: toastId });
-            // Immediately add the new run to the list in a PENDING state
             fetchDashboardData(); 
             setViewingRunId(result.run_id);
         } catch (error) {
@@ -75,6 +79,34 @@ const SimulationRunDashboard = () => {
         }
     };
     
+    // --- NEW HANDLER FOR SINGLE DELETION ---
+    const handleDeleteRun = async (runId) => {
+        if (!window.confirm(`Are you sure you want to permanently delete Run #${runId}?`)) return;
+        
+        const toastId = toast.loading(`Deleting Run #${runId}...`);
+        try {
+            await deleteSimulationRunApi(runId);
+            setRuns(prevRuns => prevRuns.filter(run => run.id !== runId));
+            toast.success(`Run #${runId} deleted.`, { id: toastId });
+        } catch (error) {
+            toast.error(`Failed to delete run: ${error.message}`, { id: toastId });
+        }
+    };
+
+    // --- NEW HANDLER FOR DELETING ALL ---
+    const handleDeleteAllRuns = async () => {
+        if (!window.confirm("DANGER: This will delete ALL of your simulation run histories. This cannot be undone. Are you sure?")) return;
+        
+        const toastId = toast.loading("Deleting all run histories...");
+        try {
+            await deleteAllSimulationRunsApi();
+            setRuns([]);
+            toast.success("All run histories deleted.", { id: toastId });
+        } catch (error) {
+            toast.error(`Failed to delete runs: ${error.message}`, { id: toastId });
+        }
+    };
+
     const getStatusBadgeColor = (status) => {
         switch (status) {
             case 'RUNNING': return 'bg-blue-600 text-blue-100 animate-pulse';
@@ -109,7 +141,18 @@ const SimulationRunDashboard = () => {
                 </button>
             </form>
 
-            <h3 className="text-xl font-bold mt-8 mb-4 text-gray-200">Run History</h3>
+            <div className="flex justify-between items-center mt-8 mb-4">
+                <h3 className="text-xl font-bold text-gray-200">Run History</h3>
+                {/* --- NEW "DELETE ALL" BUTTON --- */}
+                <button 
+                    onClick={handleDeleteAllRuns} 
+                    disabled={runs.length === 0}
+                    className="flex items-center gap-2 px-3 py-1 text-sm bg-red-800 text-red-100 rounded hover:bg-red-700 disabled:bg-gray-600 disabled:opacity-50"
+                >
+                    <TrashIcon className="h-4 w-4" />
+                    Delete All
+                </button>
+            </div>
             <div className="bg-gray-900 rounded-lg overflow-hidden">
                 <table className="w-full text-left text-sm">
                      <thead className="bg-gray-950 text-xs text-gray-400 uppercase">
@@ -119,7 +162,7 @@ const SimulationRunDashboard = () => {
                             <th className="p-3">Patients</th>
                             <th className="p-3">Status</th>
                             <th className="p-3">Started At (UTC)</th>
-                            <th className="p-3">Actions</th>
+                            <th className="p-3 text-center">Actions</th>
                          </tr>
                      </thead>
                      <tbody>
@@ -140,7 +183,13 @@ const SimulationRunDashboard = () => {
                                     </td>
                                     <td className="p-3">{run.started_at ? new Date(run.started_at).toLocaleString('en-GB', { timeZone: 'UTC' }) : 'N/A'}</td>
                                     <td className="p-3">
-                                        <button onClick={() => setViewingRunId(run.id)} className="text-indigo-400 hover:underline">View Log</button>
+                                        {/* --- NEW ACTION BUTTONS PER ROW --- */}
+                                        <div className="flex justify-center items-center gap-4">
+                                            <button onClick={() => setViewingRunId(run.id)} className="text-indigo-400 hover:underline">View Log</button>
+                                            <button onClick={() => handleDeleteRun(run.id)} title="Delete Run" className="text-gray-500 hover:text-red-400">
+                                                <TrashIcon className="h-4 w-4" />
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))
@@ -153,4 +202,3 @@ const SimulationRunDashboard = () => {
 };
 
 export default SimulationRunDashboard;
-// --- END OF FILE src/components/SimulationRunDashboard.jsx ---

@@ -1,19 +1,29 @@
-// --- CREATE NEW FILE: src/components/SimulationWorkflowManager.jsx ---
-import React, { useState, useEffect } from 'react';
+// --- REPLACE src/components/SimulationWorkflowManager.jsx ---
+import React, { useState, useEffect, useMemo } from 'react';
 import { toast } from 'react-hot-toast';
 import { getSimulationTemplatesApi, createSimulationTemplateApi, updateSimulationTemplateApi, deleteSimulationTemplateApi } from '../api/simulator';
 import { getGeneratorTemplatesApi } from '../api/simulator';
 import { getEndpointsApi } from '../api/endpoints';
-import SimulationStepEditor from './SimulationStepEditor';
+import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { PlusIcon } from '@heroicons/react/24/outline';
+import WorkflowStepCard from './WorkflowStepCard';
+import SimulationStepModal from './SimulationStepModal';
 
 const SimulationWorkflowManager = () => {
     const [templates, setTemplates] = useState([]);
     const [selectedTemplate, setSelectedTemplate] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
-    // Dependencies needed for the step editor dropdowns
+    
+    // Dependencies needed for the step editor
     const [generatorTemplates, setGeneratorTemplates] = useState([]);
     const [endpoints, setEndpoints] = useState([]);
+
+    // State for the modal
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingStepIndex, setEditingStepIndex] = useState(null);
+
+    const sensors = useSensors(useSensor(PointerSensor));
 
     const fetchAllData = async () => {
         setIsLoading(true);
@@ -38,8 +48,8 @@ const SimulationWorkflowManager = () => {
     }, []);
 
     const handleSelectTemplate = (template) => {
-        // Make a deep copy to avoid editing the original state directly
-        setSelectedTemplate(JSON.parse(JSON.stringify(template)));
+        const stepsWithIds = template.steps.map((step, index) => ({ ...step, id: step.id || `temp-${index}` }));
+        setSelectedTemplate({ ...template, steps: stepsWithIds });
     };
 
     const handleCreateNew = () => {
@@ -51,45 +61,59 @@ const SimulationWorkflowManager = () => {
         setSelectedTemplate(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleStepUpdate = (index, updatedStep) => {
+    const handleAddStep = () => {
+        const newStep = {
+            id: `new-${Date.now()}`,
+            step_order: selectedTemplate.steps.length + 1,
+            step_type: '',
+            parameters: {}
+        };
+        setSelectedTemplate(prev => ({ ...prev, steps: [...prev.steps, newStep] }));
+        // Open the modal immediately to configure the new step
+        setEditingStepIndex(selectedTemplate.steps.length);
+        setIsModalOpen(true);
+    };
+
+    const handleOpenEditModal = (index) => {
+        setEditingStepIndex(index);
+        setIsModalOpen(true);
+    };
+
+    const handleSaveStep = (updatedStep) => {
         const newSteps = [...selectedTemplate.steps];
-        newSteps[index] = updatedStep;
+        newSteps[editingStepIndex] = updatedStep;
         setSelectedTemplate(prev => ({ ...prev, steps: newSteps }));
     };
 
-    const handleAddStep = () => {
-        const newStep = { step_order: selectedTemplate.steps.length + 1, step_type: '', parameters: {} };
-        setSelectedTemplate(prev => ({ ...prev, steps: [...prev.steps, newStep] }));
-    };
-
     const handleStepDelete = (index) => {
+        if (!window.confirm("Are you sure you want to remove this step?")) return;
         const newSteps = selectedTemplate.steps.filter((_, i) => i !== index);
-        // Re-order the steps
         const reorderedSteps = newSteps.map((step, i) => ({ ...step, step_order: i + 1 }));
         setSelectedTemplate(prev => ({ ...prev, steps: reorderedSteps }));
     };
 
-    const handleStepMove = (index, direction) => {
-        const newSteps = [...selectedTemplate.steps];
-        const targetIndex = direction === 'up' ? index - 1 : index + 1;
-        if (targetIndex < 0 || targetIndex >= newSteps.length) return;
-        
-        // Swap
-        [newSteps[index], newSteps[targetIndex]] = [newSteps[targetIndex], newSteps[index]];
-        
-        // Update step_order
-        const reorderedSteps = newSteps.map((step, i) => ({ ...step, step_order: i + 1 }));
-        setSelectedTemplate(prev => ({ ...prev, steps: reorderedSteps }));
+    const handleDragEnd = (event) => {
+        const { active, over } = event;
+        if (active.id !== over.id) {
+            const oldIndex = selectedTemplate.steps.findIndex(step => step.id === active.id);
+            const newIndex = selectedTemplate.steps.findIndex(step => step.id === over.id);
+            
+            const movedSteps = arrayMove(selectedTemplate.steps, oldIndex, newIndex);
+            const reorderedSteps = movedSteps.map((step, index) => ({ ...step, step_order: index + 1 }));
+
+            setSelectedTemplate(prev => ({ ...prev, steps: reorderedSteps }));
+        }
     };
 
-    const handleSave = async () => {
+    const handleSaveWorkflow = async () => {
         const isCreating = !selectedTemplate.id;
         const toastId = toast.loading(isCreating ? 'Creating workflow...' : 'Updating workflow...');
         try {
             const payload = {
                 name: selectedTemplate.name,
                 description: selectedTemplate.description,
-                steps: selectedTemplate.steps.map(({id, ...step}) => step) // Remove temp ID for create/update
+                // Server doesn't care about our temp frontend ID
+                steps: selectedTemplate.steps.map(({ id, ...step }) => step) 
             };
 
             if (isCreating) {
@@ -98,16 +122,16 @@ const SimulationWorkflowManager = () => {
                 await updateSimulationTemplateApi(selectedTemplate.id, payload);
             }
             toast.success('Workflow saved!', { id: toastId });
-            setSelectedTemplate(null); // Close editor
-            fetchAllData(); // Refresh list
+            setSelectedTemplate(null);
+            fetchAllData();
         } catch (error) {
             toast.error(`Save failed: ${error.message}`, { id: toastId });
         }
     };
     
-    const handleDelete = async () => {
-        if (!selectedTemplate.id || !window.confirm("Are you sure? This will permanently delete the workflow template.")) return;
-         const toastId = toast.loading('Deleting workflow...');
+    const handleDeleteWorkflow = async () => {
+        if (!selectedTemplate.id || !window.confirm("Are you sure? This will permanently delete the workflow.")) return;
+        const toastId = toast.loading('Deleting workflow...');
         try {
             await deleteSimulationTemplateApi(selectedTemplate.id);
             toast.success('Workflow deleted.', { id: toastId });
@@ -117,6 +141,18 @@ const SimulationWorkflowManager = () => {
              toast.error(`Delete failed: ${error.message}`, { id: toastId });
         }
     }
+
+    const editingStep = useMemo(() =>
+        (editingStepIndex !== null && selectedTemplate) ? selectedTemplate.steps[editingStepIndex] : null,
+        [editingStepIndex, selectedTemplate]
+    );
+
+    // --- THE FIX IS HERE ---
+    // `dnd-kit`'s `SortableContext` needs an array of IDs, not the full objects.
+    const stepIds = useMemo(
+        () => (selectedTemplate ? selectedTemplate.steps.map(s => s.id) : []),
+        [selectedTemplate]
+    );
 
     return (
         <div className="flex gap-8">
@@ -143,35 +179,37 @@ const SimulationWorkflowManager = () => {
                         </div>
                         <div>
                              <label className="text-sm text-gray-400">Description</label>
-                             <textarea name="description" value={selectedTemplate.description} onChange={handleFieldChange} className="w-full bg-gray-900 p-2 rounded mt-1" rows="2" />
+                             <textarea name="description" value={selectedTemplate.description || ''} onChange={handleFieldChange} className="w-full bg-gray-900 p-2 rounded mt-1" rows="2" />
                         </div>
                         
                         <h3 className="text-lg font-bold">Steps</h3>
-                        <div className="space-y-4">
-                           {selectedTemplate.steps.map((step, index) => (
-                               <SimulationStepEditor 
-                                    key={index} // Using index is OK here as we don't have stable IDs until saved
-                                    step={step}
-                                    index={index}
-                                    onUpdate={handleStepUpdate}
-                                    onDelete={handleStepDelete}
-                                    onMove={handleStepMove}
-                                    isFirst={index === 0}
-                                    isLast={index === selectedTemplate.steps.length - 1}
-                                    generatorTemplates={generatorTemplates}
-                                    endpoints={endpoints}
-                               />
-                           ))}
-                        </div>
+                        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                            {/* --- THIS IS THE FIX --- */}
+                            <SortableContext items={stepIds} strategy={verticalListSortingStrategy}>
+                                <div className="space-y-3">
+                                   {selectedTemplate.steps.map((step, index) => (
+                                       <WorkflowStepCard 
+                                            key={step.id}
+                                            step={step}
+                                            index={index}
+                                            onEdit={handleOpenEditModal}
+                                            onDelete={handleStepDelete}
+                                            generatorTemplates={generatorTemplates}
+                                            endpoints={endpoints}
+                                       />
+                                   ))}
+                                </div>
+                            </SortableContext>
+                        </DndContext>
                         <button onClick={handleAddStep} className="flex items-center gap-2 w-full justify-center p-3 border-2 border-dashed border-gray-600 hover:border-indigo-500 hover:text-indigo-400 rounded-lg text-gray-400">
                            <PlusIcon className="h-6 w-6" /> Add Step
                         </button>
                         
                         <div className="flex justify-between items-center pt-4 border-t border-gray-700">
-                            <button onClick={handleDelete} disabled={!selectedTemplate.id} className="px-4 py-2 text-sm bg-red-800 hover:bg-red-700 rounded disabled:opacity-50">Delete Workflow</button>
+                            <button onClick={handleDeleteWorkflow} disabled={!selectedTemplate.id} className="px-4 py-2 text-sm bg-red-800 hover:bg-red-700 rounded disabled:opacity-50">Delete Workflow</button>
                             <div className="flex gap-4">
                                 <button onClick={() => setSelectedTemplate(null)} className="px-4 py-2 text-sm bg-gray-600 hover:bg-gray-500 rounded">Cancel</button>
-                                <button onClick={handleSave} className="px-6 py-2 font-bold bg-green-600 hover:bg-green-500 rounded">Save Workflow</button>
+                                <button onClick={handleSaveWorkflow} className="px-6 py-2 font-bold bg-green-600 hover:bg-green-500 rounded">Save Workflow</button>
                             </div>
                         </div>
                     </div>
@@ -181,9 +219,17 @@ const SimulationWorkflowManager = () => {
                     </div>
                 )}
             </div>
+
+            <SimulationStepModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSave={handleSaveStep}
+                step={editingStep}
+                generatorTemplates={generatorTemplates}
+                endpoints={endpoints}
+            />
         </div>
     );
 };
 
 export default SimulationWorkflowManager;
-// --- END OF FILE: src/components/SimulationWorkflowManager.jsx ---

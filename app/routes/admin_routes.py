@@ -13,6 +13,7 @@ from .. import crud, schemas
 from ..util import definition_processor
 from ..models import User
 from ..schemas import UserSchema
+from datetime import datetime
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -182,4 +183,48 @@ def update_user(user_id):
     
     db.session.commit()
     return jsonify(UserSchema.from_orm(user_to_update).model_dump())
+
+@admin_bp.route('/apikeys', methods=['GET'])
+@jwt_required() # Any logged in user can manage their own keys
+def get_api_keys():
+    user_id = get_jwt_identity()
+    keys = crud.get_api_keys_for_user(db, user_id)
+    # Don't send the hash to the client
+    return jsonify([
+        {
+            "id": key.id,
+            "name": key.name,
+            "key_prefix": key.key_prefix,
+            "created_at": key.created_at.isoformat(),
+            "last_used": key.last_used.isoformat() if key.last_used else None,
+            "is_active": key.is_active
+        } for key in keys
+    ])
+
+@admin_bp.route('/apikeys', methods=['POST'])
+@jwt_required()
+def create_api_key():
+    user_id = get_jwt_identity()
+    data = request.get_json()
+    name = data.get('name')
+    if not name:
+        return jsonify({"error": "A name for the key is required."}), 422
+    
+    db_key, raw_key = crud.create_api_key(db, user_id, name)
+    # This is the ONLY time the user will see the full key
+    return jsonify({
+        "message": "API Key created successfully. Store it securely, you will not see it again.",
+        "name": db_key.name,
+        "key_prefix": db_key.key_prefix,
+        "raw_key": raw_key
+    }), 201
+
+@admin_bp.route('/apikeys/<int:key_id>', methods=['DELETE'])
+@jwt_required()
+def delete_api_key(key_id):
+    user_id = get_jwt_identity()
+    success = crud.delete_api_key(db, key_id, user_id)
+    if not success:
+        return jsonify({"error": "API Key not found or you are not authorized to delete it."}), 404
+    return '', 204
 # --- END OF FILE app/routes/admin_routes.py ---

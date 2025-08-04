@@ -28,6 +28,8 @@ class User(db.Model):
     simulation_templates: Mapped[List["SimulationTemplate"]] = relationship(back_populates="user", cascade="all, delete-orphan")
     simulation_runs: Mapped[List["SimulationRun"]] = relationship(back_populates="user", cascade="all, delete-orphan")
 
+    api_keys: Mapped[List["ApiKey"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+
     def __init__(self, username: str, email: str, password_hash: str, google_id: Optional[str] = None, is_admin: bool = False, **kw: Any):
         super().__init__(**kw)
         self.username = username
@@ -220,6 +222,9 @@ class SimulationRun(db.Model):
     started_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     user: Mapped["User"] = relationship("User", back_populates="simulation_runs")
+    
+    # --- THIS IS THE FIX ---
+    # Tell SQLAlchemy to cascade deletes from a SimulationRun to its Events
     events: Mapped[List["SimulationRunEvent"]] = relationship(back_populates="run", cascade="all, delete-orphan", order_by="SimulationRunEvent.timestamp")
 
 class SimulationRunEvent(db.Model):
@@ -241,4 +246,23 @@ class SimulationRunEvent(db.Model):
         self.status = status
         self.details = details
 
+class ApiKey(db.Model):
+    __tablename__ = "api_keys"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    name: Mapped[str] = mapped_column(String(100), nullable=False)
+    key_hash: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    # Store the first 8 characters of the key so users can identify which one it is
+    key_prefix: Mapped[str] = mapped_column(String(8), unique=True, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    last_used: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    user: Mapped["User"] = relationship("User")
+
+    def __init__(self, user_id: int, name: str, key_hash: str, key_prefix: str, **kw: Any):
+        super().__init__(**kw)
+        self.user_id = user_id
+        self.name = name
+        self.key_hash = key_hash
+        self.key_prefix = key_prefix
 # --- END OF FILE app/models.py ---

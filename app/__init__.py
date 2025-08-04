@@ -17,16 +17,18 @@ from .extensions import db, cors, socketio, bcrypt, jwt
 from flask_socketio import join_room, leave_room
 
 # --- Import Blueprints ---
+from .routes.v1_routes import v1_bp
 from .routes.auth_routes import auth_bp
 from .routes.mllp_routes import mllp_bp
 from .routes.util_routes import util_bp
 from .routes.admin_routes import admin_bp
 from .routes.listener_routes import listener_bp
-# --- NEW: Import the simulator and endpoint blueprints ---
 from .routes.simulator_routes import simulator_bp
 from .routes.endpoint_routes import endpoint_bp
 
 from . import models, crud
+
+
 
 def create_app():
     load_dotenv()
@@ -81,12 +83,11 @@ def create_app():
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(mllp_bp, url_prefix='/api')
     app.register_blueprint(util_bp, url_prefix='/api')    
-    app.register_blueprint(admin_bp, url_prefix='/api/admin')    
-    # Your listener_bp registration is correct, it defines its own prefix.
-    app.register_blueprint(listener_bp) 
-    # --- NEW REGISTRATIONS ---
+    app.register_blueprint(admin_bp, url_prefix='/api/admin')        
+    app.register_blueprint(listener_bp)     
     app.register_blueprint(endpoint_bp)
     app.register_blueprint(simulator_bp)
+    app.register_blueprint(v1_bp)
 
 
     # --- Create/Update Database Tables ---

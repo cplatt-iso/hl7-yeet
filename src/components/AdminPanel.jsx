@@ -4,10 +4,11 @@ import React, { useState } from 'react';
 import VersionManagement from './VersionManagement';
 import TerminologyManagement from './TerminologyManagement';
 import UserManagement from './UserManagement';
-import EndpointManager from './EndpointManager'; // <-- NEW IMPORT
+import EndpointManager from './EndpointManager'; 
+import ApiKeyManager from './ApiKeyManager'; 
 
 const AdminPanel = () => {
-    const [activeSubTab, setActiveSubTab] = useState('versions');
+    const [activeSubTab, setActiveSubTab] = useState('versions');    
 
     const SubTabButton = ({ name, label }) => (
         <button
@@ -24,20 +25,21 @@ const AdminPanel = () => {
 
     return (
         <div className="p-6 bg-gray-800 rounded-lg shadow-xl">
-            <h2 className="text-2xl font-bold mb-4 text-white">Admin Control Panel</h2>
-            <div className="flex items-center gap-4 mb-6 border-b border-gray-700 pb-4">
-                <SubTabButton name="versions" label="Version Management" />
-                <SubTabButton name="terminology" label="Terminology Management" />
-                <SubTabButton name="endpoints" label="Endpoint Management" /> {/* <-- NEW BUTTON */}
+             <h2 className="text-2xl font-bold mb-4 text-white">Admin Panel</h2>
+             <div className="flex items-center gap-4 mb-6 border-b border-gray-700 pb-4">
                 <SubTabButton name="users" label="User Management" />
-            </div>
-
-            <div>
+                <SubTabButton name="versions" label="HL7 Versions" />
+                <SubTabButton name="terminology" label="HL7 Terminology" />
+                <SubTabButton name="endpoints" label="Endpoints" />
+                <SubTabButton name="apikeys" label="API Keys" /> {/* <-- ADD BUTTON */}
+             </div>
+             <div>
+                {activeSubTab === 'users' && <UserManagement />}
                 {activeSubTab === 'versions' && <VersionManagement />}
                 {activeSubTab === 'terminology' && <TerminologyManagement />}
-                {activeSubTab === 'endpoints' && <EndpointManager />} {/* <-- NEW COMPONENT RENDER */}
-                {activeSubTab === 'users' && <UserManagement />}
-            </div>
+                {activeSubTab === 'endpoints' && <EndpointManager />}
+                {activeSubTab === 'apikeys' && <ApiKeyManager />} {/* <-- ADD COMPONENT */}
+             </div>
         </div>
     );
 };
