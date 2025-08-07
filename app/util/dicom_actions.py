@@ -88,6 +88,14 @@ def perform_dmwl_find(endpoint: dict, query_params: dict) -> List[Dataset]:
         
     query_ds.SpecificCharacterSet = "ISO_IR 100"
 
+    # Debug logging to show what DICOM query is being sent
+    logging.info(f"DMWL Query Dataset being sent:")
+    logging.info(f"  AccessionNumber: {query_ds.get('AccessionNumber', 'Not set')}")
+    logging.info(f"  PatientName: {query_ds.PatientName}")
+    logging.info(f"  PatientID: {query_ds.PatientID}")
+    logging.info(f"  SPS Status: {sps_item.ScheduledProcedureStepStatus}")
+    logging.info(f"  SPS Modality: {sps_item.Modality}")
+
     logging.info(f"Associating with {endpoint['name']} for DMWL C-FIND...")
     remote_aet = endpoint.get('ae_title') or 'ANY_SCP'
     assoc = ae.associate(endpoint['hostname'], endpoint['port'], ae_title=remote_aet)
@@ -100,6 +108,10 @@ def perform_dmwl_find(endpoint: dict, query_params: dict) -> List[Dataset]:
         for status, identifier in responses:
             if status and status.Status == 0xFF00:
                 results.append(identifier)
+                # Debug logging for each result
+                acc_num = identifier.get('AccessionNumber', 'N/A')
+                pat_name = identifier.get('PatientName', 'N/A')
+                logging.info(f"DMWL result: Patient={pat_name}, Accession={acc_num}")
             elif status and status.Status != 0x0000:
                 logging.warning(f"DMWL query received non-success status: {code_to_category(status.Status)}")
     finally:

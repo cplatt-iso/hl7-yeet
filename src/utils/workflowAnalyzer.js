@@ -15,7 +15,7 @@ const STEP_IO_METADATA = {
         outputs: ['Worklist Item']
     },
     MPPS_UPDATE: {
-        inputs: ['Worklist Item'],
+        inputs: ['Worklist Item', 'Order Context'], // Accept either
         outputs: (step) => (step.parameters.mpps_status === 'IN PROGRESS' ? ['MPPS UID'] : [])
     },
     GENERATE_DICOM: {
@@ -42,4 +42,39 @@ export const getStepIO = (step, generatorTemplates) => {
         : metadata.outputs || [];
 
     return { inputs, outputs };
+};
+
+export const validateWorkflow = (steps, generatorTemplates) => {
+    const warnings = [];
+    const availableContext = new Set();
+    
+    for (let i = 0; i < steps.length; i++) {
+        const step = steps[i];
+        const { inputs, outputs } = getStepIO(step, generatorTemplates);
+        
+        // Check if MPPS_UPDATE has sufficient context
+        if (step.step_type === 'MPPS_UPDATE') {
+            const hasWorklistItem = availableContext.has('Worklist Item');
+            const hasOrderContext = availableContext.has('Order Context');
+            
+            if (!hasWorklistItem && !hasOrderContext) {
+                warnings.push({
+                    stepIndex: i,
+                    type: 'error',
+                    message: 'MPPS_UPDATE requires either a Worklist Item (from DMWL_FIND) or Order Context (from GENERATE_HL7)'
+                });
+            } else if (!hasWorklistItem && hasOrderContext) {
+                warnings.push({
+                    stepIndex: i,
+                    type: 'warning',
+                    message: 'MPPS_UPDATE is using HL7 order context. Consider adding DMWL_FIND for IHE compliance.'
+                });
+            }
+        }
+        
+        // Add outputs to available context
+        outputs.forEach(output => availableContext.add(output));
+    }
+    
+    return warnings;
 };

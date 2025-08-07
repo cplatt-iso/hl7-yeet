@@ -64,6 +64,33 @@ const SimulationStepEditor = ({ step, index, onUpdate, onDelete, onMove, isFirst
                             <option value="">-- Select a Generator --</option>
                             {generatorTemplates.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
                         </select>
+                        
+                        <label className="text-xs text-gray-400 mt-3">Accession Number Field</label>
+                        <div className="flex flex-col gap-1">
+                            <select
+                                name="accession_field"
+                                value={step.parameters.accession_field || 'OBR.3'}
+                                onChange={handleParamChange}
+                                className="bg-gray-700 p-2 rounded border border-gray-600"
+                            >
+                                <option value="OBR.3">OBR-3 (Filler Order Number) - Standard</option>
+                                <option value="OBR.2">OBR-2 (Placer Order Number)</option>
+                                <option value="ORC.3">ORC-3 (Filler Order Number)</option>
+                                <option value="ORC.2">ORC-2 (Placer Order Number)</option>
+                                <option value="CUSTOM">Custom Field...</option>
+                            </select>
+                            {step.parameters.accession_field === 'CUSTOM' && (
+                                <input
+                                    type="text"
+                                    name="custom_accession_field"
+                                    value={step.parameters.custom_accession_field || ''}
+                                    onChange={handleParamChange}
+                                    placeholder="e.g., MSH.10, PID.2"
+                                    className="bg-gray-700 p-2 rounded border border-gray-600 text-sm"
+                                />
+                            )}
+                            <p className="text-xs text-gray-500">Choose which HL7 field contains the accession number for DMWL queries</p>
+                        </div>
                     </div>
                 );
             case 'SEND_MLLP':

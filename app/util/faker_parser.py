@@ -11,6 +11,42 @@ FAKER_CUE_REGEX = re.compile(r'\{\$Faker\.(.+?)\}')
 def _generate_accession():
     return f"ACC{fake.random_number(digits=8, fix_len=True)}"
 
+def _generate_study_description():
+    """Generates a realistic study description."""
+    return fake.random_element(elements=(
+        'CT HEAD W/O CONTRAST', 'CT CHEST W/O CONTRAST', 'MRI LUMBAR SPINE W/O',
+        'CHEST X-RAY 2 VIEWS', 'ULTRASOUND ABDOMEN COMPLETE', 'MAMMOGRAM SCREENING BILATERAL',
+        'CT ANGIOGRAM HEAD AND NECK', 'MRI KNEE RIGHT W/O CONTRAST', 'X-RAY FOOT 3 VIEWS LEFT'
+    ))
+
+def _generate_and_cache_study_description(context: Dict[str, Any]) -> str:
+    """Generate a study description and cache it in the context for reuse."""
+    if 'order' not in context:
+        context['order'] = {}
+    if 'study_description' not in context['order']:
+        context['order']['study_description'] = _generate_study_description()
+    return context['order']['study_description']
+
+def _generate_and_cache_accession(context: Dict[str, Any]) -> str:
+    """Generate an accession number and cache it in the context for reuse."""
+    if 'order' not in context:
+        context['order'] = {}
+    
+    if 'accession_number' not in context['order']:
+        context['order']['accession_number'] = _generate_accession()
+    
+    return context['order']['accession_number']
+
+def _generate_and_cache_placer_order(context: Dict[str, Any]) -> str:
+    """Generate a placer order number and cache it in the context for reuse."""
+    if 'order' not in context:
+        context['order'] = {}
+    
+    if 'placer_order_number' not in context['order']:
+        context['order']['placer_order_number'] = f"PLR{fake.random_number(digits=8, fix_len=True)}"
+    
+    return context['order']['placer_order_number']
+
 def _safe_eval_call_params(args_str: str) -> Tuple[list, dict]:
     """
     Safely evaluates a string of Python arguments (both positional and keyword) using AST.
@@ -47,7 +83,28 @@ def process_faker_string(template_string: str, context: Dict[str, Any]) -> str:
         if cue == 'Person.LastName': return context.get('patient', {}).get('last_name', 'LNAME_MISSING')
         if cue == 'Person.FirstName': return context.get('patient', {}).get('first_name', 'FNAME_MISSING')
         if cue == 'Person.DOB': return context.get('patient', {}).get('dob', '19000101')
-        if cue == 'Order.AccessionNumber': return context.get('order', {}).get('accession_number', _generate_accession())
+        if cue == 'Order.AccessionNumber': return _generate_and_cache_accession(context)
+        if cue == 'Order.PlacerOrderNumber': return _generate_and_cache_placer_order(context)
+        if cue == 'Order.StudyDescription': return _generate_and_cache_study_description(context)
+        
+        # Additional contextual variables for reuse
+        if cue == 'Context.AccessionNumber': 
+            # Return the cached accession number if it exists, otherwise generate one
+            return context.get('order', {}).get('accession_number', _generate_and_cache_accession(context))
+        if cue == 'Context.PlacerOrderNumber':
+            # Return the cached placer order number if it exists, otherwise generate one
+            return context.get('order', {}).get('placer_order_number', _generate_and_cache_placer_order(context))
+        if cue == 'Context.StudyDescription':
+            return context.get('order', {}).get('study_description', _generate_and_cache_study_description(context))
+
+        # Support for PACS-specific accession placement
+        # Some PACS look for accession in OBR-2, some in OBR-3
+        if cue == 'PACS.AccessionInOBR2':
+            # For PACS that expect accession in OBR-2 (Placer Order Number)
+            return _generate_and_cache_accession(context)
+        if cue == 'PACS.AccessionInOBR3':  
+            # For PACS that expect accession in OBR-3 (Filler Order Number) - this is most common
+            return _generate_and_cache_accession(context)
 
         # --- 2. Robust Faker Method/Attribute Resolution ---
         try:

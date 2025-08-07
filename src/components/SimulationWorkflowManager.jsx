@@ -6,9 +6,10 @@ import { getGeneratorTemplatesApi } from '../api/simulator';
 import { getEndpointsApi } from '../api/endpoints';
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { PlusIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import WorkflowStepCard from './WorkflowStepCard';
 import SimulationStepModal from './SimulationStepModal';
+import { validateWorkflow } from '../utils/workflowAnalyzer';
 
 const SimulationWorkflowManager = () => {
     const [templates, setTemplates] = useState([]);
@@ -24,6 +25,12 @@ const SimulationWorkflowManager = () => {
     const [editingStepIndex, setEditingStepIndex] = useState(null);
 
     const sensors = useSensors(useSensor(PointerSensor));
+
+    // Validate workflow whenever steps change
+    const workflowValidation = useMemo(() => {
+        if (!selectedTemplate?.steps?.length) return [];
+        return validateWorkflow(selectedTemplate.steps, generatorTemplates);
+    }, [selectedTemplate?.steps, generatorTemplates]);
 
     const fetchAllData = async () => {
         setIsLoading(true);
@@ -181,6 +188,23 @@ const SimulationWorkflowManager = () => {
                              <label className="text-sm text-gray-400">Description</label>
                              <textarea name="description" value={selectedTemplate.description || ''} onChange={handleFieldChange} className="w-full bg-gray-900 p-2 rounded mt-1" rows="2" />
                         </div>
+                        
+                        {/* Workflow Validation Warnings */}
+                        {workflowValidation.length > 0 && (
+                            <div className="bg-yellow-900/20 border border-yellow-600/50 rounded-lg p-4">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <ExclamationTriangleIcon className="h-5 w-5 text-yellow-400" />
+                                    <h4 className="text-yellow-400 font-semibold">Workflow Validation</h4>
+                                </div>
+                                <div className="space-y-2">
+                                    {workflowValidation.map((warning, idx) => (
+                                        <div key={idx} className={`text-sm ${warning.type === 'error' ? 'text-red-400' : 'text-yellow-400'}`}>
+                                            <span className="font-medium">Step {warning.stepIndex + 1}:</span> {warning.message}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                         
                         <h3 className="text-lg font-bold">Steps</h3>
                         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
