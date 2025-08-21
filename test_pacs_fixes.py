@@ -26,12 +26,14 @@ def test_pacs_fixes():
         # Create test DICOM with MRI modality (should be inferred from description)
         with tempfile.TemporaryDirectory() as temp_dir:
             files = create_study_files(
-                study_instance_uid='1.2.3.4.5.6.7.8.9',
-                accession_number='ACC123456',
-                patient_mrn='MRN123456',
-                patient_name='Test^Patient^PACS',
-                study_description='MRI LUMBAR SPINE W/O',
-                output_directory=temp_dir,
+                output_dir=temp_dir,
+                overrides={
+                    'study_instance_uid': '1.2.3.4.5.6.7.8.9',
+                    'accession_number': 'ACC123456',
+                    'patient_mrn': 'MRN123456',
+                    'patient_name': 'Test^Patient^PACS',
+                    'study_description': 'MRI LUMBAR SPINE W/O',
+                },
                 num_images=2,
                 generate_pixels=True
             )

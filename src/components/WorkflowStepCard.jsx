@@ -39,7 +39,9 @@ const getStepInfo = (step, generatorTemplates, endpoints) => {
             const count = step.parameters.count ?? 10;
             const modalityText = step.parameters.modality || '(From Context)';
             const pixelText = (step.parameters.generate_pixels ?? true) ? "with pixels" : "headers only";
-            return { icon: CubeIcon, color: 'purple', title: 'Generate DICOM', summary: `${count} ${modalityText} images, ${pixelText}` };
+            const reportText = (step.parameters.generate_report ?? false) ? "+ SR report" : "";
+            const summary = reportText ? `${count} ${modalityText} images, ${pixelText}, ${reportText}` : `${count} ${modalityText} images, ${pixelText}`;
+            return { icon: CubeIcon, color: 'purple', title: 'Generate DICOM', summary: summary };
         }
         case 'SEND_DICOM': {
             const endpoint = endpoints.find(e => e.id === step.parameters.endpoint_id);

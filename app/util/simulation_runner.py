@@ -379,7 +379,9 @@ class SimulationRunner:
             output_dir=output_dir,
             num_images=params.get('count', 10),
             overrides=overrides,
-            generate_pixels=params.get('generate_pixels', True)
+            generate_pixels=params.get('generate_pixels', True),
+            burn_patient_info=params.get('burn_patient_info', False),
+            generate_report=params.get('generate_report', False)
         )
         
         self.run_context['last_dicom_files'] = file_paths
@@ -567,9 +569,9 @@ class SimulationRunner:
             # Fallback: try to get OBR directly from the order group
             obr_segment = getattr(order_group, 'OBR', None)
             
-        self._log_event(step.step_order, patient_iter, repeat_iter, 'DEBUG', f"OBR segment found: {obr_segment is not None}")
+        self._log_event(step.step_order, patient_iter, repeat_iter, 'DEBUG', f"OBR segment found: {obr_segment is not None}, type: {type(obr_segment)}, bool: {bool(obr_segment) if obr_segment is not None else 'N/A'}")
         
-        if not obr_segment:
+        if obr_segment is None:
             self._log_event(step.step_order, patient_iter, repeat_iter, 'WARN', f"No OBR segment found for {field_spec}")
             return False
             
@@ -605,9 +607,9 @@ class SimulationRunner:
     def _extract_from_orc_field(self, order_group, field_spec: str, step, patient_iter: int, repeat_iter: int) -> bool:
         """Extract accession from ORC field (ORC.2 or ORC.3)"""
         orc_segment = getattr(order_group, 'ORC', None)
-        self._log_event(step.step_order, patient_iter, repeat_iter, 'DEBUG', f"ORC segment found: {orc_segment is not None}")
+        self._log_event(step.step_order, patient_iter, repeat_iter, 'DEBUG', f"ORC segment found: {orc_segment is not None}, type: {type(orc_segment)}, bool: {bool(orc_segment) if orc_segment is not None else 'N/A'}")
         
-        if not orc_segment:
+        if orc_segment is None:
             self._log_event(step.step_order, patient_iter, repeat_iter, 'WARN', f"No ORC segment found for {field_spec}")
             return False
             
@@ -836,7 +838,7 @@ class SimulationRunner:
         Maps common procedure names/keywords to appropriate DICOM modality codes.
         """
         if not description:
-            return None
+            return "CT"  # Default fallback
             
         # Convert to uppercase for case-insensitive matching
         desc_upper = description.upper()
@@ -930,9 +932,9 @@ class SimulationRunner:
                     self._log_event(step.step_order, patient_iter, repeat_iter, 'DEBUG', f"General anatomical inference: '{keyword}' in '{description}' -> modality '{modality}'")
                     return modality
         
-        # No match found
-        self._log_event(step.step_order, patient_iter, repeat_iter, 'DEBUG', f"Could not infer modality from description: '{description}'")
-        return None
+        # No match found - return default
+        self._log_event(step.step_order, patient_iter, repeat_iter, 'DEBUG', f"Could not infer modality from description: '{description}', using default 'CT'")
+        return "CT"
 
 def run_simulation_task(run_id, app_context):
     """The entry point for the background task."""

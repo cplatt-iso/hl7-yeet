@@ -1,29 +1,9 @@
 // --- START OF FILE src/api/listener.js ---
 
-const API_URL = ''; // Uses the Vite proxy
+import { getAuthHeaders, handleResponse } from './apiUtils';
+import { API_BASE_URL } from './config.js';
 
-// We need the same helper function that mllp.js has.
-// In a larger app, we'd put this in a shared utility file.
-// For now, duplicating it is fine. It's two fucking lines.
-const getAuthHeaders = () => {
-    const token = localStorage.getItem('authToken');
-    const headers = {
-        'Content-Type': 'application/json',
-    };
-    if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
-}
-
-// Same error handler for consistency
-const handleResponse = async (response) => {
-    if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.error || err.msg || 'Failed to perform listener action');
-    }
-    return response.json();
-};
+const API_URL = API_BASE_URL; // Uses the centralized API configuration
 
 
 export const startListenerApi = async (port) => {

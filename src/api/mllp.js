@@ -1,20 +1,8 @@
 // --- START OF FILE src/api/mllp.js ---
+import { getAuthHeaders, handleResponse } from './apiUtils';
+import { API_BASE_URL } from './config.js';
 
-const API_URL = ''; // Uses the Vite proxy
-
-// --- NEW: A helper to get the auth token from localStorage ---
-// This is the simplest way to do it without prop drilling or context here.
-// When an API call is made, it grabs the latest token directly.
-const getAuthHeaders = () => {
-    const token = localStorage.getItem('authToken');
-    const headers = {
-        'Content-Type': 'application/json',
-    };
-    if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
-}
+const API_URL = API_BASE_URL; // Uses the centralized API configuration
 
 export const pingMllpApi = async (host, port) => {
     const portAsInt = parseInt(port, 10);
@@ -31,28 +19,10 @@ export const pingMllpApi = async (host, port) => {
     return handleResponse(response);
 };
 
-const handleResponse = async (response) => {
-    if (response.status === 401) {
-        // This means the token is invalid or expired.
-        // A more advanced implementation could trigger a logout here.
-        throw new Error('Unauthorized. Your session may have expired.');
-    }
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: response.statusText }));
-        throw new Error(errorData.error || errorData.message || `Server responded with ${response.status}`);
-    }
-    // Handle cases where the response might be empty (e.g., a 204 No Content)
-    const contentType = response.headers.get("content-type");
-    if (contentType && contentType.indexOf("application/json") !== -1) {
-        return response.json();
-    }
-    return;
-};
-
 export const getTableDefinitionsApi = async (tableId) => {
     // The `version` parameter was useless since the table definitions are global.
     // Removing it to keep things clean and match the backend route.
-    const response = await fetch(`/api/tables/${tableId}`, {
+    const response = await fetch(`${API_URL}/api/tables/${tableId}`, {
         headers: getAuthHeaders()
     });
     return handleResponse(response);

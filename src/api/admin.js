@@ -1,8 +1,9 @@
 // --- START OF FILE src/api/admin.js ---
 
 import { getAuthHeaders, handleResponse } from './apiUtils';
+import { API_BASE_URL } from './config.js';
 
-const API_URL = ''; // Uses Vite proxy
+const API_URL = API_BASE_URL; // Uses the centralized API configuration
 
 // ... (getHl7VersionsApi, toggleVersionStatusApi, etc. are unchanged) ...
 

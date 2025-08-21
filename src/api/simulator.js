@@ -1,7 +1,8 @@
 // --- CREATE NEW FILE: src/api/simulator.js ---
 import { getAuthHeaders, handleResponse } from './apiUtils';
+import { API_BASE_URL } from './config.js';
 
-const API_URL = ''; // Uses Vite proxy
+const API_URL = API_BASE_URL; // Uses the centralized API configuration
 
 // --- Generator Template (HL7 Message Templates) ---
 

@@ -1,16 +1,19 @@
 // --- START OF FILE src/api/templates.js ---
 
 import { getAuthHeaders, handleResponse } from './apiUtils'; // We'll create this helper file next
+import { API_BASE_URL } from './config.js';
+
+const API_URL = API_BASE_URL; // Uses the centralized API configuration
 
 export const getTemplatesApi = async () => {
-    const response = await fetch('/api/templates', {
+    const response = await fetch(`${API_URL}/api/templates`, {
         headers: getAuthHeaders()
     });
     return handleResponse(response);
 };
 
 export const saveTemplateApi = async (name, content) => {
-    const response = await fetch('/api/templates', {
+    const response = await fetch(`${API_URL}/api/templates`, {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify({ name, content })
@@ -19,7 +22,7 @@ export const saveTemplateApi = async (name, content) => {
 };
 
 export const deleteTemplateApi = async (templateId) => {
-    const response = await fetch(`/api/templates/${templateId}`, {
+    const response = await fetch(`${API_URL}/api/templates/${templateId}`, {
         method: 'DELETE',
         headers: getAuthHeaders()
     });

@@ -37,13 +37,53 @@ export const AuthProvider = ({ children }) => {
 
     const connectSocket = (authToken) => {
         if (socketRef.current) return; // Already connected
-        const newSocket = io(import.meta.env.VITE_API_URL || 'http://localhost:5001', {
-            // We don't need this for polling, but good for WebSocket transport
-            // auth: { token: authToken } 
-        });
-        newSocket.on('connect', () => console.log('Socket.IO Client Connected'));
-        newSocket.on('disconnect', () => console.log('Socket.IO Client Disconnected'));
-        socketRef.current = newSocket;
+        
+        // Define fallback socket URLs to try in order - only HTTPS/WSS for mixed content compliance
+        const socketUrls = [
+            import.meta.env.VITE_SOCKET_URL,
+            import.meta.env.VITE_API_URL,
+            'https://yeet.trazen.org',
+            // Only include localhost for development environment
+            ...(window.location.hostname === 'localhost' ? ['http://localhost:5001'] : [])
+        ].filter(Boolean); // Remove undefined values
+
+        let currentUrlIndex = 0;
+
+        const tryConnection = () => {
+            if (currentUrlIndex >= socketUrls.length) {
+                console.error('All socket.io connection attempts failed');
+                return;
+            }
+
+            const socketUrl = socketUrls[currentUrlIndex];
+            console.log(`Attempting to connect to socket.io at: ${socketUrl} (attempt ${currentUrlIndex + 1}/${socketUrls.length})`);
+            
+            const newSocket = io(socketUrl, {
+                transports: ['websocket', 'polling'],
+                timeout: 15000,
+                forceNew: true
+            });
+            
+            newSocket.on('connect', () => {
+                console.log('Socket.IO Client Connected successfully to:', socketUrl);
+                socketRef.current = newSocket;
+            });
+            
+            newSocket.on('disconnect', (reason) => {
+                console.log('Socket.IO Client Disconnected. Reason:', reason);
+            });
+            
+            newSocket.on('connect_error', (error) => {
+                console.error(`Socket.IO Connection Error for ${socketUrl}:`, error);
+                newSocket.disconnect();
+                currentUrlIndex++;
+                if (currentUrlIndex < socketUrls.length) {
+                    setTimeout(tryConnection, 2000); // Try next URL after 2 seconds
+                }
+            });
+        };
+
+        tryConnection();
     };
 
     const disconnectSocket = () => {

@@ -79,7 +79,60 @@ const HL7Parser = () => {
     const handleToggleLogCollapse = () => { setIsLogCollapsed(prevState => !prevState); };
     const handleSend = async () => { if (!isAuthenticated) { addLog('error', 'You must be logged in to send messages.'); return; } setIsSending(true); try { const result = await sendHl7(host, port, rebuildHl7Message(segments)); addLog('success', `ACK Received from ${host}:${port}:\n\n${result.ack}`); } catch (e) { addLog('error', `Failed to connect to ${host}:${port}:\n\n${e.message}`); } finally { setIsSending(false); } };
     const fetchUserTemplates = useCallback(async () => { if (isAuthenticated) { try { const templates = await getTemplatesApi(); setUserTemplates(templates); } catch (error) { console.error("Failed to fetch user templates:", error); } } else { setUserTemplates([]); } }, [isAuthenticated]);
-    useEffect(() => { if (!isAuthenticated) return; const socket = io(import.meta.env.VITE_API_URL || 'http://localhost:5001'); socketRef.current = socket; socket.on('connect', () => { }); socket.on('disconnect', () => { }); socket.on('listener_status', (data) => { setListenerStatus(data.status); setIsListening(data.status === 'listening'); }); socket.on('incoming_message', (data) => { setReceivedMessages(prev => [data, ...prev]); }); return () => { if (socket) socket.disconnect(); }; }, [isAuthenticated]);
+    useEffect(() => { 
+        if (!isAuthenticated) return; 
+        
+        // Define fallback socket URLs to try in order - only HTTPS/WSS for mixed content compliance
+        const socketUrls = [
+            import.meta.env.VITE_SOCKET_URL,
+            import.meta.env.VITE_API_URL,
+            'https://yeet.trazen.org',
+            // Only include localhost for development environment
+            ...(window.location.hostname === 'localhost' ? ['http://localhost:5001'] : [])
+        ].filter(Boolean);
+
+        let currentUrlIndex = 0;
+        let connectedSocket = null;
+
+        const tryConnection = () => {
+            if (currentUrlIndex >= socketUrls.length) {
+                console.error('All HL7Parser socket.io connection attempts failed');
+                return;
+            }
+
+            const socketUrl = socketUrls[currentUrlIndex];
+            const socket = io(socketUrl, {
+                transports: ['websocket', 'polling'],
+                timeout: 15000
+            }); 
+            
+            socket.on('connect', () => { 
+                console.log('HL7Parser socket connected to:', socketUrl); 
+                connectedSocket = socket;
+                socketRef.current = socket;
+            }); 
+            
+            socket.on('disconnect', () => { console.log('HL7Parser socket disconnected'); }); 
+            
+            socket.on('connect_error', (error) => { 
+                console.error(`HL7Parser socket error for ${socketUrl}:`, error);
+                socket.disconnect();
+                currentUrlIndex++;
+                if (currentUrlIndex < socketUrls.length) {
+                    setTimeout(tryConnection, 2000);
+                }
+            });
+            
+            socket.on('listener_status', (data) => { setListenerStatus(data.status); setIsListening(data.status === 'listening'); }); 
+            socket.on('incoming_message', (data) => { setReceivedMessages(prev => [data, ...prev]); }); 
+        };
+
+        tryConnection();
+        
+        return () => { 
+            if (connectedSocket) connectedSocket.disconnect(); 
+        }; 
+    }, [isAuthenticated]);
     useEffect(() => {
         const fetchInitialData = async () => {
             try {

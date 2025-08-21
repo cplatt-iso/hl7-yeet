@@ -7,12 +7,27 @@ import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), 'app'))
 
-from app.simulation_runner import SimulationRunner
+import types
+
+from app.util.simulation_runner import SimulationRunner
 
 def test_modality_detection():
     """Test modality detection with various study descriptions"""
     
-    runner = SimulationRunner("fake_config")
+    # The SimulationRunner requires an app_context to be passed.
+    # For this standalone test, we can pass None.
+    # It also requires a run_id, we can use a dummy value.
+    runner = SimulationRunner(run_id=1, app_context=None)
+
+    # The _log_event method requires an app_context to work.
+    # We can monkey-patch it for this test to just pass.
+    def mock_log_event(self, step_order, patient_iter, repeat_iter, status, details):
+        pass
+    runner._log_event = types.MethodType(mock_log_event, runner)
+    
+    # The _infer_modality_from_description method requires a `step` object.
+    # We can create a simple mock object for that.
+    mock_step = type('MockStep', (object,), {'step_order': 1})()
     
     # Test cases with expected modalities
     test_cases = [
@@ -45,7 +60,7 @@ def test_modality_detection():
     total = len(test_cases)
     
     for description, expected in test_cases:
-        detected = runner._infer_modality_from_description(description)
+        detected = runner._infer_modality_from_description(description, mock_step, 1, 1)
         status = "✓" if detected == expected else "✗"
         print(f"{status} '{description}' → {detected} (expected: {expected})")
         if detected == expected:

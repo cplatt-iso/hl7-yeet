@@ -1,4 +1,6 @@
-const API_URL = ''; // Uses the Vite proxy
+import { API_BASE_URL } from './config.js';
+
+const API_URL = API_BASE_URL; // Uses the centralized API configuration
 
 // A helper to handle auth responses, because they're a bit different
 const handleAuthResponse = async (response) => {

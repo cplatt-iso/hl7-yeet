@@ -33,7 +33,7 @@ const SimulationStepEditor = ({ step, index, onUpdate, onDelete, onMove, isFirst
         switch (newType) {
             case 'GENERATE_DICOM':
                 // Set blank defaults to encourage using context
-                defaultParams = { count: 10, modality: '', study_description: '', generate_pixels: true };
+                defaultParams = { count: 10, modality: '', study_description: '', generate_pixels: true, burn_patient_info: false, generate_report: false };
                 break;
             case 'WAIT':
                 defaultParams = { duration_seconds: 5 };
@@ -170,7 +170,7 @@ const SimulationStepEditor = ({ step, index, onUpdate, onDelete, onMove, isFirst
                             <label className="text-xs text-gray-400">Study Description</label>
                             <input type="text" name="study_description" value={step.parameters.study_description || ''} onChange={handleParamChange} placeholder="(Uses context if blank)" className="bg-gray-700 p-2 rounded border border-gray-600 placeholder:text-gray-500" />
                         </div>
-                        {/* --- NEW CHECKBOX --- */}
+                        {/* --- PIXEL GENERATION CHECKBOX --- */}
                         <div className="col-span-2 flex items-center gap-2 mt-2">
                              <input 
                                 type="checkbox" 
@@ -182,6 +182,33 @@ const SimulationStepEditor = ({ step, index, onUpdate, onDelete, onMove, isFirst
                             />
                             <label htmlFor={`gen-pixels-${index}`} className="text-sm text-gray-300">Generate realistic pixel data</label>
                         </div>
+                        
+                        {/* --- PATIENT INFO BURNING CHECKBOX --- */}
+                        <div className="col-span-2 flex items-center gap-2">
+                             <input 
+                                type="checkbox" 
+                                id={`burn-patient-${index}`}
+                                name="burn_patient_info"
+                                checked={step.parameters.burn_patient_info ?? false}
+                                onChange={handleParamChange}
+                                className="h-4 w-4 rounded bg-gray-700 border-gray-600 text-indigo-600 focus:ring-indigo-500"
+                            />
+                            <label htmlFor={`burn-patient-${index}`} className="text-sm text-gray-300">Burn patient information into images</label>
+                        </div>
+                        
+                        {/* --- GENERATE REPORT CHECKBOX --- */}
+                        <div className="col-span-2 flex items-center gap-2">
+                             <input 
+                                type="checkbox" 
+                                id={`gen-report-${index}`}
+                                name="generate_report"
+                                checked={step.parameters.generate_report ?? false}
+                                onChange={handleParamChange}
+                                className="h-4 w-4 rounded bg-gray-700 border-gray-600 text-indigo-600 focus:ring-indigo-500"
+                            />
+                            <label htmlFor={`gen-report-${index}`} className="text-sm text-gray-300">Generate SR (Structured Report) with modality-appropriate findings</label>
+                        </div>
+                        
                          <p className="text-xs text-gray-500 col-span-2">Values from an HL7 Order or DMWL query will be used if fields are left blank.</p>
                     </div>
                 );

@@ -1,6 +1,6 @@
 import pydicom
 from pydicom.dataset import Dataset, FileMetaDataset
-from pydicom.uid import generate_uid, ExplicitVRLittleEndian
+from pydicom.uid import generate_uid, ExplicitVRLittleEndian, ImplicitVRLittleEndian, PYDICOM_IMPLEMENTATION_UID, UID
 import datetime
 import os
 import random
@@ -14,6 +14,9 @@ try:
     HAS_PILLOW = True
 except ImportError:
     HAS_PILLOW = False
+    Image = None
+    ImageDraw = None  
+    ImageFont = None
 
 def _infer_body_part_from_description(description: str) -> str:
     """
@@ -771,7 +774,194 @@ def _get_technical_parameters(modality: str, slice_num: int) -> list:
     else:
         return []
 
-def create_study_files(output_dir: str, num_images: int, overrides: dict, generate_pixels: bool = True):
+def _generate_sr_report_text(modality: str, study_description: str, body_part: str) -> str:
+    """Generate realistic report text based on modality and study information."""
+    fake = Faker()
+    
+    # Common report elements
+    indication = f"Clinical indication: {fake.sentence()}"
+    technique = ""
+    findings = ""
+    impression = ""
+    
+    if modality in ['CT']:
+        technique = f"Technique: Axial CT images of the {body_part.lower()} were obtained without contrast enhancement."
+        if 'CHEST' in study_description.upper():
+            findings = f"Findings: The lungs are clear without evidence of consolidation, pleural effusion, or pneumothorax. The heart size is within normal limits. No mediastinal lymphadenopathy is identified. The osseous structures appear intact."
+            impression = "Impression: Normal chest CT examination."
+        elif 'ABDOMEN' in study_description.upper() or 'PELVIS' in study_description.upper():
+            findings = f"Findings: The liver, spleen, pancreas, and kidneys appear normal in size and attenuation. No intra-abdominal lymphadenopathy or free fluid is identified. The bowel loops appear unremarkable."
+            impression = "Impression: Normal abdominal CT examination."
+        elif 'HEAD' in study_description.upper() or 'BRAIN' in study_description.upper():
+            findings = f"Findings: No acute intracranial abnormality is identified. The ventricles are normal in size and configuration. No mass effect or midline shift is present."
+            impression = "Impression: Normal head CT examination."
+        else:
+            findings = f"Findings: The {body_part.lower()} structures appear within normal limits. No acute abnormality is identified."
+            impression = f"Impression: Normal {modality} examination of the {body_part.lower()}."
+    
+    elif modality in ['MR']:
+        technique = f"Technique: Multiplanar MR images of the {body_part.lower()} were obtained using standard sequences."
+        if 'BRAIN' in study_description.upper() or 'HEAD' in study_description.upper():
+            findings = f"Findings: Normal brain parenchyma without evidence of acute infarct, hemorrhage, or mass lesion. The ventricular system is normal in size. No abnormal enhancement is identified."
+            impression = "Impression: Normal brain MRI examination."
+        elif 'SPINE' in study_description.upper():
+            findings = f"Findings: Normal vertebral body height and alignment. The intervertebral discs show normal signal intensity. The spinal cord appears normal. No significant stenosis is identified."
+            impression = "Impression: Normal spine MRI examination."
+        elif 'KNEE' in study_description.upper():
+            findings = f"Findings: The menisci appear intact. The cruciate and collateral ligaments are normal. No joint effusion is identified. The articular cartilage appears preserved."
+            impression = "Impression: Normal knee MRI examination."
+        else:
+            findings = f"Findings: The {body_part.lower()} structures demonstrate normal signal characteristics. No abnormal enhancement or mass lesion is identified."
+            impression = f"Impression: Normal {modality} examination of the {body_part.lower()}."
+    
+    elif modality in ['DX', 'CR']:
+        technique = f"Technique: {modality} images of the {body_part.lower()} were obtained."
+        if 'CHEST' in study_description.upper():
+            findings = f"Findings: The heart size is within normal limits. The lungs are clear without consolidation or pleural effusion. The mediastinal contours are normal. No acute osseous abnormality is identified."
+            impression = "Impression: Normal chest radiograph."
+        elif 'ABDOMEN' in study_description.upper():
+            findings = f"Findings: Normal bowel gas pattern. No evidence of obstruction or free air. The osseous structures appear intact."
+            impression = "Impression: Normal abdominal radiograph."
+        else:
+            findings = f"Findings: The {body_part.lower()} structures appear within normal limits. No acute abnormality is identified."
+            impression = f"Impression: Normal {modality} examination of the {body_part.lower()}."
+    
+    elif modality in ['US']:
+        technique = f"Technique: Real-time ultrasound examination of the {body_part.lower()} was performed."
+        if 'ABDOMEN' in study_description.upper():
+            findings = f"Findings: The liver demonstrates normal size and echogenicity. The gallbladder appears normal without stones or wall thickening. The kidneys are normal in size and echogenicity. No free fluid is identified."
+            impression = "Impression: Normal abdominal ultrasound examination."
+        elif 'PELVIS' in study_description.upper():
+            findings = f"Findings: The uterus and ovaries appear normal in size and echogenicity. No adnexal masses or free fluid is identified."
+            impression = "Impression: Normal pelvic ultrasound examination."
+        else:
+            findings = f"Findings: The {body_part.lower()} structures demonstrate normal echogenicity and vascularity. No abnormal masses or fluid collections are identified."
+            impression = f"Impression: Normal ultrasound examination of the {body_part.lower()}."
+    
+    elif modality in ['NM']:
+        technique = f"Technique: Nuclear medicine imaging of the {body_part.lower()} was performed following intravenous administration of appropriate radiopharmaceutical."
+        if 'BONE' in study_description.upper():
+            findings = f"Findings: Normal symmetric uptake is seen throughout the osseous structures. No areas of abnormal increased or decreased uptake are identified."
+            impression = "Impression: Normal bone scan."
+        else:
+            findings = f"Findings: Normal biodistribution of the radiopharmaceutical. No areas of abnormal uptake are identified."
+            impression = f"Impression: Normal nuclear medicine examination."
+    
+    elif modality in ['MG']:
+        technique = f"Technique: Digital mammography was performed with standard CC and MLO views bilaterally."
+        findings = f"Findings: The breast tissue demonstrates scattered fibroglandular density (BI-RADS 2). No suspicious masses, calcifications, or architectural distortions are identified."
+        impression = "Impression: BI-RADS 1 - Negative mammogram."
+    
+    else:
+        # Generic report for other modalities
+        technique = f"Technique: {modality} examination of the {body_part.lower()} was performed."
+        findings = f"Findings: The {body_part.lower()} structures appear within normal limits for this examination."
+        impression = f"Impression: Normal {modality} examination."
+    
+    # Combine all sections
+    report_sections = [
+        indication,
+        "",
+        technique,
+        "",
+        findings,
+        "",
+        impression,
+        "",
+        f"Electronically signed by: Dr. {fake.last_name()}, {fake.last_name()} Radiology",
+        f"Date/Time: {datetime.datetime.now().strftime('%m/%d/%Y %H:%M:%S')}"
+    ]
+    
+    return "\n".join(report_sections)
+
+def _create_sr_object(study_instance_uid: str, series_instance_uid: str, patient_name: str, 
+                     patient_id: str, study_date: str, study_time: str, accession_number: str,
+                     modality: str, study_description: str, body_part: str, 
+                     patient_birth_date: str = '19800101', patient_sex: str = 'O') -> Dataset:
+    """Create a DICOM SR (Structured Report) object with generated report text."""
+    
+    # Generate report text
+    report_text = _generate_sr_report_text(modality, study_description, body_part)
+    
+    # Create SR dataset
+    file_meta = FileMetaDataset()
+    file_meta.MediaStorageSOPClassUID = UID("1.2.840.10008.5.1.4.1.1.88.11")  # Basic Text SR Storage
+    file_meta.MediaStorageSOPInstanceUID = generate_uid()
+    file_meta.TransferSyntaxUID = ImplicitVRLittleEndian
+    file_meta.ImplementationClassUID = PYDICOM_IMPLEMENTATION_UID
+    file_meta.ImplementationVersionName = "PYDICOM " + pydicom.__version__
+    file_meta.FileMetaInformationVersion = b'\x00\x01'
+
+    # Main Dataset
+    ds = Dataset()
+    ds.file_meta = file_meta
+    ds.is_little_endian = True
+    ds.is_implicit_VR = True
+
+    # Patient Information
+    ds.PatientName = patient_name
+    ds.PatientID = patient_id
+    ds.PatientBirthDate = patient_birth_date
+    ds.PatientSex = patient_sex
+
+    # Study Information
+    ds.AccessionNumber = accession_number
+    ds.StudyInstanceUID = study_instance_uid
+    ds.StudyDate = study_date
+    ds.StudyTime = study_time
+    ds.StudyID = "1"
+    ds.StudyDescription = study_description
+    ds.ReferringPhysicianName = "SIMULATION^DOCTOR"
+
+    # Series Information for SR
+    ds.SeriesInstanceUID = series_instance_uid
+    ds.SeriesNumber = "999"  # Use high number to distinguish from imaging series
+    ds.Modality = "SR"  # Structured Report
+    ds.SeriesDescription = f"SR Report for {study_description}"
+
+    # Instance Information
+    ds.SOPClassUID = UID("1.2.840.10008.5.1.4.1.1.88.11")  # Basic Text SR Storage
+    ds.SOPInstanceUID = file_meta.MediaStorageSOPInstanceUID
+    ds.InstanceNumber = 1
+    ds.ContentDate = study_date
+    ds.ContentTime = study_time
+
+    # Equipment Information
+    ds.Manufacturer = "DICOM Generator"
+    ds.ManufacturerModelName = "Python-SR-Generator-v1.0"
+    ds.InstitutionName = "Gen Hospital"
+
+    # SR Specific Attributes
+    ds.ValueType = "CONTAINER"
+    ds.ConceptNameCodeSequence = [Dataset()]
+    ds.ConceptNameCodeSequence[0].CodeValue = "18782-3"
+    ds.ConceptNameCodeSequence[0].CodingSchemeDesignator = "LN"
+    ds.ConceptNameCodeSequence[0].CodeMeaning = "Radiology Report"
+
+    ds.ContinuityOfContent = "SEPARATE"
+    ds.CompletionFlag = "COMPLETE"
+    ds.VerificationFlag = "VERIFIED"
+
+    # Content Sequence - Main report content
+    ds.ContentSequence = [Dataset()]
+    content_item = ds.ContentSequence[0]
+    content_item.RelationshipType = "CONTAINS"
+    content_item.ValueType = "TEXT"
+    
+    content_item.ConceptNameCodeSequence = [Dataset()]
+    content_item.ConceptNameCodeSequence[0].CodeValue = "121060"
+    content_item.ConceptNameCodeSequence[0].CodingSchemeDesignator = "DCM"
+    content_item.ConceptNameCodeSequence[0].CodeMeaning = "History"
+
+    content_item.TextValue = report_text
+
+    # Additional SR metadata
+    ds.PerformingPhysicianName = f"SIMULATION^RADIOLOGIST^{Faker().last_name()}"
+    ds.ContentCreatorName = ds.PerformingPhysicianName
+
+    return ds
+
+def create_study_files(output_dir: str, num_images: int, overrides: dict, generate_pixels: bool = True, burn_patient_info: bool = False, generate_report: bool = False):
     logging.info(f"DICOM Generator: Starting study generation in {output_dir}")
     
     fake = Faker()
@@ -819,10 +1009,10 @@ def create_study_files(output_dir: str, num_images: int, overrides: dict, genera
         
         # --- File Meta Information ---
         file_meta = FileMetaDataset()
-        file_meta.MediaStorageSOPClassUID = sop_class_uid
+        file_meta.MediaStorageSOPClassUID = UID(sop_class_uid)
         file_meta.MediaStorageSOPInstanceUID = sop_instance_uid
-        file_meta.TransferSyntaxUID = pydicom.uid.ImplicitVRLittleEndian
-        file_meta.ImplementationClassUID = pydicom.uid.PYDICOM_IMPLEMENTATION_UID
+        file_meta.TransferSyntaxUID = ImplicitVRLittleEndian
+        file_meta.ImplementationClassUID = PYDICOM_IMPLEMENTATION_UID
         file_meta.ImplementationVersionName = "PYDICOM " + pydicom.__version__
         file_meta.FileMetaInformationVersion = b'\x00\x01'
 
@@ -949,18 +1139,21 @@ def create_study_files(output_dir: str, num_images: int, overrides: dict, genera
             if HAS_PILLOW:
                 max_val = (2**ds.BitsStored) - 1
                 scaled_array = (pixel_array / max_val * 255.0).astype(np.uint8)
-                pil_image = Image.fromarray(scaled_array, mode='L')
-                draw = ImageDraw.Draw(pil_image)
+                pil_image = Image.fromarray(scaled_array, mode='L')  # type: ignore
+                draw = ImageDraw.Draw(pil_image)  # type: ignore
                 
                 try:
-                    font = ImageFont.truetype("DejaVuSans.ttf", 20)
-                    small_font = ImageFont.truetype("DejaVuSans.ttf", 14)
+                    font = ImageFont.truetype("DejaVuSans.ttf", 20)  # type: ignore
+                    small_font = ImageFont.truetype("DejaVuSans.ttf", 14)  # type: ignore
                 except IOError:
-                    font = ImageFont.load_default()
-                    small_font = ImageFont.load_default()
+                    font = ImageFont.load_default()  # type: ignore
+                    small_font = ImageFont.load_default()  # type: ignore
 
-                draw.text((10, 10), str(ds.PatientName).replace("^", " "), font=font, fill=255)
-                draw.text((10, 35), f"MRN: {ds.PatientID}", font=small_font, fill=255)
+                # Only burn patient information if requested
+                if burn_patient_info:
+                    draw.text((10, 10), str(ds.PatientName).replace("^", " "), font=font, fill=255)
+                    draw.text((10, 35), f"MRN: {ds.PatientID}", font=small_font, fill=255)
+                
                 draw.text((10, 512 - 40), f"Img: {ds.InstanceNumber}/{num_images}", font=small_font, fill=255)
                 
                 overlay_array_8bit = np.array(pil_image)
@@ -999,6 +1192,37 @@ def create_study_files(output_dir: str, num_images: int, overrides: dict, genera
             raise 
             
         generated_files.append(str(filepath.resolve()))
+
+    # --- Generate SR (Structured Report) if requested ---
+    if generate_report:
+        logging.info(f"DICOM Generator: Creating SR object for study")
+        sr_series_uid = generate_uid()
+        
+        try:
+            sr_ds = _create_sr_object(
+                study_instance_uid=study_instance_uid,
+                series_instance_uid=sr_series_uid,
+                patient_name=patient_name,
+                patient_id=patient_id,
+                study_date=study_date,
+                study_time=study_time,
+                accession_number=accession_number,
+                modality=chosen_modality,
+                study_description=study_description,
+                body_part=body_part_examined,
+                patient_birth_date=overrides.get('PatientBirthDate', '19800101'),
+                patient_sex=overrides.get('PatientSex', 'O')
+            )
+            
+            # Save SR file
+            sr_filepath = study_output_path / f"SR.{sr_ds.SOPInstanceUID}.dcm"
+            sr_ds.save_as(sr_filepath, write_like_original=False)
+            logging.info(f"Successfully saved SR report: {sr_filepath} ({sr_filepath.stat().st_size} bytes)")
+            generated_files.append(str(sr_filepath.resolve()))
+            
+        except Exception as e:
+            logging.error(f"Error creating SR object: {e}")
+            # Don't fail the entire generation if SR creation fails
 
     logging.info(f"DICOM Generator: Finished. Generated {len(generated_files)} files.")
     return generated_files

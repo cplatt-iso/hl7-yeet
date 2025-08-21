@@ -17,53 +17,72 @@ ExplicitVRLittleEndian = "1.2.840.10008.1.2.1"
 
 
 def perform_c_store(file_paths: list[str], endpoint: dict) -> dict:
-    """Sends a list of DICOM files to a remote SCP using C-STORE."""
+    """Sends a list of DICOM files to a remote SCP using C-STORE.
+    Creates separate associations for each study/exam to ensure proper cleanup."""
     results = {'success': [], 'failure': []}
     our_aet = endpoint.get('aet_title') or 'YEETER_SCU'
     if not isinstance(our_aet, str):
         our_aet = 'YEETER_SCU'
-    ae = AE(ae_title=our_aet)
 
+    # Group files by StudyInstanceUID to send each exam separately
+    studies = {}
     for fpath in file_paths:
         try:
             ds = dcmread(fpath, stop_before_pixels=True)
-            ae.add_requested_context(ds.SOPClassUID)
+            study_uid = ds.StudyInstanceUID
+            if study_uid not in studies:
+                studies[study_uid] = {'files': [], 'sop_classes': set()}
+            studies[study_uid]['files'].append(fpath)
+            studies[study_uid]['sop_classes'].add(ds.SOPClassUID)
         except Exception as e:
-            logging.error(f"Could not read SOP Class from {fpath}: {e}")
+            logging.error(f"Could not read DICOM file {fpath}: {e}")
             results['failure'].append({'path': fpath, 'reason': f"File read error: {e}"})
     
-    if not ae.requested_contexts:
-        logging.error("C-STORE failed: No valid DICOM files could be read to create presentation contexts.")
-        return {"error": "No valid DICOM files with SOPClassUID found to create contexts."}
+    if not studies:
+        logging.error("C-STORE failed: No valid DICOM files could be read.")
+        return {"error": "No valid DICOM files found."}
 
-    logging.info(f"Associating with {endpoint['name']} ({endpoint['hostname']}:{endpoint['port']}) as '{our_aet}' to AET '{endpoint.get('ae_title', 'ANY_SCP')}' for C-STORE.")
-    assoc = ae.associate(
-        endpoint['hostname'],
-        endpoint['port'],
-        ae_title=endpoint.get('ae_title', 'ANY_SCP')
-    )
+    # Send each study with its own association
+    for study_uid, study_data in studies.items():
+        logging.info(f"Opening new association for study {study_uid}")
+        
+        ae = AE(ae_title=our_aet)
+        # Add presentation contexts for all SOP classes in this study
+        for sop_class in study_data['sop_classes']:
+            ae.add_requested_context(sop_class)
 
-    if not assoc.is_established:
-        logging.error(f"C-STORE association with {endpoint['name']} failed.")
-        return {"error": f"C-STORE association failed for {endpoint['name']}"}
+        logging.info(f"Associating with {endpoint['name']} ({endpoint['hostname']}:{endpoint['port']}) as '{our_aet}' to AET '{endpoint.get('ae_title', 'ANY_SCP')}' for study {study_uid}")
+        assoc = ae.associate(
+            endpoint['hostname'],
+            endpoint['port'],
+            ae_title=endpoint.get('ae_title', 'ANY_SCP')
+        )
 
-    try:
-        for fpath in file_paths:
-            try:
-                status = assoc.send_c_store(fpath)
-                if status and status.Status == 0x0000:
-                    logging.info(f"Successfully stored: {fpath}")
-                    results['success'].append({'path': fpath})
-                else:
-                    reason = code_to_category(status.Status) if status else "Unknown Status"
-                    logging.warning(f"C-STORE for {fpath} failed with status: {reason}")
-                    results['failure'].append({'path': fpath, 'reason': reason})
-            except Exception as e:
-                logging.error(f"An exception occurred during C-STORE for {fpath}: {e}")
-                results['failure'].append({'path': fpath, 'reason': f"Send error: {e}"})
-    finally:
-        assoc.release()
-        logging.info("C-STORE association released.")
+        if not assoc.is_established:
+            logging.error(f"C-STORE association with {endpoint['name']} failed for study {study_uid}")
+            for fpath in study_data['files']:
+                results['failure'].append({'path': fpath, 'reason': f"Association failed for study {study_uid}"})
+            continue
+
+        try:
+            logging.info(f"Association established for study {study_uid}, sending {len(study_data['files'])} files")
+            for fpath in study_data['files']:
+                try:
+                    status = assoc.send_c_store(fpath)
+                    if status and status.Status == 0x0000:
+                        logging.info(f"Successfully stored: {fpath}")
+                        results['success'].append({'path': fpath})
+                    else:
+                        reason = code_to_category(status.Status) if status else "Unknown Status"
+                        logging.warning(f"C-STORE for {fpath} failed with status: {reason}")
+                        results['failure'].append({'path': fpath, 'reason': reason})
+                except Exception as e:
+                    logging.error(f"An exception occurred during C-STORE for {fpath}: {e}")
+                    results['failure'].append({'path': fpath, 'reason': f"Send error: {e}"})
+        finally:
+            # Release association after each study/exam
+            assoc.release()
+            logging.info(f"C-STORE association released for study {study_uid}")
     
     return results
 
@@ -106,7 +125,7 @@ def perform_dmwl_find(endpoint: dict, query_params: dict) -> List[Dataset]:
     try:
         responses = assoc.send_c_find(query_ds, ModalityWorklistInformationModelFind)
         for status, identifier in responses:
-            if status and status.Status == 0xFF00:
+            if status and status.Status == 0xFF00 and identifier is not None:
                 results.append(identifier)
                 # Debug logging for each result
                 acc_num = identifier.get('AccessionNumber', 'N/A')
@@ -121,8 +140,15 @@ def perform_dmwl_find(endpoint: dict, query_params: dict) -> List[Dataset]:
     return results
 
 
-def perform_mpps_action(endpoint: dict, worklist_item: Dataset, mpps_status: str, mpps_uid_from_context: Optional[str] = None) -> Dict:
+def perform_mpps_action(endpoint: dict, worklist_item: Optional[Dataset], mpps_status: str, mpps_uid_from_context: Optional[str] = None) -> Dict:
     """Builds and sends an MPPS N-CREATE or N-SET message."""
+    
+    if worklist_item is None:
+        return {
+            'status': 'FAILURE',
+            'details': 'No worklist item provided for MPPS action. Cannot proceed without patient and procedure information.'
+        }
+    
     our_aet = endpoint.get('aet_title') or 'YEETER_MPPS'
     ae = AE(ae_title=our_aet)
     ae.add_requested_context(ModalityPerformedProcedureStepSOPClass)
