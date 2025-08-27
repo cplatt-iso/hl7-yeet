@@ -13,5 +13,16 @@ export default defineConfig({
     host: '192.168.88.115', // Good for accessing on your LAN
     port: 5175,
     allowedHosts: ['192.168.88.115', 'yeet.trazen.org', 'localhost'],
+    proxy: {
+      '/api': {
+        target: 'https://yeet.trazen.org',
+        changeOrigin: true,
+        secure: true,
+        headers: {
+          'Origin': 'https://yeet.trazen.org'
+        }
+      }
+      // Removed socket.io proxy - not needed for polling approach
+    }
   },
 })

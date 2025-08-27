@@ -1,6 +1,6 @@
 // --- START OF FILE src/components/HL7Parser.jsx ---
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { io } from 'socket.io-client';
+// import { io } from 'socket.io-client'; // DISABLED Socket.IO
 
 // API Imports
 import { parseHl7, sendHl7, analyzeHl7, getTotalUsage, getUsageByModel, getSupportedVersions, pingMllpApi } from '../api/mllp';
@@ -82,57 +82,13 @@ const HL7Parser = () => {
     useEffect(() => { 
         if (!isAuthenticated) return; 
         
-        // Define fallback socket URLs to try in order - only HTTPS/WSS for mixed content compliance
-        const socketUrls = [
-            import.meta.env.VITE_SOCKET_URL,
-            import.meta.env.VITE_API_URL,
-            'https://yeet.trazen.org',
-            // Only include localhost for development environment
-            ...(window.location.hostname === 'localhost' ? ['http://localhost:5001'] : [])
-        ].filter(Boolean);
-
-        let currentUrlIndex = 0;
-        let connectedSocket = null;
-
-        const tryConnection = () => {
-            if (currentUrlIndex >= socketUrls.length) {
-                console.error('All HL7Parser socket.io connection attempts failed');
-                return;
-            }
-
-            const socketUrl = socketUrls[currentUrlIndex];
-            const socket = io(socketUrl, {
-                transports: ['websocket', 'polling'],
-                timeout: 15000
-            }); 
-            
-            socket.on('connect', () => { 
-                console.log('HL7Parser socket connected to:', socketUrl); 
-                connectedSocket = socket;
-                socketRef.current = socket;
-            }); 
-            
-            socket.on('disconnect', () => { console.log('HL7Parser socket disconnected'); }); 
-            
-            socket.on('connect_error', (error) => { 
-                console.error(`HL7Parser socket error for ${socketUrl}:`, error);
-                socket.disconnect();
-                currentUrlIndex++;
-                if (currentUrlIndex < socketUrls.length) {
-                    setTimeout(tryConnection, 2000);
-                }
-            });
-            
-            socket.on('listener_status', (data) => { setListenerStatus(data.status); setIsListening(data.status === 'listening'); }); 
-            socket.on('incoming_message', (data) => { setReceivedMessages(prev => [data, ...prev]); }); 
-        };
-
-        tryConnection();
+        // DISABLED: Socket.IO connection for HL7Parser
+        console.log('HL7Parser: Socket.IO connections disabled, using REST API only');
         
-        return () => { 
-            if (connectedSocket) connectedSocket.disconnect(); 
-        }; 
-    }, [isAuthenticated]);
+        // Still fetch user templates
+        fetchUserTemplates();
+    }, [isAuthenticated, fetchUserTemplates]);
+    
     useEffect(() => {
         const fetchInitialData = async () => {
             try {

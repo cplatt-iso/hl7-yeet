@@ -1,145 +1,123 @@
-// --- START OF FILE src/context/AuthContext.jsx ---
-
-import React, { createContext, useState, useContext, useEffect, useRef } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
 import { loginApi, registerApi, googleLoginApi } from '../api/auth';
-import { io } from 'socket.io-client'; // <-- IMPORT SOCKET.IO
 
-const AuthContext = createContext(null);
+const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
-    const [token, setToken] = useState(null);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(true);
-    const socketRef = useRef(null); // <-- REF TO HOLD THE SOCKET INSTANCE
 
     useEffect(() => {
-        try {
-            const storedToken = localStorage.getItem('authToken');
-            const storedUser = localStorage.getItem('authUser');
-            const storedIsAdmin = localStorage.getItem('isAdmin');
-            if (storedToken && storedUser) {
-                setToken(storedToken);
-                setUser(JSON.parse(storedUser));
-                setIsAdmin(storedIsAdmin === 'true');
-                // Connect socket if token exists on initial load
-                connectSocket(storedToken); 
+        // Check for existing token on app load
+        const token = localStorage.getItem('authToken');
+        if (token) {
+            // For JWT tokens, we can decode to check if valid/get user info
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                const currentTime = Date.now() / 1000;
+                
+                if (payload.exp > currentTime) {
+                    // Token is still valid
+                    setUser({
+                        username: payload.sub,
+                        is_admin: payload.is_admin || false
+                    });
+                    setIsAuthenticated(true);
+                    setIsAdmin(payload.is_admin || false);
+                } else {
+                    // Token expired, clear it
+                    localStorage.removeItem('authToken');
+                }
+            } catch {
+                // Invalid token format, clear it
+                localStorage.removeItem('authToken');
             }
-        } catch (error) {
-            console.error("Failed to parse auth data from localStorage", error);
-            localStorage.clear();
-        } finally {
-            setLoading(false);
         }
-        // Disconnect on component unmount
-        return () => disconnectSocket();
+        setLoading(false);
     }, []);
 
-    const connectSocket = (authToken) => {
-        if (socketRef.current) return; // Already connected
+    const login = async (credentials) => {
+        // loginApi expects (username, password)
+        const response = await loginApi(credentials.username || credentials.email, credentials.password);
+        const { access_token, username } = response;
         
-        // Define fallback socket URLs to try in order - only HTTPS/WSS for mixed content compliance
-        const socketUrls = [
-            import.meta.env.VITE_SOCKET_URL,
-            import.meta.env.VITE_API_URL,
-            'https://yeet.trazen.org',
-            // Only include localhost for development environment
-            ...(window.location.hostname === 'localhost' ? ['http://localhost:5001'] : [])
-        ].filter(Boolean); // Remove undefined values
-
-        let currentUrlIndex = 0;
-
-        const tryConnection = () => {
-            if (currentUrlIndex >= socketUrls.length) {
-                console.error('All socket.io connection attempts failed');
-                return;
-            }
-
-            const socketUrl = socketUrls[currentUrlIndex];
-            console.log(`Attempting to connect to socket.io at: ${socketUrl} (attempt ${currentUrlIndex + 1}/${socketUrls.length})`);
-            
-            const newSocket = io(socketUrl, {
-                transports: ['websocket', 'polling'],
-                timeout: 15000,
-                forceNew: true
-            });
-            
-            newSocket.on('connect', () => {
-                console.log('Socket.IO Client Connected successfully to:', socketUrl);
-                socketRef.current = newSocket;
-            });
-            
-            newSocket.on('disconnect', (reason) => {
-                console.log('Socket.IO Client Disconnected. Reason:', reason);
-            });
-            
-            newSocket.on('connect_error', (error) => {
-                console.error(`Socket.IO Connection Error for ${socketUrl}:`, error);
-                newSocket.disconnect();
-                currentUrlIndex++;
-                if (currentUrlIndex < socketUrls.length) {
-                    setTimeout(tryConnection, 2000); // Try next URL after 2 seconds
-                }
-            });
+        localStorage.setItem('authToken', access_token);
+        
+        // Decode token to get user info
+        const payload = JSON.parse(atob(access_token.split('.')[1]));
+        const userData = {
+            username: username,
+            is_admin: payload.is_admin || false
         };
-
-        tryConnection();
-    };
-
-    const disconnectSocket = () => {
-        if (socketRef.current) {
-            socketRef.current.disconnect();
-            socketRef.current = null;
-        }
-    };
-
-    const login = async (username, password) => {
-        const data = await loginApi(username, password);
-        setToken(data.access_token);
-        const userData = { username: data.username };
+        
         setUser(userData);
-        setIsAdmin(data.is_admin);
-        localStorage.setItem('authToken', data.access_token);
-        localStorage.setItem('authUser', JSON.stringify(userData));
-        localStorage.setItem('isAdmin', data.is_admin);
-        connectSocket(data.access_token); // Connect after login
-    };
-    
-    const googleLogin = async (googleToken) => {
-        const data = await googleLoginApi(googleToken);
-        setToken(data.access_token);
-        const userData = { username: data.username };
-        setUser(userData);
-        setIsAdmin(data.is_admin);
-        localStorage.setItem('authToken', data.access_token);
-        localStorage.setItem('authUser', JSON.stringify(userData));
-        localStorage.setItem('isAdmin', data.is_admin);
-        connectSocket(data.access_token);
+        setIsAuthenticated(true);
+        setIsAdmin(userData.is_admin);
+        
+        return { data: { token: access_token, user: userData } };
     };
 
-    const register = async (username, email, password) => {
-        await registerApi(username, email, password);
+    const register = async (userData) => {
+        // registerApi expects (username, email, password)
+        const response = await registerApi(userData.username, userData.email, userData.password);
+        const { access_token, username } = response;
+        
+        localStorage.setItem('authToken', access_token);
+        
+        // Decode token to get user info
+        const payload = JSON.parse(atob(access_token.split('.')[1]));
+        const user = {
+            username: username,
+            is_admin: payload.is_admin || false
+        };
+        
+        setUser(user);
+        setIsAuthenticated(true);
+        setIsAdmin(user.is_admin);
+        
+        return { data: { token: access_token, user } };
+    };
+
+    const googleLogin = async (googleUser) => {
+        const response = await googleLoginApi(googleUser.token || googleUser);
+        const { access_token, username } = response;
+        
+        localStorage.setItem('authToken', access_token);
+        
+        // Decode token to get user info
+        const payload = JSON.parse(atob(access_token.split('.')[1]));
+        const userData = {
+            username: username,
+            is_admin: payload.is_admin || false
+        };
+        
+        setUser(userData);
+        setIsAuthenticated(true);
+        setIsAdmin(userData.is_admin);
+        
+        return { data: { token: access_token, user: userData } };
     };
 
     const logout = () => {
-        disconnectSocket(); // Disconnect before clearing data
+        localStorage.removeItem('authToken');
         setUser(null);
-        setToken(null);
+        setIsAuthenticated(false);
         setIsAdmin(false);
-        localStorage.clear();
     };
 
     const value = {
         user,
-        token,
-        isAuthenticated: !!token,
+        isAuthenticated,
         isAdmin,
         loading,
-        socket: socketRef.current, // <-- EXPOSE THE SOCKET
         login,
         register,
-        logout,
         googleLogin,
+        logout,
+        // Legacy socket property for components that still reference it
+        socket: null
     };
 
     return (
@@ -151,9 +129,8 @@ export const AuthProvider = ({ children }) => {
 
 export const useAuth = () => {
     const context = useContext(AuthContext);
-    if (context === undefined) {
+    if (!context) {
         throw new Error('useAuth must be used within an AuthProvider');
     }
     return context;
 };
-// --- END OF FILE src/context/AuthContext.jsx ---

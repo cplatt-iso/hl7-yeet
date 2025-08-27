@@ -2,7 +2,7 @@
 
 import os
 import logging
-from flask import Flask
+from flask import Flask, request
 from flask_jwt_extended import get_current_user # I'm adding this back just in case, it's good practice
 from dotenv import load_dotenv
 from .commands import register_commands
@@ -52,7 +52,13 @@ def create_app():
     # --- Initialize Extensions ---
     db.init_app(app)
     cors.init_app(app, resources={r"/api/*": {"origins": "*"}})
-    socketio.init_app(app, cors_allowed_origins="*")
+    socketio.init_app(app, 
+                     cors_allowed_origins="*",
+                     logger=True,
+                     engineio_logger=True,
+                     ping_timeout=60,
+                     ping_interval=25,
+                     allow_upgrades=True)
     bcrypt.init_app(app)
     jwt.init_app(app)
 
@@ -63,6 +69,43 @@ def create_app():
         return crud.get_user_by_id(db, int(identity))
         
     # --- NEW: SOCKET.IO HANDLERS FOR SIMULATOR LOGGING ---
+    @socketio.on('connect')
+    def handle_connect(auth=None):
+        """Handle Socket.IO client connection with optional authentication."""
+        try:
+            # Try to authenticate if token is provided
+            token = None
+            if auth and 'token' in auth:
+                token = auth['token']
+            elif request.args.get('token'):
+                token = request.args.get('token')
+            
+            if token:
+                try:
+                    # Validate JWT token
+                    from flask_jwt_extended import decode_token
+                    decoded = decode_token(token)
+                    user_id = decoded['sub']
+                    user = crud.get_user_by_id(db, int(user_id))
+                    if user:
+                        logging.info(f"Socket.IO: Authenticated user {user.username} connected")
+                    else:
+                        logging.warning(f"Socket.IO: Invalid user ID {user_id} in token")
+                except Exception as e:
+                    logging.warning(f"Socket.IO: Token validation failed: {e}")
+            else:
+                logging.info("Socket.IO: Anonymous client connected (no token provided)")
+            
+            logging.info(f"Socket.IO: Client connected successfully")
+            
+        except Exception as e:
+            logging.error(f"Socket.IO: Connection error: {e}")
+
+    @socketio.on('disconnect')
+    def handle_disconnect():
+        """Handle Socket.IO client disconnection."""
+        logging.info(f"Socket.IO: Client disconnected")
+
     @socketio.on('join_run_room')
     def handle_join_run_room(data):
         run_id = data.get('run_id')
@@ -88,6 +131,10 @@ def create_app():
     app.register_blueprint(endpoint_bp)
     app.register_blueprint(simulator_bp)
     app.register_blueprint(v1_bp)
+    
+    # Import and register SSE routes
+    from .routes.sse_routes import sse_bp
+    app.register_blueprint(sse_bp)
 
 
     # --- Create/Update Database Tables ---
