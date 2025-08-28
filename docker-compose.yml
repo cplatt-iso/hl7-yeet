@@ -1,0 +1,63 @@
+services:
+  hl7-yeeter:
+    build: 
+       context: .
+    image: hl7-yeeter:latest
+    container_name: hl7-yeeter
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      # Database connection - use internal Docker network
+      DATABASE_URL: "postgresql+psycopg2://${POSTGRES_USER:-yeeter_user}:${POSTGRES_PASSWORD:-yeeter_pw}@postgres:5432/${POSTGRES_DB:-hl7_yeeter_db}"
+      FLASK_ENV: "development"
+      # Application settings
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-default_secret_change_me}
+      JWT_ACCESS_TOKEN_EXPIRES_HOURS: 24
+      VITE_GOOGLE_CLIENT_ID: ${VITE_GOOGLE_CLIENT_ID:-}
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:5001}
+    ports:
+      - "5001:5001"
+    networks:
+      - yeeter_network
+      - npm_web
+      - axiom_shared_network
+    volumes:
+      - ./db-data:/data
+      
+  postgres:
+    image: postgres:15-alpine
+    container_name: yeeter_postgres
+    restart: unless-stopped
+    ports:
+      # Expose postgres on host port 5434 to avoid conflicts with system postgres
+      - "${POSTGRES_PORT:-5434}:5432"
+    volumes:
+      - databases_postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-yeeter_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-yeeter_pw}
+      POSTGRES_DB: ${POSTGRES_DB:-hl7_yeeter_db}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - yeeter_network
+
+volumes:
+  databases_postgres_data:
+    external: true
+  
+networks:
+  yeeter_network:
+    driver: bridge
+  npm_web:
+    external: true
+  axiom_shared_network:
+    external: true
