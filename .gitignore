@@ -68,3 +68,4 @@ coverage.xml
 debug_*
 *segment-dictionary*
 *old_segment_dictionary*
+db-data/

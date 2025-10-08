@@ -87,10 +87,21 @@ def refresh_terminology():
     """Triggers a full refresh of V2 terminology tables."""
     current_user_id = get_jwt_identity()
     logging.info(f"Admin user {current_user_id} triggered a terminology refresh.")
-    # MODIFIED: Pass the socketio instance to the processor
-    result = definition_processor.process_terminology_refresh(socketio)
-    if result['status'] == 'success': return jsonify(result), 202 # Return 202 Accepted
-    else: return jsonify(error=result['message']), 500
+    
+    # Wrapper function to run the refresh with Flask app context
+    def run_refresh():
+        try:
+            # Background tasks need the Flask app context for database operations
+            with current_app.app_context():
+                definition_processor.process_terminology_refresh(socketio)
+        except Exception as e:
+            logging.error(f"Background terminology refresh failed: {e}", exc_info=True)
+    
+    # Run the terminology refresh as a background task to avoid blocking the request
+    socketio.start_background_task(run_refresh)
+    
+    # Return immediately with 202 Accepted - client will receive updates via Socket.IO
+    return jsonify({"status": "started", "message": "Terminology refresh started in background"}), 202
 
 @admin_bp.route('/terminology/tables', methods=['GET'])
 @admin_required()

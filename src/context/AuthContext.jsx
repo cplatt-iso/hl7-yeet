@@ -12,27 +12,29 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         // Check for existing token on app load
         const token = localStorage.getItem('authToken');
-        if (token) {
-            // For JWT tokens, we can decode to check if valid/get user info
+        const storedUser = localStorage.getItem('userData');
+        
+        if (token && storedUser) {
+            // For JWT tokens, we can decode to check if valid
             try {
                 const payload = JSON.parse(atob(token.split('.')[1]));
                 const currentTime = Date.now() / 1000;
                 
                 if (payload.exp > currentTime) {
-                    // Token is still valid
-                    setUser({
-                        username: payload.sub,
-                        is_admin: payload.is_admin || false
-                    });
+                    // Token is still valid, restore user data
+                    const userData = JSON.parse(storedUser);
+                    setUser(userData);
                     setIsAuthenticated(true);
-                    setIsAdmin(payload.is_admin || false);
+                    setIsAdmin(userData.is_admin || false);
                 } else {
                     // Token expired, clear it
                     localStorage.removeItem('authToken');
+                    localStorage.removeItem('userData');
                 }
             } catch {
-                // Invalid token format, clear it
+                // Invalid token or data format, clear it
                 localStorage.removeItem('authToken');
+                localStorage.removeItem('userData');
             }
         }
         setLoading(false);
@@ -41,16 +43,18 @@ export const AuthProvider = ({ children }) => {
     const login = async (credentials) => {
         // loginApi expects (username, password)
         const response = await loginApi(credentials.username || credentials.email, credentials.password);
-        const { access_token, username } = response;
+        const { access_token, username, is_admin } = response;
         
         localStorage.setItem('authToken', access_token);
         
-        // Decode token to get user info
-        const payload = JSON.parse(atob(access_token.split('.')[1]));
+        // Use is_admin from the API response
         const userData = {
             username: username,
-            is_admin: payload.is_admin || false
+            is_admin: is_admin || false
         };
+        
+        // Store user data for persistence across page reloads
+        localStorage.setItem('userData', JSON.stringify(userData));
         
         setUser(userData);
         setIsAuthenticated(true);
@@ -62,16 +66,18 @@ export const AuthProvider = ({ children }) => {
     const register = async (userData) => {
         // registerApi expects (username, email, password)
         const response = await registerApi(userData.username, userData.email, userData.password);
-        const { access_token, username } = response;
+        const { access_token, username, is_admin } = response;
         
         localStorage.setItem('authToken', access_token);
         
-        // Decode token to get user info
-        const payload = JSON.parse(atob(access_token.split('.')[1]));
+        // Use is_admin from the API response
         const user = {
             username: username,
-            is_admin: payload.is_admin || false
+            is_admin: is_admin || false
         };
+        
+        // Store user data for persistence across page reloads
+        localStorage.setItem('userData', JSON.stringify(user));
         
         setUser(user);
         setIsAuthenticated(true);
@@ -82,16 +88,18 @@ export const AuthProvider = ({ children }) => {
 
     const googleLogin = async (googleUser) => {
         const response = await googleLoginApi(googleUser.token || googleUser);
-        const { access_token, username } = response;
+        const { access_token, username, is_admin } = response;
         
         localStorage.setItem('authToken', access_token);
         
-        // Decode token to get user info
-        const payload = JSON.parse(atob(access_token.split('.')[1]));
+        // Use is_admin from the API response
         const userData = {
             username: username,
-            is_admin: payload.is_admin || false
+            is_admin: is_admin || false
         };
+        
+        // Store user data for persistence across page reloads
+        localStorage.setItem('userData', JSON.stringify(userData));
         
         setUser(userData);
         setIsAuthenticated(true);
@@ -102,6 +110,7 @@ export const AuthProvider = ({ children }) => {
 
     const logout = () => {
         localStorage.removeItem('authToken');
+        localStorage.removeItem('userData');
         setUser(null);
         setIsAuthenticated(false);
         setIsAdmin(false);
