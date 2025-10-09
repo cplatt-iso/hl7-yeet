@@ -52,7 +52,7 @@ const HL7Parser = () => {
     const [analysisResult, setAnalysisResult] = useState(null);
     const [totalTokenUsage, setTotalTokenUsage] = useState(0);
     const [showTooltips, setShowTooltips] = useState(true);
-    const [selectedModel, setSelectedModel] = useState('gemini-1.5-flash');
+    const [selectedModel, setSelectedModel] = useState(''); // Will be set by SettingsPanel
     const [modelUsage, setModelUsage] = useState({});
     const [supportedVersions, setSupportedVersions] = useState([]);
     const [selectedHl7Version, setSelectedHl7Version] = useState('');

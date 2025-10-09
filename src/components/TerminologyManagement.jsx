@@ -1,9 +1,10 @@
 // --- START OF FILE src/components/TerminologyManagement.jsx ---
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { refreshTerminologyApi, getTerminologyStatusApi } from '../api/admin';
-import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-hot-toast';
+import { io } from 'socket.io-client';
+import { API_BASE_URL } from '../api/config';
 import TerminologyBrowser from './TerminologyBrowser'; // <-- NEW IMPORT
 
 const ProgressBar = ({ progress }) => (
@@ -21,7 +22,7 @@ const TerminologyManagement = () => {
     const [progress, setProgress] = useState(0);
     const [progressMessage, setProgressMessage] = useState('');
     const [isBrowserOpen, setIsBrowserOpen] = useState(false); // <-- NEW STATE
-    const { socket } = useAuth();
+    const socketRef = useRef(null);
 
     const fetchStatus = async () => {
         try {
@@ -37,9 +38,20 @@ const TerminologyManagement = () => {
     }, []);
 
     useEffect(() => {
-        if (!socket) return;
+        // Set up Socket.IO connection for real-time terminology refresh updates
+        const token = localStorage.getItem('authToken');
+        const socketUrl = import.meta.env.VITE_SOCKET_URL || API_BASE_URL;
+        
+        socketRef.current = io(socketUrl, {
+            auth: { token },
+            transports: ['websocket', 'polling'],
+            reconnection: true,
+            reconnectionDelay: 1000,
+            reconnectionAttempts: 5
+        });
 
         const handleStatusUpdate = (data) => {
+            console.log('Terminology status update:', data);
             setProgressMessage(data.message);
             if (data.progress) {
                 setProgress(data.progress);
@@ -51,12 +63,23 @@ const TerminologyManagement = () => {
             }
         };
 
-        socket.on('terminology_status', handleStatusUpdate);
+        socketRef.current.on('terminology_status', handleStatusUpdate);
+
+        socketRef.current.on('connect', () => {
+            console.log('Socket.IO connected for terminology management');
+        });
+
+        socketRef.current.on('disconnect', () => {
+            console.log('Socket.IO disconnected');
+        });
 
         return () => {
-            socket.off('terminology_status', handleStatusUpdate);
+            if (socketRef.current) {
+                socketRef.current.off('terminology_status', handleStatusUpdate);
+                socketRef.current.disconnect();
+            }
         };
-    }, [socket]);
+    }, []);
 
     const handleRefresh = async () => {
         if (!window.confirm("Are you sure? This will reload all terminology definitions and can take several minutes.")) return;

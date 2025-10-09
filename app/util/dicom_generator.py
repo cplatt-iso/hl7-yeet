@@ -895,8 +895,7 @@ def _create_sr_object(study_instance_uid: str, series_instance_uid: str, patient
     # Main Dataset
     ds = Dataset()
     ds.file_meta = file_meta
-    ds.is_little_endian = True
-    ds.is_implicit_VR = True
+    # Transfer syntax is set in file_meta, no need to set deprecated attributes
 
     # Patient Information
     ds.PatientName = patient_name
@@ -1019,9 +1018,7 @@ def create_study_files(output_dir: str, num_images: int, overrides: dict, genera
         # --- Main Dataset ---
         ds = Dataset()
         ds.file_meta = file_meta
-        # Set the transfer syntax attributes on the dataset itself
-        ds.is_little_endian = True
-        ds.is_implicit_VR = True
+        # Transfer syntax is set in file_meta, no need to set deprecated attributes
 
         # --- Patient and Study Information ---
         ds.PatientName = patient_name
@@ -1184,7 +1181,7 @@ def create_study_files(output_dir: str, num_images: int, overrides: dict, genera
         
         try:
             # pydicom.config.enforce_valid_values = True # Can be uncommented for strict validation
-            ds.save_as(filepath, write_like_original=False)
+            ds.save_as(filepath, enforce_file_format=True)
             logging.info(f"Successfully saved PACS-compatible DICOM: {filepath} ({filepath.stat().st_size} bytes)")
             
         except Exception as e:
@@ -1216,7 +1213,7 @@ def create_study_files(output_dir: str, num_images: int, overrides: dict, genera
             
             # Save SR file
             sr_filepath = study_output_path / f"SR.{sr_ds.SOPInstanceUID}.dcm"
-            sr_ds.save_as(sr_filepath, write_like_original=False)
+            sr_ds.save_as(sr_filepath, enforce_file_format=True)
             logging.info(f"Successfully saved SR report: {sr_filepath} ({sr_filepath.stat().st_size} bytes)")
             generated_files.append(str(sr_filepath.resolve()))
             

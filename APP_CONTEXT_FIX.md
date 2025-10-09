@@ -24,19 +24,25 @@ Flask background tasks run in a separate thread/context and do not automatically
 
 ## Solution Applied
 
-Wrapped the background task execution with Flask's application context manager:
+Captured the Flask app instance while still in the request context, then wrapped the background task execution with Flask's application context manager:
 
 ```python
+# Capture the app instance while we're still in request context
+app = current_app._get_current_object()
+
 def run_refresh():
     try:
         # Background tasks need the Flask app context for database operations
-        with current_app.app_context():
+        with app.app_context():
             definition_processor.process_terminology_refresh(socketio)
     except Exception as e:
         logging.error(f"Background terminology refresh failed: {e}", exc_info=True)
 ```
 
-The `with current_app.app_context():` statement creates and activates an application context for the duration of the block, allowing all database operations and Flask functionality to work correctly.
+The key steps are:
+
+1. **Capture the app instance**: `current_app._get_current_object()` gets the actual Flask app object (not the proxy) while we're still in the request context
+2. **Use app context in background task**: `with app.app_context():` creates and activates an application context for the duration of the block, allowing all database operations and Flask functionality to work correctly
 
 ## Files Modified
 

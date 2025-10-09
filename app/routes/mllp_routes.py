@@ -29,7 +29,48 @@ if GEMINI_API_KEY:
 else:
     logging.warning("CRITICAL: GOOGLE_API_KEY not found in environment. The AI Analyzer will not work.")
 
-ALLOWED_MODELS = {'gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.5-flash', 'gemini-2.5-pro'}
+# Cache for available models - will be populated dynamically
+_available_models_cache = None
+_cache_timestamp = None
+CACHE_DURATION = 3600  # Cache for 1 hour
+
+def get_available_gemini_models():
+    """
+    Fetches available Gemini models from Google API and caches them.
+    Returns a list of model names that support generateContent.
+    """
+    global _available_models_cache, _cache_timestamp
+    
+    # Check if cache is valid
+    if _available_models_cache is not None and _cache_timestamp is not None:
+        if (datetime.now().timestamp() - _cache_timestamp) < CACHE_DURATION:
+            return _available_models_cache
+    
+    try:
+        if not GEMINI_API_KEY:
+            logging.warning("Cannot fetch Gemini models: GOOGLE_API_KEY not configured")
+            return []
+        
+        # Fetch all available models
+        models = genai.list_models()
+        
+        # Filter for models that support generateContent and exclude image-generation models
+        gemini_models = [
+            model.name for model in models 
+            if 'generateContent' in model.supported_generation_methods
+            and 'image-generation' not in model.name.lower()
+        ]
+        
+        _available_models_cache = gemini_models
+        _cache_timestamp = datetime.now().timestamp()
+        
+        logging.info(f"Fetched {len(gemini_models)} available Gemini models: {gemini_models}")
+        return gemini_models
+    
+    except Exception as e:
+        logging.error(f"Error fetching available Gemini models: {e}")
+        # Return empty list on error, or return cached value if available
+        return _available_models_cache if _available_models_cache else []
 
 
 @mllp_bp.route('/parse_hl7', methods=['POST'])
@@ -77,6 +118,17 @@ def send_hl7():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
+@mllp_bp.route('/available_models', methods=['GET'])
+@jwt_required()
+def get_available_models_api():
+    """Returns list of available Gemini models that support text generation."""
+    if not GEMINI_API_KEY:
+        return jsonify({"error": "Google AI API key is not configured on the server."}), 503
+    
+    models = get_available_gemini_models()
+    return jsonify({"models": models}), 200
+
+
 @mllp_bp.route('/analyze_hl7', methods=['POST'])
 @jwt_required()
 def analyze_hl7_api():
@@ -90,9 +142,11 @@ def analyze_hl7_api():
         logging.error(f"Validation error on /api/analyze_hl7: {e.errors()}")
         return jsonify({"error": e.errors()}), 422
     
-    if data.model not in ALLOWED_MODELS:
-        logging.warning(f"Rejected attempt to use unapproved model: {data.model}")
-        return jsonify({"error": f"Invalid model: {data.model}"}), 400
+    # Validate model against dynamically fetched list
+    available_models = get_available_gemini_models()
+    if data.model not in available_models:
+        logging.warning(f"Rejected attempt to use unavailable model: {data.model}")
+        return jsonify({"error": f"Invalid or unavailable model: {data.model}. Use /api/available_models to see available models."}), 400
 
     definitions = load_hl7_definitions_for_version(data.version)
     if not definitions:
@@ -118,8 +172,21 @@ def analyze_hl7_api():
         
         analysis_result = json.loads(response.text)
         
-        if 'fixed_message' in analysis_result and isinstance(analysis_result['fixed_message'], dict):
-            analysis_result['fixed_message'] = _reconstruct_hl7_from_json(analysis_result['fixed_message'])
+        # Handle fixed_message reconstruction if it's a structured JSON object
+        if 'fixed_message' in analysis_result:
+            fixed_msg = analysis_result['fixed_message']
+            if isinstance(fixed_msg, dict):
+                try:
+                    analysis_result['fixed_message'] = _reconstruct_hl7_from_json(fixed_msg)
+                except Exception as e:
+                    logging.error(f"Error reconstructing HL7 from JSON: {e}", exc_info=True)
+                    # Keep the original dict if reconstruction fails
+                    analysis_result['fixed_message_error'] = str(e)
+            elif isinstance(fixed_msg, str):
+                # Already a string, use as-is
+                pass
+            else:
+                logging.warning(f"Unexpected type for fixed_message: {type(fixed_msg)}")
 
         analysis_result['usage'] = usage_data
         analysis_result['prompt'] = prompt
@@ -240,6 +307,16 @@ def get_table_definitions(table_id: str):
 def _reconstruct_hl7_from_json(fixed_message_json):
     reconstructed_segments = []
     for segment_name, fields in fixed_message_json.items():
+        # Handle case where fields is already a string (segment line)
+        if isinstance(fields, str):
+            reconstructed_segments.append(fields)
+            continue
+        
+        # Handle case where fields is not a dict
+        if not isinstance(fields, dict):
+            logging.warning(f"Unexpected type for fields in segment {segment_name}: {type(fields)}")
+            continue
+        
         max_field = 0
         for key in fields.keys():
             try:

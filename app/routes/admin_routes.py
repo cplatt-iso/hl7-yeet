@@ -88,11 +88,14 @@ def refresh_terminology():
     current_user_id = get_jwt_identity()
     logging.info(f"Admin user {current_user_id} triggered a terminology refresh.")
     
+    # Capture the app instance while we're still in request context
+    app = current_app._get_current_object()  # type: ignore
+    
     # Wrapper function to run the refresh with Flask app context
     def run_refresh():
         try:
             # Background tasks need the Flask app context for database operations
-            with current_app.app_context():
+            with app.app_context():
                 definition_processor.process_terminology_refresh(socketio)
         except Exception as e:
             logging.error(f"Background terminology refresh failed: {e}", exc_info=True)

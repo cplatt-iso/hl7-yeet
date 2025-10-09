@@ -51,10 +51,6 @@ def refresh_terminology():
 **After:**
 
 ```python
-
-**After:**
-
-```python
 @admin_bp.route('/terminology/refresh', methods=['POST'])
 @admin_required()
 def refresh_terminology():
@@ -62,11 +58,14 @@ def refresh_terminology():
     current_user_id = get_jwt_identity()
     logging.info(f"Admin user {current_user_id} triggered a terminology refresh.")
     
+    # Capture the app instance while we're still in request context
+    app = current_app._get_current_object()
+    
     # Wrapper function to run the refresh with Flask app context
     def run_refresh():
         try:
             # Background tasks need the Flask app context for database operations
-            with current_app.app_context():
+            with app.app_context():
                 definition_processor.process_terminology_refresh(socketio)
         except Exception as e:
             logging.error(f"Background terminology refresh failed: {e}", exc_info=True)
@@ -115,4 +114,9 @@ The frontend already had Socket.IO listening for `terminology_status` events, so
 
 ## Update: Application Context Issue
 
-Initial implementation worked but failed with `RuntimeError: Working outside of application context` when trying to access the database. This was fixed by wrapping the background task execution with `current_app.app_context()` to provide the necessary Flask application context for SQLAlchemy database operations.
+Initial implementation failed with `RuntimeError: Working outside of application context` when trying to access the database. This required two fixes:
+
+1. **Capture the app instance**: `current_app._get_current_object()` must be called while still in the request context to get the actual Flask app object (not the proxy)
+2. **Use app context in background task**: Wrap the background task execution with `app.app_context()` to provide the necessary Flask application context for SQLAlchemy database operations
+
+Simply using `current_app.app_context()` inside the background task doesn't work because `current_app` is a LocalProxy that only works within an active context.

@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { API_BASE_URL } from '../api/config';
 
 const Toggle = ({ label, enabled, onChange }) => (
     <div className="flex items-center justify-between">
@@ -29,15 +31,55 @@ const SettingsPanel = ({
     selectedHl7Version,
     setSelectedHl7Version
 }) => {
+    const [availableModels, setAvailableModels] = useState([]);
+    const [loadingModels, setLoadingModels] = useState(true);
 
-    // Debug logs removed
+    // Fetch available models from the API
+    useEffect(() => {
+        const fetchModels = async () => {
+            try {
+                const token = localStorage.getItem('authToken');
+                if (!token) {
+                    console.warn('No auth token available, skipping model fetch');
+                    setLoadingModels(false);
+                    return;
+                }
+                
+                const response = await axios.get(`${API_BASE_URL}/api/available_models`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                
+                if (response.data.models && response.data.models.length > 0) {
+                    console.log(`✓ Fetched ${response.data.models.length} models from API`);
+                    setAvailableModels(response.data.models);
+                    
+                    // If current selected model is not in the list, select the first available
+                    if (!response.data.models.includes(selectedModel)) {
+                        setSelectedModel(response.data.models[0]);
+                    }
+                } else {
+                    console.warn('API returned empty models array');
+                }
+            } catch (error) {
+                console.error('Error fetching available models:', error);
+                console.error('Error details:', error.response?.status, error.response?.data);
+                // Fallback to a default set if API fails
+                const fallbackModels = [
+                    'models/gemini-2.5-flash',
+                    'models/gemini-1.5-flash',
+                ];
+                setAvailableModels(fallbackModels);
+                if (!fallbackModels.includes(selectedModel)) {
+                    setSelectedModel(fallbackModels[0]);
+                }
+            } finally {
+                setLoadingModels(false);
+            }
+        };
 
-    const availableModels = [
-        'gemini-1.5-flash',
-        'gemini-1.5-pro',
-        'gemini-2.5-flash',
-        'gemini-2.5-pro',
-    ];
+        fetchModels();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []); // Empty dependency array - fetch once on mount, setSelectedModel is stable
 
     return (
         <div className="flex flex-col space-y-4 p-4 bg-gray-800 rounded-md border border-gray-700 h-fit">
@@ -76,19 +118,24 @@ const SettingsPanel = ({
             {/* --- Existing AI Model Selector --- */}
             <div>
                 <label htmlFor="model-select" className="block text-sm font-medium text-gray-300 mb-1">
-                    AI Analysis Model
+                    AI Analysis Model {loadingModels && <span className="text-xs text-gray-400">(Loading...)</span>}
                 </label>
                 <select
                     id="model-select"
                     value={selectedModel}
                     onChange={(e) => setSelectedModel(e.target.value)}
-                    className="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm p-2 text-white focus:ring-indigo-500 focus:border-indigo-500"
+                    disabled={loadingModels || availableModels.length === 0}
+                    className="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm p-2 text-white focus:ring-indigo-500 focus:border-indigo-500 disabled:opacity-50"
                 >
-                    {availableModels.map(model => (
-                        <option key={model} value={model}>
-                            {model}
-                        </option>
-                    ))}
+                    {availableModels.length > 0 ? (
+                        availableModels.map(model => (
+                            <option key={model} value={model}>
+                                {model.replace('models/', '')}
+                            </option>
+                        ))
+                    ) : (
+                        <option>No models available</option>
+                    )}
                 </select>
             </div>
         </div>
