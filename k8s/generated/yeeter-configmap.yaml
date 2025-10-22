@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: yeeter-config
+  namespace: yeeter
+data:
+  VITE_API_URL: "https://yeet.trazen.org"
+  VITE_SOCKET_URL: "https://yeet.trazen.org"

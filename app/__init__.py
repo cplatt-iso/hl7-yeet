@@ -25,6 +25,7 @@ from .routes.admin_routes import admin_bp
 from .routes.listener_routes import listener_bp
 from .routes.simulator_routes import simulator_bp
 from .routes.endpoint_routes import endpoint_bp
+from .routes.system_routes import system_bp
 
 from . import models, crud
 
@@ -123,6 +124,7 @@ def create_app():
 
     # --- Register Blueprints ---
     logging.info("Registering blueprints...")
+    app.register_blueprint(system_bp)  # Health check endpoint
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(mllp_bp, url_prefix='/api')
     app.register_blueprint(util_bp, url_prefix='/api')    

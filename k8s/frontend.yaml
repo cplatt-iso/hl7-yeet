@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: yeeter-frontend
+  namespace: yeeter
+  labels:
+    app: yeeter-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: yeeter-frontend
+  template:
+    metadata:
+      labels:
+        app: yeeter-frontend
+    spec:
+      containers:
+      - name: frontend
+        image: hl7-yeeter-frontend:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5175
+          hostPort: 5175  # Bind directly to host port 5175
+          name: http
+        env:
+        - name: VITE_API_URL
+          valueFrom:
+            configMapKeyRef:
+              name: yeeter-config
+              key: VITE_API_URL
+        - name: VITE_SOCKET_URL
+          valueFrom:
+            configMapKeyRef:
+              name: yeeter-config
+              key: VITE_SOCKET_URL
+        - name: VITE_GOOGLE_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: yeeter-secrets
+              key: VITE_GOOGLE_CLIENT_ID
+        volumeMounts:
+        - name: frontend-code
+          mountPath: /app/src
+          subPath: src
+        - name: frontend-code
+          mountPath: /app/public
+          subPath: public
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 5175
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 5175
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+      volumes:
+      - name: frontend-code
+        hostPath:
+          path: /home/icculus/projects/yeeter
+          type: Directory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: yeeter-frontend
+  namespace: yeeter
+  labels:
+    app: yeeter-frontend
+spec:
+  type: NodePort
+  ports:
+  - port: 5175
+    targetPort: 5175
+    nodePort: 30175  # Exposed as 30175, but we can change vite config
+    protocol: TCP
+    name: http
+  selector:
+    app: yeeter-frontend

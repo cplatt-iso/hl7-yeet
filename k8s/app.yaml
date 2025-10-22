@@ -1,0 +1,134 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: yeeter-app
+  namespace: yeeter
+  labels:
+    app: yeeter-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: yeeter-app
+  template:
+    metadata:
+      labels:
+        app: yeeter-app
+    spec:
+      initContainers:
+      - name: wait-for-postgres
+        image: busybox:1.36
+        command: ['sh', '-c', 'until nc -z postgres 5432; do echo waiting for postgres; sleep 2; done']
+      containers:
+      - name: yeeter
+        image: hl7-yeeter:latest
+        imagePullPolicy: IfNotPresent  # Use local image if available
+        ports:
+        - containerPort: 5001
+          name: http
+        env:
+        - name: FLASK_APP
+          value: "run.py"
+        - name: FLASK_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: yeeter-config
+              key: FLASK_ENV
+        - name: DATABASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: yeeter-config
+              key: DATABASE_URL
+        - name: JWT_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: yeeter-secrets
+              key: JWT_SECRET_KEY
+        - name: JWT_ACCESS_TOKEN_EXPIRES_HOURS
+          valueFrom:
+            configMapKeyRef:
+              name: yeeter-config
+              key: JWT_ACCESS_TOKEN_EXPIRES_HOURS
+        - name: GOOGLE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: yeeter-secrets
+              key: GOOGLE_API_KEY
+        - name: VITE_GOOGLE_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: yeeter-secrets
+              key: VITE_GOOGLE_CLIENT_ID
+        - name: VITE_API_URL
+          valueFrom:
+            configMapKeyRef:
+              name: yeeter-config
+              key: VITE_API_URL
+        volumeMounts:
+        - name: yeeter-storage
+          mountPath: /app/db-data
+        - name: yeeter-storage
+          mountPath: /app/uploads
+          subPath: uploads
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 5001
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 5001
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+      volumes:
+      - name: yeeter-storage
+        persistentVolumeClaim:
+          claimName: yeeter-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: yeeter-app
+  namespace: yeeter
+  labels:
+    app: yeeter-app
+spec:
+  type: ClusterIP  # Internal only
+  ports:
+  - port: 5001
+    targetPort: 5001
+    protocol: TCP
+    name: http
+  selector:
+    app: yeeter-app
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: yeeter-app-external
+  namespace: yeeter
+  labels:
+    app: yeeter-app
+spec:
+  type: NodePort
+  ports:
+  - port: 5001
+    targetPort: 5001
+    nodePort: 30001  # Exposed on host as 30001
+    protocol: TCP
+    name: http
+  selector:
+    app: yeeter-app

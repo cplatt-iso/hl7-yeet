@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: yeeter-config
+  namespace: yeeter
+data:
+  FLASK_ENV: "production"
+  JWT_ACCESS_TOKEN_EXPIRES_HOURS: "24"
+  VITE_API_URL: "https://yeet.trazen.org"
+  VITE_SOCKET_URL: "https://yeet.trazen.org"
+  # Database connection - using k8s service name
+  DATABASE_URL: "postgresql+psycopg2://yeeter_user:yeeter_pw@postgres:5432/hl7_yeeter_db"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: yeeter-secrets
+  namespace: yeeter
+type: Opaque
+data:
+  POSTGRES_USER: eWVldGVyX3VzZXI=  # yeeter_user
+  POSTGRES_PASSWORD: eWVldGVyX3B3  # yeeter_pw
+  POSTGRES_DB: aGw3X3llZXRlcl9kYg==  # hl7_yeeter_db
+  JWT_SECRET_KEY: NzA0MWUyYzE2MjUyMmEzZTUwM2U5YzIwYzAwYWU3YzdlZjY0MjQzZTRjNjFiNTE0  # from .env
+  GOOGLE_API_KEY: QUl6YVN5RFcxSTFmTFR6UDk1eWdvM2lOLURJc042RzBxb1g4dXZV  # from .env
+  VITE_GOOGLE_CLIENT_ID: NTYxMTcyMTQ0ODA1LWFuOWs5MDIxYnJuaWpsZWJ1M2JxM24wNGpyM2lyaXFjLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29t  # from .env

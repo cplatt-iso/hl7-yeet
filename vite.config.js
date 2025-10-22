@@ -10,7 +10,7 @@ export default defineConfig({
   ],
   server: {
     // These settings are for when you run `npm run dev`
-    host: '192.168.88.115', // Good for accessing on your LAN
+    host: '0.0.0.0', // Listen on all interfaces for k8s
     port: 5175,
     allowedHosts: ['192.168.88.115', 'yeet.trazen.org', 'localhost'],
     proxy: {
