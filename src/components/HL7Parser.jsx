@@ -70,7 +70,6 @@ const HL7Parser = () => {
         segmentIndex: null, // We need to know which field was clicked
         fieldIndex: null,
     });
-    const socketRef = useRef(null);
     const scrollRef = useRef(null);
     const debounceTimerRef = useRef(null);
 
@@ -105,7 +104,7 @@ const HL7Parser = () => {
                     setModelUsage(byModel);
                     fetchUserTemplates();
                 }
-            } catch (error) {
+            } catch {
                 toast.error("Failed to load initial app data. Some features may not work.");
             }
         };
@@ -114,14 +113,47 @@ const HL7Parser = () => {
     useEffect(() => { if (activeTab !== 'sender' || !hl7Message.trim()) { setSegments([]); setError(''); return; } const handler = setTimeout(() => { setIsProcessing(true); parseHl7(hl7Message, selectedHl7Version).then(data => { setSegments(data); setError(''); }).catch(err => { setSegments([]); setError(err.message); }).finally(() => { setIsProcessing(false); }); }, 500); return () => clearTimeout(handler); }, [hl7Message, selectedHl7Version, activeTab]);
     useEffect(() => { if (scrollRef.current > 0) { window.scrollTo(0, scrollRef.current); scrollRef.current = 0; } }, [segments]);
     const updateHl7MessageText = useCallback((newState) => { if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current); debounceTimerRef.current = setTimeout(() => { setHl7Message(rebuildHl7Message(newState)); }, 300); }, []);
-    const handleFieldInteraction = (updateLogic) => { scrollRef.current = window.scrollY; setIsProcessing(true); setTimeout(() => { const newSegments = updateLogic(segments); setSegments(newSegments); updateHl7MessageText(newSegments); setIsProcessing(false); }, 0); };
-    const handleStartListener = async () => { try { await startListenerApi(listenerPort); } catch (error) { console.error("API Error starting listener:", error); setListenerStatus('error'); } };
-    const handleStopListener = async () => { try { await stopListenerApi(); } catch (error) { console.error("API Error stopping listener:", error); setListenerStatus('error'); } };
+    const handleFieldInteraction = useCallback((updateLogic) => {
+        scrollRef.current = window.scrollY;
+        setIsProcessing(true);
+        setTimeout(() => {
+            setSegments(prevSegments => {
+                const newSegments = updateLogic(prevSegments);
+                updateHl7MessageText(newSegments);
+                setIsProcessing(false);
+                return newSegments;
+            });
+        }, 0);
+    }, [updateHl7MessageText]);
+    const handleStartListener = async () => { 
+        try { 
+            await startListenerApi(listenerPort); 
+            setIsListening(true); 
+            setListenerStatus('listening');
+            toast.success(`Listener started on port ${listenerPort}`);
+        } catch (error) { 
+            console.error("API Error starting listener:", error); 
+            setListenerStatus('error'); 
+            toast.error(`Failed to start listener: ${error.message}`);
+        } 
+    };
+    const handleStopListener = async () => { 
+        try { 
+            await stopListenerApi(); 
+            setIsListening(false); 
+            setListenerStatus('idle');
+            toast.success('Listener stopped');
+        } catch (error) { 
+            console.error("API Error stopping listener:", error); 
+            setListenerStatus('error'); 
+            toast.error(`Failed to stop listener: ${error.message}`);
+        } 
+    };
     const handleClearListener = () => { setReceivedMessages([]); };
     const handleLoadIntoParser = (messageToLoad) => { setHl7Message(messageToLoad); setActiveTab('sender'); };
     const handleAnalyze = async () => { if (!hl7Message || isAnalyzing || !isAuthenticated) return; setOriginalMessageForDiff(hl7Message); setIsAnalyzing(true); setAnalysisResult(null); try { const result = await analyzeHl7(hl7Message, selectedModel, selectedHl7Version); setAnalysisResult(result); if (result.usage?.total_tokens) { const tokens = result.usage.total_tokens; setTotalTokenUsage(pt => pt + tokens); setModelUsage(pu => ({ ...pu, [selectedModel]: (pu[selectedModel] || 0) + tokens })); } } catch (e) { setAnalysisResult({ explanation: `**Error:** ${e.message}` }); } finally { setIsAnalyzing(false); } };
-    const handleFieldMove = useCallback((source, destination) => { handleFieldInteraction((cs) => cs.map((s, si) => (si === source.segmentIndex || si === destination.segmentIndex) ? { ...s, fields: s.fields.map((f, fi) => (si === source.segmentIndex && fi === source.fieldIndex) ? { ...f, value: '' } : (si === destination.segmentIndex && fi === destination.fieldIndex) ? { ...f, value: cs[source.segmentIndex].fields[source.fieldIndex].value } : f) } : s)); }, [segments, updateHl7MessageText]);
-    const handleFieldUpdate = useCallback((segmentIndex, fieldIndex, newValue) => { handleFieldInteraction((cs) => cs.map((s, si) => (si === segmentIndex) ? { ...s, fields: s.fields.map((f, fi) => (fi === fieldIndex) ? { ...f, value: newValue } : f) } : s)); }, [segments, updateHl7MessageText]);
+    const handleFieldMove = useCallback((source, destination) => { handleFieldInteraction((cs) => cs.map((s, si) => (si === source.segmentIndex || si === destination.segmentIndex) ? { ...s, fields: s.fields.map((f, fi) => (si === source.segmentIndex && fi === source.fieldIndex) ? { ...f, value: '' } : (si === destination.segmentIndex && fi === destination.fieldIndex) ? { ...f, value: cs[source.segmentIndex].fields[source.fieldIndex].value } : f) } : s)); }, [handleFieldInteraction]);
+    const handleFieldUpdate = useCallback((segmentIndex, fieldIndex, newValue) => { handleFieldInteraction((cs) => cs.map((s, si) => (si === segmentIndex) ? { ...s, fields: s.fields.map((f, fi) => (fi === fieldIndex) ? { ...f, value: newValue } : f) } : s)); }, [handleFieldInteraction]);
     const handleCopy = async () => { if (!hl7Message || isCopied) return; await navigator.clipboard.writeText(hl7Message); setIsCopied(true); setTimeout(() => setIsCopied(false), 2000); };
     const handleStrip = () => { if (!hl7Message) return; setHl7Message(stripCommentsAndBlankLines(hl7Message)); };
     const handleClear = () => { setHl7Message(''); };
@@ -143,11 +175,6 @@ const HL7Parser = () => {
         handleFieldUpdate(dictionaryModalState.segmentIndex, dictionaryModalState.fieldIndex, value);
         handleCloseDictionary();
     }
-
-    const handleSelectDestination = (destination) => {
-        setHost(destination.hostname);
-        setPort(destination.port);
-    };
 
     const handlePing = async () => {
         if (!host || !port) {

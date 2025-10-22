@@ -32,10 +32,6 @@ const SimulationStepModal = ({
                     step={step}
                     index={step.step_order - 1} // Editor doesn't use index for logic, but for display
                     onUpdate={(_, updatedStep) => setStep(updatedStep)}
-                    onDelete={() => {}} // Handled outside modal
-                    onMove={() => {}}   // Handled outside modal
-                    isFirst={true}      // Not relevant in modal
-                    isLast={true}       // Not relevant in modal
                     generatorTemplates={generatorTemplates}
                     endpoints={endpoints}
                 />

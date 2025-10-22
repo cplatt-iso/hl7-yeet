@@ -136,6 +136,8 @@ export const AuthProvider = ({ children }) => {
     );
 };
 
+// Fast Refresh rule does not apply to shared hooks in this file.
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
     const context = useContext(AuthContext);
     if (!context) {

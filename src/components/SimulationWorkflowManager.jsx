@@ -120,7 +120,11 @@ const SimulationWorkflowManager = () => {
                 name: selectedTemplate.name,
                 description: selectedTemplate.description,
                 // Server doesn't care about our temp frontend ID
-                steps: selectedTemplate.steps.map(({ id, ...step }) => step) 
+                steps: selectedTemplate.steps.map(step => {
+                    const stepPayload = { ...step };
+                    delete stepPayload.id;
+                    return stepPayload;
+                }) 
             };
 
             if (isCreating) {

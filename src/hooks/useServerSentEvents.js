@@ -6,7 +6,12 @@ export const useServerSentEvents = (runId) => {
   const [status, setStatus] = useState('connecting');
   const [error, setError] = useState(null);
   const eventSourceRef = useRef(null);
+  const statusRef = useRef('connecting');
   const { token } = useAuth();
+
+  useEffect(() => {
+    statusRef.current = status;
+  }, [status]);
 
   useEffect(() => {
     if (!runId || !token) {
@@ -93,7 +98,7 @@ export const useServerSentEvents = (runId) => {
         }
         
         // Only auto-reconnect if we were previously connected
-        if (status === 'connected') {
+        if (statusRef.current === 'connected') {
           setTimeout(() => {
             console.log('SSE: Attempting to reconnect...');
             setStatus('connecting');
@@ -115,7 +120,7 @@ export const useServerSentEvents = (runId) => {
         eventSourceRef.current = null;
       }
     };
-  }, [runId, token]); // Remove status from dependencies to prevent reconnection loops
+  }, [runId, token]);
 
   const disconnect = () => {
     if (eventSourceRef.current) {

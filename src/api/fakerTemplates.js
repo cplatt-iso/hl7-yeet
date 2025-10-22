@@ -1,7 +1,5 @@
 import { faker } from '@faker-js/faker';
 
-const generateTimestamp = () => new Date().toISOString().replace(/[-:.]/g, '').slice(0, 14);
-
 // A data structure for our smart order generation
 const radiologyExams = [
     { name: "Chest X-Ray (2 views)", code: "71046", modality: "CR" },

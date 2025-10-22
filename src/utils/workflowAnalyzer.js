@@ -50,7 +50,7 @@ export const validateWorkflow = (steps, generatorTemplates) => {
     
     for (let i = 0; i < steps.length; i++) {
         const step = steps[i];
-        const { inputs, outputs } = getStepIO(step, generatorTemplates);
+    const { outputs } = getStepIO(step, generatorTemplates);
         
         // Check if MPPS_UPDATE has sufficient context
         if (step.step_type === 'MPPS_UPDATE') {

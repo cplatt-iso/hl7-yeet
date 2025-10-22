@@ -1,7 +1,7 @@
 // --- REPLACE src/components/SimulationStepEditor.jsx ---
 import React from 'react';
 
-const SimulationStepEditor = ({ step, index, onUpdate, onDelete, onMove, isFirst, isLast, generatorTemplates, endpoints }) => {
+const SimulationStepEditor = ({ step, index, onUpdate, generatorTemplates, endpoints }) => {
     
     const handleParamChange = (e) => {
         const { name, value, type, checked } = e.target;

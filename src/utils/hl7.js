@@ -88,7 +88,7 @@ export const convertJsonToHl7 = (jsonString) => {
     let messageObject;
     try {
         messageObject = JSON.parse(jsonString);
-    } catch (error) {
+    } catch {
         throw new Error("Invalid JSON provided. Could not parse.");
     }
 
