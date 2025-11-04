@@ -3,9 +3,10 @@
 import time
 import logging
 import socket
-from datetime import datetime
+from datetime import datetime, timedelta
 from faker import Faker
 from hl7apy.parser import parse_message
+from sqlalchemy import select
 
 from ..extensions import db, socketio
 from .. import crud, models
@@ -29,12 +30,32 @@ STEP_HANDLERS = {
     'MPPS_UPDATE': 'handle_mpps_update',
 }
 
+
+class SimulationCancelled(Exception):
+    """Raised when a user requests cancellation of a simulation run."""
+
+
 class SimulationRunner:
     def __init__(self, run_id: int, app_context):
         self.run_id = run_id
         self.app_context = app_context
         self.run_context = {}  # This holds the state for a single patient workflow
         self.faker = Faker()
+        self._cancelled = False
+
+    def _check_for_cancellation(self, patient_iter: int, step_order: int, repeat_iter: int):
+        """Abort execution if the run has been cancelled."""
+        if self._cancelled:
+            raise SimulationCancelled()
+
+        with self.app_context():
+            status = db.session.execute(
+                select(models.SimulationRun.status).filter_by(id=self.run_id)
+            ).scalar_one_or_none()
+            if status == 'CANCELLED':
+                self._cancelled = True
+                self._log_event(step_order, patient_iter, repeat_iter, 'WARN', "Cancellation requested. Stopping simulation run.")
+                raise SimulationCancelled()
 
     def _log_event(self, step_order: int, patient_iter: int, repeat_iter: int, status: str, details: str):
         """Helper to log events to the database and emit them via socket."""
@@ -93,6 +114,11 @@ class SimulationRunner:
                     logging.error(f"FATAL: SimulationRun with ID {self.run_id} not found.")
                     return
 
+                if run.status == 'CANCELLED':
+                    self._emit_status_update(run.status)
+                    self._log_event(999, 0, 0, 'INFO', "Simulation run was cancelled before it started.")
+                    return
+
                 run.status = 'RUNNING'
                 run.started_at = datetime.utcnow()
                 db.session.commit()
@@ -103,13 +129,16 @@ class SimulationRunner:
             
             for i in range(1, patient_count + 1):
                 self.run_context = {} 
+                self._check_for_cancellation(patient_iter=i, step_order=0, repeat_iter=0)
                 self._log_event(0, i, 0, 'INFO', f"--- Starting Iteration {i} of {patient_count} ---")
                 
                 for step in run.template.steps:
+                    self._check_for_cancellation(patient_iter=i, step_order=step.step_order, repeat_iter=0)
                     repeat_count = step.parameters.get('repeat', {}).get('count', 1)
                     delay_ms = step.parameters.get('repeat', {}).get('delay_ms', 0)
 
                     for j in range(1, repeat_count + 1):
+                        self._check_for_cancellation(patient_iter=i, step_order=step.step_order, repeat_iter=j)
                         handler_name = STEP_HANDLERS.get(step.step_type)
                         if not handler_name:
                             raise NotImplementedError(f"No handler for step type '{step.step_type}'")
@@ -131,6 +160,16 @@ class SimulationRunner:
                     db.session.commit()
                     self._emit_status_update(run.status)
             self._log_event(999, patient_count, 1, 'SUCCESS', "Simulation run completed successfully.")
+
+        except SimulationCancelled:
+            logging.info(f"SimulationRun-{self.run_id} cancelled by user request.")
+            with self.app_context():
+                run = crud.get_simulation_run_by_id(db, self.run_id)
+                if run:
+                    run.status = 'CANCELLED'
+                    db.session.commit()
+                    self._emit_status_update(run.status)
+            self._log_event(999, 0, 0, 'INFO', "Simulation run cancelled by user.")
 
         except Exception as e:
             logging.error(f"SimulationRun-{self.run_id} failed: {e}", exc_info=True)
@@ -164,6 +203,17 @@ class SimulationRunner:
             gen_template = crud.get_generator_template_by_id(db, template_id)
             if not gen_template:
                 raise FileNotFoundError(f"GeneratorTemplate with ID {template_id} not found.")
+
+        # Ensure message-level context timestamps are available for template rendering.
+        context_bucket = self.run_context.setdefault('Context', {})
+        message_timestamp = self.faker.date_time_this_year()
+        scheduled_start = self.faker.date_time_between(start_date="+1d", end_date="+14d")
+        scheduled_end = scheduled_start + timedelta(minutes=30)
+        context_bucket.update({
+            'MessageTimestamp': message_timestamp,
+            'ScheduledStart': scheduled_start,
+            'ScheduledEnd': scheduled_end,
+        })
 
         generated_message = process_faker_string(gen_template.content, self.run_context)
         self.run_context['last_hl7_message'] = generated_message
@@ -345,15 +395,15 @@ class SimulationRunner:
             if final_modality in ['DX', 'CR']:
                 final_desc = f"{final_modality} Chest PA/LAT"
             elif final_modality == 'CT':
-                final_desc = f"CT Chest W/O Contrast"
+                final_desc = "CT Chest W/O Contrast"
             elif final_modality == 'MR':
-                final_desc = f"MRI Brain W/O Contrast"
+                final_desc = "MRI Brain W/O Contrast"
             elif final_modality == 'US':
-                final_desc = f"Ultrasound Abdomen Complete"
+                final_desc = "Ultrasound Abdomen Complete"
             elif final_modality == 'NM':
-                final_desc = f"Nuclear Medicine Bone Scan"
+                final_desc = "Nuclear Medicine Bone Scan"
             elif final_modality == 'MG':
-                final_desc = f"Mammogram Bilateral Screening"
+                final_desc = "Mammogram Bilateral Screening"
             else:
                 final_desc = f"Generated {final_modality} Study"
             self._log_event(step.step_order, patient_iter, repeat_iter, 'INFO', f"Study Description not found in context; using modality-specific default: '{final_desc}'.")
@@ -634,7 +684,7 @@ class SimulationRunner:
                         if orc_lines:
                             orc_str = orc_lines[0]
                         else:
-                            self._log_event(step.step_order, patient_iter, repeat_iter, 'WARN', f"Could not extract ORC content from segment object")
+                            self._log_event(step.step_order, patient_iter, repeat_iter, 'WARN', "Could not extract ORC content from segment object")
                             return False
                     self._log_event(step.step_order, patient_iter, repeat_iter, 'DEBUG', f"ORC segment extracted content: {orc_str}")
                 except Exception as inner_e:
@@ -779,7 +829,6 @@ class SimulationRunner:
                 
                 # Second, try OBR-4 procedure code (sometimes contains modality hints)
                 if not extracted_modality and len(obr_fields) > 4 and obr_fields[4].strip():
-                    procedure_field = obr_fields[4].upper()
                     # Check if procedure code starts with common modality prefixes
                     modality_prefixes = {
                         '7': 'DX',      # 7xxxx codes often X-ray

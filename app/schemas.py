@@ -198,4 +198,37 @@ class SimulationRunResponse(AppBaseModel):
     events: List[SimulationRunEventResponse]
 
 
+class SimulationRunStepStats(AppBaseModel):
+    step_order: int
+    total_events: int
+    success_events: int
+    failure_events: int
+    warning_events: int
+    info_events: int
+
+
+class SimulationRunStatsResponse(AppBaseModel):
+    run_id: int
+    user_id: int
+    template_id: int
+    patient_count: int
+    status: str
+    started_at: Optional[datetime] = None
+    completed_at: Optional[datetime] = None
+    duration_seconds: Optional[float] = None
+    first_event_at: Optional[datetime] = None
+    last_event_at: Optional[datetime] = None
+    total_events: int
+    success_events: int
+    failure_events: int
+    warning_events: int
+    info_events: int
+    debug_events: int
+    unique_steps: int
+    max_iteration: int
+    last_failure: Optional[str] = None
+    steps: List[SimulationRunStepStats] = Field(default_factory=list)
+
+
+
 # --- END OF FILE app/schemas.py ---

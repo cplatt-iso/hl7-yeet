@@ -1,9 +1,10 @@
 # --- REPLACE app/crud.py ---
 
-from sqlalchemy.orm import Session, joinedload, contains_eager
-from sqlalchemy import func, select, or_, delete
+from sqlalchemy.orm import joinedload
+from sqlalchemy import func, select, or_
 from flask_sqlalchemy import SQLAlchemy
 import logging 
+from typing import Any
 
 from . import models, schemas
 from .extensions import bcrypt
@@ -230,30 +231,6 @@ def add_received_message(db: SQLAlchemy, raw_message: str) -> models.ReceivedMes
     db.session.commit()
     db.session.refresh(db_message)
     return db_message
-    message_type = control_id = sending_app = "UNKNOWN"
-    try:
-        lines = raw_message.split('\r')
-        msh = next((l for l in lines if l.startswith('MSH')), None)
-        if msh:
-            fields = msh.split('|')
-            if len(fields) > 8:
-                message_type = fields[8]
-            if len(fields) > 9:
-                control_id = fields[9]
-            if len(fields) > 2:
-                sending_app = fields[2]
-    except Exception:
-        pass
-    db_message = models.ReceivedMessage(
-        raw_message=raw_message,
-        message_type=message_type,
-        control_id=control_id,
-        sending_app=sending_app
-    )
-    db.session.add(db_message)
-    db.session.commit()
-    db.session.refresh(db_message)
-    return db_message
 
 def get_received_messages(db: SQLAlchemy, page: int, per_page: int, search_term: str | None = None):
     query = db.select(models.ReceivedMessage)
@@ -444,6 +421,22 @@ def get_simulation_runs_for_user(db: SQLAlchemy, user_id: int) -> list[models.Si
         .order_by(models.SimulationRun.started_at.desc().nulls_last(), models.SimulationRun.id.desc())
     ).scalars())
 
+def request_simulation_run_cancel(db: SQLAlchemy, run_id: int, user_id: int, is_admin: bool) -> tuple[models.SimulationRun | None, str | None]:
+    """Mark a simulation run for cancellation if it is still in progress."""
+    run = db.session.get(models.SimulationRun, run_id)
+    if not run:
+        return None, "Run not found"
+
+    if not is_admin and run.user_id != user_id:
+        return None, "Unauthorized"
+
+    if run.status in {'COMPLETED', 'ERROR', 'FAILED', 'CANCELLED'}:
+        return run, "Run is already finished"
+
+    run.status = 'CANCELLED'
+    db.session.commit()
+    return run, None
+
 def delete_simulation_run(db: SQLAlchemy, run_id: int, user_id: int, is_admin: bool) -> bool:
     """Deletes a single simulation run by its ID, checking for ownership."""
     db_run = get_simulation_run_by_id(db, run_id)
@@ -474,6 +467,99 @@ def delete_all_simulation_runs_for_user(db: SQLAlchemy, user_id: int):
         db.session.delete(run)
     
     db.session.commit()
+
+
+def calculate_simulation_run_stats(run: models.SimulationRun) -> dict[str, Any]:
+    """Builds an aggregate statistics payload for a simulation run."""
+    events = sorted(run.events, key=lambda e: e.timestamp or datetime.utcnow())
+
+    total_events = len(events)
+    success_events = 0
+    failure_events = 0
+    warning_events = 0
+    info_events = 0
+    debug_events = 0
+
+    steps: dict[int, dict[str, int]] = {}
+    last_failure_details: str | None = None
+
+    for event in events:
+        status = (event.status or '').upper()
+        step_stats = steps.setdefault(event.step_order, {
+            'total': 0,
+            'success': 0,
+            'failure': 0,
+            'warning': 0,
+            'info': 0,
+        })
+
+        step_stats['total'] += 1
+
+        if status == 'SUCCESS':
+            success_events += 1
+            step_stats['success'] += 1
+        elif status in ('FAILURE', 'ERROR'):
+            failure_events += 1
+            step_stats['failure'] += 1
+            timestamp = event.timestamp.isoformat() if event.timestamp else 'unknown-time'
+            last_failure_details = f"[{timestamp}] Step {event.step_order} Iter {event.iteration}: {event.details}"
+        elif status == 'WARN':
+            warning_events += 1
+            step_stats['warning'] += 1
+        elif status == 'INFO':
+            info_events += 1
+            step_stats['info'] += 1
+        elif status == 'DEBUG':
+            debug_events += 1
+        else:
+            info_events += 1
+            step_stats['info'] += 1
+
+    first_event_at = events[0].timestamp if events else None
+    last_event_at = events[-1].timestamp if events else None
+
+    started_at = run.started_at or first_event_at
+    completed_at = run.completed_at or last_event_at
+    duration_seconds = None
+    if started_at and completed_at:
+        duration_seconds = (completed_at - started_at).total_seconds()
+
+    max_iteration = max((event.iteration for event in events), default=0)
+
+    step_stats_payload = [
+        {
+            'step_order': step_order,
+            'total_events': stats['total'],
+            'success_events': stats['success'],
+            'failure_events': stats['failure'],
+            'warning_events': stats['warning'],
+            'info_events': stats['info'],
+        }
+        for step_order, stats in sorted(steps.items())
+    ]
+
+    return {
+        'run_id': run.id,
+        'user_id': run.user_id,
+        'template_id': run.template_id,
+        'patient_count': run.patient_count,
+        'status': run.status,
+        'started_at': started_at,
+        'completed_at': completed_at,
+        'duration_seconds': duration_seconds,
+        'first_event_at': first_event_at,
+        'last_event_at': last_event_at,
+        'total_events': total_events,
+        'success_events': success_events,
+        'failure_events': failure_events,
+        'warning_events': warning_events,
+        'info_events': info_events,
+        'debug_events': debug_events,
+        'unique_steps': len(steps),
+        'max_iteration': max_iteration,
+        'last_failure': last_failure_details,
+        'steps': step_stats_payload,
+    }
 
 
 def create_api_key(db: SQLAlchemy, user_id: int, name: str) -> tuple[models.ApiKey, str]:

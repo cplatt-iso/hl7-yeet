@@ -1,13 +1,12 @@
 # --- START OF FILE app/routes/util_routes.py ---
-import os
 # import re # No longer needed here
 # import logging # No longer needed here
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
 from pydantic import ValidationError
 
 from .. import schemas, crud
 from ..extensions import db
+from ..auth_utils import auth_required, get_authenticated_user_id
 # from ..models import Hl7TableDefinition # No longer needed here
 
 util_bp = Blueprint('utils', __name__)
@@ -31,17 +30,17 @@ def get_supported_versions():
 # --- Template Routes ---
 
 @util_bp.route('/templates', methods=['GET'])
-@jwt_required()
+@auth_required()
 def get_templates():
-    user_id = get_jwt_identity()
+    user_id = get_authenticated_user_id()
     templates = crud.get_templates_for_user(db, user_id=user_id)
     response_data = [schemas.Template.model_validate(t) for t in templates]
     return jsonify([t.model_dump() for t in response_data])
 
 @util_bp.route('/templates', methods=['POST'])
-@jwt_required()
+@auth_required()
 def save_template():
-    user_id = get_jwt_identity()
+    user_id = get_authenticated_user_id()
     try:
         template_data = schemas.TemplateCreate.model_validate(request.get_json())
     except ValidationError as e:
@@ -56,9 +55,9 @@ def save_template():
     return jsonify(response_data.model_dump()), 201
 
 @util_bp.route('/templates/<int:template_id>', methods=['DELETE'])
-@jwt_required()
+@auth_required()
 def delete_template(template_id: int):
-    user_id = get_jwt_identity()
+    user_id = get_authenticated_user_id()
     deleted_template = crud.delete_template(db, user_id=user_id, template_id=template_id)
     if not deleted_template:
         return jsonify({"error": "Template not found or you do not have permission to delete it"}), 404
@@ -67,16 +66,16 @@ def delete_template(template_id: int):
 # --- Token Usage Routes ---
 
 @util_bp.route('/get_total_token_usage', methods=['GET'])
-@jwt_required()
+@auth_required()
 def get_total_token_usage():
-    user_id = get_jwt_identity()
+    user_id = get_authenticated_user_id()
     total_usage = crud.get_total_usage_for_user(db, user_id=user_id)
     return jsonify({"total_usage": total_usage})
 
 @util_bp.route('/get_usage_by_model', methods=['GET'])
-@jwt_required()
+@auth_required()
 def get_usage_by_model():
-    user_id = get_jwt_identity()
+    user_id = get_authenticated_user_id()
     usage_data = crud.get_usage_by_model_for_user(db, user_id=user_id)
     return jsonify(usage_data)
 

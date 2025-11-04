@@ -30,3 +30,4 @@ requests
 pydantic[email]
 
 Pillow
+pytest

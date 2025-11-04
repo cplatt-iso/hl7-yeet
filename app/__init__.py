@@ -3,7 +3,6 @@
 import os
 import logging
 from flask import Flask, request
-from flask_jwt_extended import get_current_user # I'm adding this back just in case, it's good practice
 from dotenv import load_dotenv
 from .commands import register_commands
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -27,7 +26,8 @@ from .routes.simulator_routes import simulator_bp
 from .routes.endpoint_routes import endpoint_bp
 from .routes.system_routes import system_bp
 
-from . import models, crud
+from . import models as _models  # noqa: F401 - imported for SQLAlchemy model registration
+from . import crud  # noqa: F401
 
 
 
@@ -97,15 +97,15 @@ def create_app():
             else:
                 logging.info("Socket.IO: Anonymous client connected (no token provided)")
             
-            logging.info(f"Socket.IO: Client connected successfully")
-            
+            logging.info("Socket.IO: Client connected successfully")
+        
         except Exception as e:
             logging.error(f"Socket.IO: Connection error: {e}")
 
     @socketio.on('disconnect')
     def handle_disconnect():
         """Handle Socket.IO client disconnection."""
-        logging.info(f"Socket.IO: Client disconnected")
+        logging.info("Socket.IO: Client disconnected")
 
     @socketio.on('join_run_room')
     def handle_join_run_room(data):

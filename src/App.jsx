@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import HL7Parser from './components/HL7Parser';
 import Login from './components/Login';
 import Register from './components/Register';
+import ApiKeysPage from './components/ApiKeysPage';
 import { useAuth } from './context/AuthContext';
 import YeetLoader from './components/YeetLoader';
 import { Toaster } from 'react-hot-toast';
@@ -39,6 +40,10 @@ function App() {
             <Route 
               path="/" 
               element={isAuthenticated ? <HL7Parser /> : <Navigate to="/login" />} 
+            />
+            <Route
+              path="/api-keys"
+              element={isAuthenticated ? <ApiKeysPage /> : <Navigate to="/login" />}
             />
             <Route 
               path="*" 

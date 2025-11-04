@@ -66,7 +66,7 @@ Full-stack HL7 message simulator with AI analysis (Google Gemini), MLLP client/s
 
 ## Development Workflows
 
-### Running the Application
+### Local Docker Compose
 ```bash
 # Full stack with Docker
 docker compose up -d --build
@@ -88,6 +88,13 @@ docker exec yeeter_postgres psql -U yeeter_user -d hl7_yeeter_db
 SELECT id, username, email, is_admin FROM users;
 SELECT id, version, is_enabled FROM hl7_versions;
 ```
+
+### k3s / Kubernetes Deployment
+- Use manifests in `k8s/` (backend `app.yaml`, frontend `frontend.yaml`, configmap/secret files) targeting the `yeeter` namespace.
+- Rebuild and load images with `scripts/build_and_deploy_k3s.sh`; the script builds backend/frontend Docker images, imports them into the local k3s containerd (`sudo k3s ctr images import -`), and restarts deployments.
+- Frontend deployment binds `hostPort: 5175`. During rollout, delete the previous pod (`kubectl -n yeeter delete pod <old-frontend-pod>`) if the new replica remains Pending due to hostPort contention.
+- Verify updates with `kubectl -n yeeter rollout status deployment/yeeter-app` and `kubectl -n yeeter rollout status deployment/yeeter-frontend`; exposed NodePorts remain 30001 (backend) and 30175 (frontend).
+- For any new workload (e.g., worker service), follow the same workflow: build locally, `docker save | sudo k3s ctr images import -`, and restart the deployment.
 
 ### Testing API Endpoints
 ```bash

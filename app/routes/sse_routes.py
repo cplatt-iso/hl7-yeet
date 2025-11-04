@@ -1,12 +1,13 @@
 # --- NEW FILE: app/routes/sse_routes.py ---
 """Server-Sent Events routes for real-time streaming."""
 from flask import Blueprint, Response, request
-from flask_jwt_extended import jwt_required, get_current_user
+from flask_jwt_extended import decode_token
 import json
 import time
 import logging
 from ..extensions import db
 from .. import crud
+from ..auth_utils import validate_api_key
 
 sse_bp = Blueprint('sse', __name__, url_prefix='/api/sse')
 
@@ -21,17 +22,23 @@ def stream_run_logs(run_id):
     if not token:
         return Response("Missing token parameter", status=401)
     
-    # Verify JWT token manually
-    try:
-        from flask_jwt_extended import decode_token, get_current_user
-        decoded_token = decode_token(token)
-        user_id = decoded_token['sub']
-        user = crud.get_user_by_id(db, int(user_id))
+    user = None
+    if token.startswith("ytr_"):
+        user, _ = validate_api_key(token)
         if not user:
+            logging.warning("SSE rejected invalid API key token")
             return Response("Invalid token", status=401)
-    except Exception as e:
-        logging.error(f"SSE auth error: {e}")
-        return Response("Invalid token", status=401)
+    else:
+        try:
+            decoded_token = decode_token(token)
+            user_id = int(decoded_token['sub'])
+            user = crud.get_user_by_id(db, user_id)
+            if not user:
+                logging.warning("SSE rejected unknown JWT subject %s", decoded_token['sub'])
+                return Response("Invalid token", status=401)
+        except Exception as e:  # pragma: no cover - defensive logging
+            logging.error(f"SSE auth error: {e}")
+            return Response("Invalid token", status=401)
     
     def generate():
         # Send initial connection message
@@ -41,6 +48,9 @@ def stream_run_logs(run_id):
         run = crud.get_simulation_run_by_id(db, run_id)
         if not run:
             yield f"data: {json.dumps({'type': 'error', 'message': 'Run not found'})}\n\n"
+            return
+        if run.user_id != user.id and not getattr(user, "is_admin", False):
+            yield f"data: {json.dumps({'type': 'error', 'message': 'Unauthorized'})}\n\n"
             return
             
         # Send existing events first

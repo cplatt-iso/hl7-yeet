@@ -2,6 +2,7 @@
 import re
 import logging
 import ast
+from datetime import datetime
 from faker import Faker
 from typing import Dict, Any, Tuple
 
@@ -108,6 +109,37 @@ def _generate_and_cache_placer_order(context: Dict[str, Any]) -> str:
     
     return context['order']['placer_order_number']
 
+
+def _resolve_context_path(context: Dict[str, Any], cue: str) -> Tuple[Any, bool]:
+    """Resolve a dotted path (with optional method calls) against the run context."""
+    parts = cue.split('.')
+    obj: Any = context
+    last_was_method = False
+
+    for part in parts:
+        if isinstance(obj, dict) and '(' not in part:
+            if part not in obj:
+                raise KeyError(part)
+            obj = obj[part]
+            last_was_method = False
+            continue
+
+        if '(' in part and part.endswith(')'):
+            method_name, args_str = part[:-1].split('(', 1)
+            if not hasattr(obj, method_name) or not callable(getattr(obj, method_name)):
+                raise AttributeError(f"Object '{type(obj).__name__}' has no callable method '{method_name}'")
+            args, kwargs = _safe_eval_call_params(args_str)
+            obj = getattr(obj, method_name)(*args, **kwargs)
+            last_was_method = True
+        else:
+            if hasattr(obj, part):
+                obj = getattr(obj, part)
+                last_was_method = False
+            else:
+                raise AttributeError(f"Object '{type(obj).__name__}' has no attribute '{part}'")
+
+    return obj, last_was_method
+
 def _safe_eval_call_params(args_str: str) -> Tuple[list, dict]:
     """
     Safely evaluates a string of Python arguments (both positional and keyword) using AST.
@@ -140,14 +172,22 @@ def process_faker_string(template_string: str, context: Dict[str, Any]) -> str:
         cue = match.group(1)
         
         # --- 1. Context Variable Check ---
-        if cue == 'Patient.MRN': return context.get('patient', {}).get('mrn', 'MRN_MISSING')
-        if cue == 'Person.LastName': return context.get('patient', {}).get('last_name', 'LNAME_MISSING')
-        if cue == 'Person.FirstName': return context.get('patient', {}).get('first_name', 'FNAME_MISSING')
-        if cue == 'Person.DOB': return context.get('patient', {}).get('dob', '19000101')
-        if cue == 'Order.AccessionNumber': return _generate_and_cache_accession(context)
-        if cue == 'Order.PlacerOrderNumber': return _generate_and_cache_placer_order(context)
-        if cue == 'Order.StudyDescription': return _generate_and_cache_study_description(context)
-        if cue == 'Order.Modality': return _generate_and_cache_modality(context)
+        if cue == 'Patient.MRN':
+            return context.get('patient', {}).get('mrn', 'MRN_MISSING')
+        if cue == 'Person.LastName':
+            return context.get('patient', {}).get('last_name', 'LNAME_MISSING')
+        if cue == 'Person.FirstName':
+            return context.get('patient', {}).get('first_name', 'FNAME_MISSING')
+        if cue == 'Person.DOB':
+            return context.get('patient', {}).get('dob', '19000101')
+        if cue == 'Order.AccessionNumber':
+            return _generate_and_cache_accession(context)
+        if cue == 'Order.PlacerOrderNumber':
+            return _generate_and_cache_placer_order(context)
+        if cue == 'Order.StudyDescription':
+            return _generate_and_cache_study_description(context)
+        if cue == 'Order.Modality':
+            return _generate_and_cache_modality(context)
         
         # Additional contextual variables for reuse
         if cue == 'Context.AccessionNumber': 
@@ -160,6 +200,15 @@ def process_faker_string(template_string: str, context: Dict[str, Any]) -> str:
             return context.get('order', {}).get('study_description', _generate_and_cache_study_description(context))
         if cue == 'Context.Modality':
             return context.get('order', {}).get('modality', _generate_and_cache_modality(context))
+
+        # Attempt to resolve against the full run context (supports nested structures and method calls)
+        try:
+            resolved_value, last_was_method = _resolve_context_path(context, cue)
+            if isinstance(resolved_value, datetime) and not last_was_method:
+                return resolved_value.strftime('%Y%m%d%H%M%S')
+            return str(resolved_value)
+        except (KeyError, AttributeError, ValueError, TypeError):
+            pass
 
         # Support for PACS-specific accession placement
         # Some PACS look for accession in OBR-2, some in OBR-3

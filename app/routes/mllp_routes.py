@@ -5,11 +5,9 @@ import json
 import socket
 import logging
 import threading
-import re
 import google.generativeai as genai
 from datetime import datetime
 from flask import Blueprint, request, jsonify, current_app
-from flask_jwt_extended import jwt_required, get_jwt_identity
 from pydantic import ValidationError
 
 from .. import schemas, crud
@@ -17,6 +15,7 @@ from ..extensions import db, socketio
 from ..models import Hl7TableDefinition
 from ..util.hl7_parser import _parse_hl7_string, load_hl7_definitions_for_version
 from ..util.mllp_listener import mllp_server_worker, stop_listener_event
+from ..auth_utils import auth_required, get_authenticated_user_id
 
 mllp_bp = Blueprint('mllp', __name__)
 
@@ -52,7 +51,8 @@ def get_available_gemini_models():
             return []
         
         # Fetch all available models
-        models = genai.list_models()
+        from google.generativeai import list_models  # type: ignore
+        models = list_models()
         
         # Filter for models that support generateContent and exclude image-generation models
         gemini_models = [
@@ -92,7 +92,7 @@ def parse_hl7_api():
 
 
 @mllp_bp.route('/send_hl7', methods=['POST'])
-@jwt_required()
+@auth_required()
 def send_hl7():
     try:
         data = schemas.MllpSendRequest.model_validate(request.get_json())
@@ -119,7 +119,7 @@ def send_hl7():
 
 
 @mllp_bp.route('/available_models', methods=['GET'])
-@jwt_required()
+@auth_required()
 def get_available_models_api():
     """Returns list of available Gemini models that support text generation."""
     if not GEMINI_API_KEY:
@@ -130,9 +130,9 @@ def get_available_models_api():
 
 
 @mllp_bp.route('/analyze_hl7', methods=['POST'])
-@jwt_required()
+@auth_required()
 def analyze_hl7_api():
-    user_id = get_jwt_identity()
+    user_id = get_authenticated_user_id()
     if not GEMINI_API_KEY:
         return jsonify({"error": "Google AI API key is not configured on the server."}), 503
 
@@ -199,7 +199,7 @@ def analyze_hl7_api():
 
 
 @mllp_bp.route('/listener/start', methods=['POST'])
-@jwt_required()
+@auth_required()
 def start_listener_api():
     global listener_thread
     try:
@@ -225,7 +225,7 @@ def start_listener_api():
 
 
 @mllp_bp.route('/listener/stop', methods=['POST'])
-@jwt_required()
+@auth_required()
 def stop_listener_api():
     global listener_thread
     if listener_thread and listener_thread.is_alive():
@@ -236,7 +236,7 @@ def stop_listener_api():
 
 
 @mllp_bp.route('/ping_mllp', methods=['POST'])
-@jwt_required()
+@auth_required()
 def ping_mllp():
     try:
         data = schemas.MllpPingRequest.model_validate(request.get_json())
@@ -281,7 +281,7 @@ def ping_mllp():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 @mllp_bp.route('/tables/<string:table_id>', methods=['GET'])
-@jwt_required()
+@auth_required()
 def get_table_definitions(table_id: str):
     """Fetches all values for a given HL7 table ID from the global table."""
     logging.info(f"--- /tables lookup initiated for CLEAN table ID: '{table_id}' ---")

@@ -2,34 +2,22 @@
 
 import os
 import logging
-from functools import wraps
 from flask import Blueprint, jsonify, request, current_app
-from flask_jwt_extended import jwt_required, get_jwt_identity
 from pydantic import ValidationError
 from werkzeug.utils import secure_filename
 
+from ..auth_utils import auth_required, get_authenticated_user_id
 from ..extensions import db, socketio # <-- IMPORT socketio
 from .. import crud, schemas
 from ..util import definition_processor
 from ..models import User
 from ..schemas import UserSchema
-from datetime import datetime
 
 admin_bp = Blueprint('admin', __name__)
 
+
 def admin_required():
-    def wrapper(fn):
-        @wraps(fn)
-        @jwt_required()
-        def decorator(*args, **kwargs):
-            current_user_id = get_jwt_identity()
-            user = crud.get_user_by_id(db, current_user_id)
-            if not user or not user.is_admin:
-                logging.warning(f"Non-admin user {user.username if user else 'Unknown'} with ID {current_user_id} tried to access an admin route.")
-                return jsonify(msg="Admins only! Fuck off!"), 403
-            return fn(*args, **kwargs)
-        return decorator
-    return wrapper
+    return auth_required(admin=True)
 
 # ... (Version management routes are unchanged) ...
 @admin_bp.route('/versions', methods=['GET'])
@@ -41,28 +29,35 @@ def get_versions():
 @admin_bp.route('/versions/upload', methods=['POST'])
 @admin_required()
 def upload_version():
-    if 'file' not in request.files: return jsonify(error="No file part in the request"), 400
+    if 'file' not in request.files:
+        return jsonify(error="No file part in the request"), 400
     file = request.files['file']
     version_string = request.form.get('version')
     description = request.form.get('description', '')
-    if not file or not file.filename: return jsonify(error="No file selected for uploading"), 400
-    if not version_string: return jsonify(error="Version string is required"), 400
+    if not file or not file.filename:
+        return jsonify(error="No file selected for uploading"), 400
+    if not version_string:
+        return jsonify(error="Version string is required"), 400
     filename = secure_filename(file.filename)
-    if not filename.endswith('.zip'): return jsonify(error="Invalid file type. Please upload a ZIP file."), 400
+    if not filename.endswith('.zip'):
+        return jsonify(error="Invalid file type. Please upload a ZIP file."), 400
     upload_folder = current_app.config['UPLOAD_FOLDER']
     saved_path = os.path.join(upload_folder, filename)
     file.save(saved_path)
-    current_user_id = get_jwt_identity()
+    current_user_id = get_authenticated_user_id()
     logging.info(f"Starting processing for version '{version_string}' uploaded by user {current_user_id}...")
     result = definition_processor.process_version_upload(saved_path, version_string, description, current_user_id)
-    if result['status'] == 'success': return jsonify(result), 200
-    else: return jsonify(error=result['message']), 500
+    if result['status'] == 'success':
+        return jsonify(result), 200
+    else:
+        return jsonify(error=result['message']), 500
 
 @admin_bp.route('/versions/<int:version_id>/toggle', methods=['PATCH'])
 @admin_required()
 def toggle_version_status(version_id):
     version = crud.toggle_hl7_version_status(db, version_id)
-    if not version: return jsonify(error="Version not found"), 404
+    if not version:
+        return jsonify(error="Version not found"), 404
     return jsonify(schemas.Hl7VersionResponse.model_validate(version).model_dump()), 200
 
 @admin_bp.route('/versions/<int:version_id>/default', methods=['PATCH'])
@@ -85,7 +80,7 @@ def get_terminology_status():
 @admin_required()
 def refresh_terminology():
     """Triggers a full refresh of V2 terminology tables."""
-    current_user_id = get_jwt_identity()
+    current_user_id = get_authenticated_user_id()
     logging.info(f"Admin user {current_user_id} triggered a terminology refresh.")
     
     # Capture the app instance while we're still in request context
@@ -173,7 +168,7 @@ def delete_user(user_id):
         return jsonify({"msg": "User not found"}), 404
     
     # Prevent an admin from deleting themselves
-    current_user_id = get_jwt_identity()
+    current_user_id = get_authenticated_user_id()
     if user_to_delete.id == int(current_user_id):
          return jsonify({"msg": "Admin cannot delete themselves."}), 400
 
@@ -199,9 +194,9 @@ def update_user(user_id):
     return jsonify(UserSchema.from_orm(user_to_update).model_dump())
 
 @admin_bp.route('/apikeys', methods=['GET'])
-@jwt_required() # Any logged in user can manage their own keys
+@auth_required() # Any logged in user can manage their own keys
 def get_api_keys():
-    user_id = get_jwt_identity()
+    user_id = get_authenticated_user_id()
     keys = crud.get_api_keys_for_user(db, user_id)
     # Don't send the hash to the client
     return jsonify([
@@ -216,9 +211,9 @@ def get_api_keys():
     ])
 
 @admin_bp.route('/apikeys', methods=['POST'])
-@jwt_required()
+@auth_required()
 def create_api_key():
-    user_id = get_jwt_identity()
+    user_id = get_authenticated_user_id()
     data = request.get_json()
     name = data.get('name')
     if not name:
@@ -234,9 +229,9 @@ def create_api_key():
     }), 201
 
 @admin_bp.route('/apikeys/<int:key_id>', methods=['DELETE'])
-@jwt_required()
+@auth_required()
 def delete_api_key(key_id):
-    user_id = get_jwt_identity()
+    user_id = get_authenticated_user_id()
     success = crud.delete_api_key(db, key_id, user_id)
     if not success:
         return jsonify({"error": "API Key not found or you are not authorized to delete it."}), 404

@@ -1,8 +1,7 @@
 import pydicom
 from pydicom.dataset import Dataset, FileMetaDataset
-from pydicom.uid import generate_uid, ExplicitVRLittleEndian, ImplicitVRLittleEndian, PYDICOM_IMPLEMENTATION_UID, UID
+from pydicom.uid import generate_uid, ImplicitVRLittleEndian, PYDICOM_IMPLEMENTATION_UID, UID
 import datetime
-import os
 import random
 from pathlib import Path
 from faker import Faker
@@ -190,7 +189,7 @@ def _generate_ct_image(image, draw, body_part: str, width: int, height: int, sli
                      center_x + chest_w, center_y + chest_h], fill=100, outline=150)
         
         # Lungs (darker areas on sides)
-        lung_w, lung_h = chest_w//2, chest_h - 20
+        lung_h = chest_h - 20
         draw.ellipse([center_x - chest_w + 20, center_y - lung_h,
                      center_x - 20, center_y + lung_h], fill=60, outline=80)  # Left lung
         draw.ellipse([center_x + 20, center_y - lung_h,
@@ -212,7 +211,6 @@ def _generate_ct_image(image, draw, body_part: str, width: int, height: int, sli
                      center_x + abd_w, center_y + abd_h], fill=110, outline=140)
         
         # Liver (upper right)
-        liver_w, liver_h = abd_w//2, abd_h//3
         draw.ellipse([center_x + 10, center_y - abd_h + 10,
                      center_x + abd_w - 10, center_y - abd_h//3], fill=130)
         
@@ -277,7 +275,7 @@ def _generate_ct_image(image, draw, body_part: str, width: int, height: int, sli
                  center_x + lamina_w, center_y - vert_h//2 + 5], start=45, end=135, fill=200, width=4)
         
         # Spinous process
-        spinous_w, spinous_h = 8, 20
+        spinous_w = 8
         draw.ellipse([center_x - spinous_w//2, center_y - vert_h//2 - 25,
                      center_x + spinous_w//2, center_y - vert_h//2 - 5], fill=190)
         
@@ -787,13 +785,13 @@ def _generate_sr_report_text(modality: str, study_description: str, body_part: s
     if modality in ['CT']:
         technique = f"Technique: Axial CT images of the {body_part.lower()} were obtained without contrast enhancement."
         if 'CHEST' in study_description.upper():
-            findings = f"Findings: The lungs are clear without evidence of consolidation, pleural effusion, or pneumothorax. The heart size is within normal limits. No mediastinal lymphadenopathy is identified. The osseous structures appear intact."
+            findings = "Findings: The lungs are clear without evidence of consolidation, pleural effusion, or pneumothorax. The heart size is within normal limits. No mediastinal lymphadenopathy is identified. The osseous structures appear intact."
             impression = "Impression: Normal chest CT examination."
         elif 'ABDOMEN' in study_description.upper() or 'PELVIS' in study_description.upper():
-            findings = f"Findings: The liver, spleen, pancreas, and kidneys appear normal in size and attenuation. No intra-abdominal lymphadenopathy or free fluid is identified. The bowel loops appear unremarkable."
+            findings = "Findings: The liver, spleen, pancreas, and kidneys appear normal in size and attenuation. No intra-abdominal lymphadenopathy or free fluid is identified. The bowel loops appear unremarkable."
             impression = "Impression: Normal abdominal CT examination."
         elif 'HEAD' in study_description.upper() or 'BRAIN' in study_description.upper():
-            findings = f"Findings: No acute intracranial abnormality is identified. The ventricles are normal in size and configuration. No mass effect or midline shift is present."
+            findings = "Findings: No acute intracranial abnormality is identified. The ventricles are normal in size and configuration. No mass effect or midline shift is present."
             impression = "Impression: Normal head CT examination."
         else:
             findings = f"Findings: The {body_part.lower()} structures appear within normal limits. No acute abnormality is identified."
@@ -802,13 +800,13 @@ def _generate_sr_report_text(modality: str, study_description: str, body_part: s
     elif modality in ['MR']:
         technique = f"Technique: Multiplanar MR images of the {body_part.lower()} were obtained using standard sequences."
         if 'BRAIN' in study_description.upper() or 'HEAD' in study_description.upper():
-            findings = f"Findings: Normal brain parenchyma without evidence of acute infarct, hemorrhage, or mass lesion. The ventricular system is normal in size. No abnormal enhancement is identified."
+            findings = "Findings: Normal brain parenchyma without evidence of acute infarct, hemorrhage, or mass lesion. The ventricular system is normal in size. No abnormal enhancement is identified."
             impression = "Impression: Normal brain MRI examination."
         elif 'SPINE' in study_description.upper():
-            findings = f"Findings: Normal vertebral body height and alignment. The intervertebral discs show normal signal intensity. The spinal cord appears normal. No significant stenosis is identified."
+            findings = "Findings: Normal vertebral body height and alignment. The intervertebral discs show normal signal intensity. The spinal cord appears normal. No significant stenosis is identified."
             impression = "Impression: Normal spine MRI examination."
         elif 'KNEE' in study_description.upper():
-            findings = f"Findings: The menisci appear intact. The cruciate and collateral ligaments are normal. No joint effusion is identified. The articular cartilage appears preserved."
+            findings = "Findings: The menisci appear intact. The cruciate and collateral ligaments are normal. No joint effusion is identified. The articular cartilage appears preserved."
             impression = "Impression: Normal knee MRI examination."
         else:
             findings = f"Findings: The {body_part.lower()} structures demonstrate normal signal characteristics. No abnormal enhancement or mass lesion is identified."
@@ -817,10 +815,10 @@ def _generate_sr_report_text(modality: str, study_description: str, body_part: s
     elif modality in ['DX', 'CR']:
         technique = f"Technique: {modality} images of the {body_part.lower()} were obtained."
         if 'CHEST' in study_description.upper():
-            findings = f"Findings: The heart size is within normal limits. The lungs are clear without consolidation or pleural effusion. The mediastinal contours are normal. No acute osseous abnormality is identified."
+            findings = "Findings: The heart size is within normal limits. The lungs are clear without consolidation or pleural effusion. The mediastinal contours are normal. No acute osseous abnormality is identified."
             impression = "Impression: Normal chest radiograph."
         elif 'ABDOMEN' in study_description.upper():
-            findings = f"Findings: Normal bowel gas pattern. No evidence of obstruction or free air. The osseous structures appear intact."
+            findings = "Findings: Normal bowel gas pattern. No evidence of obstruction or free air. The osseous structures appear intact."
             impression = "Impression: Normal abdominal radiograph."
         else:
             findings = f"Findings: The {body_part.lower()} structures appear within normal limits. No acute abnormality is identified."
@@ -829,10 +827,10 @@ def _generate_sr_report_text(modality: str, study_description: str, body_part: s
     elif modality in ['US']:
         technique = f"Technique: Real-time ultrasound examination of the {body_part.lower()} was performed."
         if 'ABDOMEN' in study_description.upper():
-            findings = f"Findings: The liver demonstrates normal size and echogenicity. The gallbladder appears normal without stones or wall thickening. The kidneys are normal in size and echogenicity. No free fluid is identified."
+            findings = "Findings: The liver demonstrates normal size and echogenicity. The gallbladder appears normal without stones or wall thickening. The kidneys are normal in size and echogenicity. No free fluid is identified."
             impression = "Impression: Normal abdominal ultrasound examination."
         elif 'PELVIS' in study_description.upper():
-            findings = f"Findings: The uterus and ovaries appear normal in size and echogenicity. No adnexal masses or free fluid is identified."
+            findings = "Findings: The uterus and ovaries appear normal in size and echogenicity. No adnexal masses or free fluid is identified."
             impression = "Impression: Normal pelvic ultrasound examination."
         else:
             findings = f"Findings: The {body_part.lower()} structures demonstrate normal echogenicity and vascularity. No abnormal masses or fluid collections are identified."
@@ -841,15 +839,15 @@ def _generate_sr_report_text(modality: str, study_description: str, body_part: s
     elif modality in ['NM']:
         technique = f"Technique: Nuclear medicine imaging of the {body_part.lower()} was performed following intravenous administration of appropriate radiopharmaceutical."
         if 'BONE' in study_description.upper():
-            findings = f"Findings: Normal symmetric uptake is seen throughout the osseous structures. No areas of abnormal increased or decreased uptake are identified."
+            findings = "Findings: Normal symmetric uptake is seen throughout the osseous structures. No areas of abnormal increased or decreased uptake are identified."
             impression = "Impression: Normal bone scan."
         else:
-            findings = f"Findings: Normal biodistribution of the radiopharmaceutical. No areas of abnormal uptake are identified."
-            impression = f"Impression: Normal nuclear medicine examination."
+            findings = "Findings: Normal biodistribution of the radiopharmaceutical. No areas of abnormal uptake are identified."
+            impression = "Impression: Normal nuclear medicine examination."
     
     elif modality in ['MG']:
-        technique = f"Technique: Digital mammography was performed with standard CC and MLO views bilaterally."
-        findings = f"Findings: The breast tissue demonstrates scattered fibroglandular density (BI-RADS 2). No suspicious masses, calcifications, or architectural distortions are identified."
+        technique = "Technique: Digital mammography was performed with standard CC and MLO views bilaterally."
+        findings = "Findings: The breast tissue demonstrates scattered fibroglandular density (BI-RADS 2). No suspicious masses, calcifications, or architectural distortions are identified."
         impression = "Impression: BI-RADS 1 - Negative mammogram."
     
     else:
@@ -1192,7 +1190,7 @@ def create_study_files(output_dir: str, num_images: int, overrides: dict, genera
 
     # --- Generate SR (Structured Report) if requested ---
     if generate_report:
-        logging.info(f"DICOM Generator: Creating SR object for study")
+        logging.info("DICOM Generator: Creating SR object for study")
         sr_series_uid = generate_uid()
         
         try:

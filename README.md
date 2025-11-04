@@ -78,8 +78,8 @@ From the `/home/icculus/axiom/infra/databases` directory, run:
 docker-compose up --build -d
 ```
 
-* `--build`: Build the image (needed after code changes)
-* `-d`: Detached mode
+- `--build`: Build the image (needed after code changes)
+- `-d`: Detached mode
 
 
 ### 4. Access the Application
@@ -93,21 +93,59 @@ Once the container is running, access HL7 Yeeter at:
 ## How to Use
 
 ### Sender & Parser
+
 - Paste or edit HL7 messages, see them parsed and color-coded
 - Edit fields inline, drag-and-drop values, rebuild messages in real time
 - Send to any MLLP endpoint and view ACK/NACK
 - Use the AI analyzer for message explanation and correction
 
 ### MLLP Listener
+
 - Start a listener on any port, view incoming messages and ACKs in real time
 
 ### Simulation Engine
+
 - Create and run simulation templates with multiple steps (generate HL7/DICOM, send, wait, etc.)
 - Context extraction from HL7 messages (accession, modality, etc.)
 - Real-time event logging and status updates
 
 ### Authentication
+
 - Register/login with username/password or Google OAuth
+
+### Command-line Simulator CLI
+
+- Install project dependencies and ensure `requests` and `click` are available (see `requirements.txt`).
+- Use the helper script `scripts/yeeter_cli.py` to automate simulator runs:
+
+  ```bash
+  # Authenticate and cache token locally (~/.yeeter/config.json by default)
+  python scripts/yeeter_cli.py login --username <user> --password <pass>
+
+  # Discover available templates
+  python scripts/yeeter_cli.py templates list
+
+  # Start a run from template ID 42 with 5 patients
+  python scripts/yeeter_cli.py runs start --template-id 42 --patients 5
+
+  # Machine-readable run metadata for automation
+  python scripts/yeeter_cli.py runs start --template-id 42 --patients 5 --output json
+
+  # Watch status changes until completion
+  python scripts/yeeter_cli.py runs watch 101 --interval 2
+
+  # Fetch aggregated metrics (table, json, or csv output)
+  python scripts/yeeter_cli.py runs stats 101 --format table
+  ```
+
+- Override the API host with `YEETER_API_URL` or pass `--api-url`; for self-signed endpoints, add `--insecure`.
+- CLI configuration path can be customized via `YEETER_CONFIG_PATH` (defaults to `~/.yeeter/config.json`).
+- Run repeatable benchmarks with the helper script:
+
+  ```bash
+  # Launch template 42, watch progress, and archive stats under benchmarks/
+  scripts/run_benchmark.sh 42 10 benchmarks
+  ```
 
 
 ## Development
@@ -119,6 +157,7 @@ docker-compose down
 ```
 
 ### Backend Structure
+
 - `app/__init__.py`: Flask app factory, extension and blueprint registration
 - `app/models.py`: SQLAlchemy models (User, Endpoint, GeneratorTemplate, SimulationTemplate, etc.)
 - `app/schemas.py`: Pydantic schemas for API validation
@@ -126,11 +165,13 @@ docker-compose down
 - `app/util/simulation_runner.py`: Simulation engine (step orchestration, HL7/DICOM generation, MLLP sending, etc.)
 
 ### Frontend Structure
+
 - `src/App.jsx`: Main React app, routing, authentication context
 - `src/main.jsx`: Entry point, Google OAuth provider, AuthProvider
 - `src/components/HL7Parser.jsx`: HL7 message parser/editor UI
 
 ### Critical Files
+
 - Backend: `app/models.py`, `app/schemas.py`, `app/crud.py`, `app/util/simulation_runner.py`, `app/__init__.py`
 - Frontend: `src/App.jsx`, `src/main.jsx`, `src/components/HL7Parser.jsx`
 

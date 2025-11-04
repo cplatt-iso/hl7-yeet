@@ -1,18 +1,18 @@
 # --- CREATE NEW FILE: app/routes/endpoint_routes.py ---
 
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
 from pydantic import ValidationError
 from ..extensions import db
 from .. import crud, schemas
 from .admin_routes import admin_required
+from ..auth_utils import auth_required, get_authenticated_user_id
 
 endpoint_bp = Blueprint('endpoint_bp', __name__, url_prefix='/api/endpoints')
 
 @endpoint_bp.route('', methods=['POST'])
 @admin_required()
 def create_endpoint():
-    user_id = get_jwt_identity()
+    user_id = get_authenticated_user_id()
     try:
         data = schemas.EndpointCreate.model_validate(request.get_json())
     except ValidationError as e:
@@ -22,7 +22,7 @@ def create_endpoint():
     return jsonify(schemas.EndpointResponse.model_validate(endpoint).model_dump()), 201
 
 @endpoint_bp.route('', methods=['GET'])
-@jwt_required() # Any logged in user can see the endpoints
+@auth_required() # Any logged in user can see the endpoints
 def get_endpoints():
     endpoints = crud.get_all_endpoints(db)
     return jsonify([schemas.EndpointResponse.model_validate(e).model_dump() for e in endpoints])
