@@ -28,6 +28,7 @@ from .routes.system_routes import system_bp
 
 from . import models as _models  # noqa: F401 - imported for SQLAlchemy model registration
 from . import crud  # noqa: F401
+from .util.rabbitmq_client import init_rabbitmq_publisher
 
 
 
@@ -62,6 +63,17 @@ def create_app():
                      allow_upgrades=True)
     bcrypt.init_app(app)
     jwt.init_app(app)
+
+    rabbitmq_url = os.environ.get('RABBITMQ_URL')
+    rabbitmq_queue = os.environ.get('RABBITMQ_ORDER_QUEUE')
+    init_rabbitmq_publisher(rabbitmq_url, order_queue=rabbitmq_queue)
+    if rabbitmq_url:
+        app.config['RABBITMQ_URL'] = rabbitmq_url
+        if rabbitmq_queue:
+            app.config['RABBITMQ_ORDER_QUEUE'] = rabbitmq_queue
+        logging.info("RabbitMQ publisher initialized with order queue '%s'", rabbitmq_queue or 'default')
+    else:
+        logging.info("RabbitMQ publisher disabled; RABBITMQ_URL not configured")
 
     # --- User Loader for JWT ---
     @jwt.user_lookup_loader

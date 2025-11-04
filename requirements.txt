@@ -31,3 +31,4 @@ pydantic[email]
 
 Pillow
 pytest
+pika

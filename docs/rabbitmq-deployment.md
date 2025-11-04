@@ -57,5 +57,6 @@ This guide explains how to deploy RabbitMQ into the `yeeter` namespace of the k3
 ## Next Steps
 
 - Backend deployment now sources `RABBITMQ_URL` from `yeeter-secrets`; implement publishing/consuming logic next.
+- Optional: set `RABBITMQ_ORDER_QUEUE` in `yeeter-secrets` to override the default `yeeter.simulation.orders` queue name.
 - Add queue provisioning logic or definitions if needed for simulator jobs.
 - Integrate publishing/consuming logic in the backend and worker services per the massive throughput plan.

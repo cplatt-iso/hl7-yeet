@@ -3,13 +3,15 @@
 import time
 import logging
 import socket
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+from uuid import uuid4
 from faker import Faker
 from hl7apy.parser import parse_message
 from sqlalchemy import select
 
 from ..extensions import db, socketio
 from .. import crud, models
+from .rabbitmq_client import get_rabbitmq_publisher, is_rabbitmq_enabled
 from .faker_parser import process_faker_string
 from .dicom_generator import create_study_files
 from .dicom_actions import perform_c_store, perform_dmwl_find, perform_mpps_action
@@ -42,6 +44,9 @@ class SimulationRunner:
         self.run_context = {}  # This holds the state for a single patient workflow
         self.faker = Faker()
         self._cancelled = False
+        self._rabbitmq_enabled = is_rabbitmq_enabled()
+        self._template_id: int | None = None
+        self._template_name: str | None = None
 
     def _check_for_cancellation(self, patient_iter: int, step_order: int, repeat_iter: int):
         """Abort execution if the run has been cancelled."""
@@ -90,6 +95,64 @@ class SimulationRunner:
         socketio.emit('sim_run_status_update', {'run_id': self.run_id, 'status': status}, to=f'run-{self.run_id}')
         logging.info(f"Emitted status update for Run {self.run_id}: {status}")
 
+    def _queue_async_order_job(
+        self,
+        step: models.SimulationStep,
+        patient_iter: int,
+        repeat_iter: int,
+        generated_message: str,
+    ) -> bool:
+        """Publish an asynchronous order job to RabbitMQ if enabled and requested."""
+        if not step.parameters.get('queue_async', False):
+            return False
+
+        publisher = get_rabbitmq_publisher()
+        if not publisher:
+            if self._rabbitmq_enabled:
+                self._log_event(
+                    step.step_order,
+                    patient_iter,
+                    repeat_iter,
+                    'WARN',
+                    "Async queue requested but RabbitMQ publisher is not available.",
+                )
+            return False
+
+        job_id = str(uuid4())
+        payload = {
+            'job_id': job_id,
+            'queued_at': datetime.now(timezone.utc).isoformat(),
+            'run_id': self.run_id,
+            'template_id': self._template_id,
+            'template_name': self._template_name,
+            'step_order': step.step_order,
+            'patient_iteration': patient_iter,
+            'repeat_iteration': repeat_iter,
+            'hl7_message': generated_message,
+            'order_context': self.run_context.get('order', {}),
+            'patient_context': self.run_context.get('patient', {}),
+            'metadata': step.parameters.get('queue_metadata', {}),
+        }
+
+        if publisher.publish_order_job(payload):
+            self._log_event(
+                step.step_order,
+                patient_iter,
+                repeat_iter,
+                'INFO',
+                f"Queued async job {job_id} to RabbitMQ order queue.",
+            )
+            return True
+
+        self._log_event(
+            step.step_order,
+            patient_iter,
+            repeat_iter,
+            'WARN',
+            "Failed to publish async job to RabbitMQ order queue.",
+        )
+        return False
+
     def _get_or_create_patient(self, patient_iter: int):
         """Ensures a patient exists in the context for the current iteration."""
         if 'patient' not in self.run_context:
@@ -121,6 +184,8 @@ class SimulationRunner:
 
                 run.status = 'RUNNING'
                 run.started_at = datetime.utcnow()
+                self._template_id = run.template_id
+                self._template_name = run.template.name if run.template else None
                 db.session.commit()
                 self._emit_status_update(run.status)
                 
@@ -216,15 +281,15 @@ class SimulationRunner:
         })
 
         generated_message = process_faker_string(gen_template.content, self.run_context)
-        self.run_context['last_hl7_message'] = generated_message
+        normalized_message = generated_message.replace('\n', '\r').strip()
+        self.run_context['last_hl7_message'] = normalized_message
         
         # Get accession number field configuration from step parameters
         accession_field = step.parameters.get('accession_field', 'OBR.3')  # Default to OBR-3
         
         accession_extracted = False
         try:
-            clean_message = generated_message.replace('\n', '\r').strip()
-            msg = parse_message(clean_message)
+            msg = parse_message(normalized_message)
 
             msh = getattr(msg, 'MSH', None)
             is_orm = msh and hasattr(msh, 'msh_9') and msh.msh_9.message_code.value == 'ORM'
@@ -252,6 +317,7 @@ class SimulationRunner:
         else:
             self._log_event(step.step_order, patient_iter, repeat_iter, 'SUCCESS', f"Generated {gen_template.message_type}, but FAILED to extract a valid Accession Number.")
 
+        self._queue_async_order_job(step, patient_iter, repeat_iter, normalized_message)
         return True
 
 

@@ -29,23 +29,25 @@
 
 ### Phase 0 – Prerequisites
 
-- [ ] Add `docs/` folder to repo (done).
+- [x] Add `docs/` folder to repo.
 - [ ] Confirm existing simulator logic for GENERATE_HL7 is stable at scale (load test single-threaded path).
 
 ### Phase 1 – RabbitMQ Infrastructure
 
-- [ ] Add Helm chart or manifest for RabbitMQ cluster in `k8s/rabbitmq.yaml`.
-- [ ] Create `Secret` with credentials (`RABBITMQ_URL`, user, password).
-- [ ] Update ConfigMap or env files with connection string for app/worker.
-- [ ] Document `kubectl` commands for deploying RabbitMQ and verifying connectivity.
+- [x] Add manifest for RabbitMQ cluster in `k8s/rabbitmq.yaml`.
+- [x] Create `Secret` with credentials (`RABBITMQ_URL`, user, password).
+- [x] Update ConfigMap/Secrets with connection string for app/worker deployments.
+- [x] Document `kubectl` workflow for deploying RabbitMQ and verifying connectivity (`docs/rabbitmq-deployment.md`).
 
 ### Phase 2 – Publisher Integration (Simulator Runner)
 
-- [ ] Implement a small AMQP client utility (e.g., Pika or Kombu) within backend.
-- [ ] Extend `SimulationRunner.handle_generate_hl7` to publish order jobs after order context extraction.
+- [x] Implement a small AMQP client utility (`app/util/rabbitmq_client.py`) using Pika.
+- [x] Extend `SimulationRunner.handle_generate_hl7` to optionally publish order jobs after context extraction (`queue_async` flag).
   - Payload includes: `run_id`, `step_id`, `patient_context`, `order_context`, template IDs, any timing overrides.
 - [ ] Update run lifecycle: after all orders queued, mark run status `WAITING_ON_WORKERS`.
 - [ ] Emit socket event indicating queued job count.
+
+> **New configuration:** Set `queue_async: true` (and optional `queue_metadata`) on a `GENERATE_HL7` step to emit an order job. The publisher uses `RABBITMQ_URL` plus optional `RABBITMQ_ORDER_QUEUE` (defaults to `yeeter.simulation.orders`).
 
 ### Phase 3 – Worker Service
 
@@ -83,6 +85,6 @@
 
 ## Immediate Next Steps
 
-1. Finalize RabbitMQ deployment approach and credentials management.
-2. Draft AMQP publisher helper and local integration test (publish → consume → ack).
-3. Prototype worker that consumes jobs and executes a pared-down DICOM generation flow.
+- [x] Finalize RabbitMQ deployment approach and credentials management.
+- [x] Draft AMQP publisher helper and local integration test (publish → consume → ack).
+- [ ] Prototype worker that consumes jobs and executes a pared-down DICOM generation flow.
