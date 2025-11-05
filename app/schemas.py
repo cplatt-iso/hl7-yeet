@@ -230,5 +230,51 @@ class SimulationRunStatsResponse(AppBaseModel):
     steps: List[SimulationRunStepStats] = Field(default_factory=list)
 
 
+class SimulationRunMetricsResponse(AppBaseModel):
+    run_id: int
+    total_patients: int
+    queued_job_count: int
+    queued_job_max_depth: int
+    queued_job_last_depth: int
+    queue_publish_sum_ms: float
+    queue_publish_min_ms: Optional[float] = None
+    queue_publish_max_ms: Optional[float] = None
+    queue_publish_avg_ms: Optional[float] = None
+    dicom_attempted_instances: int
+    dicom_success_instances: int
+    dicom_attempted_bytes: int
+    dicom_success_bytes: int
+    dicom_send_count: int
+    dicom_send_sum_ms: float
+    dicom_send_min_ms: Optional[float] = None
+    dicom_send_max_ms: Optional[float] = None
+    dicom_send_avg_ms: Optional[float] = None
+    worker_job_count: int
+    worker_job_success_count: int
+    worker_job_duration_sum_ms: float
+    worker_job_duration_min_ms: Optional[float] = None
+    worker_job_duration_max_ms: Optional[float] = None
+    worker_job_duration_avg_ms: Optional[float] = None
+    wall_clock_seconds: Optional[float] = None
+    orders_per_second: Optional[float] = None
+    created_at: datetime
+    updated_at: datetime
+
+
+class WorkerJobMetricResponse(AppBaseModel):
+    id: int
+    run_id: int
+    job_id: Optional[str] = None
+    queue: Optional[str] = None
+    success: bool
+    outcome: str
+    error: Optional[str] = None
+    duration_ms: Optional[float] = None
+    steps_executed: Optional[int] = None
+    remaining_steps: Optional[int] = None
+    patient_iteration: Optional[int] = None
+    repeat_iteration: Optional[int] = None
+    created_at: datetime
+
 
 # --- END OF FILE app/schemas.py ---

@@ -10,6 +10,7 @@ data:
   VITE_SOCKET_URL: "https://yeet.trazen.org"
   # Database connection - using k8s service name
   DATABASE_URL: "postgresql+psycopg2://yeeter_user:yeeter_pw@postgres:5432/hl7_yeeter_db"
+  RABBITMQ_ORDER_QUEUE: "yeeter.simulation.orders"
 ---
 apiVersion: v1
 kind: Secret

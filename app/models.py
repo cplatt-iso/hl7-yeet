@@ -1,6 +1,6 @@
 # --- START OF FILE app/models.py ---
 from datetime import datetime
-from sqlalchemy import Integer, String, Text, DateTime, ForeignKey, func, Boolean, JSON
+from sqlalchemy import Integer, String, Text, DateTime, ForeignKey, func, Boolean, JSON, Float, BigInteger
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import List, Any, Optional 
 
@@ -226,6 +226,8 @@ class SimulationRun(db.Model):
     # --- THIS IS THE FIX ---
     # Tell SQLAlchemy to cascade deletes from a SimulationRun to its Events
     events: Mapped[List["SimulationRunEvent"]] = relationship(back_populates="run", cascade="all, delete-orphan", order_by="SimulationRunEvent.timestamp")
+    stats: Mapped[Optional["SimulationRunStats"]] = relationship("SimulationRunStats", back_populates="run", cascade="all, delete-orphan", uselist=False)
+    worker_metrics: Mapped[List["WorkerJobMetric"]] = relationship("WorkerJobMetric", back_populates="run", cascade="all, delete-orphan")
 
 class SimulationRunEvent(db.Model):
     __tablename__ = "simulation_run_events"
@@ -245,6 +247,53 @@ class SimulationRunEvent(db.Model):
         self.iteration = iteration
         self.status = status
         self.details = details
+
+class SimulationRunStats(db.Model):
+    __tablename__ = "simulation_run_stats"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    run_id: Mapped[int] = mapped_column(Integer, ForeignKey("simulation_runs.id", ondelete="CASCADE"), unique=True, nullable=False)
+    total_patients: Mapped[int] = mapped_column(Integer, nullable=False, default=1, server_default="1")
+    queued_job_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    queued_job_max_depth: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    queued_job_last_depth: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    queue_publish_sum_ms: Mapped[float] = mapped_column(Float, nullable=False, default=0.0, server_default="0")
+    queue_publish_min_ms: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    queue_publish_max_ms: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    dicom_attempted_instances: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    dicom_success_instances: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    dicom_attempted_bytes: Mapped[int] = mapped_column(BigInteger, nullable=False, default=0, server_default="0")
+    dicom_success_bytes: Mapped[int] = mapped_column(BigInteger, nullable=False, default=0, server_default="0")
+    dicom_send_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    dicom_send_sum_ms: Mapped[float] = mapped_column(Float, nullable=False, default=0.0, server_default="0")
+    dicom_send_min_ms: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    dicom_send_max_ms: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    worker_job_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    worker_job_success_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    worker_job_duration_sum_ms: Mapped[float] = mapped_column(Float, nullable=False, default=0.0, server_default="0")
+    worker_job_duration_min_ms: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    worker_job_duration_max_ms: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    wall_clock_seconds: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    orders_per_second: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
+    run: Mapped["SimulationRun"] = relationship("SimulationRun", back_populates="stats")
+
+class WorkerJobMetric(db.Model):
+    __tablename__ = "worker_job_metrics"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    run_id: Mapped[int] = mapped_column(Integer, ForeignKey("simulation_runs.id", ondelete="CASCADE"), nullable=False, index=True)
+    job_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True, index=True)
+    queue: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
+    success: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    outcome: Mapped[str] = mapped_column(String(64), nullable=False)
+    error: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    duration_ms: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    steps_executed: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    remaining_steps: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    patient_iteration: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    repeat_iteration: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    run: Mapped["SimulationRun"] = relationship("SimulationRun", back_populates="worker_metrics")
 
 class ApiKey(db.Model):
     __tablename__ = "api_keys"

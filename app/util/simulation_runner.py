@@ -1,9 +1,12 @@
 # --- START OF FILE app/util/simulation_runner.py ---
 
+import json
 import time
 import logging
 import socket
+from pathlib import Path
 from datetime import datetime, timedelta, timezone
+from types import SimpleNamespace
 from uuid import uuid4
 from faker import Faker
 from hl7apy.parser import parse_message
@@ -15,6 +18,7 @@ from .rabbitmq_client import get_rabbitmq_publisher, is_rabbitmq_enabled
 from .faker_parser import process_faker_string
 from .dicom_generator import create_study_files
 from .dicom_actions import perform_c_store, perform_dmwl_find, perform_mpps_action
+from .metrics import emit_metric
 
 # MLLP Constants
 VT = b'\x0b'
@@ -37,6 +41,16 @@ class SimulationCancelled(Exception):
     """Raised when a user requests cancellation of a simulation run."""
 
 
+def _serialize_for_job(data: dict) -> dict:
+    """Serialize context data so it can be JSON encoded."""
+    def _default(value):
+        if isinstance(value, datetime):
+            return value.isoformat()
+        return value
+
+    return json.loads(json.dumps(data, default=_default))
+
+
 class SimulationRunner:
     def __init__(self, run_id: int, app_context):
         self.run_id = run_id
@@ -47,6 +61,10 @@ class SimulationRunner:
         self._rabbitmq_enabled = is_rabbitmq_enabled()
         self._template_id: int | None = None
         self._template_name: str | None = None
+        self._template_steps: list[models.SimulationStep] = []
+        self._patient_count: int = 1
+        self._iteration_delegated: bool = False
+        self._queued_jobs: int = 0
 
     def _check_for_cancellation(self, patient_iter: int, step_order: int, repeat_iter: int):
         """Abort execution if the run has been cancelled."""
@@ -95,6 +113,35 @@ class SimulationRunner:
         socketio.emit('sim_run_status_update', {'run_id': self.run_id, 'status': status}, to=f'run-{self.run_id}')
         logging.info(f"Emitted status update for Run {self.run_id}: {status}")
 
+    def _emit_async_queue_event(
+        self,
+        job_id: str,
+        queue_name: str,
+        patient_iter: int,
+        repeat_iter: int,
+    ) -> None:
+        """Notify listeners that a job was queued for async processing."""
+        socketio.emit(
+            'simulation_async_job_queued',
+            {
+                'run_id': self.run_id,
+                'job_id': job_id,
+                'queued_jobs': self._queued_jobs,
+                'queue': queue_name,
+                'patient_iteration': patient_iter,
+                'repeat_iteration': repeat_iter,
+            },
+            to=f'run-{self.run_id}'
+        )
+        logging.info(
+            "[SimRun-%s] Queued async job %s (total queued: %s) for patient %s repeat %s",
+            self.run_id,
+            job_id,
+            self._queued_jobs,
+            patient_iter,
+            repeat_iter,
+        )
+
     def _queue_async_order_job(
         self,
         step: models.SimulationStep,
@@ -118,30 +165,80 @@ class SimulationRunner:
                 )
             return False
 
-        job_id = str(uuid4())
-        payload = {
-            'job_id': job_id,
-            'queued_at': datetime.now(timezone.utc).isoformat(),
-            'run_id': self.run_id,
-            'template_id': self._template_id,
-            'template_name': self._template_name,
-            'step_order': step.step_order,
-            'patient_iteration': patient_iter,
-            'repeat_iteration': repeat_iter,
-            'hl7_message': generated_message,
-            'order_context': self.run_context.get('order', {}),
-            'patient_context': self.run_context.get('patient', {}),
-            'metadata': step.parameters.get('queue_metadata', {}),
-        }
+        remaining_steps = [
+            {
+                'id': template_step.id,
+                'order': template_step.step_order,
+                'type': template_step.step_type,
+                'parameters': template_step.parameters,
+                'description': template_step.parameters.get('label'),
+            }
+            for template_step in self._template_steps
+            if template_step.step_order > step.step_order
+        ]
 
-        if publisher.publish_order_job(payload):
+        snapshot = SimpleNamespace(
+            job_id=str(uuid4()),
+            run_id=self.run_id,
+            template_id=self._template_id,
+            template_name=self._template_name,
+            trigger_step=step.step_order,
+            patient_iteration=patient_iter,
+            repeat_iteration=repeat_iter,
+            total_patients=self._patient_count,
+            queued_at=datetime.now(timezone.utc),
+        )
+
+        queue_name = step.parameters.get('queue_name') or publisher.order_queue
+
+        payload = _serialize_for_job({
+            'job_id': snapshot.job_id,
+            'job': {
+                **vars(snapshot),
+                'queued_at': snapshot.queued_at.isoformat(),
+            },
+            'hl7_message': generated_message,
+            'run_context': self.run_context,
+            'remaining_steps': remaining_steps,
+            'metadata': step.parameters.get('queue_metadata', {}),
+            'queue': queue_name,
+        })
+
+        publish_started = time.perf_counter()
+        published = publisher.publish_order_job(payload)
+        publish_latency_ms = (time.perf_counter() - publish_started) * 1000
+
+        if published:
+            self._iteration_delegated = True
+            self._queued_jobs += 1
             self._log_event(
                 step.step_order,
                 patient_iter,
                 repeat_iter,
                 'INFO',
-                f"Queued async job {job_id} to RabbitMQ order queue.",
+                f"Queued async job {snapshot.job_id} to RabbitMQ order queue ({queue_name}).",
             )
+            self._emit_async_queue_event(snapshot.job_id, queue_name, patient_iter, repeat_iter)
+            emit_metric(
+                'queue_publish',
+                run_id=self.run_id,
+                template_id=self._template_id,
+                template_name=self._template_name,
+                job_id=snapshot.job_id,
+                queue=queue_name,
+                latency_ms=publish_latency_ms,
+                queued_jobs=self._queued_jobs,
+                remaining_steps=len(remaining_steps),
+                patient_iteration=patient_iter,
+                repeat_iteration=repeat_iter,
+            )
+            with self.app_context():
+                crud.record_queue_publish_metric(
+                    db,
+                    self.run_id,
+                    latency_ms=publish_latency_ms,
+                    queued_jobs=self._queued_jobs,
+                )
             return True
 
         self._log_event(
@@ -150,6 +247,18 @@ class SimulationRunner:
             repeat_iter,
             'WARN',
             "Failed to publish async job to RabbitMQ order queue.",
+        )
+        emit_metric(
+            'queue_publish_failed',
+            run_id=self.run_id,
+            template_id=self._template_id,
+            template_name=self._template_name,
+            job_id=snapshot.job_id,
+            queue=queue_name,
+            latency_ms=publish_latency_ms,
+            remaining_steps=len(remaining_steps),
+            patient_iteration=patient_iter,
+            repeat_iteration=repeat_iter,
         )
         return False
 
@@ -186,23 +295,30 @@ class SimulationRunner:
                 run.started_at = datetime.utcnow()
                 self._template_id = run.template_id
                 self._template_name = run.template.name if run.template else None
+                self._template_steps = sorted(run.template.steps, key=lambda s: s.step_order)
+                self._patient_count = run.patient_count or 1
                 db.session.commit()
                 self._emit_status_update(run.status)
                 
-                patient_count = run.patient_count or 1
+                patient_count = self._patient_count
                 self._log_event(0, 0, 0, 'INFO', f"Simulation run starting for template '{run.template.name}' with {patient_count} patient iteration(s).")
             
             for i in range(1, patient_count + 1):
-                self.run_context = {} 
+                self.run_context = {}
+                self._iteration_delegated = False
                 self._check_for_cancellation(patient_iter=i, step_order=0, repeat_iter=0)
                 self._log_event(0, i, 0, 'INFO', f"--- Starting Iteration {i} of {patient_count} ---")
                 
-                for step in run.template.steps:
+                for step in self._template_steps:
+                    if self._iteration_delegated:
+                        break
                     self._check_for_cancellation(patient_iter=i, step_order=step.step_order, repeat_iter=0)
                     repeat_count = step.parameters.get('repeat', {}).get('count', 1)
                     delay_ms = step.parameters.get('repeat', {}).get('delay_ms', 0)
 
                     for j in range(1, repeat_count + 1):
+                        if self._iteration_delegated:
+                            break
                         self._check_for_cancellation(patient_iter=i, step_order=step.step_order, repeat_iter=j)
                         handler_name = STEP_HANDLERS.get(step.step_type)
                         if not handler_name:
@@ -214,6 +330,9 @@ class SimulationRunner:
                         if not success:
                             raise Exception(f"Step {step.step_order} failed on repeat {j}. Halting workflow.")
                         
+                        if self._iteration_delegated:
+                            break
+
                         if j < repeat_count and delay_ms > 0:
                             self._log_event(step.step_order, i, j, 'INFO', f"Delaying for {delay_ms}ms...")
                             time.sleep(delay_ms / 1000.0)
@@ -221,10 +340,16 @@ class SimulationRunner:
             with self.app_context():
                 run = crud.get_simulation_run_by_id(db, self.run_id) # Re-fetch to be safe
                 if run:
-                    run.status = 'COMPLETED'
-                    db.session.commit()
-                    self._emit_status_update(run.status)
-            self._log_event(999, patient_count, 1, 'SUCCESS', "Simulation run completed successfully.")
+                    if self._queued_jobs > 0:
+                        run.status = 'WAITING_ON_WORKERS'
+                        db.session.commit()
+                        self._emit_status_update(run.status)
+                        self._log_event(999, patient_count, 1, 'INFO', f"Queued {self._queued_jobs} async job(s); awaiting worker completion.")
+                    else:
+                        run.status = 'COMPLETED'
+                        db.session.commit()
+                        self._emit_status_update(run.status)
+                        self._log_event(999, patient_count, 1, 'SUCCESS', "Simulation run completed successfully.")
 
         except SimulationCancelled:
             logging.info(f"SimulationRun-{self.run_id} cancelled by user request.")
@@ -250,8 +375,13 @@ class SimulationRunner:
             with self.app_context():
                 run = crud.get_simulation_run_by_id(db, self.run_id)
                 if run:
-                    run.completed_at = datetime.utcnow()
-                    db.session.commit()
+                    if run.status in {'COMPLETED', 'ERROR', 'CANCELLED'}:
+                        run.completed_at = datetime.utcnow()
+                        db.session.commit()
+                        try:
+                            crud.update_run_timing_metrics(db, self.run_id)
+                        except Exception:
+                            logging.exception("Failed to update timing metrics for run %s", self.run_id)
                     logging.info(f"Final status for Run ID {self.run_id} is '{run.status}'.")
 
     # --- STEP HANDLER IMPLEMENTATIONS ---
@@ -520,10 +650,53 @@ class SimulationRunner:
             if not endpoint or endpoint.endpoint_type != 'DICOM_SCP':
                 raise ValueError(f"Endpoint ID {endpoint_id} is not a valid DICOM_SCP endpoint.")
         
+        send_started = time.perf_counter()
         results = perform_c_store(file_paths, endpoint.to_dict())
+        send_latency_ms = (time.perf_counter() - send_started) * 1000
+
+        attempted_bytes = 0
+        for path_str in file_paths:
+            try:
+                attempted_bytes += Path(path_str).stat().st_size
+            except OSError:
+                continue
+
+        success_paths = [entry.get('path') for entry in results.get('success', []) if entry.get('path')]
+        success_bytes = 0
+        for path_str in success_paths:
+            try:
+                success_bytes += Path(path_str).stat().st_size
+            except OSError:
+                continue
 
         success_count = len(results.get('success', []))
         failure_count = len(results.get('failure', []))
+
+        emit_metric(
+            'dicom_c_store',
+            run_id=self.run_id,
+            template_id=self._template_id,
+            endpoint_id=endpoint.id,
+            endpoint_name=endpoint.name,
+            patient_iteration=patient_iter,
+            repeat_iteration=repeat_iter,
+            attempted_instances=len(file_paths),
+            success_instances=success_count,
+            failed_instances=failure_count,
+            attempted_bytes=attempted_bytes,
+            success_bytes=success_bytes,
+            duration_ms=send_latency_ms,
+        )
+        with self.app_context():
+            crud.record_dicom_send_metric(
+                db,
+                self.run_id,
+                attempted_instances=len(file_paths),
+                success_instances=success_count,
+                attempted_bytes=attempted_bytes,
+                success_bytes=success_bytes,
+                duration_ms=send_latency_ms,
+            )
         
         if failure_count > 0:
             details = f"C-STORE to '{endpoint.name}' partially failed. Success: {success_count}, Failure: {failure_count}."

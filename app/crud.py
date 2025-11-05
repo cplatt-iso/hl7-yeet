@@ -562,6 +562,167 @@ def calculate_simulation_run_stats(run: models.SimulationRun) -> dict[str, Any]:
     }
 
 
+def _ensure_run_stats(db: SQLAlchemy, run_id: int) -> models.SimulationRunStats:
+    stats = db.session.execute(
+        select(models.SimulationRunStats).filter_by(run_id=run_id)
+    ).scalar_one_or_none()
+    if stats:
+        return stats
+
+    run = db.session.get(models.SimulationRun, run_id)
+    if not run:
+        raise ValueError(f"SimulationRun {run_id} not found; cannot create stats entry")
+
+    stats = models.SimulationRunStats()
+    stats.run_id = run_id
+    stats.total_patients = run.patient_count or 1
+    db.session.add(stats)
+    db.session.flush()
+    return stats
+
+
+def record_queue_publish_metric(
+    db: SQLAlchemy,
+    run_id: int,
+    *,
+    latency_ms: float,
+    queued_jobs: int,
+) -> models.SimulationRunStats:
+    stats = _ensure_run_stats(db, run_id)
+    stats.queued_job_count += 1
+    stats.queue_publish_sum_ms += float(latency_ms)
+    stats.queue_publish_min_ms = (
+        latency_ms
+        if stats.queue_publish_min_ms is None or latency_ms < stats.queue_publish_min_ms
+        else stats.queue_publish_min_ms
+    )
+    stats.queue_publish_max_ms = (
+        latency_ms
+        if stats.queue_publish_max_ms is None or latency_ms > stats.queue_publish_max_ms
+        else stats.queue_publish_max_ms
+    )
+    stats.queued_job_last_depth = queued_jobs
+    if queued_jobs > stats.queued_job_max_depth:
+        stats.queued_job_max_depth = queued_jobs
+    db.session.commit()
+    return stats
+
+
+def record_dicom_send_metric(
+    db: SQLAlchemy,
+    run_id: int,
+    *,
+    attempted_instances: int,
+    success_instances: int,
+    attempted_bytes: int,
+    success_bytes: int,
+    duration_ms: float,
+) -> models.SimulationRunStats:
+    stats = _ensure_run_stats(db, run_id)
+    stats.dicom_attempted_instances += int(attempted_instances)
+    stats.dicom_success_instances += int(success_instances)
+    stats.dicom_attempted_bytes += int(attempted_bytes)
+    stats.dicom_success_bytes += int(success_bytes)
+    stats.dicom_send_count += 1
+    stats.dicom_send_sum_ms += float(duration_ms)
+    stats.dicom_send_min_ms = (
+        duration_ms
+        if stats.dicom_send_min_ms is None or duration_ms < stats.dicom_send_min_ms
+        else stats.dicom_send_min_ms
+    )
+    stats.dicom_send_max_ms = (
+        duration_ms
+        if stats.dicom_send_max_ms is None or duration_ms > stats.dicom_send_max_ms
+        else stats.dicom_send_max_ms
+    )
+    db.session.commit()
+    return stats
+
+
+def record_worker_job_metric(
+    db: SQLAlchemy,
+    *,
+    run_id: int,
+    job_id: str | None,
+    queue: str | None,
+    success: bool,
+    outcome: str,
+    error: str | None,
+    duration_ms: float | None,
+    steps_executed: int,
+    remaining_steps: int,
+    patient_iteration: int | None,
+    repeat_iteration: int | None,
+) -> models.WorkerJobMetric:
+    metric = models.WorkerJobMetric()
+    metric.run_id = run_id
+    metric.job_id = job_id
+    metric.queue = queue
+    metric.success = success
+    metric.outcome = outcome
+    metric.error = error
+    metric.duration_ms = duration_ms
+    metric.steps_executed = steps_executed
+    metric.remaining_steps = remaining_steps
+    metric.patient_iteration = patient_iteration
+    metric.repeat_iteration = repeat_iteration
+    db.session.add(metric)
+
+    stats = _ensure_run_stats(db, run_id)
+    stats.worker_job_count += 1
+    if success:
+        stats.worker_job_success_count += 1
+    if duration_ms is not None:
+        stats.worker_job_duration_sum_ms += float(duration_ms)
+        stats.worker_job_duration_min_ms = (
+            duration_ms
+            if stats.worker_job_duration_min_ms is None or duration_ms < stats.worker_job_duration_min_ms
+            else stats.worker_job_duration_min_ms
+        )
+        stats.worker_job_duration_max_ms = (
+            duration_ms
+            if stats.worker_job_duration_max_ms is None or duration_ms > stats.worker_job_duration_max_ms
+            else stats.worker_job_duration_max_ms
+        )
+    db.session.commit()
+    db.session.refresh(metric)
+    return metric
+
+
+def get_run_stats_record(db: SQLAlchemy, run_id: int, *, create_if_missing: bool = False) -> models.SimulationRunStats | None:
+    stats = db.session.execute(
+        select(models.SimulationRunStats).filter_by(run_id=run_id)
+    ).scalar_one_or_none()
+    if stats or not create_if_missing:
+        return stats
+    return _ensure_run_stats(db, run_id)
+
+
+def get_worker_metrics_for_run(db: SQLAlchemy, run_id: int) -> list[models.WorkerJobMetric]:
+    return list(
+        db.session.execute(
+            select(models.WorkerJobMetric)
+            .filter_by(run_id=run_id)
+            .order_by(models.WorkerJobMetric.created_at.asc())
+        ).scalars()
+    )
+
+
+def update_run_timing_metrics(db: SQLAlchemy, run_id: int) -> models.SimulationRunStats | None:
+    run = db.session.get(models.SimulationRun, run_id)
+    if not run:
+        return None
+
+    stats = _ensure_run_stats(db, run_id)
+    if run.started_at and run.completed_at:
+        wall_clock_seconds = (run.completed_at - run.started_at).total_seconds()
+        stats.wall_clock_seconds = wall_clock_seconds
+        if wall_clock_seconds > 0 and stats.queued_job_count:
+            stats.orders_per_second = stats.queued_job_count / wall_clock_seconds
+    db.session.commit()
+    return stats
+
+
 def create_api_key(db: SQLAlchemy, user_id: int, name: str) -> tuple[models.ApiKey, str]:
     """Generates a new API key, stores its hash, and returns the key object and the raw key."""
     raw_key = f"ytr_{secrets.token_urlsafe(32)}"

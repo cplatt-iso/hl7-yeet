@@ -339,6 +339,44 @@ def runs(ctx: click.Context) -> None:
     """Commands for creating and monitoring simulation runs."""
 
 
+@runs.command("list")
+@click.option(
+    "--output",
+    "output_format",
+    type=click.Choice(["table", "json"]),
+    default="table",
+    show_default=True,
+    help="Choose pretty table output or raw JSON.",
+)
+@click.pass_context
+def list_runs(ctx: click.Context, output_format: str) -> None:
+    """List recent simulation runs for the current user."""
+    client, _ = _get_authenticated_client(ctx)
+    runs = client.get_json("/api/simulator/runs")
+
+    if output_format == "json":
+        click.echo(json.dumps(runs, indent=2))
+        return
+
+    if not runs:
+        click.echo("No simulation runs found.")
+        return
+
+    click.echo("ID   | Status      | Patients | Started At           | Completed At")
+    click.echo("-----|-------------|----------|----------------------|----------------------")
+    for entry in runs:
+        if not isinstance(entry, dict):
+            click.echo(str(entry))
+            continue
+
+        run_id = str(entry.get("id", "n/a")).rjust(4)
+        status = str(entry.get("status", "n/a")).ljust(11)
+        patients = str(entry.get("patient_count", "n/a")).rjust(8)
+        started = (entry.get("started_at") or "n/a").ljust(22)
+        completed = entry.get("completed_at") or "n/a"
+        click.echo(f"{run_id} | {status} | {patients} | {started} | {completed}")
+
+
 @runs.command("start")
 @click.option("--template-id", required=True, type=int, help="Simulation template ID to execute.")
 @click.option("--patients", default=1, show_default=True, type=click.IntRange(1, None), help="Number of patient iterations.")

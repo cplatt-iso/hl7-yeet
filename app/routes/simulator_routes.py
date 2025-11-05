@@ -155,6 +155,74 @@ def get_run_stats(run_id):
     return jsonify(stats_response.model_dump(mode='json'))
 
 
+@simulator_bp.route('/runs/<int:run_id>/metrics', methods=['GET'])
+@auth_required()
+def get_run_metrics(run_id):
+    user_id = get_authenticated_user_id()
+    run = crud.get_simulation_run_by_id(db, run_id)
+    if not run or (not get_authenticated_user().is_admin and run.user_id != user_id):
+        return jsonify({"error": "Simulation run not found or unauthorized"}), 404
+
+    stats_record = crud.get_run_stats_record(db, run_id, create_if_missing=True)
+    if not stats_record:
+        return jsonify({"error": "Metrics not available"}), 404
+
+    queue_avg = (
+        stats_record.queue_publish_sum_ms / stats_record.queued_job_count
+        if stats_record.queued_job_count else None
+    )
+    dicom_avg = (
+        stats_record.dicom_send_sum_ms / stats_record.dicom_send_count
+        if stats_record.dicom_send_count else None
+    )
+    worker_avg = (
+        stats_record.worker_job_duration_sum_ms / stats_record.worker_job_count
+        if stats_record.worker_job_count else None
+    )
+
+    metrics_payload = {
+        'run_id': stats_record.run_id,
+        'total_patients': stats_record.total_patients,
+        'queued_job_count': stats_record.queued_job_count,
+        'queued_job_max_depth': stats_record.queued_job_max_depth,
+        'queued_job_last_depth': stats_record.queued_job_last_depth,
+        'queue_publish_sum_ms': stats_record.queue_publish_sum_ms,
+        'queue_publish_min_ms': stats_record.queue_publish_min_ms,
+        'queue_publish_max_ms': stats_record.queue_publish_max_ms,
+        'queue_publish_avg_ms': queue_avg,
+        'dicom_attempted_instances': stats_record.dicom_attempted_instances,
+        'dicom_success_instances': stats_record.dicom_success_instances,
+        'dicom_attempted_bytes': stats_record.dicom_attempted_bytes,
+        'dicom_success_bytes': stats_record.dicom_success_bytes,
+        'dicom_send_count': stats_record.dicom_send_count,
+        'dicom_send_sum_ms': stats_record.dicom_send_sum_ms,
+        'dicom_send_min_ms': stats_record.dicom_send_min_ms,
+        'dicom_send_max_ms': stats_record.dicom_send_max_ms,
+        'dicom_send_avg_ms': dicom_avg,
+        'worker_job_count': stats_record.worker_job_count,
+        'worker_job_success_count': stats_record.worker_job_success_count,
+        'worker_job_duration_sum_ms': stats_record.worker_job_duration_sum_ms,
+        'worker_job_duration_min_ms': stats_record.worker_job_duration_min_ms,
+        'worker_job_duration_max_ms': stats_record.worker_job_duration_max_ms,
+        'worker_job_duration_avg_ms': worker_avg,
+        'wall_clock_seconds': stats_record.wall_clock_seconds,
+        'orders_per_second': stats_record.orders_per_second,
+        'created_at': stats_record.created_at,
+        'updated_at': stats_record.updated_at,
+    }
+
+    metrics_response = schemas.SimulationRunMetricsResponse.model_validate(metrics_payload)
+    worker_metrics = crud.get_worker_metrics_for_run(db, run_id)
+    worker_payload = [
+        schemas.WorkerJobMetricResponse.model_validate(metric).model_dump(mode='json')
+        for metric in worker_metrics
+    ]
+
+    response = metrics_response.model_dump(mode='json')
+    response['worker_jobs'] = worker_payload
+    return jsonify(response)
+
+
 @simulator_bp.route('/runs/<int:run_id>/cancel', methods=['POST'])
 @auth_required()
 def cancel_run(run_id):

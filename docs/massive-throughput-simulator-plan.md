@@ -22,7 +22,7 @@
    - Provides durable queues for `generate_dicom`, `send_dicom`, etc.
    - Enables fan-out across multiple worker pods with visibility, acknowledgments, dead-letter support.
 4. **Monitoring & Back-pressure**
-   - Prometheus metrics + RabbitMQ management plugin for queue depth.
+   - Custom metrics logged from producer/worker (queue depth, job latency) with optional RabbitMQ management snapshots.
    - Worker autoscaling targets queue length / CPU.
 
 ## Work Breakdown
@@ -44,18 +44,18 @@
 - [x] Implement a small AMQP client utility (`app/util/rabbitmq_client.py`) using Pika.
 - [x] Extend `SimulationRunner.handle_generate_hl7` to optionally publish order jobs after context extraction (`queue_async` flag).
   - Payload includes: `run_id`, `step_id`, `patient_context`, `order_context`, template IDs, any timing overrides.
-- [ ] Update run lifecycle: after all orders queued, mark run status `WAITING_ON_WORKERS`.
-- [ ] Emit socket event indicating queued job count.
+- [x] Update run lifecycle: after all orders queued, mark run status `WAITING_ON_WORKERS`.
+- [x] Emit socket event indicating queued job count.
 
 > **New configuration:** Set `queue_async: true` (and optional `queue_metadata`) on a `GENERATE_HL7` step to emit an order job. The publisher uses `RABBITMQ_URL` plus optional `RABBITMQ_ORDER_QUEUE` (defaults to `yeeter.simulation.orders`).
 
 ### Phase 3 – Worker Service
 
-- [ ] Create new module `app/worker/` with CLI entrypoint (e.g., `python -m app.worker`).
-- [ ] Implement consumer loop with manual ACK and retry/backoff.
-- [ ] Reuse existing helper functions (`create_study_files`, `perform_c_store`) with minimal duplication.
-- [ ] On success/failure, log `SimulationRunEvent` rows and emit socket updates (via socketio client or REST hook).
-- [ ] Package worker container (Dockerfile.worker) and add new k8s deployment `yeeter-worker` (scalable replicas).
+- [x] Create new module `app/worker/` with CLI entrypoint (run via `python -m app.worker`).
+- [x] Implement consumer loop with manual ACK and optional requeue-on-error flag (future: add exponential backoff).
+- [x] Reuse existing helper functions (`SimulationRunner` handlers wrap `create_study_files`, `perform_c_store`, etc.).
+- [x] On success/failure, log `SimulationRunEvent` rows and emit socket updates (via existing Socket.IO integration).
+- [x] Package worker container (Dockerfile.worker) and add new k8s deployment `yeeter-worker` (scalable replicas).
 
 ### Phase 4 – Step Orchestration Refinements
 
@@ -63,6 +63,7 @@
 - [ ] Adjust SimulationStep model and schemas to store queue name / job type metadata.
 - [ ] Modify frontend simulator UI to show queue-driven progress (orders queued, workers processing, completions).
 - [ ] Provide admin controls to scale worker replicas from UI (optional).
+- [x] Script a RabbitMQ-backed autoscaler to scale `yeeter-worker` replicas based on queue depth.
 
 ### Phase 5 – Reliability & Observability
 

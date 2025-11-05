@@ -56,7 +56,8 @@ This guide explains how to deploy RabbitMQ into the `yeeter` namespace of the k3
 
 ## Next Steps
 
-- Backend deployment now sources `RABBITMQ_URL` from `yeeter-secrets`; implement publishing/consuming logic next.
+- Backend now publishes asynchronous order jobs when templates set `queue_async`; confirm `RABBITMQ_URL` in `yeeter-secrets` and monitor for the new `WAITING_ON_WORKERS` status / `simulation_async_job_queued` socket events.
 - Optional: set `RABBITMQ_ORDER_QUEUE` in `yeeter-secrets` to override the default `yeeter.simulation.orders` queue name.
-- Add queue provisioning logic or definitions if needed for simulator jobs.
-- Integrate publishing/consuming logic in the backend and worker services per the massive throughput plan.
+- Add queue provisioning logic or definitions if additional worker-specific queues are required.
+- Start the worker implementation phase to consume queued jobs, execute deferred steps, and drive runs to completion.
+- Run the new worker locally with `python -m app.worker --amqp-url <url>` (prefetch and requeue behavior are configurable via flags) or package it for deployment once ready.

@@ -27,6 +27,9 @@ Full-stack HL7 message simulator with AI analysis (Google Gemini), MLLP client/s
 
 ## Critical Conventions
 
+### Standards & Compliance
+- Treat IHE integration profiles as the default rule set for workflow and data flow decisions; flag any planned deviation for explicit discussion before implementation.
+
 ### Authentication & Storage
 - **Token Key**: ALWAYS use `authToken` (not `token`) for localStorage
 - **Headers**: Use `src/api/apiUtils.js::getAuthHeaders()` - automatically adds JWT Bearer token

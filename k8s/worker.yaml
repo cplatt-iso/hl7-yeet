@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: yeeter-worker
+  namespace: yeeter
+  labels:
+    app: yeeter-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: yeeter-worker
+  template:
+    metadata:
+      labels:
+        app: yeeter-worker
+    spec:
+      containers:
+      - name: worker
+        image: hl7-yeeter-worker:latest
+        imagePullPolicy: IfNotPresent
+        args:
+        - "--prefetch"
+        - "4"
+        - "--requeue-on-error"
+        env:
+        - name: FLASK_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: yeeter-config
+              key: FLASK_ENV
+        - name: FLASK_SKIP_EVENTLET
+          value: "1"
+        - name: DATABASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: yeeter-config
+              key: DATABASE_URL
+        - name: JWT_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: yeeter-secrets
+              key: JWT_SECRET_KEY
+        - name: JWT_ACCESS_TOKEN_EXPIRES_HOURS
+          valueFrom:
+            configMapKeyRef:
+              name: yeeter-config
+              key: JWT_ACCESS_TOKEN_EXPIRES_HOURS
+        - name: GOOGLE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: yeeter-secrets
+              key: GOOGLE_API_KEY
+        - name: RABBITMQ_URL
+          valueFrom:
+            secretKeyRef:
+              name: yeeter-secrets
+              key: RABBITMQ_URL
+        - name: RABBITMQ_ORDER_QUEUE
+          valueFrom:
+            configMapKeyRef:
+              name: yeeter-config
+              key: RABBITMQ_ORDER_QUEUE
+        - name: WORKER_PREFETCH
+          value: "4"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
