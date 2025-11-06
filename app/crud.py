@@ -723,6 +723,136 @@ def update_run_timing_metrics(db: SQLAlchemy, run_id: int) -> models.SimulationR
     return stats
 
 
+def _compute_average(total: float | int, count: int) -> float | None:
+    if not count:
+        return None
+    return float(total) / float(count)
+
+
+def build_run_metrics_payload(
+    stats: models.SimulationRunStats,
+    *,
+    run: models.SimulationRun | None = None,
+    user: models.User | None = None,
+    template: models.SimulationTemplate | None = None,
+) -> dict[str, Any]:
+    queue_avg = _compute_average(stats.queue_publish_sum_ms, stats.queued_job_count)
+    dicom_avg = _compute_average(stats.dicom_send_sum_ms, stats.dicom_send_count)
+    worker_avg = _compute_average(stats.worker_job_duration_sum_ms, stats.worker_job_count)
+
+    if run is None:
+        run = stats.run
+    if template is None and run is not None:
+        template = getattr(run, "template", None)
+    if user is None and run is not None:
+        user = getattr(run, "user", None)
+
+    return {
+        "run_id": stats.run_id,
+        "user_id": getattr(run, "user_id", None),
+        "username": getattr(user, "username", None) if user else None,
+        "template_id": getattr(run, "template_id", None),
+        "template_name": getattr(template, "name", None) if template else None,
+        "status": getattr(run, "status", None),
+        "started_at": getattr(run, "started_at", None),
+        "completed_at": getattr(run, "completed_at", None),
+        "total_patients": stats.total_patients,
+        "queued_job_count": stats.queued_job_count,
+        "queued_job_max_depth": stats.queued_job_max_depth,
+        "queued_job_last_depth": stats.queued_job_last_depth,
+        "queue_publish_sum_ms": stats.queue_publish_sum_ms,
+        "queue_publish_min_ms": stats.queue_publish_min_ms,
+        "queue_publish_max_ms": stats.queue_publish_max_ms,
+        "queue_publish_avg_ms": queue_avg,
+        "dicom_attempted_instances": stats.dicom_attempted_instances,
+        "dicom_success_instances": stats.dicom_success_instances,
+        "dicom_attempted_bytes": stats.dicom_attempted_bytes,
+        "dicom_success_bytes": stats.dicom_success_bytes,
+        "dicom_send_count": stats.dicom_send_count,
+        "dicom_send_sum_ms": stats.dicom_send_sum_ms,
+        "dicom_send_min_ms": stats.dicom_send_min_ms,
+        "dicom_send_max_ms": stats.dicom_send_max_ms,
+        "dicom_send_avg_ms": dicom_avg,
+        "worker_job_count": stats.worker_job_count,
+        "worker_job_success_count": stats.worker_job_success_count,
+        "worker_job_duration_sum_ms": stats.worker_job_duration_sum_ms,
+        "worker_job_duration_min_ms": stats.worker_job_duration_min_ms,
+        "worker_job_duration_max_ms": stats.worker_job_duration_max_ms,
+        "worker_job_duration_avg_ms": worker_avg,
+        "wall_clock_seconds": stats.wall_clock_seconds,
+        "orders_per_second": stats.orders_per_second,
+        "created_at": stats.created_at,
+        "updated_at": stats.updated_at,
+    }
+
+
+def list_run_metrics(
+    db: SQLAlchemy,
+    *,
+    user_id: int,
+    is_admin: bool,
+    template_id: int | None = None,
+    status: str | None = None,
+    start_at: datetime | None = None,
+    end_at: datetime | None = None,
+    limit: int = 100,
+) -> list[dict[str, Any]]:
+    query = (
+        db.session.query(models.SimulationRunStats, models.SimulationRun, models.User, models.SimulationTemplate)
+        .join(models.SimulationRun, models.SimulationRun.id == models.SimulationRunStats.run_id)
+        .join(models.User, models.User.id == models.SimulationRun.user_id)
+        .outerjoin(models.SimulationTemplate, models.SimulationTemplate.id == models.SimulationRun.template_id)
+    )
+
+    if not is_admin:
+        query = query.filter(models.SimulationRun.user_id == user_id)
+    if template_id is not None:
+        query = query.filter(models.SimulationRun.template_id == template_id)
+    if status:
+        query = query.filter(models.SimulationRun.status == status)
+    if start_at:
+        query = query.filter(models.SimulationRun.started_at >= start_at)
+    if end_at:
+        query = query.filter(models.SimulationRun.completed_at <= end_at)
+
+    query = query.order_by(models.SimulationRunStats.created_at.desc())
+    if limit:
+        query = query.limit(max(limit, 0))
+
+    results: list[dict[str, Any]] = []
+    for stats, run, user, template in query.all():
+        results.append(build_run_metrics_payload(stats, run=run, user=user, template=template))
+    return results
+
+
+def list_worker_metrics(
+    db: SQLAlchemy,
+    *,
+    user_id: int,
+    is_admin: bool,
+    run_id: int | None = None,
+    queue: str | None = None,
+    success: bool | None = None,
+    limit: int = 200,
+) -> list[models.WorkerJobMetric]:
+    query = db.session.query(models.WorkerJobMetric).join(models.SimulationRun)
+
+    if not is_admin:
+        query = query.filter(models.SimulationRun.user_id == user_id)
+    if run_id is not None:
+        query = query.filter(models.WorkerJobMetric.run_id == run_id)
+    if queue:
+        query = query.filter(models.WorkerJobMetric.queue == queue)
+    if success is not None:
+        query = query.filter(models.WorkerJobMetric.success == success)
+
+    query = query.order_by(models.WorkerJobMetric.created_at.desc())
+    if limit:
+        query = query.limit(max(limit, 0))
+
+    return list(query.all())
+
+
 def create_api_key(db: SQLAlchemy, user_id: int, name: str) -> tuple[models.ApiKey, str]:
     """Generates a new API key, stores its hash, and returns the key object and the raw key."""
     raw_key = f"ytr_{secrets.token_urlsafe(32)}"

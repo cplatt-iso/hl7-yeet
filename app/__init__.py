@@ -25,6 +25,7 @@ from .routes.listener_routes import listener_bp
 from .routes.simulator_routes import simulator_bp
 from .routes.endpoint_routes import endpoint_bp
 from .routes.system_routes import system_bp
+from .routes.metrics_routes import metrics_bp
 
 from . import models as _models  # noqa: F401 - imported for SQLAlchemy model registration
 from . import crud  # noqa: F401
@@ -144,6 +145,7 @@ def create_app():
     app.register_blueprint(listener_bp)     
     app.register_blueprint(endpoint_bp)
     app.register_blueprint(simulator_bp)
+    app.register_blueprint(metrics_bp)
     app.register_blueprint(v1_bp)
     
     # Import and register SSE routes

@@ -232,6 +232,13 @@ class SimulationRunStatsResponse(AppBaseModel):
 
 class SimulationRunMetricsResponse(AppBaseModel):
     run_id: int
+    user_id: Optional[int] = None
+    username: Optional[str] = None
+    template_id: Optional[int] = None
+    template_name: Optional[str] = None
+    status: Optional[str] = None
+    started_at: Optional[datetime] = None
+    completed_at: Optional[datetime] = None
     total_patients: int
     queued_job_count: int
     queued_job_max_depth: int
@@ -261,6 +268,29 @@ class SimulationRunMetricsResponse(AppBaseModel):
     updated_at: datetime
 
 
+class RunMetricsSummary(AppBaseModel):
+    run_count: int
+    total_patients: int
+    total_worker_jobs: int
+    total_worker_success: int
+    total_dicom_instances: int
+    total_dicom_bytes: int
+    average_orders_per_second: Optional[float] = None
+
+
+class RunMetricsListResponse(AppBaseModel):
+    summary: RunMetricsSummary
+    runs: List[SimulationRunMetricsResponse]
+
+
+class RunMetricsListFilters(BaseModel):
+    template_id: Optional[int] = None
+    status: Optional[str] = None
+    start_at: Optional[datetime] = None
+    end_at: Optional[datetime] = None
+    limit: int = Field(100, ge=1, le=1000)
+
+
 class WorkerJobMetricResponse(AppBaseModel):
     id: int
     run_id: int
@@ -275,6 +305,25 @@ class WorkerJobMetricResponse(AppBaseModel):
     patient_iteration: Optional[int] = None
     repeat_iteration: Optional[int] = None
     created_at: datetime
+
+
+class WorkerMetricsSummary(AppBaseModel):
+    job_count: int
+    success_count: int
+    failure_count: int
+    average_duration_ms: Optional[float] = None
+
+
+class WorkerMetricsListResponse(AppBaseModel):
+    summary: WorkerMetricsSummary
+    metrics: List[WorkerJobMetricResponse]
+
+
+class WorkerMetricsListFilters(BaseModel):
+    run_id: Optional[int] = None
+    queue: Optional[str] = None
+    success: Optional[bool] = None
+    limit: int = Field(200, ge=1, le=2000)
 
 
 # --- END OF FILE app/schemas.py ---
