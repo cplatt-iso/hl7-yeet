@@ -73,6 +73,13 @@ const UserStatus = () => {
                         Dashboard
                     </Link>
                     <Link
+                        to="/metrics"
+                        className="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-800"
+                        onClick={() => setIsMenuOpen(false)}
+                    >
+                        Metrics
+                    </Link>
+                    <Link
                         to="/api-keys"
                         className="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-800"
                         onClick={() => setIsMenuOpen(false)}

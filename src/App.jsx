@@ -3,6 +3,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import HL7Parser from './components/HL7Parser';
+import MetricsDashboard from './components/MetricsDashboard';
 import Login from './components/Login';
 import Register from './components/Register';
 import ApiKeysPage from './components/ApiKeysPage';
@@ -40,6 +41,10 @@ function App() {
             <Route 
               path="/" 
               element={isAuthenticated ? <HL7Parser /> : <Navigate to="/login" />} 
+            />
+            <Route
+              path="/metrics"
+              element={isAuthenticated ? <MetricsDashboard /> : <Navigate to="/login" />}
             />
             <Route
               path="/api-keys"
