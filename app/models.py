@@ -148,7 +148,8 @@ class Hl7Version(db.Model):
 class SystemMetadata(db.Model):
     __tablename__ = 'system_metadata'
     key: Mapped[str] = mapped_column(String(50), primary_key=True)
-    value: Mapped[str] = mapped_column(String(255), nullable=False)
+    # Allow large JSON blobs for system metadata (e.g., autoscaler config)
+    value: Mapped[str] = mapped_column(Text, nullable=False)
 
     def __init__(self, key: str, value: str, **kw: Any):
         super().__init__(**kw)
@@ -267,6 +268,10 @@ class SimulationRunStats(db.Model):
     dicom_send_sum_ms: Mapped[float] = mapped_column(Float, nullable=False, default=0.0, server_default="0")
     dicom_send_min_ms: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     dicom_send_max_ms: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    dicom_throughput_sum_mbps: Mapped[float] = mapped_column(Float, nullable=False, default=0.0, server_default="0")
+    dicom_throughput_min_mbps: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    dicom_throughput_max_mbps: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    dicom_throughput_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
     worker_job_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
     worker_job_success_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
     worker_job_duration_sum_ms: Mapped[float] = mapped_column(Float, nullable=False, default=0.0, server_default="0")
@@ -274,6 +279,7 @@ class SimulationRunStats(db.Model):
     worker_job_duration_max_ms: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     wall_clock_seconds: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     orders_per_second: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    step_duration_summary: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict, server_default='{}')
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
     run: Mapped["SimulationRun"] = relationship("SimulationRun", back_populates="stats")

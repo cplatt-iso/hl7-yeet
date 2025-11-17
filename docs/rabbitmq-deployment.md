@@ -56,7 +56,7 @@ This guide explains how to deploy RabbitMQ into the `yeeter` namespace of the k3
 
 ## Next Steps
 
-- Backend now publishes asynchronous order jobs when templates set `queue_async`; confirm `RABBITMQ_URL` in `yeeter-secrets` and monitor for the new `WAITING_ON_WORKERS` status / `simulation_async_job_queued` socket events.
+- Backend now publishes asynchronous order jobs when templates set `queue_async`; confirm `RABBITMQ_URL` in `yeeter-secrets` and monitor for the `WAITING_ON_WORKERS` status plus the `simulation_async_job_queued` / `simulation_async_job_completed` socket events.
 - Optional: set `RABBITMQ_ORDER_QUEUE` in `yeeter-secrets` to override the default `yeeter.simulation.orders` queue name.
 - Add queue provisioning logic or definitions if additional worker-specific queues are required.
 - Start the worker implementation phase to consume queued jobs, execute deferred steps, and drive runs to completion.

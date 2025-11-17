@@ -30,6 +30,8 @@ from .routes.metrics_routes import metrics_bp
 from . import models as _models  # noqa: F401 - imported for SQLAlchemy model registration
 from . import crud  # noqa: F401
 from .util.rabbitmq_client import init_rabbitmq_publisher
+from .util.worker_scaler import init_worker_autoscaler
+from .util.schema_guard import ensure_simulation_run_stats_schema
 
 
 
@@ -49,6 +51,12 @@ def create_app():
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = int(os.environ.get('JWT_ACCESS_TOKEN_EXPIRES_HOURS', 24)) * 3600
     app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads')
     app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 # 16 MB max upload size
+    app.config.setdefault('SIM_RUN_EVENTS_DEFAULT_LIMIT', 2000)
+    app.config.setdefault('SIM_RUN_WORKER_JOBS_DEFAULT_LIMIT', 500)
+    app.config.setdefault('SIM_RUN_WORKER_JOBS_MAX_LIMIT', 2000)
+    app.config.setdefault('K8S_NAMESPACE', os.environ.get('K8S_NAMESPACE', 'default'))
+    app.config.setdefault('WORKER_DEPLOYMENT_NAME', os.environ.get('WORKER_DEPLOYMENT_NAME', 'yeeter-worker'))
+    app.config['WORKER_AUTOSCALER_ENABLED'] = os.environ.get('WORKER_AUTOSCALER_ENABLED', 'true').lower() != 'false'
 
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
@@ -158,9 +166,13 @@ def create_app():
         logging.info("Initializing database tables from models...")
         # This will now automatically create all our new simulator tables
         db.create_all()
+        ensure_simulation_run_stats_schema()
         logging.info("Database tables checked/created successfully.")
 
     register_commands(app)
+
+    # Initialize autoscaler after configuration so that it can start monitoring right away.
+    init_worker_autoscaler(app)
 
     logging.info("HL7 Yeeter Backend: Application creation complete.")
     return app

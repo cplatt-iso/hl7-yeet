@@ -32,3 +32,4 @@ pydantic[email]
 Pillow
 pytest
 pika
+kubernetes>=29.0.0

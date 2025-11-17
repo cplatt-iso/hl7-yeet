@@ -24,6 +24,7 @@ This directory contains Kubernetes manifests for deploying HL7 Yeeter on k3s.
 
 ```bash
 # From project root
+export EXTRA_IMPORT_NODES="t430"   # Space-separated list if you have extra nodes
 ./k8s/deploy.sh
 ```
 
@@ -136,6 +137,17 @@ kubectl scale deployment yeeter-app -n yeeter --replicas=3
 ```
 
 ## Troubleshooting
+
+### Image pulls fail on pinned nodes
+
+When a deployment is constrained to a specific node (for example via `nodeSelector`) Kubernetes will try to pull the image on that node. If you are using locally built images, set `EXTRA_IMPORT_NODES` before running `./k8s/deploy.sh` so the script copies the tarball and runs `k3s ctr images import` on each listed host:
+
+```bash
+export EXTRA_IMPORT_NODES="t430 edge-node-2"
+./k8s/deploy.sh
+```
+
+The variable accepts a space-separated list of node SSH targets. The script assumes passwordless SSH with the same sudo privileges as the local machine.
 
 ### Check pod status
 

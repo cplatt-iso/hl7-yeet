@@ -5,6 +5,41 @@ import { API_BASE_URL } from './config.js';
 
 const API_URL = API_BASE_URL; // Uses the centralized API configuration
 
+// --- Worker autoscaler APIs ---
+
+export const getWorkerAutoscalerStatusApi = async () => {
+    const response = await fetch(`${API_URL}/api/admin/worker/autoscaler`, {
+        headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+};
+
+export const updateWorkerAutoscalerConfigApi = async (config) => {
+    const response = await fetch(`${API_URL}/api/admin/worker/autoscaler`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(config),
+    });
+    return handleResponse(response);
+};
+
+export const manualWorkerScaleApi = async (replicas) => {
+    const response = await fetch(`${API_URL}/api/admin/worker/autoscaler/scale`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ replicas }),
+    });
+    return handleResponse(response);
+};
+
+export const clearManualWorkerScaleApi = async () => {
+    const response = await fetch(`${API_URL}/api/admin/worker/autoscaler/scale`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+};
+
 // ... (getHl7VersionsApi, toggleVersionStatusApi, etc. are unchanged) ...
 
 /**

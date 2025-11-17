@@ -1,5 +1,7 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useRef, useCallback } from 'react';
+import { io } from 'socket.io-client';
 import { loginApi, registerApi, googleLoginApi } from '../api/auth';
+import { API_BASE_URL } from '../api/config';
 
 const AuthContext = createContext();
 
@@ -8,6 +10,57 @@ export const AuthProvider = ({ children }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [socket, setSocket] = useState(null);
+    const socketRef = useRef(null);
+
+    const SOCKET_URL = useRef(import.meta.env.VITE_SOCKET_URL || API_BASE_URL);
+
+    const disconnectSocket = useCallback(() => {
+        if (socketRef.current) {
+            socketRef.current.removeAllListeners();
+            socketRef.current.disconnect();
+            socketRef.current = null;
+        }
+        setSocket(null);
+    }, []);
+
+    const connectSocket = useCallback((token) => {
+        if (!token) {
+            return null;
+        }
+
+        // Tear down any existing connection before creating a new one
+        if (socketRef.current) {
+            disconnectSocket();
+        }
+
+        const nextSocket = io(SOCKET_URL.current, {
+            auth: { token },
+            transports: ['websocket', 'polling'],
+            reconnection: true,
+            reconnectionAttempts: 5,
+            reconnectionDelay: 1000,
+        });
+
+        const handleConnectError = (error) => {
+            console.error('[HL7 Yeeter] Socket.IO connection error:', error.message);
+        };
+
+        nextSocket.on('connect_error', handleConnectError);
+
+        socketRef.current = nextSocket;
+        setSocket(nextSocket);
+
+        return () => {
+            nextSocket.off('connect_error', handleConnectError);
+            nextSocket.removeAllListeners();
+            nextSocket.disconnect();
+            if (socketRef.current === nextSocket) {
+                socketRef.current = null;
+            }
+            setSocket(null);
+        };
+    }, [disconnectSocket]);
 
     useEffect(() => {
         // Check for existing token on app load
@@ -38,7 +91,30 @@ export const AuthProvider = ({ children }) => {
             }
         }
         setLoading(false);
-    }, []);
+        return () => {
+            disconnectSocket();
+        };
+    }, [connectSocket, disconnectSocket]);
+
+    useEffect(() => {
+        if (!isAuthenticated) {
+            disconnectSocket();
+            return;
+        }
+
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            disconnectSocket();
+            return;
+        }
+
+        const cleanup = connectSocket(token);
+        return () => {
+            if (cleanup) {
+                cleanup();
+            }
+        };
+    }, [isAuthenticated, connectSocket, disconnectSocket]);
 
     const login = async (credentials) => {
         // loginApi expects (username, password)
@@ -114,6 +190,7 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
         setIsAuthenticated(false);
         setIsAdmin(false);
+        disconnectSocket();
     };
 
     const value = {
@@ -125,8 +202,7 @@ export const AuthProvider = ({ children }) => {
         register,
         googleLogin,
         logout,
-        // Legacy socket property for components that still reference it
-        socket: null
+        socket,
     };
 
     return (

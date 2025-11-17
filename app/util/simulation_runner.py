@@ -4,6 +4,7 @@ import json
 import time
 import logging
 import socket
+import shutil
 from pathlib import Path
 from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
@@ -36,6 +37,45 @@ STEP_HANDLERS = {
     'MPPS_UPDATE': 'handle_mpps_update',
 }
 
+SIM_RUN_BASE_DIR = Path('/data/sim_runs')
+
+
+def cleanup_sim_run_artifacts(run_id: int) -> tuple[bool, str | None]:
+    """Delete generated DICOM artifacts for a completed simulation run."""
+    try:
+        base_dir = SIM_RUN_BASE_DIR.resolve()
+    except Exception as exc:  # pragma: no cover - filesystem edge case
+        logging.exception("Failed to resolve simulation run base directory: %s", exc)
+        return False, str(exc)
+
+    run_dir = SIM_RUN_BASE_DIR / str(run_id)
+    if not run_dir.exists():
+        return False, None
+
+    try:
+        resolved_run_dir = run_dir.resolve()
+    except Exception as exc:  # pragma: no cover - filesystem edge case
+        logging.exception("Failed to resolve simulation run directory for run %s: %s", run_id, exc)
+        return False, str(exc)
+
+    if base_dir != resolved_run_dir and base_dir not in resolved_run_dir.parents:
+        logging.warning(
+            "Refusing to delete run directory %s because it is outside %s",
+            resolved_run_dir,
+            base_dir,
+        )
+        return False, "outside_allowed_path"
+
+    try:
+        shutil.rmtree(resolved_run_dir)
+        logging.info("Removed DICOM artifacts for simulation run %s at %s", run_id, resolved_run_dir)
+        return True, None
+    except FileNotFoundError:
+        return False, None
+    except Exception as exc:  # pragma: no cover - filesystem edge case
+        logging.exception("Failed to remove DICOM artifacts for run %s: %s", run_id, exc)
+        return False, str(exc)
+
 
 class SimulationCancelled(Exception):
     """Raised when a user requests cancellation of a simulation run."""
@@ -65,6 +105,41 @@ class SimulationRunner:
         self._patient_count: int = 1
         self._iteration_delegated: bool = False
         self._queued_jobs: int = 0
+
+    @staticmethod
+    def _format_duration_ms(duration_ms: float) -> str:
+        try:
+            duration_ms = float(duration_ms)
+        except (TypeError, ValueError):
+            return "—"
+
+        if duration_ms < 1000:
+            return f"{duration_ms:.2f} ms"
+
+        seconds = duration_ms / 1000.0
+        if seconds < 60:
+            return f"{seconds:.2f} s ({duration_ms:.2f} ms)"
+
+        minutes = seconds / 60.0
+        return f"{minutes:.2f} min ({seconds:.2f} s)"
+
+    def _record_step_duration_metric(self, step: models.SimulationStep, duration_ms: float) -> None:
+        try:
+            with self.app_context():
+                crud.record_step_duration_metric(
+                    db,
+                    run_id=self.run_id,
+                    step_order=step.step_order,
+                    step_type=step.step_type,
+                    duration_ms=float(duration_ms),
+                )
+        except Exception:  # pragma: no cover - metrics recording best effort
+            logging.exception("Failed to record step duration metric for run %s step %s", self.run_id, step.step_order)
+
+    def _log_step_duration(self, step: models.SimulationStep, patient_iter: int, repeat_iter: int, duration_ms: float, outcome: str) -> None:
+        formatted = self._format_duration_ms(duration_ms)
+        message = f"{step.step_type} {outcome} in {formatted}."
+        self._log_event(step.step_order, patient_iter, repeat_iter, 'INFO', message)
 
     def _check_for_cancellation(self, patient_iter: int, step_order: int, repeat_iter: int):
         """Abort execution if the run has been cancelled."""
@@ -177,6 +252,29 @@ class SimulationRunner:
             if template_step.step_order > step.step_order
         ]
 
+        def _coerce_positive_int(raw_value, default, minimum=1):
+            try:
+                value = int(raw_value)
+                if value < minimum:
+                    return minimum
+                return value
+            except (TypeError, ValueError):
+                return default
+
+        retry_limit_param = (
+            step.parameters.get('queue_retry_limit')
+            or step.parameters.get('async_max_attempts')
+            or step.parameters.get('max_attempts')
+        )
+        retry_delay_param = (
+            step.parameters.get('queue_retry_delay_ms')
+            or step.parameters.get('async_retry_delay_ms')
+            or step.parameters.get('retry_delay_ms')
+        )
+
+        max_attempts = _coerce_positive_int(retry_limit_param, default=3)
+        retry_delay_ms = _coerce_positive_int(retry_delay_param, default=5000, minimum=0)
+
         snapshot = SimpleNamespace(
             job_id=str(uuid4()),
             run_id=self.run_id,
@@ -202,6 +300,11 @@ class SimulationRunner:
             'remaining_steps': remaining_steps,
             'metadata': step.parameters.get('queue_metadata', {}),
             'queue': queue_name,
+            'retry_policy': {
+                'attempt': 1,
+                'max_attempts': max_attempts,
+                'retry_delay_ms': retry_delay_ms,
+            },
         })
 
         publish_started = time.perf_counter()
@@ -281,7 +384,7 @@ class SimulationRunner:
         run = None # Define run outside the try block
         try:
             with self.app_context():
-                run = crud.get_simulation_run_by_id(db, self.run_id)
+                run = crud.get_simulation_run_by_id(db, self.run_id, with_events=False)
                 if not run:
                     logging.error(f"FATAL: SimulationRun with ID {self.run_id} not found.")
                     return
@@ -325,11 +428,24 @@ class SimulationRunner:
                             raise NotImplementedError(f"No handler for step type '{step.step_type}'")
                         
                         handler_func = getattr(self, handler_name)
-                        success = handler_func(step, patient_iter=i, repeat_iter=j)
-                        
-                        if not success:
-                            raise Exception(f"Step {step.step_order} failed on repeat {j}. Halting workflow.")
-                        
+                        step_started = time.perf_counter()
+                        success = False
+                        exception_raised = False
+                        try:
+                            success = handler_func(step, patient_iter=i, repeat_iter=j)
+                            if not success:
+                                raise Exception(f"Step {step.step_order} failed on repeat {j}. Halting workflow.")
+                        except Exception:
+                            exception_raised = True
+                            raise
+                        finally:
+                            duration_ms = (time.perf_counter() - step_started) * 1000.0
+                            delegated = self._iteration_delegated and success and not exception_raised
+                            outcome = 'delegated to workers' if delegated else ('completed' if success and not exception_raised else 'failed')
+                            status_duration = max(duration_ms, 0.0)
+                            self._record_step_duration_metric(step, status_duration)
+                            self._log_step_duration(step, i, j, status_duration, outcome)
+
                         if self._iteration_delegated:
                             break
 
@@ -338,7 +454,7 @@ class SimulationRunner:
                             time.sleep(delay_ms / 1000.0)
 
             with self.app_context():
-                run = crud.get_simulation_run_by_id(db, self.run_id) # Re-fetch to be safe
+                run = crud.get_simulation_run_by_id(db, self.run_id, with_events=False) # Re-fetch to be safe
                 if run:
                     if self._queued_jobs > 0:
                         run.status = 'WAITING_ON_WORKERS'
@@ -350,11 +466,16 @@ class SimulationRunner:
                         db.session.commit()
                         self._emit_status_update(run.status)
                         self._log_event(999, patient_count, 1, 'SUCCESS', "Simulation run completed successfully.")
+                        cleaned, cleanup_error = cleanup_sim_run_artifacts(self.run_id)
+                        if cleaned:
+                            self._log_event(999, patient_count, 1, 'INFO', "Removed generated DICOM files for this run.")
+                        elif cleanup_error:
+                            self._log_event(999, patient_count, 1, 'WARN', f"Failed to remove generated DICOM files: {cleanup_error}")
 
         except SimulationCancelled:
             logging.info(f"SimulationRun-{self.run_id} cancelled by user request.")
             with self.app_context():
-                run = crud.get_simulation_run_by_id(db, self.run_id)
+                run = crud.get_simulation_run_by_id(db, self.run_id, with_events=False)
                 if run:
                     run.status = 'CANCELLED'
                     db.session.commit()
@@ -364,7 +485,7 @@ class SimulationRunner:
         except Exception as e:
             logging.error(f"SimulationRun-{self.run_id} failed: {e}", exc_info=True)
             with self.app_context():
-                run = crud.get_simulation_run_by_id(db, self.run_id)
+                run = crud.get_simulation_run_by_id(db, self.run_id, with_events=False)
                 if run:
                     run.status = 'ERROR'
                     db.session.commit()
@@ -373,7 +494,7 @@ class SimulationRunner:
         
         finally:
             with self.app_context():
-                run = crud.get_simulation_run_by_id(db, self.run_id)
+                run = crud.get_simulation_run_by_id(db, self.run_id, with_events=False)
                 if run:
                     if run.status in {'COMPLETED', 'ERROR', 'CANCELLED'}:
                         run.completed_at = datetime.utcnow()
@@ -672,6 +793,14 @@ class SimulationRunner:
         success_count = len(results.get('success', []))
         failure_count = len(results.get('failure', []))
 
+        throughput_mbps = None
+        throughput_gbps = None
+        if success_bytes > 0 and send_latency_ms > 0:
+            seconds = send_latency_ms / 1000.0
+            if seconds > 0:
+                throughput_mbps = (success_bytes * 8.0) / seconds / 1_000_000
+                throughput_gbps = throughput_mbps / 1000.0
+
         emit_metric(
             'dicom_c_store',
             run_id=self.run_id,
@@ -699,11 +828,23 @@ class SimulationRunner:
             )
         
         if failure_count > 0:
-            details = f"C-STORE to '{endpoint.name}' partially failed. Success: {success_count}, Failure: {failure_count}."
+            base = f"C-STORE to '{endpoint.name}' partially failed. Success: {success_count}, Failure: {failure_count}."
+            duration_text = f" Duration: {self._format_duration_ms(send_latency_ms)}."
+            if throughput_mbps is not None:
+                duration_text += f" Observed throughput {throughput_mbps:.2f} Mbit/s"
+                if throughput_gbps is not None and throughput_gbps >= 0.1:
+                    duration_text += f" ({throughput_gbps:.2f} Gbit/s)"
+            details = base + duration_text
             self._log_event(step.step_order, patient_iter, repeat_iter, 'FAILURE', details)
             return False
         else:
-            details = f"C-STORE of {success_count} instances to '{endpoint.name}' successful."
+            throughput_text = f" (duration: {self._format_duration_ms(send_latency_ms)}"
+            if throughput_mbps is not None:
+                throughput_text += f", throughput: {throughput_mbps:.2f} Mbit/s"
+                if throughput_gbps is not None and throughput_gbps >= 0.1:
+                    throughput_text += f" ({throughput_gbps:.2f} Gbit/s)"
+            throughput_text += ")"
+            details = f"C-STORE of {success_count} instances to '{endpoint.name}' successful.{throughput_text}"
             self._log_event(step.step_order, patient_iter, repeat_iter, 'SUCCESS', details)
             return True
 

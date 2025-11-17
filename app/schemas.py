@@ -195,7 +195,18 @@ class SimulationRunResponse(AppBaseModel):
     status: str
     started_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None
-    events: List[SimulationRunEventResponse]
+    events: List[SimulationRunEventResponse] = Field(default_factory=list)
+
+
+class SimulationRunSummaryResponse(AppBaseModel):
+    """Lightweight representation used for listing runs without event payloads."""
+    id: int
+    user_id: int
+    template_id: int
+    patient_count: int
+    status: str
+    started_at: Optional[datetime] = None
+    completed_at: Optional[datetime] = None
 
 
 class SimulationRunStepStats(AppBaseModel):
@@ -205,6 +216,17 @@ class SimulationRunStepStats(AppBaseModel):
     failure_events: int
     warning_events: int
     info_events: int
+
+
+class StepDurationSummary(AppBaseModel):
+    step_order: int
+    step_type: Optional[str] = None
+    count: int
+    total_ms: float
+    avg_ms: Optional[float] = None
+    min_ms: Optional[float] = None
+    max_ms: Optional[float] = None
+    last_ms: Optional[float] = None
 
 
 class SimulationRunStatsResponse(AppBaseModel):
@@ -228,6 +250,7 @@ class SimulationRunStatsResponse(AppBaseModel):
     max_iteration: int
     last_failure: Optional[str] = None
     steps: List[SimulationRunStepStats] = Field(default_factory=list)
+    step_duration_summary: List[StepDurationSummary] = Field(default_factory=list)
 
 
 class SimulationRunMetricsResponse(AppBaseModel):
@@ -256,6 +279,11 @@ class SimulationRunMetricsResponse(AppBaseModel):
     dicom_send_min_ms: Optional[float] = None
     dicom_send_max_ms: Optional[float] = None
     dicom_send_avg_ms: Optional[float] = None
+    dicom_throughput_sum_mbps: float
+    dicom_throughput_min_mbps: Optional[float] = None
+    dicom_throughput_max_mbps: Optional[float] = None
+    dicom_throughput_avg_mbps: Optional[float] = None
+    dicom_throughput_count: int
     worker_job_count: int
     worker_job_success_count: int
     worker_job_duration_sum_ms: float
@@ -264,6 +292,7 @@ class SimulationRunMetricsResponse(AppBaseModel):
     worker_job_duration_avg_ms: Optional[float] = None
     wall_clock_seconds: Optional[float] = None
     orders_per_second: Optional[float] = None
+    step_durations: List[StepDurationSummary] = Field(default_factory=list)
     created_at: datetime
     updated_at: datetime
 

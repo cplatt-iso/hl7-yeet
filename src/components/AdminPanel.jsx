@@ -6,6 +6,7 @@ import TerminologyManagement from './TerminologyManagement';
 import UserManagement from './UserManagement';
 import EndpointManager from './EndpointManager'; 
 import ApiKeyManager from './ApiKeyManager'; 
+import WorkerAutoscalerPanel from './WorkerAutoscalerPanel';
 
 const AdminPanel = () => {
     const [activeSubTab, setActiveSubTab] = useState('versions');    
@@ -31,6 +32,7 @@ const AdminPanel = () => {
                 <SubTabButton name="versions" label="HL7 Versions" />
                 <SubTabButton name="terminology" label="HL7 Terminology" />
                 <SubTabButton name="endpoints" label="Endpoints" />
+                <SubTabButton name="autoscaler" label="Autoscaler" />
                 <SubTabButton name="apikeys" label="API Keys" /> {/* <-- ADD BUTTON */}
              </div>
              <div>
@@ -38,6 +40,7 @@ const AdminPanel = () => {
                 {activeSubTab === 'versions' && <VersionManagement />}
                 {activeSubTab === 'terminology' && <TerminologyManagement />}
                 {activeSubTab === 'endpoints' && <EndpointManager />}
+                {activeSubTab === 'autoscaler' && <WorkerAutoscalerPanel />}
                 {activeSubTab === 'apikeys' && <ApiKeyManager />} {/* <-- ADD COMPONENT */}
              </div>
         </div>

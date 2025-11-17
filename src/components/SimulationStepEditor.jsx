@@ -1,8 +1,75 @@
 // --- REPLACE src/components/SimulationStepEditor.jsx ---
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { InformationCircleIcon } from '@heroicons/react/24/outline';
+
+const STEP_GUIDANCE = {
+    GENERATE_HL7: {
+        title: 'Generates order context',
+        body: 'Select an HL7 generator template. The resulting ORM message seeds patient, procedure, and accession values used by downstream DICOM steps. Choose which HL7 field should be treated as the accession number and optionally queue the order for asynchronous workers.'
+    },
+    SEND_MLLP: {
+        title: 'Sends HL7 message via MLLP',
+        body: 'Pick the destination MLLP endpoint. The message produced earlier in the run is delivered as-is. Use this to feed RIS/PACS systems once context is ready.'
+    },
+    DMWL_FIND: {
+        title: 'Queries the modality worklist',
+        body: 'Executes a C-FIND using the accession number from context. Store the returned worklist item so later steps can populate DICOM headers and MPPS.'
+    },
+    MPPS_UPDATE: {
+        title: 'Updates Modality Performed Procedure Step',
+        body: 'Send MPPS status transitions to the selected endpoint. IN PROGRESS issues an N-CREATE and yields a Procedure Step UID for subsequent COMPLETED or DISCONTINUED updates.'
+    },
+    GENERATE_DICOM: {
+        title: 'Builds synthetic DICOM series',
+        body: 'Creates images using context from HL7 or worklist results. Leave modality or description blank to auto-populate. Toggle pixel generation, burn-in, or structured report output as needed.'
+    },
+    SEND_DICOM: {
+        title: 'Sends generated DICOM files',
+        body: 'Push the study generated earlier to a DICOM Storage SCP. Make sure GENERATE_DICOM ran first so files are available.'
+    },
+    WAIT: {
+        title: 'Pauses the workflow',
+        body: 'Delay execution for the given number of seconds. Helpful when waiting for external systems to ingest prior steps.'
+    }
+};
+
+const StepGuidanceCallout = ({ stepType }) => {
+    if (!stepType || !STEP_GUIDANCE[stepType]) {
+        return null;
+    }
+
+    const { title, body } = STEP_GUIDANCE[stepType];
+    return (
+        <div className="mb-3 flex items-start gap-3 rounded-md border border-sky-700/60 bg-sky-900/20 p-3 text-sky-100">
+            <InformationCircleIcon className="mt-0.5 h-5 w-5 flex-shrink-0 text-sky-300" aria-hidden="true" />
+            <div>
+                <p className="text-sm font-semibold uppercase tracking-wide text-sky-200">{title}</p>
+                <p className="mt-1 text-xs leading-relaxed text-sky-100/90">{body}</p>
+            </div>
+        </div>
+    );
+};
 
 const SimulationStepEditor = ({ step, index, onUpdate, generatorTemplates, endpoints }) => {
-    
+    const [metadataDraft, setMetadataDraft] = useState('');
+    const [metadataError, setMetadataError] = useState(null);
+
+    useEffect(() => {
+        const metadata = step.parameters?.queue_metadata;
+        if (metadata && Object.keys(metadata).length > 0) {
+            setMetadataDraft(JSON.stringify(metadata, null, 2));
+        } else {
+            setMetadataDraft('');
+        }
+        setMetadataError(null);
+    }, [step.parameters?.queue_metadata]);
+
+    const updateParameters = (mutator) => {
+        const current = step.parameters || {};
+        const nextParams = typeof mutator === 'function' ? mutator(current) : mutator;
+        onUpdate(index, { ...step, parameters: nextParams });
+    };
+
     const handleParamChange = (e) => {
         const { name, value, type, checked } = e.target;
 
@@ -19,11 +86,51 @@ const SimulationStepEditor = ({ step, index, onUpdate, generatorTemplates, endpo
             finalValue = value;
         }
         
-        const newParams = {
-            ...step.parameters,
-            [name]: finalValue
-        };
-        onUpdate(index, { ...step, parameters: newParams });
+        updateParameters(prev => {
+            const next = {
+                ...prev,
+                [name]: finalValue
+            };
+
+            if (name === 'queue_async' && !finalValue) {
+                delete next.queue_name;
+                delete next.queue_retry_limit;
+                delete next.queue_retry_delay_ms;
+                delete next.queue_metadata;
+            }
+
+            return next;
+        });
+    };
+
+    const handleMetadataBlur = () => {
+        if (!step.parameters.queue_async) {
+            return;
+        }
+
+        if (!metadataDraft.trim()) {
+            setMetadataError(null);
+            updateParameters(prev => {
+                const next = { ...prev };
+                delete next.queue_metadata;
+                return next;
+            });
+            return;
+        }
+
+        try {
+            const parsed = JSON.parse(metadataDraft);
+            if (parsed === null || Array.isArray(parsed) || typeof parsed !== 'object') {
+                throw new Error('Metadata must be a JSON object.');
+            }
+            setMetadataError(null);
+            updateParameters(prev => ({
+                ...prev,
+                queue_metadata: parsed
+            }));
+        } catch (err) {
+            setMetadataError(err.message || 'Invalid JSON.');
+        }
     };
     
     const handleTypeChange = (e) => {
@@ -90,6 +197,84 @@ const SimulationStepEditor = ({ step, index, onUpdate, generatorTemplates, endpo
                                 />
                             )}
                             <p className="text-xs text-gray-500">Choose which HL7 field contains the accession number for DMWL queries</p>
+                        </div>
+
+                        <div className="mt-4 rounded-md border border-indigo-700/40 bg-indigo-950/20 p-3">
+                            <div className="flex items-center justify-between">
+                                <label htmlFor={`queue-async-${index}`} className="text-sm font-medium text-indigo-200">
+                                    Queue order for async workers
+                                </label>
+                                <input
+                                    id={`queue-async-${index}`}
+                                    type="checkbox"
+                                    name="queue_async"
+                                    checked={step.parameters.queue_async ?? false}
+                                    onChange={handleParamChange}
+                                    className="h-4 w-4 border-gray-600 bg-gray-700 text-indigo-500 focus:ring-indigo-400"
+                                />
+                            </div>
+                            <p className="mt-1 text-xs text-indigo-100/80">
+                                When enabled the run publishes this order to RabbitMQ and waits for worker pods to finish the remaining steps.
+                            </p>
+
+                            {step.parameters.queue_async && (
+                                <div className="mt-3 grid grid-cols-1 gap-3">
+                                    <div className="grid gap-1">
+                                        <label className="text-xs text-indigo-100">Order Queue Override (optional)</label>
+                                        <input
+                                            type="text"
+                                            name="queue_name"
+                                            value={step.parameters.queue_name || ''}
+                                            onChange={handleParamChange}
+                                            placeholder="Defaults to yeeter.simulation.orders"
+                                            className="w-full rounded border border-indigo-800/60 bg-gray-900/70 p-2 text-sm text-gray-200 placeholder:text-gray-500"
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <label className="flex flex-col gap-1 text-xs text-indigo-100">
+                                            Max Attempts
+                                            <input
+                                                type="number"
+                                                name="queue_retry_limit"
+                                                value={step.parameters.queue_retry_limit ?? ''}
+                                                min="1"
+                                                onChange={handleParamChange}
+                                                className="rounded border border-indigo-800/60 bg-gray-900/70 p-2 text-sm text-gray-200"
+                                                placeholder="3"
+                                            />
+                                        </label>
+                                        <label className="flex flex-col gap-1 text-xs text-indigo-100">
+                                            Retry Delay (ms)
+                                            <input
+                                                type="number"
+                                                name="queue_retry_delay_ms"
+                                                value={step.parameters.queue_retry_delay_ms ?? ''}
+                                                min="0"
+                                                onChange={handleParamChange}
+                                                className="rounded border border-indigo-800/60 bg-gray-900/70 p-2 text-sm text-gray-200"
+                                                placeholder="5000"
+                                            />
+                                        </label>
+                                    </div>
+                                    <div className="grid gap-1">
+                                        <label className="text-xs text-indigo-100">Metadata (JSON object, optional)</label>
+                                        <textarea
+                                            rows={4}
+                                            value={metadataDraft}
+                                            onChange={(e) => setMetadataDraft(e.target.value)}
+                                            onBlur={handleMetadataBlur}
+                                            placeholder='e.g. {"priority": "STAT"}'
+                                            className="w-full rounded border border-indigo-800/60 bg-gray-900/70 p-2 text-sm text-gray-200 placeholder:text-gray-500"
+                                        />
+                                        {metadataError && (
+                                            <span className="text-xs text-red-300">{metadataError}</span>
+                                        )}
+                                        {!metadataError && metadataDraft && (
+                                            <span className="text-xs text-indigo-200/80">Saved when the field loses focus.</span>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 );
@@ -235,9 +420,11 @@ const SimulationStepEditor = ({ step, index, onUpdate, generatorTemplates, endpo
                     </div>
                 );
             default:
-                return <p className="text-gray-500">Select a step type to configure parameters.</p>;
+                return null;
         }
     };
+
+    const parametersContent = renderParameters();
 
     return (
         <div className="bg-gray-800/50 p-4 rounded-lg border border-gray-700 flex gap-4">
@@ -266,7 +453,14 @@ const SimulationStepEditor = ({ step, index, onUpdate, generatorTemplates, endpo
                 <div>
                     <h5 className="font-semibold text-sm mb-2 text-gray-300">Parameters</h5>
                     <div className="p-3 bg-gray-900/50 rounded-md min-h-[5rem]">
-                        {renderParameters()}
+                        {step.step_type ? (
+                            <>
+                                <StepGuidanceCallout stepType={step.step_type} />
+                                {parametersContent || <p className="text-gray-500">No parameters required for this step.</p>}
+                            </>
+                        ) : (
+                            <p className="text-gray-500">Select a step type to configure parameters.</p>
+                        )}
                     </div>
                 </div>
             </div>

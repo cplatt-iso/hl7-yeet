@@ -130,23 +130,63 @@ def run_simulation():
 def get_runs_history():
     user_id = get_authenticated_user_id()
     runs = crud.get_simulation_runs_for_user(db, user_id=user_id)
-    return jsonify([schemas.SimulationRunResponse.model_validate(r).model_dump(exclude={'events'}) for r in runs])
+    summaries = [
+        schemas.SimulationRunSummaryResponse.model_validate(run).model_dump()
+        for run in runs
+    ]
+    return jsonify(summaries)
 
 @simulator_bp.route('/runs/<int:run_id>', methods=['GET'])
 @auth_required()
 def get_run_details(run_id):
     user_id = get_authenticated_user_id()
-    run = crud.get_simulation_run_by_id(db, run_id)
+    default_limit = current_app.config.get('SIM_RUN_EVENTS_DEFAULT_LIMIT', 2000)
+    events_limit = request.args.get('events_limit', type=int) or default_limit
+    events_offset = request.args.get('events_offset', type=int) or 0
+    events_order = request.args.get('events_order', default='desc')
+
+    events_limit = max(events_limit, 1)
+    events_offset = max(events_offset, 0)
+    events_order_normalized = (events_order or 'desc').lower()
+    if events_order_normalized not in {'asc', 'desc'}:
+        events_order_normalized = 'desc'
+
+    run = crud.get_simulation_run_by_id(db, run_id, with_events=False)
     if not run or (not get_authenticated_user().is_admin and run.user_id != user_id):
         return jsonify({"error": "Simulation run not found or unauthorized"}), 404
-    return jsonify(schemas.SimulationRunResponse.model_validate(run).model_dump())
+
+    events, total_events = crud.get_simulation_run_events(
+        db,
+        run_id,
+        limit=events_limit,
+        offset=events_offset,
+        order=events_order_normalized,
+    )
+
+    run.events = events
+    run_payload = schemas.SimulationRunResponse.model_validate(run).model_dump()
+
+    returned_count = len(events)
+    remaining_count = max(total_events - (events_offset + returned_count), 0)
+
+    run_payload.update({
+        'events_limit': events_limit,
+        'events_offset': events_offset,
+        'events_order': events_order_normalized,
+        'events_total': total_events,
+        'events_returned': returned_count,
+        'events_remaining': remaining_count,
+        'events_truncated': remaining_count > 0 or events_offset > 0,
+    })
+
+    return jsonify(run_payload)
 
 
 @simulator_bp.route('/runs/<int:run_id>/stats', methods=['GET'])
 @auth_required()
 def get_run_stats(run_id):
     user_id = get_authenticated_user_id()
-    run = crud.get_simulation_run_by_id(db, run_id)
+    run = crud.get_simulation_run_by_id(db, run_id, with_events=True)
     if not run or (not get_authenticated_user().is_admin and run.user_id != user_id):
         return jsonify({"error": "Simulation run not found or unauthorized"}), 404
 
@@ -159,13 +199,26 @@ def get_run_stats(run_id):
 @auth_required()
 def get_run_metrics(run_id):
     user_id = get_authenticated_user_id()
-    run = crud.get_simulation_run_by_id(db, run_id)
+    run = crud.get_simulation_run_by_id(db, run_id, with_events=False)
     if not run or (not get_authenticated_user().is_admin and run.user_id != user_id):
         return jsonify({"error": "Simulation run not found or unauthorized"}), 404
 
     stats_record = crud.get_run_stats_record(db, run_id, create_if_missing=True)
     if not stats_record:
         return jsonify({"error": "Metrics not available"}), 404
+
+    default_jobs_limit = current_app.config.get('SIM_RUN_WORKER_JOBS_DEFAULT_LIMIT', 500)
+    max_jobs_limit = current_app.config.get('SIM_RUN_WORKER_JOBS_MAX_LIMIT', max(default_jobs_limit, 2000))
+
+    jobs_limit = request.args.get('jobs_limit', type=int) or default_jobs_limit
+    jobs_offset = request.args.get('jobs_offset', type=int) or 0
+    jobs_order = request.args.get('jobs_order', default='desc') or 'desc'
+
+    jobs_limit = max(1, min(jobs_limit, max_jobs_limit))
+    jobs_offset = max(jobs_offset, 0)
+    jobs_order_normalized = jobs_order.lower()
+    if jobs_order_normalized not in {'asc', 'desc'}:
+        jobs_order_normalized = 'desc'
 
     metrics_payload = crud.build_run_metrics_payload(
         stats_record,
@@ -175,14 +228,32 @@ def get_run_metrics(run_id):
     )
 
     metrics_response = schemas.SimulationRunMetricsResponse.model_validate(metrics_payload)
-    worker_metrics = crud.get_worker_metrics_for_run(db, run_id)
+    worker_metrics, total_worker_metrics = crud.get_worker_metrics_for_run(
+        db,
+        run_id,
+        limit=jobs_limit,
+        offset=jobs_offset,
+        order=jobs_order_normalized,
+    )
     worker_payload = [
         schemas.WorkerJobMetricResponse.model_validate(metric).model_dump(mode='json')
         for metric in worker_metrics
     ]
 
     response = metrics_response.model_dump(mode='json')
-    response['worker_jobs'] = worker_payload
+    returned_count = len(worker_payload)
+    remaining_count = max(total_worker_metrics - (jobs_offset + returned_count), 0)
+
+    response.update({
+        'worker_jobs': worker_payload,
+        'worker_jobs_limit': jobs_limit,
+        'worker_jobs_offset': jobs_offset,
+        'worker_jobs_order': jobs_order_normalized,
+        'worker_jobs_total': total_worker_metrics,
+        'worker_jobs_returned': returned_count,
+        'worker_jobs_remaining': remaining_count,
+        'worker_jobs_truncated': remaining_count > 0 or jobs_offset > 0,
+    })
     return jsonify(response)
 
 

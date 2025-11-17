@@ -31,7 +31,7 @@ import AdminPanel from './AdminPanel';
 import Simulator from './Simulator';
 
 const HL7Parser = () => {
-    const { isAuthenticated, isAdmin } = useAuth(); // <-- MODIFIED: Get isAdmin from context
+    const { isAuthenticated, isAdmin, socket } = useAuth(); // <-- MODIFIED: Get isAdmin and socket from context
     const [activeTab, setActiveTab] = useState('sender');
     const [host, setHost] = useState('localhost');
     const [port, setPort] = useState('5001');
@@ -81,12 +81,45 @@ const HL7Parser = () => {
     useEffect(() => { 
         if (!isAuthenticated) return; 
         
-        // DISABLED: Socket.IO connection for HL7Parser
-        console.log('HL7Parser: Socket.IO connections disabled, using REST API only');
+        // DISABLED: Socket.IO connection for HL7Parser (rest-only for parser operations)
+        console.log('HL7Parser: Socket.IO connections disabled for parser actions; relying on shared context socket');
         
         // Still fetch user templates
         fetchUserTemplates();
     }, [isAuthenticated, fetchUserTemplates]);
+
+    useEffect(() => {
+        if (!socket) {
+            return;
+        }
+
+        const handleListenerStatus = (payload) => {
+            if (!payload) {
+                return;
+            }
+
+            const nextStatus = payload.status || 'idle';
+            setListenerStatus(nextStatus);
+
+            if (nextStatus === 'listening') {
+                setIsListening(true);
+                if (payload.port) {
+                    setListenerPort(String(payload.port));
+                }
+            } else {
+                setIsListening(false);
+                if (nextStatus === 'error' && payload.message) {
+                    toast.error(payload.message);
+                }
+            }
+        };
+
+        socket.on('listener_status', handleListenerStatus);
+
+        return () => {
+            socket.off('listener_status', handleListenerStatus);
+        };
+    }, [socket]);
     
     useEffect(() => {
         const fetchInitialData = async () => {

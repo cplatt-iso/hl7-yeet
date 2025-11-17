@@ -17,7 +17,9 @@ Use this reference template when you want a simulator run to emit HL7 orders syn
         "queue_metadata": {
           "priority": "STAT",
           "campaign": "nightly-load-test"
-        }
+        },
+        "queue_retry_limit": 3,
+        "queue_retry_delay_ms": 10000
       }
     },
     {
@@ -53,3 +55,5 @@ Use this reference template when you want a simulator run to emit HL7 orders syn
 - When the run executes, step 1 queues a job with the latest patient and order context. The Python runner stops there and marks the run `WAITING_ON_WORKERS`.
 - Steps 2–4 are included in the queued payload so worker processes can regenerate DICOM, send it, and perform any throttling without blocking the main runner.
 - Add or remove follow-on steps as needed; workers should respect the order shown in the `remaining_steps` array that is emitted with each job.
+- `queue_retry_limit` controls how many times the worker will republish the job if a step fails (defaults to 3). After the limit is reached the run is marked `ERROR` and retries stop.
+- `queue_retry_delay_ms` adds an optional back-off between attempts (defaults to 5000 ms). Set to `0` for immediate retries.

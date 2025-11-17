@@ -1,6 +1,6 @@
 # --- NEW FILE: app/routes/sse_routes.py ---
 """Server-Sent Events routes for real-time streaming."""
-from flask import Blueprint, Response, request
+from flask import Blueprint, Response, current_app, request
 from flask_jwt_extended import decode_token
 import json
 import time
@@ -45,7 +45,7 @@ def stream_run_logs(run_id):
         yield f"data: {json.dumps({'type': 'connection', 'message': 'Connected to run stream'})}\n\n"
         
         # Verify the run exists and belongs to user (optional security check)
-        run = crud.get_simulation_run_by_id(db, run_id)
+        run = crud.get_simulation_run_by_id(db, run_id, with_events=False)
         if not run:
             yield f"data: {json.dumps({'type': 'error', 'message': 'Run not found'})}\n\n"
             return
@@ -53,9 +53,26 @@ def stream_run_logs(run_id):
             yield f"data: {json.dumps({'type': 'error', 'message': 'Unauthorized'})}\n\n"
             return
             
-        # Send existing events first
-        if run.events:
-            for event in run.events:
+        page_size = current_app.config.get('SIM_RUN_EVENTS_DEFAULT_LIMIT', 2000)
+        if page_size <= 0:
+            page_size = 500
+
+        events_offset = 0
+        last_event_id = 0
+
+        while True:
+            events_batch, total_events = crud.get_simulation_run_events(
+                db,
+                run_id,
+                limit=page_size,
+                offset=events_offset,
+                order='asc',
+            )
+
+            if not events_batch:
+                break
+
+            for event in events_batch:
                 event_data = {
                     'type': 'log_update',
                     'run_id': run_id,
@@ -69,14 +86,15 @@ def stream_run_logs(run_id):
                     }
                 }
                 yield f"data: {json.dumps(event_data)}\n\n"
-        
-        # Store this connection
+                last_event_id = event.id
+
+            events_offset += len(events_batch)
+            if events_offset >= total_events:
+                break
+
         if run_id not in active_connections:
             active_connections[run_id] = []
         active_connections[run_id].append(generate)
-        
-        # Keep connection alive and check for new events
-        last_event_id = run.events[-1].id if run.events else 0
         
         while True:
             try:
@@ -85,7 +103,7 @@ def stream_run_logs(run_id):
                     new_events = db.session.query(crud.models.SimulationRunEvent).filter(
                         crud.models.SimulationRunEvent.run_id == run_id,
                         crud.models.SimulationRunEvent.id > last_event_id
-                    ).order_by(crud.models.SimulationRunEvent.id).all()
+                    ).order_by(crud.models.SimulationRunEvent.id).limit(page_size).all()
                     
                     for event in new_events:
                         event_data = {
@@ -104,7 +122,7 @@ def stream_run_logs(run_id):
                         last_event_id = event.id
                         
                     # Check if run is completed
-                    run = crud.get_simulation_run_by_id(db, run_id)
+                    run = crud.get_simulation_run_by_id(db, run_id, with_events=False)
                     if run and run.status in ['COMPLETED', 'ERROR']:
                         yield f"data: {json.dumps({'type': 'status_update', 'run_id': run_id, 'status': run.status})}\n\n"
                         if run.status == 'COMPLETED':

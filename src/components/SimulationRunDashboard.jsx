@@ -1,5 +1,5 @@
 // --- REPLACE src/components/SimulationRunDashboard.jsx ---
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-hot-toast';
 import { 
     getSimulationTemplatesApi, 
@@ -8,12 +8,13 @@ import {
     deleteSimulationRunApi,      // <-- IMPORT
     deleteAllSimulationRunsApi   // <-- IMPORT
 } from '../api/simulator';
+import { getWorkerAutoscalerStatusApi } from '../api/admin';
 import SimulationRunLog from './SimulationRunLog';
 import { useAuth } from '../context/AuthContext';
 import { TrashIcon } from '@heroicons/react/24/outline'; // <-- IMPORT
 
 const SimulationRunDashboard = () => {
-    const { socket } = useAuth();
+    const { socket, isAdmin } = useAuth();
     const [templates, setTemplates] = useState([]);
     const [runs, setRuns] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -21,8 +22,10 @@ const SimulationRunDashboard = () => {
     const [patientCount, setPatientCount] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [viewingRunId, setViewingRunId] = useState(null);
+    const [autoscalerStatus, setAutoscalerStatus] = useState(null);
+    const [autoscalerError, setAutoscalerError] = useState(null);
 
-    const fetchDashboardData = () => {
+    const fetchDashboardData = useCallback(() => {
         setIsLoading(true);
         Promise.all([
             getSimulationTemplatesApi(),
@@ -35,29 +38,119 @@ const SimulationRunDashboard = () => {
         }).finally(() => {
             setIsLoading(false);
         });
-    };
-
-    useEffect(() => {
-        fetchDashboardData();
     }, []);
 
     useEffect(() => {
-        if (socket) {
-            const handleStatusUpdate = (data) => {
-                setRuns(prevRuns =>
-                    prevRuns.map(run =>
-                        run.id === data.run_id ? { ...run, status: data.status } : run
-                    )
-                );
-            };
+        fetchDashboardData();
+    }, [fetchDashboardData]);
 
-            socket.on('sim_run_status_update', handleStatusUpdate);
-
-            return () => {
-                socket.off('sim_run_status_update', handleStatusUpdate);
-            };
+    const fetchAutoscalerStatus = useCallback(async () => {
+        if (!isAdmin) {
+            return;
         }
-    }, [socket]);
+        try {
+            const data = await getWorkerAutoscalerStatusApi();
+            setAutoscalerStatus(data.status);
+            setAutoscalerError(null);
+        } catch (error) {
+            console.error('Failed to fetch autoscaler status', error);
+            setAutoscalerError(error.message);
+        }
+    }, [isAdmin]);
+
+    useEffect(() => {
+        if (!isAdmin) {
+            setAutoscalerStatus(null);
+            setAutoscalerError(null);
+            return;
+        }
+        fetchAutoscalerStatus();
+        const timer = setInterval(fetchAutoscalerStatus, 20000);
+        return () => clearInterval(timer);
+    }, [isAdmin, fetchAutoscalerStatus]);
+
+    useEffect(() => {
+        if (!socket) {
+            return;
+        }
+
+        const handleStatusUpdate = (data) => {
+            if (!data || !data.run_id || !data.status) {
+                return;
+            }
+            setRuns(prevRuns =>
+                prevRuns.map(run =>
+                    run.id === data.run_id ? { ...run, status: data.status } : run
+                )
+            );
+            if (['COMPLETED', 'ERROR', 'CANCELLED'].includes(data.status)) {
+                fetchDashboardData();
+            }
+        };
+
+        const handleAsyncQueued = (payload) => {
+            if (!payload || !payload.run_id) {
+                return;
+            }
+            setRuns(prevRuns =>
+                prevRuns.map(run => {
+                    if (run.id !== payload.run_id) {
+                        return run;
+                    }
+                    if (run.status === 'COMPLETED' || run.status === 'ERROR' || run.status === 'CANCELLED') {
+                        return run;
+                    }
+                    return { ...run, status: 'WAITING_ON_WORKERS' };
+                })
+            );
+        };
+
+        const handleAsyncCompleted = (payload) => {
+            if (!payload || !payload.run_id) {
+                return;
+            }
+            const nextStatus = payload.metrics?.status;
+            if (nextStatus) {
+                setRuns(prevRuns =>
+                    prevRuns.map(run => run.id === payload.run_id ? { ...run, status: nextStatus } : run)
+                );
+                if (['COMPLETED', 'ERROR', 'CANCELLED'].includes(nextStatus)) {
+                    fetchDashboardData();
+                }
+            }
+        };
+
+        socket.on('sim_run_status_update', handleStatusUpdate);
+        socket.on('simulation_async_job_queued', handleAsyncQueued);
+        socket.on('simulation_async_job_completed', handleAsyncCompleted);
+
+        return () => {
+            socket.off('sim_run_status_update', handleStatusUpdate);
+            socket.off('simulation_async_job_queued', handleAsyncQueued);
+            socket.off('simulation_async_job_completed', handleAsyncCompleted);
+        };
+    }, [socket, fetchDashboardData]);
+
+    useEffect(() => {
+        if (!socket || !Array.isArray(runs) || runs.length === 0) {
+            return;
+        }
+
+        const joinedRunIds = new Set();
+
+        runs.forEach((run) => {
+            if (run && run.id) {
+                socket.emit('join_run_room', { run_id: run.id });
+                joinedRunIds.add(run.id);
+            }
+        });
+
+        return () => {
+            joinedRunIds.forEach((runId) => {
+                socket.emit('leave_run_room', { run_id: runId });
+            });
+        };
+    }, [socket, runs]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -109,11 +202,20 @@ const SimulationRunDashboard = () => {
 
     const getStatusBadgeColor = (status) => {
         switch (status) {
-            case 'RUNNING': return 'bg-blue-600 text-blue-100 animate-pulse';
-            case 'COMPLETED': return 'bg-green-600 text-green-100';
-            case 'ERROR': return 'bg-red-600 text-red-100';
-            case 'PENDING': return 'bg-yellow-600 text-yellow-100';
-            default: return 'bg-gray-600 text-gray-100';
+            case 'RUNNING':
+                return 'bg-blue-600 text-blue-100 animate-pulse';
+            case 'WAITING_ON_WORKERS':
+                return 'bg-purple-600 text-purple-100 animate-pulse';
+            case 'COMPLETED':
+                return 'bg-green-600 text-green-100';
+            case 'ERROR':
+                return 'bg-red-600 text-red-100';
+            case 'CANCELLED':
+                return 'bg-gray-600 text-gray-100 line-through';
+            case 'PENDING':
+                return 'bg-yellow-600 text-yellow-100';
+            default:
+                return 'bg-gray-600 text-gray-100';
         }
     };
 
@@ -140,6 +242,27 @@ const SimulationRunDashboard = () => {
                     {isSubmitting ? 'Starting...' : 'Run Simulation'}
                 </button>
             </form>
+
+            {isAdmin && (
+                <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="bg-gray-900 rounded-lg border border-gray-800 p-4">
+                        <h4 className="text-sm font-semibold text-gray-300 mb-3">Worker Autoscaler</h4>
+                        {autoscalerStatus ? (
+                            <div className="space-y-2 text-sm text-gray-200">
+                                <div className="flex justify-between"><span className="text-gray-400">Current Replicas</span><span className="font-mono">{autoscalerStatus.current_replicas ?? '—'}</span></div>
+                                <div className="flex justify-between"><span className="text-gray-400">Queue Depth</span><span className="font-mono">{autoscalerStatus.queue_depth ?? '—'}</span></div>
+                                <div className="flex justify-between"><span className="text-gray-400">Manual Override</span><span className="font-mono">{autoscalerStatus.manual_override_active ? `${autoscalerStatus.manual_override_replicas}` : 'No'}</span></div>
+                                <div className="flex justify-between"><span className="text-gray-400">Last Scale</span><span className="font-mono text-right">{autoscalerStatus.last_scale_at ? `${autoscalerStatus.last_scale_action || ''}` : '—'}</span></div>
+                                <div className="text-xs text-gray-500">Updated {autoscalerStatus.last_queue_check_at ? new Date(autoscalerStatus.last_queue_check_at).toLocaleTimeString() : '—'}</div>
+                            </div>
+                        ) : autoscalerError ? (
+                            <p className="text-sm text-red-400">{autoscalerError}</p>
+                        ) : (
+                            <p className="text-sm text-gray-400">Loading autoscaler status...</p>
+                        )}
+                    </div>
+                </div>
+            )}
 
             <div className="flex justify-between items-center mt-8 mb-4">
                 <h3 className="text-xl font-bold text-gray-200">Run History</h3>

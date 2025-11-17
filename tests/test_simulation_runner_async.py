@@ -45,6 +45,7 @@ def test_queue_async_order_job_success(monkeypatch):
     publisher_mock.publish_order_job.return_value = True
     publisher_mock.order_queue = "yeeter.simulation.orders"
     monkeypatch.setattr("app.util.simulation_runner.get_rabbitmq_publisher", lambda: publisher_mock)
+    monkeypatch.setattr("app.crud.record_queue_publish_metric", lambda *args, **kwargs: None)
 
     step = cast(
         models.SimulationStep,
@@ -62,6 +63,11 @@ def test_queue_async_order_job_success(monkeypatch):
     assert payload["hl7_message"] == "HL7|MSG"
     assert payload["queue"] == "yeeter.simulation.orders"
     assert payload["metadata"] == {"priority": "STAT"}
+    assert payload["retry_policy"] == {
+        "attempt": 1,
+        "max_attempts": 3,
+        "retry_delay_ms": 5000,
+    }
     assert payload["run_context"]["patient"]["mrn"] == "999"
     assert payload["remaining_steps"] == [
         {

@@ -26,7 +26,7 @@ def test_handle_payload_success(monkeypatch):
 
     run_record = SimpleNamespace(id=7, status="WAITING_ON_WORKERS", completed_at=None)
 
-    def fake_get_run(db_obj, run_id):
+    def fake_get_run(db_obj, run_id, **kwargs):
         assert run_id == 7
         return run_record
 
@@ -35,6 +35,13 @@ def test_handle_payload_success(monkeypatch):
 
     monkeypatch.setattr("app.worker.consumer.crud.get_simulation_run_by_id", fake_get_run)
     monkeypatch.setattr("app.worker.consumer.db", dummy_db)
+
+    def fake_record_metric(db_obj, run_id, **kwargs):
+        return SimpleNamespace(id=1, run_id=run_id, created_at="2025-01-01T00:00:00Z", **kwargs)
+
+    monkeypatch.setattr("app.worker.consumer.crud.record_worker_job_metric", fake_record_metric)
+    monkeypatch.setattr("app.worker.consumer.crud.get_run_stats_record", lambda *args, **kwargs: None)
+    monkeypatch.setattr("app.worker.consumer.crud.update_run_timing_metrics", lambda *args, **kwargs: None)
 
     socket_emits = []
 
@@ -86,13 +93,17 @@ def test_handle_payload_success(monkeypatch):
         ],
     }
 
-    assert consumer._handle_payload(payload) is True
+    result = consumer._handle_payload(payload)
+    assert isinstance(result, dict)
+    assert result.get("success") is True
 
     assert run_record.status == "COMPLETED"
     assert run_record.completed_at is not None
     dummy_session.commit.assert_called_once()
 
-    assert socket_emits == [("sim_run_status_update", {"run_id": 7, "status": "COMPLETED"}, "run-7")]
+    assert ("sim_run_status_update", {"run_id": 7, "status": "COMPLETED"}, "run-7") in socket_emits
+    completion_events = [evt for evt in socket_emits if evt[0] == "simulation_async_job_completed"]
+    assert completion_events, "expected worker completion payload to be emitted"
 
     assert any(call[0] == "generate_dicom" for call in runner_calls)
     assert any(call[0] == "send_dicom" for call in runner_calls)
@@ -109,7 +120,7 @@ def test_handle_payload_failure(monkeypatch):
 
     run_record = SimpleNamespace(id=8, status="WAITING_ON_WORKERS", completed_at=None)
 
-    def fake_get_run(db_obj, run_id):
+    def fake_get_run(db_obj, run_id, **kwargs):
         assert run_id == 8
         return run_record
 
@@ -118,6 +129,13 @@ def test_handle_payload_failure(monkeypatch):
 
     monkeypatch.setattr("app.worker.consumer.crud.get_simulation_run_by_id", fake_get_run)
     monkeypatch.setattr("app.worker.consumer.db", dummy_db)
+
+    def fake_record_metric(db_obj, run_id, **kwargs):
+        return SimpleNamespace(id=1, run_id=run_id, created_at="2025-01-01T00:00:00Z", **kwargs)
+
+    monkeypatch.setattr("app.worker.consumer.crud.record_worker_job_metric", fake_record_metric)
+    monkeypatch.setattr("app.worker.consumer.crud.get_run_stats_record", lambda *args, **kwargs: None)
+    monkeypatch.setattr("app.worker.consumer.crud.update_run_timing_metrics", lambda *args, **kwargs: None)
     monkeypatch.setattr("app.worker.consumer.socketio.emit", MagicMock())
 
     class StubRunner:
@@ -142,6 +160,8 @@ def test_handle_payload_failure(monkeypatch):
         ],
     }
 
-    assert consumer._handle_payload(payload) is False
-    assert run_record.status == "WAITING_ON_WORKERS"
-    dummy_session.commit.assert_not_called()
+    result = consumer._handle_payload(payload)
+    assert isinstance(result, dict)
+    assert result.get("success") is False
+    assert run_record.status == "ERROR"
+    dummy_session.commit.assert_called_once()

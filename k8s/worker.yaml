@@ -15,9 +15,13 @@ spec:
       labels:
         app: yeeter-worker
     spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      nodeSelector:
+        kubernetes.io/hostname: t430
       containers:
       - name: worker
-        image: hl7-yeeter-worker:latest
+        image: docker.io/library/hl7-yeeter-worker:latest
         imagePullPolicy: IfNotPresent
         args:
         - "--prefetch"

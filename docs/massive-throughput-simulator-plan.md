@@ -61,7 +61,7 @@
 
 - [ ] Allow generator templates to specify which steps are "queued" vs "inline".
 - [ ] Adjust SimulationStep model and schemas to store queue name / job type metadata.
-- [ ] Modify frontend simulator UI to show queue-driven progress (orders queued, workers processing, completions).
+- [x] Modify frontend simulator UI to show queue-driven progress (orders queued, workers processing, completions).
 - [ ] Provide admin controls to scale worker replicas from UI (optional).
 - [x] Script a RabbitMQ-backed autoscaler to scale `yeeter-worker` replicas based on queue depth.
 

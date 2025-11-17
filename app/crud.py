@@ -406,12 +406,66 @@ def delete_simulation_template(db: SQLAlchemy, template_id: int, user_id: int, i
     db.session.commit()
     return True
 
-def get_simulation_run_by_id(db: SQLAlchemy, run_id: int) -> models.SimulationRun | None:
-    """Gets a simulation run, eagerly loading the template and its steps."""
-    return db.session.query(models.SimulationRun).options(
-        joinedload(models.SimulationRun.events),
+def get_simulation_run_by_id(
+    db: SQLAlchemy,
+    run_id: int,
+    *,
+    with_events: bool = False,
+) -> models.SimulationRun | None:
+    """Gets a simulation run, optionally eager loading the associated events."""
+    query = db.session.query(models.SimulationRun).options(
         joinedload(models.SimulationRun.template).joinedload(models.SimulationTemplate.steps)
-    ).filter(models.SimulationRun.id == run_id).one_or_none()
+    )
+
+    if with_events:
+        query = query.options(joinedload(models.SimulationRun.events))
+
+    return query.filter(models.SimulationRun.id == run_id).one_or_none()
+
+
+def get_simulation_run_events(
+    db: SQLAlchemy,
+    run_id: int,
+    *,
+    limit: int | None = None,
+    offset: int = 0,
+    order: str = "desc",
+) -> tuple[list[models.SimulationRunEvent], int]:
+    """Fetches simulation run events with pagination metadata."""
+
+    total_events = db.session.scalar(
+        db.select(func.count(models.SimulationRunEvent.id)).filter(models.SimulationRunEvent.run_id == run_id)
+    ) or 0
+
+    order_normalized = (order or "asc").lower()
+    if order_normalized not in {"asc", "desc"}:
+        order_normalized = "asc"
+
+    query = db.session.query(models.SimulationRunEvent).filter_by(run_id=run_id)
+
+    if order_normalized == "desc":
+        query = query.order_by(
+            models.SimulationRunEvent.timestamp.desc(),
+            models.SimulationRunEvent.id.desc(),
+        )
+    else:
+        query = query.order_by(
+            models.SimulationRunEvent.timestamp.asc(),
+            models.SimulationRunEvent.id.asc(),
+        )
+
+    if offset:
+        query = query.offset(max(offset, 0))
+
+    if limit:
+        query = query.limit(max(limit, 0))
+
+    events = list(query.all())
+
+    if order_normalized == "desc":
+        events.reverse()
+
+    return events, total_events
 
 def get_simulation_runs_for_user(db: SQLAlchemy, user_id: int) -> list[models.SimulationRun]:
     """Gets all simulation run summaries for a user."""
@@ -538,6 +592,38 @@ def calculate_simulation_run_stats(run: models.SimulationRun) -> dict[str, Any]:
         for step_order, stats in sorted(steps.items())
     ]
 
+    duration_summary: list[dict[str, Any]] = []
+    stats_record = getattr(run, 'stats', None)
+    if stats_record and isinstance(stats_record.step_duration_summary, dict):
+        for key, entry in stats_record.step_duration_summary.items():
+            try:
+                step_order = int(entry.get('step_order', key))
+            except (TypeError, ValueError):
+                step_order = key
+            count = int(entry.get('count', 0)) or 0
+            total_ms = float(entry.get('total_ms', 0.0)) if entry.get('total_ms') is not None else 0.0
+            avg_ms = total_ms / count if count else None
+            min_ms = entry.get('min_ms')
+            if min_ms is not None:
+                min_ms = float(min_ms)
+            max_ms = entry.get('max_ms')
+            if max_ms is not None:
+                max_ms = float(max_ms)
+            last_ms = entry.get('last_ms')
+            if last_ms is not None:
+                last_ms = float(last_ms)
+            duration_summary.append({
+                'step_order': step_order,
+                'step_type': entry.get('step_type'),
+                'count': count,
+                'total_ms': total_ms,
+                'avg_ms': avg_ms,
+                'min_ms': min_ms,
+                'max_ms': max_ms,
+                'last_ms': last_ms,
+            })
+        duration_summary.sort(key=lambda item: item.get('step_order', 0))
+
     return {
         'run_id': run.id,
         'user_id': run.user_id,
@@ -559,6 +645,7 @@ def calculate_simulation_run_stats(run: models.SimulationRun) -> dict[str, Any]:
         'max_iteration': max_iteration,
         'last_failure': last_failure_details,
         'steps': step_stats_payload,
+        'step_duration_summary': duration_summary,
     }
 
 
@@ -635,6 +722,67 @@ def record_dicom_send_metric(
         if stats.dicom_send_max_ms is None or duration_ms > stats.dicom_send_max_ms
         else stats.dicom_send_max_ms
     )
+
+    throughput_mbps = None
+    if success_bytes > 0 and duration_ms > 0:
+        seconds = duration_ms / 1000.0
+        if seconds > 0:
+            throughput_mbps = (success_bytes * 8.0) / seconds / 1_000_000
+
+    if throughput_mbps is not None:
+        stats.dicom_throughput_count += 1
+        stats.dicom_throughput_sum_mbps += throughput_mbps
+        stats.dicom_throughput_min_mbps = (
+            throughput_mbps
+            if stats.dicom_throughput_min_mbps is None or throughput_mbps < stats.dicom_throughput_min_mbps
+            else stats.dicom_throughput_min_mbps
+        )
+        stats.dicom_throughput_max_mbps = (
+            throughput_mbps
+            if stats.dicom_throughput_max_mbps is None or throughput_mbps > stats.dicom_throughput_max_mbps
+            else stats.dicom_throughput_max_mbps
+        )
+    db.session.commit()
+    return stats
+
+
+def record_step_duration_metric(
+    db: SQLAlchemy,
+    *,
+    run_id: int,
+    step_order: int,
+    step_type: str,
+    duration_ms: float,
+) -> models.SimulationRunStats:
+    stats = _ensure_run_stats(db, run_id)
+    summary = dict(stats.step_duration_summary or {})
+    key = str(step_order)
+    entry = summary.get(key, {
+        'step_order': step_order,
+        'step_type': step_type,
+        'count': 0,
+        'total_ms': 0.0,
+        'min_ms': None,
+        'max_ms': None,
+    })
+
+    entry['step_type'] = step_type
+    entry['count'] = int(entry.get('count', 0)) + 1
+    entry['total_ms'] = float(entry.get('total_ms', 0.0)) + float(duration_ms)
+    entry['min_ms'] = (
+        float(duration_ms)
+        if entry.get('min_ms') is None or duration_ms < entry.get('min_ms')
+        else entry.get('min_ms')
+    )
+    entry['max_ms'] = (
+        float(duration_ms)
+        if entry.get('max_ms') is None or duration_ms > entry.get('max_ms')
+        else entry.get('max_ms')
+    )
+    entry['last_ms'] = float(duration_ms)
+
+    summary[key] = entry
+    stats.step_duration_summary = summary
     db.session.commit()
     return stats
 
@@ -698,14 +846,42 @@ def get_run_stats_record(db: SQLAlchemy, run_id: int, *, create_if_missing: bool
     return _ensure_run_stats(db, run_id)
 
 
-def get_worker_metrics_for_run(db: SQLAlchemy, run_id: int) -> list[models.WorkerJobMetric]:
-    return list(
-        db.session.execute(
-            select(models.WorkerJobMetric)
-            .filter_by(run_id=run_id)
-            .order_by(models.WorkerJobMetric.created_at.asc())
-        ).scalars()
-    )
+def get_worker_metrics_for_run(
+    db: SQLAlchemy,
+    run_id: int,
+    *,
+    limit: int | None = None,
+    offset: int = 0,
+    order: str = "asc",
+) -> tuple[list[models.WorkerJobMetric], int]:
+    """Fetch worker metrics for a run with optional pagination."""
+    total_count = db.session.execute(
+        select(func.count()).select_from(models.WorkerJobMetric).filter_by(run_id=run_id)
+    ).scalar_one()
+
+    order_normalized = (order or "asc").lower()
+    if order_normalized not in {"asc", "desc"}:
+        order_normalized = "asc"
+
+    query = select(models.WorkerJobMetric).filter_by(run_id=run_id)
+    if order_normalized == "desc":
+        query = query.order_by(
+            models.WorkerJobMetric.created_at.desc(),
+            models.WorkerJobMetric.id.desc(),
+        )
+    else:
+        query = query.order_by(
+            models.WorkerJobMetric.created_at.asc(),
+            models.WorkerJobMetric.id.asc(),
+        )
+
+    if offset:
+        query = query.offset(max(offset, 0))
+    if limit:
+        query = query.limit(max(limit, 0))
+
+    metrics = list(db.session.execute(query).scalars())
+    return metrics, total_count
 
 
 def update_run_timing_metrics(db: SQLAlchemy, run_id: int) -> models.SimulationRunStats | None:
@@ -736,9 +912,15 @@ def build_run_metrics_payload(
     user: models.User | None = None,
     template: models.SimulationTemplate | None = None,
 ) -> dict[str, Any]:
-    queue_avg = _compute_average(stats.queue_publish_sum_ms, stats.queued_job_count)
-    dicom_avg = _compute_average(stats.dicom_send_sum_ms, stats.dicom_send_count)
-    worker_avg = _compute_average(stats.worker_job_duration_sum_ms, stats.worker_job_count)
+    queue_publish_sum = float(stats.queue_publish_sum_ms or 0.0)
+    dicom_send_sum = float(stats.dicom_send_sum_ms or 0.0)
+    worker_duration_sum = float(stats.worker_job_duration_sum_ms or 0.0)
+    dicom_throughput_sum = float(stats.dicom_throughput_sum_mbps or 0.0)
+
+    queue_avg = _compute_average(queue_publish_sum, stats.queued_job_count)
+    dicom_avg = _compute_average(dicom_send_sum, stats.dicom_send_count)
+    worker_avg = _compute_average(worker_duration_sum, stats.worker_job_count)
+    dicom_throughput_avg = _compute_average(dicom_throughput_sum, stats.dicom_throughput_count)
 
     if run is None:
         run = stats.run
@@ -746,6 +928,38 @@ def build_run_metrics_payload(
         template = getattr(run, "template", None)
     if user is None and run is not None:
         user = getattr(run, "user", None)
+
+    step_duration_payload: list[dict[str, Any]] = []
+    if isinstance(stats.step_duration_summary, dict):
+        for key, entry in stats.step_duration_summary.items():
+            try:
+                step_order = int(entry.get('step_order', key))
+            except (TypeError, ValueError):
+                step_order = key
+            count = int(entry.get('count', 0)) or 0
+            total_ms = float(entry.get('total_ms', 0.0)) if entry.get('total_ms') is not None else 0.0
+            avg_ms = total_ms / count if count else None
+            min_ms = entry.get('min_ms')
+            if min_ms is not None:
+                min_ms = float(min_ms)
+            max_ms = entry.get('max_ms')
+            if max_ms is not None:
+                max_ms = float(max_ms)
+            last_ms = entry.get('last_ms')
+            if last_ms is not None:
+                last_ms = float(last_ms)
+
+            step_duration_payload.append({
+                'step_order': step_order,
+                'step_type': entry.get('step_type'),
+                'count': count,
+                'total_ms': total_ms,
+                'avg_ms': avg_ms,
+                'min_ms': min_ms,
+                'max_ms': max_ms,
+                'last_ms': last_ms,
+            })
+        step_duration_payload.sort(key=lambda item: item.get('step_order', 0))
 
     return {
         "run_id": stats.run_id,
@@ -760,7 +974,7 @@ def build_run_metrics_payload(
         "queued_job_count": stats.queued_job_count,
         "queued_job_max_depth": stats.queued_job_max_depth,
         "queued_job_last_depth": stats.queued_job_last_depth,
-        "queue_publish_sum_ms": stats.queue_publish_sum_ms,
+    "queue_publish_sum_ms": queue_publish_sum,
         "queue_publish_min_ms": stats.queue_publish_min_ms,
         "queue_publish_max_ms": stats.queue_publish_max_ms,
         "queue_publish_avg_ms": queue_avg,
@@ -769,18 +983,24 @@ def build_run_metrics_payload(
         "dicom_attempted_bytes": stats.dicom_attempted_bytes,
         "dicom_success_bytes": stats.dicom_success_bytes,
         "dicom_send_count": stats.dicom_send_count,
-        "dicom_send_sum_ms": stats.dicom_send_sum_ms,
+    "dicom_send_sum_ms": dicom_send_sum,
         "dicom_send_min_ms": stats.dicom_send_min_ms,
         "dicom_send_max_ms": stats.dicom_send_max_ms,
         "dicom_send_avg_ms": dicom_avg,
+    "dicom_throughput_sum_mbps": dicom_throughput_sum,
+        "dicom_throughput_min_mbps": stats.dicom_throughput_min_mbps,
+        "dicom_throughput_max_mbps": stats.dicom_throughput_max_mbps,
+        "dicom_throughput_avg_mbps": dicom_throughput_avg,
+        "dicom_throughput_count": stats.dicom_throughput_count,
         "worker_job_count": stats.worker_job_count,
         "worker_job_success_count": stats.worker_job_success_count,
-        "worker_job_duration_sum_ms": stats.worker_job_duration_sum_ms,
+    "worker_job_duration_sum_ms": worker_duration_sum,
         "worker_job_duration_min_ms": stats.worker_job_duration_min_ms,
         "worker_job_duration_max_ms": stats.worker_job_duration_max_ms,
         "worker_job_duration_avg_ms": worker_avg,
         "wall_clock_seconds": stats.wall_clock_seconds,
         "orders_per_second": stats.orders_per_second,
+        "step_durations": step_duration_payload,
         "created_at": stats.created_at,
         "updated_at": stats.updated_at,
     }

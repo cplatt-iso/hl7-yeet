@@ -1,5 +1,5 @@
 // --- START OF FILE src/components/MetricsDashboard.jsx ---
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import {
@@ -10,6 +10,7 @@ import {
 } from '../api/metrics';
 import { useAuth } from '../context/AuthContext';
 import YeetLoader from './YeetLoader';
+import Sparkline from './Sparkline';
 
 const initialRunSummary = {
     run_count: 0,
@@ -144,6 +145,24 @@ const MetricsDashboard = () => {
         }
     };
 
+    const workerDurationTrend = useMemo(() => {
+        if (!Array.isArray(runData) || runData.length === 0) {
+            return [];
+        }
+        return [...runData]
+            .filter((run) => run.worker_job_duration_avg_ms !== null && run.worker_job_duration_avg_ms !== undefined)
+            .sort((a, b) => {
+                const aTime = new Date(a.completed_at || a.started_at || 0).getTime();
+                const bTime = new Date(b.completed_at || b.started_at || 0).getTime();
+                return aTime - bTime;
+            })
+            .map((run) => Number(run.worker_job_duration_avg_ms));
+    }, [runData]);
+
+    const workerDurationLatest = workerDurationTrend.length
+        ? workerDurationTrend[workerDurationTrend.length - 1]
+        : null;
+
     useEffect(() => {
         if (!isAuthenticated) {
             return;
@@ -240,6 +259,19 @@ const MetricsDashboard = () => {
                     <SummaryCard label="Orders / Second" value={formatFloat(runSummary.average_orders_per_second, 2)} hint={ordersPerSecondHint} />
                     <SummaryCard label="DICOM Instances" value={formatNumber(runSummary.total_dicom_instances)} hint={`${formatBytes(runSummary.total_dicom_bytes)} transferred`} />
                 </div>
+
+                {workerDurationTrend.length > 1 && (
+                    <div className="rounded-lg border border-gray-700 bg-gray-800 p-4 shadow-sm">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <p className="text-sm text-gray-400">Worker Duration Trend</p>
+                                <p className="mt-1 text-2xl font-semibold text-gray-100">{formatFloat(workerDurationLatest, 2)} ms</p>
+                                <p className="mt-1 text-xs text-gray-500">Average worker runtime across the last {workerDurationTrend.length} completed runs.</p>
+                            </div>
+                            <Sparkline data={workerDurationTrend} className="sm:ml-4" />
+                        </div>
+                    </div>
+                )}
 
                 <form onSubmit={handleApplyRunFilters} className="grid gap-4 rounded-lg border border-gray-700 bg-gray-800 p-4 md:grid-cols-6">
                     <div className="md:col-span-1">

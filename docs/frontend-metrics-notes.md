@@ -2,7 +2,7 @@
 
 ## Context Recap
 - Backend now exposes per-run metrics at `/api/simulator/runs/<id>/metrics` returning aggregate stats plus individual worker job entries.
-- Socket events available today: `sim_log_update`, `sim_run_status_update`, and `simulation_async_job_queued`; additional real-time metrics streaming is still TBD on the backend.
+- Socket events available today: `sim_log_update`, `sim_run_status_update`, `simulation_async_job_queued`, and `simulation_async_job_completed`; additional real-time metrics streaming is still TBD on the backend.
 - Metrics persistence requires the new `simulation_run_stats` and `worker_job_metrics` tables—ensure the DB migration is applied before attempting UI work.
 
 ## Immediate UI Tasks
@@ -10,10 +10,11 @@
 - Render high-level aggregates (orders/sec, wall-clock, queue depth peaks, DICOM totals) as summary cards so users can scan performance quickly.
 - Display worker job history in a virtualized table with sortable columns for duration, outcome, and timestamps; include failure highlighting.
 - Provide CSV export from the browser using the metrics payload until backend CSV endpoints exist.
+- Visualise rolling worker duration averages (sparkline) on the metrics dashboard; reuse the same data shape for other trend views later.
 
 ## Pending Backend Dependencies
 - Global `/api/metrics/*` endpoints are still planned; design the frontend assuming future filters for date range, template, and user.
-- Real-time metrics streaming via Socket.IO is listed on the TODO. Build UI components so they can accept live updates (e.g., via context/provider) once the events land.
+- Real-time metrics streaming via Socket.IO is listed on the TODO. Build UI components so they can accept live updates (e.g., via context/provider) once the events land. The run log now listens for both queue and completion events to reconcile placeholders immediately.
 
 ## UX Considerations
 - Keep HL7/IHE compliance front and center: surface modality, accession, and MPPS context alongside metrics where it helps validate workflows.

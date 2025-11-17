@@ -2,9 +2,12 @@ import os
 import json
 import logging
 import click
+from flask import current_app
 from flask.cli import with_appcontext
+
 from .extensions import db
 from .models import Hl7TableDefinition
+from .util.worker_scaler import init_worker_autoscaler
 
 STATIC_DIR = "/app/app/static"  # inside container path
 
@@ -64,6 +67,28 @@ def load_hl7_tables():
     db.session.commit()
     click.echo(f"Fucking brilliant. Successfully loaded {loaded_count} definitions into the database.")
 
+
+@click.command(name="scale_workers")
+@click.argument("replicas", type=int)
+@with_appcontext
+def scale_workers(replicas: int):
+    """Manually scale the worker deployment to REPLICAS using the autoscaler."""
+
+    if replicas < 1:
+        raise click.BadParameter("replicas must be >= 1")
+
+    autoscaler = init_worker_autoscaler(current_app)
+    success, error = autoscaler.apply_manual_scale(replicas)
+    if not success:
+        raise click.ClickException(f"Failed to scale workers: {error}")
+
+    payload = autoscaler.get_status_payload()
+    status = payload.get("status", {})
+    click.echo(
+        f"Workers scaled to {status.get('current_replicas')} replicas (target={status.get('target_replicas')})."
+    )
+
 def register_commands(app):
     app.cli.add_command(load_hl7_tables)
+    app.cli.add_command(scale_workers)
 # --- END OF FILE app/commands.py ---

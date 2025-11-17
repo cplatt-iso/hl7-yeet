@@ -94,8 +94,26 @@ export const getSimulationRunsApi = async () => {
     return handleResponse(response);
 };
 
-export const getSimulationRunApi = async (runId) => {
-    const response = await fetch(`${API_URL}/api/simulator/runs/${runId}`, {
+export const getSimulationRunApi = async (runId, options = {}) => {
+    const { eventsLimit, eventsOffset, eventsOrder } = options;
+    const params = new URLSearchParams();
+
+    if (eventsLimit !== undefined && eventsLimit !== null) {
+        params.set('events_limit', eventsLimit);
+    }
+    if (eventsOffset !== undefined && eventsOffset !== null) {
+        params.set('events_offset', eventsOffset);
+    }
+    if (eventsOrder) {
+        params.set('events_order', eventsOrder);
+    }
+
+    const query = params.toString();
+    const url = query
+        ? `${API_URL}/api/simulator/runs/${runId}?${query}`
+        : `${API_URL}/api/simulator/runs/${runId}`;
+
+    const response = await fetch(url, {
         headers: getAuthHeaders(),
     });
     return handleResponse(response);
@@ -112,6 +130,31 @@ export const deleteSimulationRunApi = async (runId) => {
 export const deleteAllSimulationRunsApi = async () => {
     const response = await fetch(`${API_URL}/api/simulator/runs`, {
         method: 'DELETE',
+        headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+};
+
+export const getSimulationRunMetricsApi = async (runId, options = {}) => {
+    const { jobsLimit, jobsOffset, jobsOrder } = options;
+    const params = new URLSearchParams();
+
+    if (jobsLimit !== undefined && jobsLimit !== null) {
+        params.set('jobs_limit', jobsLimit);
+    }
+    if (jobsOffset !== undefined && jobsOffset !== null) {
+        params.set('jobs_offset', jobsOffset);
+    }
+    if (jobsOrder) {
+        params.set('jobs_order', jobsOrder);
+    }
+
+    const query = params.toString();
+    const url = query
+        ? `${API_URL}/api/simulator/runs/${runId}/metrics?${query}`
+        : `${API_URL}/api/simulator/runs/${runId}/metrics`;
+
+    const response = await fetch(url, {
         headers: getAuthHeaders(),
     });
     return handleResponse(response);

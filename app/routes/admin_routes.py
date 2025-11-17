@@ -3,6 +3,7 @@
 import os
 import logging
 from flask import Blueprint, jsonify, request, current_app
+from typing import cast
 from pydantic import ValidationError
 from werkzeug.utils import secure_filename
 
@@ -10,6 +11,7 @@ from ..auth_utils import auth_required, get_authenticated_user_id
 from ..extensions import db, socketio # <-- IMPORT socketio
 from .. import crud, schemas
 from ..util import definition_processor
+from ..util.worker_scaler import WorkerAutoscaler, get_worker_autoscaler
 from ..models import User
 from ..schemas import UserSchema
 
@@ -18,6 +20,67 @@ admin_bp = Blueprint('admin', __name__)
 
 def admin_required():
     return auth_required(admin=True)
+
+
+def _require_autoscaler():
+    autoscaler = get_worker_autoscaler()
+    if not autoscaler:
+        return None, (jsonify({"error": "Worker autoscaler is not available"}), 503)
+    return autoscaler, None
+
+
+@admin_bp.route('/worker/autoscaler', methods=['GET'])
+@admin_required()
+def get_worker_autoscaler_status():
+    autoscaler, error_response = _require_autoscaler()
+    if error_response:
+        return error_response
+    autoscaler = cast(WorkerAutoscaler, autoscaler)
+    return jsonify(autoscaler.get_status_payload()), 200
+
+
+@admin_bp.route('/worker/autoscaler', methods=['PUT'])
+@admin_required()
+def update_worker_autoscaler_config():
+    autoscaler, error_response = _require_autoscaler()
+    if error_response:
+        return error_response
+    autoscaler = cast(WorkerAutoscaler, autoscaler)
+    data = request.get_json() or {}
+    autoscaler.update_config(data)
+    return jsonify(autoscaler.get_status_payload()), 200
+
+
+@admin_bp.route('/worker/autoscaler/scale', methods=['POST'])
+@admin_required()
+def manual_worker_scale():
+    autoscaler, error_response = _require_autoscaler()
+    if error_response:
+        return error_response
+    autoscaler = cast(WorkerAutoscaler, autoscaler)
+    data = request.get_json() or {}
+    replicas = data.get('replicas')
+    if replicas is None:
+        return jsonify({"error": "replicas is required"}), 400
+    try:
+        replicas = int(replicas)
+    except (TypeError, ValueError):
+        return jsonify({"error": "replicas must be an integer"}), 400
+    success, error = autoscaler.apply_manual_scale(replicas)
+    if not success:
+        return jsonify({"error": error or "unable to scale"}), 400
+    return jsonify(autoscaler.get_status_payload()), 200
+
+
+@admin_bp.route('/worker/autoscaler/scale', methods=['DELETE'])
+@admin_required()
+def clear_manual_worker_scale():
+    autoscaler, error_response = _require_autoscaler()
+    if error_response:
+        return error_response
+    autoscaler = cast(WorkerAutoscaler, autoscaler)
+    autoscaler.clear_manual_override()
+    return jsonify(autoscaler.get_status_payload()), 200
 
 # ... (Version management routes are unchanged) ...
 @admin_bp.route('/versions', methods=['GET'])

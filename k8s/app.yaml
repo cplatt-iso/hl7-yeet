@@ -21,7 +21,7 @@ spec:
         command: ['sh', '-c', 'until nc -z postgres 5432; do echo waiting for postgres; sleep 2; done']
       containers:
       - name: yeeter
-        image: hl7-yeeter:latest
+        image: docker.io/library/hl7-yeeter:latest
         imagePullPolicy: IfNotPresent  # Use local image if available
         ports:
         - containerPort: 5001
@@ -69,6 +69,10 @@ spec:
             secretKeyRef:
               name: yeeter-secrets
               key: RABBITMQ_URL
+        - name: K8S_NAMESPACE
+          value: "yeeter"
+        - name: WORKER_DEPLOYMENT_NAME
+          value: "yeeter-worker"
         volumeMounts:
         - name: yeeter-storage
           mountPath: /app/db-data

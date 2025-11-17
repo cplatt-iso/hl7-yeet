@@ -11,10 +11,11 @@ from typing import Any
 
 import pika
 
-from .. import crud
+from .. import crud, schemas
 from ..extensions import db, socketio
 from ..util.metrics import emit_metric
-from ..util.simulation_runner import SimulationRunner, STEP_HANDLERS
+from ..util.rabbitmq_client import get_rabbitmq_publisher
+from ..util.simulation_runner import SimulationRunner, STEP_HANDLERS, cleanup_sim_run_artifacts
 
 
 class WorkerConsumer:
@@ -93,13 +94,22 @@ class WorkerConsumer:
             channel.basic_ack(delivery_tag=method.delivery_tag)
             return
 
+        result: dict[str, Any] | bool
         try:
-            success = self._handle_payload(payload)
+            result = self._handle_payload(payload)
         except Exception as exc:  # pragma: no cover - unexpected error
             logging.exception("Worker failed to process job: %s", exc)
-            success = False
+            result = {"success": False}
 
-        if success:
+        success = False
+        retrying = False
+        if isinstance(result, dict):
+            success = bool(result.get("success"))
+            retrying = bool(result.get("retrying"))
+        else:
+            success = bool(result)
+
+        if success or retrying:
             channel.basic_ack(delivery_tag=method.delivery_tag)
         else:
             if self.requeue_on_error:
@@ -107,7 +117,7 @@ class WorkerConsumer:
             else:
                 channel.basic_ack(delivery_tag=method.delivery_tag)
 
-    def _handle_payload(self, payload: dict[str, Any]) -> bool:
+    def _handle_payload(self, payload: dict[str, Any]) -> dict[str, Any]:
         job_meta = payload.get("job", {})
         job_id = payload.get("job_id") or job_meta.get("job_id")
         run_id = job_meta.get("run_id")
@@ -120,7 +130,28 @@ class WorkerConsumer:
         template_name = job_meta.get("template_name")
         queue_name = payload.get("queue") or self.queue_name
 
-        def _finish(success: bool, outcome: str, error: str | None = None) -> bool:
+        retry_policy = payload.get("retry_policy") or {}
+
+        def _coerce_int(value: Any, default: int, minimum: int) -> int:
+            try:
+                parsed = int(value)
+            except (TypeError, ValueError):
+                return default
+            return parsed if parsed >= minimum else minimum
+
+        attempt = _coerce_int(retry_policy.get("attempt"), default=1, minimum=1)
+        max_attempts = _coerce_int(retry_policy.get("max_attempts"), default=1, minimum=1)
+        retry_delay_ms = _coerce_int(retry_policy.get("retry_delay_ms"), default=0, minimum=0)
+
+        def _finish(
+            success: bool,
+            outcome: str,
+            *,
+            error: str | None = None,
+            retrying: bool = False,
+            attempt_override: int | None = None,
+            max_attempts_override: int | None = None,
+        ) -> bool:
             duration_ms = (time.perf_counter() - process_started) * 1000
             outstanding_steps = max(len(remaining_steps) - steps_executed, 0)
             emit_metric(
@@ -141,7 +172,7 @@ class WorkerConsumer:
             )
             if run_id:
                 with self.app_context():
-                    crud.record_worker_job_metric(
+                    metric = crud.record_worker_job_metric(
                         db,
                         run_id=run_id,
                         job_id=job_id,
@@ -155,18 +186,95 @@ class WorkerConsumer:
                         patient_iteration=patient_iter,
                         repeat_iteration=repeat_iter,
                     )
+
+                    stats_record = crud.get_run_stats_record(db, run_id, create_if_missing=True)
+                    run = crud.get_simulation_run_by_id(db, run_id, with_events=False)
+
+                    if run:
+                        now_naive = datetime.now(timezone.utc).replace(tzinfo=None)
+                        if success:
+                            if run.status not in {"CANCELLED", "ERROR"}:
+                                run.status = "COMPLETED"
+                                if not run.completed_at:
+                                    run.completed_at = now_naive
+                                db.session.commit()
+                                try:
+                                    crud.update_run_timing_metrics(db, run_id)
+                                except Exception:
+                                    logging.exception("Failed to update timing metrics for run %s", run_id)
+                                socketio.emit(
+                                    "sim_run_status_update",
+                                    {"run_id": run_id, "status": "COMPLETED"},
+                                    to=f"run-{run_id}",
+                                )
+                        elif not retrying and run.status not in {"CANCELLED", "ERROR"}:
+                            run.status = "ERROR"
+                            run.completed_at = now_naive
+                            db.session.commit()
+                            try:
+                                crud.update_run_timing_metrics(db, run_id)
+                            except Exception:
+                                logging.exception("Failed to update timing metrics for run %s", run_id)
+                            socketio.emit(
+                                "sim_run_status_update",
+                                {"run_id": run_id, "status": "ERROR"},
+                                to=f"run-{run_id}",
+                            )
+
+                    metrics_payload = None
+                    if stats_record and run:
+                        metrics_dict = crud.build_run_metrics_payload(
+                            stats_record,
+                            run=run,
+                            user=getattr(run, "user", None),
+                            template=getattr(run, "template", None),
+                        )
+                        metrics_payload = (
+                            schemas.SimulationRunMetricsResponse
+                            .model_validate(metrics_dict)
+                            .model_dump(mode="json")
+                        )
+
+                    job_payload = (
+                        schemas.WorkerJobMetricResponse
+                        .model_validate(metric)
+                        .model_dump(mode="json")
+                    )
+
+                    if attempt_override is not None:
+                        job_payload["attempt"] = attempt_override
+                    if max_attempts_override is not None:
+                        job_payload["max_attempts"] = max_attempts_override
+                    job_payload["retrying"] = retrying
+                    if error:
+                        job_payload.setdefault("error", error)
+
+                    socketio.emit(
+                        "simulation_async_job_completed",
+                        {
+                            "run_id": run_id,
+                            "job": job_payload,
+                            "metrics": metrics_payload,
+                            "retrying": retrying,
+                            "retry_attempt": attempt_override,
+                            "retry_max_attempts": max_attempts_override,
+                        },
+                        to=f"run-{run_id}",
+                    )
             return success
 
         try:
             if not run_id:
                 logging.warning("Worker payload missing run_id; acking job %s", job_id)
-                return _finish(True, "skipped_missing_run")
+                _finish(True, "skipped_missing_run", attempt_override=attempt, max_attempts_override=max_attempts)
+                return {"success": True}
 
             with self.app_context():
-                run = crud.get_simulation_run_by_id(db, run_id)
+                run = crud.get_simulation_run_by_id(db, run_id, with_events=False)
             if not run:
                 logging.warning("Worker could not find SimulationRun %s; acking job %s", run_id, job_id)
-                return _finish(True, "skipped_run_absent")
+                _finish(True, "skipped_run_absent", attempt_override=attempt, max_attempts_override=max_attempts)
+                return {"success": True}
 
             runner = SimulationRunner(run_id=run_id, app_context=self.app_context)
             runner.run_context = payload.get("run_context", {})
@@ -176,6 +284,10 @@ class WorkerConsumer:
             runner._template_steps = []
             runner._iteration_delegated = False
             runner._queued_jobs = 0
+
+            failure_outcome: str | None = None
+            failure_error: str | None = None
+            failure_step: SimpleNamespace | None = None
 
             for step_data in remaining_steps:
                 step_obj = SimpleNamespace(
@@ -204,25 +316,68 @@ class WorkerConsumer:
                         "FAILURE",
                         f"Worker failed step '{step_obj.step_type}'.",
                     )
-                    return _finish(False, "step_failure", error=f"step_failed:{step_obj.step_type}")
+                    failure_outcome = "step_failure"
+                    failure_error = f"step_failed:{step_obj.step_type}"
+                    failure_step = step_obj
+                    break
                 steps_executed += 1
 
-            with self.app_context():
-                refreshed_run = crud.get_simulation_run_by_id(db, run_id)
-                if refreshed_run:
-                    if refreshed_run.status not in {"CANCELLED", "ERROR"}:
-                        refreshed_run.status = "COMPLETED"
-                        refreshed_run.completed_at = datetime.now(timezone.utc).replace(tzinfo=None)
-                        db.session.commit()
-                        try:
-                            crud.update_run_timing_metrics(db, run_id)
-                        except Exception:
-                            logging.exception("Failed to update timing metrics for run %s", run_id)
-                        socketio.emit(
-                            "sim_run_status_update",
-                            {"run_id": run_id, "status": "COMPLETED"},
-                            to=f"run-{run_id}",
+            if failure_outcome:
+                retrying = False
+                if attempt < max_attempts:
+                    publisher = get_rabbitmq_publisher()
+                    if publisher:
+                        new_payload = dict(payload)
+                        new_retry = dict(retry_policy)
+                        new_retry["attempt"] = attempt + 1
+                        new_payload["retry_policy"] = new_retry
+                        new_job_meta = dict(new_payload.get("job", {}))
+                        new_job_meta["retry_attempt"] = attempt + 1
+                        new_payload["job"] = new_job_meta
+                        retrying = publisher.publish_order_job(new_payload)
+                        if retrying:
+                            step_order = failure_step.step_order if failure_step else 0
+                            runner._log_event(
+                                step_order,
+                                patient_iter,
+                                repeat_iter,
+                                "WARN",
+                                f"Async job {job_id or 'unknown'} failed (attempt {attempt}/{max_attempts}); requeued for retry.",
+                            )
+                            if retry_delay_ms > 0:
+                                time.sleep(retry_delay_ms / 1000.0)
+                        else:
+                            logging.error(
+                                "Worker failed to republish async job %s for retry; max attempts may be exceeded.",
+                                job_id,
+                            )
+                    else:
+                        logging.warning(
+                            "Retry requested for async job %s but RabbitMQ publisher is unavailable.",
+                            job_id,
                         )
+
+                if not retrying and attempt >= max_attempts:
+                    step_order = failure_step.step_order if failure_step else 0
+                    runner._log_event(
+                        step_order,
+                        patient_iter,
+                        repeat_iter,
+                        "FAILURE",
+                        f"Async job {job_id or 'unknown'} exhausted {max_attempts} attempt(s); marking run as ERROR.",
+                    )
+
+                _finish(
+                    False,
+                    failure_outcome,
+                    error=failure_error,
+                    retrying=retrying,
+                    attempt_override=attempt,
+                    max_attempts_override=max_attempts,
+                )
+                if retrying:
+                    return {"success": False, "retrying": True}
+                return {"success": False}
 
             runner._log_event(
                 999,
@@ -231,7 +386,33 @@ class WorkerConsumer:
                 "SUCCESS",
                 f"Worker completed job {job_id or 'unknown'}.",
             )
-            return _finish(True, "completed")
+            cleanup_ok, cleanup_error = cleanup_sim_run_artifacts(run_id)
+            if cleanup_ok:
+                runner._log_event(
+                    999,
+                    patient_iter,
+                    repeat_iter,
+                    "INFO",
+                    "Removed generated DICOM files for this run.",
+                )
+            elif cleanup_error:
+                runner._log_event(
+                    999,
+                    patient_iter,
+                    repeat_iter,
+                    "WARN",
+                    f"Failed to remove generated DICOM files: {cleanup_error}",
+                )
+            _finish(True, "completed", attempt_override=attempt, max_attempts_override=max_attempts)
+            return {"success": True}
         except Exception as exc:  # pragma: no cover - defensive
             logging.exception("Worker encountered exception for job %s", job_id)
-            return _finish(False, "exception", error=str(exc))
+            _finish(
+                False,
+                "exception",
+                error=str(exc),
+                retrying=False,
+                attempt_override=attempt,
+                max_attempts_override=max_attempts,
+            )
+            return {"success": False}
