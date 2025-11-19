@@ -11,10 +11,13 @@ from types import SimpleNamespace
 from uuid import uuid4
 from faker import Faker
 from hl7apy.parser import parse_message
+from pydantic import ValidationError
 from sqlalchemy import select
 
 from ..extensions import db, socketio
 from .. import crud, models
+from ..catalog.factory import get_exam_factory
+from ..exam_spec import ExamSpec, Laterality
 from .rabbitmq_client import get_rabbitmq_publisher, is_rabbitmq_enabled
 from .faker_parser import process_faker_string
 from .dicom_generator import create_study_files
@@ -97,6 +100,8 @@ class SimulationRunner:
         self.app_context = app_context
         self.run_context = {}  # This holds the state for a single patient workflow
         self.faker = Faker()
+        self._exam_factory = get_exam_factory()
+        self._current_exam_spec: ExamSpec | None = None
         self._cancelled = False
         self._rabbitmq_enabled = is_rabbitmq_enabled()
         self._template_id: int | None = None
@@ -379,6 +384,133 @@ class SimulationRunner:
             patient_details = ", ".join([f"{key}: {value}" for key, value in self.run_context['patient'].items()])
             self._log_event(0, patient_iter, 0, 'INFO', f"Patient Context: {patient_details}")
 
+    def _ensure_order_context(self) -> dict:
+        return self.run_context.setdefault('order', {})
+
+    def _ensure_accession_number(self) -> str:
+        order_context = self._ensure_order_context()
+        accession = order_context.get('accession_number')
+        if not accession:
+            accession = f"ACC{self.faker.random_number(digits=8, fix_len=True)}"
+            order_context['accession_number'] = accession
+        return accession
+
+    def _calculate_patient_age(self) -> int | None:
+        patient = self.run_context.get('patient', {})
+        dob_str = patient.get('dob')
+        if not dob_str:
+            return None
+        try:
+            dob = datetime.strptime(dob_str, '%Y%m%d').date()
+        except ValueError:
+            return None
+        today = datetime.utcnow().date()
+        years = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+        return max(years, 0)
+
+    def _normalize_laterality_filter(self, value: str | None) -> str | None:
+        if not value:
+            return None
+        value = value.strip().upper()
+        if value in {'R', 'L', 'B', 'U', ''}:
+            return value
+        try:
+            return Laterality[value].value
+        except KeyError:
+            return None
+
+    def _select_exam_spec(self, step: models.SimulationStep, patient_iter: int, repeat_iter: int) -> ExamSpec:
+        params = step.parameters if isinstance(step.parameters, dict) else {}
+        nested_param = params.get('exam')
+        nested = nested_param if isinstance(nested_param, dict) else {}
+
+        exam_id = nested.get('exam_id') or params.get('exam_id')
+        cpt_code = nested.get('cpt_code') or params.get('cpt_code')
+        modality = nested.get('modality') or params.get('modality')
+        body_part = nested.get('body_part') or params.get('body_part')
+        setting = nested.get('setting') or params.get('setting')
+        laterality = nested.get('laterality') or params.get('laterality')
+        laterality = self._normalize_laterality_filter(laterality)
+
+        patient_age = self._calculate_patient_age()
+        patient_sex = self.run_context.get('patient', {}).get('sex')
+
+        filters = {
+            'modality': modality.upper() if isinstance(modality, str) else None,
+            'body_part': body_part.upper() if isinstance(body_part, str) else None,
+            'setting': setting,
+            'laterality': laterality,
+            'patient_age': patient_age,
+            'patient_sex': patient_sex,
+        }
+
+        try:
+            if exam_id:
+                exam = self._exam_factory.get_exam_by_id(exam_id)
+                selection_details = f"exam_id={exam_id}"
+            elif cpt_code:
+                exam = self._exam_factory.get_exam_by_cpt_code(cpt_code)
+                selection_details = f"cpt_code={cpt_code}"
+            else:
+                exam = self._exam_factory.get_random_exam(**filters)
+                selection_details = f"random filters={ {k: v for k, v in filters.items() if v is not None} }"
+        except ValueError as exc:
+            self._log_event(step.step_order, patient_iter, repeat_iter, 'FAILURE', f"Exam selection failed: {exc}")
+            raise
+
+        self._log_event(step.step_order, patient_iter, repeat_iter, 'INFO', f"Using ExamSpec '{exam.id}' ({selection_details}).")
+        return exam
+
+    def _cache_exam_spec(self, exam: ExamSpec) -> None:
+        self._current_exam_spec = exam
+        self.run_context['exam_spec_id'] = exam.id
+        try:
+            self.run_context['exam_spec'] = json.loads(exam.json())
+        except TypeError:
+            self.run_context['exam_spec'] = exam.dict()
+
+    def _apply_exam_spec_context(self, exam: ExamSpec, step: models.SimulationStep, patient_iter: int, repeat_iter: int) -> None:
+        self._cache_exam_spec(exam)
+        order_context = self._ensure_order_context()
+        order_context.update({
+            'exam_id': exam.id,
+            'study_description': exam.description,
+            'modality': exam.modality,
+            'body_part': exam.body_part,
+            'laterality': exam.laterality.value,
+            'estimated_duration_min': exam.estimated_duration_min,
+            'setting': ','.join(exam.setting),
+            'contrast': getattr(exam.contrast, 'value', exam.contrast),
+            'contrast_agent': exam.contrast_agent,
+        })
+        order_context['procedure_codes'] = [code.dict() for code in exam.procedure_codes]
+
+        indication_override = step.parameters.get('indication') if isinstance(step.parameters, dict) else None
+        reason_for_exam = indication_override or exam.indication_template
+        if reason_for_exam:
+            order_context['reason_for_exam'] = reason_for_exam
+
+        self._log_event(
+            step.step_order,
+            patient_iter,
+            repeat_iter,
+            'DEBUG',
+            f"Cached ExamSpec context for {exam.id} (study='{exam.description}', modality='{exam.modality}').",
+        )
+
+    def _get_active_exam_spec(self) -> ExamSpec | None:
+        if self._current_exam_spec is not None:
+            return self._current_exam_spec
+        cached = self.run_context.get('exam_spec')
+        if not cached:
+            return None
+        if isinstance(cached, dict):
+            try:
+                self._current_exam_spec = ExamSpec(**cached)
+            except ValidationError:
+                return None
+        return self._current_exam_spec
+
     def execute(self):
         """The main execution method for the entire simulation run."""
         run = None # Define run outside the try block
@@ -408,6 +540,7 @@ class SimulationRunner:
             
             for i in range(1, patient_count + 1):
                 self.run_context = {}
+                self._current_exam_spec = None
                 self._iteration_delegated = False
                 self._check_for_cancellation(patient_iter=i, step_order=0, repeat_iter=0)
                 self._log_event(0, i, 0, 'INFO', f"--- Starting Iteration {i} of {patient_count} ---")
@@ -510,8 +643,15 @@ class SimulationRunner:
     def handle_generate_hl7(self, step: models.SimulationStep, patient_iter: int, repeat_iter: int) -> bool:
         self._log_event(step.step_order, patient_iter, repeat_iter, 'INFO', "Executing step: GENERATE_HL7")
         self._get_or_create_patient(patient_iter)
+        self._ensure_accession_number()
 
-        template_id = step.parameters.get('generator_template_id')
+        exam_spec = self._get_active_exam_spec()
+        if exam_spec is None:
+            exam_spec = self._select_exam_spec(step, patient_iter, repeat_iter)
+            self._apply_exam_spec_context(exam_spec, step, patient_iter, repeat_iter)
+
+        params = step.parameters if isinstance(step.parameters, dict) else {}
+        template_id = params.get('generator_template_id')
         if not template_id:
             raise ValueError("GENERATE_HL7 step is missing 'generator_template_id' parameter.")
         
@@ -536,7 +676,7 @@ class SimulationRunner:
         self.run_context['last_hl7_message'] = normalized_message
         
         # Get accession number field configuration from step parameters
-        accession_field = step.parameters.get('accession_field', 'OBR.3')  # Default to OBR-3
+        accession_field = params.get('accession_field', 'OBR.3')  # Default to OBR-3
         
         accession_extracted = False
         try:
@@ -630,7 +770,16 @@ class SimulationRunner:
         
         user_modality = params.get('modality', '').strip()
         worklist_item = self.run_context.get('worklist_item')
-        order_context = self.run_context.get('order', {})
+        order_context = self._ensure_order_context()
+        exam_spec = self._get_active_exam_spec()
+
+        if exam_spec:
+            order_context.setdefault('modality', exam_spec.modality)
+            order_context.setdefault('study_description', exam_spec.description)
+            order_context.setdefault('body_part', exam_spec.body_part)
+            if exam_spec.laterality.value:
+                order_context.setdefault('laterality', exam_spec.laterality.value)
+            self._log_event(step.step_order, patient_iter, repeat_iter, 'DEBUG', f"Using ExamSpec metadata for DICOM generation ({exam_spec.id}).")
         
         final_modality = ''
         if user_modality:
@@ -728,8 +877,8 @@ class SimulationRunner:
 
         # Infer body part from study description for better DICOM generation
         from .dicom_generator import _infer_body_part_from_description
-        inferred_body_part = _infer_body_part_from_description(final_desc)
-        self._log_event(step.step_order, patient_iter, repeat_iter, 'INFO', f"Inferred body part for DICOM generation: '{inferred_body_part}' from description: '{final_desc}'")
+        inferred_body_part = order_context.get('body_part') or _infer_body_part_from_description(final_desc)
+        self._log_event(step.step_order, patient_iter, repeat_iter, 'INFO', f"Body part for DICOM generation: '{inferred_body_part}' (source={'ExamSpec' if exam_spec else 'inferred'})")
 
         overrides = {
             "PatientName": f"{self.run_context['patient']['last_name']}^{self.run_context['patient']['first_name']}",
@@ -741,6 +890,9 @@ class SimulationRunner:
             "StudyDescription": final_desc,
             "BodyPartExamined": inferred_body_part,
         }
+
+        if exam_spec and exam_spec.laterality.value:
+            overrides["Laterality"] = exam_spec.laterality.value
 
         file_paths = create_study_files(
             output_dir=output_dir,

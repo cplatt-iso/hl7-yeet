@@ -160,4 +160,49 @@ export const getSimulationRunMetricsApi = async (runId, options = {}) => {
     return handleResponse(response);
 };
 
+
+// --- Exam Factory Integration ---
+
+const buildQueryString = (filters = {}) => {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+            params.set(key, value);
+        }
+    });
+    const query = params.toString();
+    return query ? `?${query}` : '';
+};
+
+export const getExamCatalogApi = async (filters = {}) => {
+    const query = buildQueryString(filters);
+    const response = await fetch(`${API_URL}/api/simulator/exams${query}`, {
+        headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+};
+
+export const getExamSpecApi = async (examId) => {
+    const response = await fetch(`${API_URL}/api/simulator/exams/${encodeURIComponent(examId)}`, {
+        headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+};
+
+export const getExamModalitiesApi = async () => {
+    const response = await fetch(`${API_URL}/api/simulator/exams/modalities`, {
+        headers: getAuthHeaders(),
+    });
+    return handleResponse(response);
+};
+
+export const selectExamSpecApi = async (filters = {}) => {
+    const response = await fetch(`${API_URL}/api/simulator/exams/select`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(filters || {}),
+    });
+    return handleResponse(response);
+};
+
 // --- END OF FILE: src/api/simulator.js ---

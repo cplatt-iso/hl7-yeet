@@ -1,16 +1,121 @@
 # --- START OF FILE app/routes/simulator_routes.py ---
 
 # ... (imports and other routes are unchanged) ...
+from typing import Any, Dict, cast
+
 from flask import Blueprint, jsonify, request, current_app
 from pydantic import ValidationError
 
 from .. import crud, schemas
+from ..catalog.factory import get_exam_factory
 from ..extensions import db, socketio
 from ..routes.admin_routes import admin_required
 from ..util.simulation_runner import run_simulation_task
 from ..auth_utils import auth_required, get_authenticated_user, get_authenticated_user_id
 
 simulator_bp = Blueprint('simulator', __name__, url_prefix='/api/simulator')
+
+
+def _serialize_exam_spec(exam: Any) -> Dict[str, Any]:
+    model_dump = getattr(exam, "model_dump", None)
+    if callable(model_dump):
+        return cast(Dict[str, Any], model_dump(mode='json'))
+    dict_method = getattr(exam, "dict", None)
+    if callable(dict_method):
+        return cast(Dict[str, Any], dict_method())
+    raise TypeError("ExamSpec object could not be serialized")
+
+
+def _build_factory_filters(filter_model: schemas.ExamFilterParams) -> dict:
+    filters = {
+        'modality': filter_model.modality,
+        'body_part': filter_model.body_part,
+        'setting': filter_model.setting,
+        'laterality': filter_model.laterality,
+        'patient_age': filter_model.patient_age,
+        'patient_sex': filter_model.patient_sex,
+    }
+    return {key: value for key, value in filters.items() if value not in (None, '')}
+
+
+@simulator_bp.route('/exams', methods=['GET'])
+@auth_required()
+def list_exam_specs():
+    raw_query = dict(request.args.items())
+    try:
+        filters_model = schemas.ExamFilterParams.model_validate(raw_query)
+    except ValidationError as exc:
+        return jsonify({"error": exc.errors()}), 422
+
+    filter_kwargs = _build_factory_filters(filters_model)
+    factory = get_exam_factory()
+    exams = factory.list_exams(**filter_kwargs)
+    payload = [_serialize_exam_spec(exam) for exam in exams]
+    response = {
+        'metadata': factory.get_catalog_metadata(),
+        'count': len(payload),
+        'filters': filter_kwargs,
+        'exams': payload,
+    }
+    return jsonify(response)
+
+
+@simulator_bp.route('/exams/<string:exam_id>', methods=['GET'])
+@auth_required()
+def get_exam_spec(exam_id: str):
+    factory = get_exam_factory()
+    try:
+        exam = factory.get_exam_by_id(exam_id)
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 404
+    return jsonify(_serialize_exam_spec(exam))
+
+
+@simulator_bp.route('/exams/modalities', methods=['GET'])
+@auth_required()
+def list_exam_modalities():
+    factory = get_exam_factory()
+    modalities = [
+        {
+            'code': code,
+            'count': len(factory.get_exams_by_modality(code)),
+        }
+        for code in factory.get_available_modalities()
+    ]
+    return jsonify({'modalities': modalities})
+
+
+@simulator_bp.route('/exams/select', methods=['POST'])
+@auth_required()
+def select_exam_spec():
+    try:
+        selection = schemas.ExamSelectionRequest.model_validate(request.get_json() or {})
+    except ValidationError as exc:
+        return jsonify({"error": exc.errors()}), 422
+
+    factory = get_exam_factory()
+    filter_kwargs = _build_factory_filters(selection)
+    strategy = 'random'
+
+    try:
+        if selection.exam_id:
+            exam = factory.get_exam_by_id(selection.exam_id)
+            strategy = 'exam_id'
+        elif selection.cpt_code:
+            exam = factory.get_exam_by_cpt_code(selection.cpt_code)
+            strategy = 'cpt_code'
+        else:
+            exam = factory.get_random_exam(**filter_kwargs)
+            strategy = 'random'
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 404
+
+    payload = _serialize_exam_spec(exam)
+    payload['_selection'] = {
+        'strategy': strategy,
+        'filters': filter_kwargs,
+    }
+    return jsonify(payload)
 
 # ... (Generator and Simulation Template CRUDs are unchanged) ...
 # --- Generator Template CRUD ---

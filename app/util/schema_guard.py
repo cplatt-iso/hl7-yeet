@@ -59,6 +59,15 @@ def ensure_simulation_run_stats_schema() -> None:
     """Ensure new SimulationRunStats columns exist in legacy deployments."""
 
     engine = _db.engine
+
+    # SQLite (used in tests) lacks ALTER TABLE ... ADD COLUMN IF NOT EXISTS and
+    # the JSONB casts in the statements below, so we simply skip the guard in
+    # that environment. The production deployments all run on PostgreSQL where
+    # these statements are valid.
+    if engine.dialect.name == "sqlite":
+        logging.info("Schema guard skipped for SQLite engine")
+        return
+
     with engine.begin() as conn:
         for statement in _SIM_STATS_ALTERS:
             sql = " ".join(line.strip() for line in statement.strip().splitlines())

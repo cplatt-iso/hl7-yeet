@@ -1,0 +1,97 @@
+{
+  "schema_version": "1.0",
+  "catalog_version": "2025.0.0",
+  "metadata": {
+    "maintainer": "HL7 Yeeter",
+    "modalities": ["CT", "MR"],
+    "total_exams": 2
+  },
+  "exams": [
+    {
+      "id": "CT-HEAD-WO",
+      "version": "1.0",
+      "modality": "CT",
+      "name": "CT Head Without Contrast",
+      "description": "CT HEAD W/O CONTRAST",
+      "body_part": "HEAD",
+      "laterality": "",
+      "indication_template": "Acute headache, rule out hemorrhage",
+      "contrast": "none",
+      "procedure_codes": [
+        {
+          "system": "CPT",
+          "code": "70450",
+          "display": "CT head without contrast"
+        }
+      ],
+      "series": [
+        {
+          "protocol_name": "HEAD_STD",
+          "series_description": "HEAD 5MM STD",
+          "instances": 32,
+          "acquisition_duration_sec": 180,
+          "matrix": [512, 512],
+          "slice_thickness_mm": 5.0,
+          "spacing_between_slices_mm": 5.0,
+          "pixel_profile": "ct_head"
+        }
+      ],
+      "estimated_duration_min": 5.0,
+      "frequency_weight": 2.0,
+      "setting": ["emergency", "inpatient"],
+      "custom_metadata": {
+        "department": "Neuroradiology"
+      }
+    },
+    {
+      "id": "MR-KNEE-RIGHT-WO",
+      "version": "1.0",
+      "modality": "MR",
+      "name": "MRI Knee Right Without Contrast",
+      "description": "MRI KNEE RIGHT W/O CONTRAST",
+      "body_part": "KNEE",
+      "laterality": "R",
+      "indication_template": "Right knee pain, evaluate for meniscal tear",
+      "contrast": "none",
+      "procedure_codes": [
+        {
+          "system": "CPT",
+          "code": "73721",
+          "display": "MRI lower extremity joint without contrast"
+        },
+        {
+          "system": "LOINC",
+          "code": "37017-7",
+          "display": "MR Lower extremity - right joint"
+        }
+      ],
+      "series": [
+        {
+          "protocol_name": "SAG_PD",
+          "series_description": "SAG PD KNEE",
+          "instances": 24,
+          "acquisition_duration_sec": 240,
+          "sequence_name": "pd_tse_sag",
+          "matrix": [320, 256],
+          "pixel_profile": "mr_msk_sag"
+        },
+        {
+          "protocol_name": "COR_PDFS",
+          "series_description": "COR PD FS KNEE",
+          "instances": 24,
+          "acquisition_duration_sec": 220,
+          "sequence_name": "pd_tse_fs_cor",
+          "matrix": [320, 256],
+          "pixel_profile": "mr_msk_cor"
+        }
+      ],
+      "estimated_duration_min": 25.0,
+      "min_age": 5,
+      "frequency_weight": 1.5,
+      "setting": ["outpatient"],
+      "custom_metadata": {
+        "subspecialty": "MSK"
+      }
+    }
+  ]
+}

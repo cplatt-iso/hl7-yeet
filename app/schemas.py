@@ -1,5 +1,5 @@
 # --- START OF FILE app/schemas.py ---
-from pydantic import BaseModel, Field, EmailStr, computed_field
+from pydantic import BaseModel, Field, EmailStr, computed_field, field_validator
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 
@@ -353,6 +353,41 @@ class WorkerMetricsListFilters(BaseModel):
     queue: Optional[str] = None
     success: Optional[bool] = None
     limit: int = Field(200, ge=1, le=2000)
+
+
+class ExamFilterParams(BaseModel):
+    modality: Optional[str] = Field(None, min_length=2)
+    body_part: Optional[str] = Field(None, min_length=2)
+    setting: Optional[str] = Field(None, min_length=2)
+    laterality: Optional[str] = Field(None, min_length=1, max_length=2)
+    patient_age: Optional[int] = Field(None, ge=0, le=120)
+    patient_sex: Optional[str] = Field(None, min_length=1, max_length=1)
+
+    @field_validator('modality', 'body_part', 'laterality', mode='before')
+    @classmethod
+    def _upper_if_string(cls, value: Optional[str]):
+        if value is None:
+            return value
+        return value.strip().upper()
+
+    @field_validator('setting', mode='before')
+    @classmethod
+    def _lower_setting(cls, value: Optional[str]):
+        if value is None:
+            return value
+        return value.strip().lower()
+
+    @field_validator('patient_sex', mode='before')
+    @classmethod
+    def _upper_sex(cls, value: Optional[str]):
+        if value is None:
+            return value
+        return value.strip().upper()
+
+
+class ExamSelectionRequest(ExamFilterParams):
+    exam_id: Optional[str] = Field(None, min_length=3)
+    cpt_code: Optional[str] = Field(None, min_length=3)
 
 
 # --- END OF FILE app/schemas.py ---
