@@ -1,6 +1,6 @@
 # EXAMGEN-5.0: Template Migration & Faker Refactor
 
-**Status:** Not Started  
+**Status:** In Progress  
 **Created:** 2025-01-18  
 **Previous:** [EXAMGEN-4.0](EXAMGEN-4.0-SimulationRunner-Integration.md)  
 **Next:** [EXAMGEN-6.0](EXAMGEN-6.0-Validation-Testing.md)
@@ -8,6 +8,12 @@
 ## Purpose
 
 Migrate existing HL7 message templates from faker string format to ExamSpec-driven generation, and refactor `app/util/faker_parser.py` to remove hardcoded study/modality tuples.
+
+## Progress Log
+
+| Date | Update |
+| ---- | ------ |
+| 2025-11-19 | Added ExamSpec-aware context helpers in `faker_parser.py`, wired SimulationRunner to call them, and created `tests/test_faker_parser.py` to prove we no longer fall back to random study/modality pairs when an exam is available. |
 
 ## Current Template Inventory
 
@@ -393,9 +399,9 @@ function StepConfigurationForm({ step, onChange }) {
 
 ## Implementation Checklist
 
-- [ ] Refactor `faker_parser.py` to use ExamSpec context
-- [ ] Add `set_current_exam()`, `get_current_exam()`, `clear_exam_context()` functions
-- [ ] Update faker functions: `faker_study_description()`, `faker_modality()`, etc.
+- [x] Refactor `faker_parser.py` to use ExamSpec context
+- [x] Add `set_current_exam()`, `get_current_exam()`, `clear_exam_context()` functions
+- [x] Update faker functions: `faker_study_description()`, `faker_modality()`, etc.
 - [ ] Add `use_exam_spec` and `exam_id` fields to SimulationStep model
 - [ ] Create database migration script
 - [ ] Update `handle_generate_hl7()` to support both paths

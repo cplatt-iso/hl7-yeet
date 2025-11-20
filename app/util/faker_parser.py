@@ -1,93 +1,213 @@
 # --- START OF FILE app/util/faker_parser.py ---
-import re
-import logging
+
+from __future__ import annotations
+
 import ast
+import json
+import logging
+import re
 from datetime import datetime
+from typing import Any, Dict, Optional, Tuple
+
 from faker import Faker
-from typing import Dict, Any, Tuple
+from pydantic import ValidationError
+
+from app.exam_spec import ExamSpec
 
 fake = Faker()
 FAKER_CUE_REGEX = re.compile(r'\{\$Faker\.(.+?)\}')
+LOGGER = logging.getLogger(__name__)
+
+DEFAULT_STUDY_MODALITY_PAIRS: Tuple[Tuple[str, str], ...] = (
+    ('CT HEAD W/O CONTRAST', 'CT'),
+    ('CT CHEST W/O CONTRAST', 'CT'),
+    ('CT ABDOMEN PELVIS W CONTRAST', 'CT'),
+    ('CT SPINE CERVICAL W/O CONTRAST', 'CT'),
+    ('CT SPINE LUMBAR W/O CONTRAST', 'CT'),
+    ('CT ANGIOGRAM HEAD AND NECK', 'CT'),
+    ('CT CHEST W CONTRAST', 'CT'),
+    ('MRI LUMBAR SPINE W/O CONTRAST', 'MR'),
+    ('MRI KNEE RIGHT W/O CONTRAST', 'MR'),
+    ('MRI BRAIN W/O CONTRAST', 'MR'),
+    ('MRI CERVICAL SPINE W/O CONTRAST', 'MR'),
+    ('MRI SHOULDER LEFT W/O CONTRAST', 'MR'),
+    ('MRI KNEE LEFT W/O CONTRAST', 'MR'),
+    ('MRI ANKLE RIGHT W/O CONTRAST', 'MR'),
+    ('CHEST X-RAY 2 VIEWS', 'DX'),
+    ('X-RAY FOOT 3 VIEWS LEFT', 'DX'),
+    ('X-RAY HAND 3 VIEWS RIGHT', 'DX'),
+    ('X-RAY SPINE LUMBAR 2 VIEWS', 'DX'),
+    ('X-RAY PELVIS 1 VIEW', 'DX'),
+    ('X-RAY ABDOMEN 2 VIEWS', 'DX'),
+    ('ULTRASOUND ABDOMEN COMPLETE', 'US'),
+    ('ULTRASOUND PELVIS TRANSVAGINAL', 'US'),
+    ('ULTRASOUND CAROTID DUPLEX', 'US'),
+    ('ECHOCARDIOGRAM COMPLETE', 'US'),
+    ('ULTRASOUND RENAL', 'US'),
+    ('MAMMOGRAM SCREENING BILATERAL', 'MG'),
+    ('MAMMOGRAM DIAGNOSTIC BILATERAL', 'MG'),
+    ('MAMMOGRAM UNILATERAL LEFT', 'MG'),
+    ('NUCLEAR MEDICINE BONE SCAN', 'NM'),
+    ('NUCLEAR MEDICINE CARDIAC STRESS', 'NM'),
+    ('NUCLEAR MEDICINE THYROID SCAN', 'NM'),
+    ('CR CHEST PA', 'CR'),
+    ('CR ABDOMEN SUPINE', 'CR'),
+    ('CR PELVIS AP', 'CR'),
+)
+
+_current_exam: Optional[ExamSpec] = None
+
+
+def set_current_exam(exam: Optional[ExamSpec]) -> None:
+    """Set the active ExamSpec so faker cues can reuse consistent metadata."""
+
+    global _current_exam
+    _current_exam = exam
+
+
+def get_current_exam() -> Optional[ExamSpec]:
+    """Return the currently cached ExamSpec, if any."""
+
+    return _current_exam
+
+
+def clear_exam_context() -> None:
+    """Clear any cached ExamSpec to avoid cross-template leakage."""
+
+    global _current_exam
+    _current_exam = None
+
+
+def _random_study_and_modality() -> Tuple[str, str]:
+    return fake.random_element(elements=DEFAULT_STUDY_MODALITY_PAIRS)
+
+
+def _coerce_exam_spec(exam_data: Any) -> Optional[ExamSpec]:
+    if isinstance(exam_data, ExamSpec):
+        return exam_data
+    if isinstance(exam_data, dict):
+        try:
+            return ExamSpec(**exam_data)
+        except ValidationError as exc:  # pragma: no cover - defensive
+            LOGGER.warning("Invalid exam_spec payload in context: %s", exc)
+            return None
+    if isinstance(exam_data, str):
+        try:
+            payload = json.loads(exam_data)
+        except ValueError as exc:  # pragma: no cover - defensive
+            LOGGER.warning("Failed to decode exam_spec JSON: %s", exc)
+            return None
+        return _coerce_exam_spec(payload)
+    return None
+
+
+def _resolve_exam_from_context(context: Dict[str, Any]) -> Optional[ExamSpec]:
+    if _current_exam is not None:
+        return _current_exam
+
+    for key in ('exam', 'exam_spec'):
+        exam_candidate = context.get(key)
+        exam = _coerce_exam_spec(exam_candidate)
+        if exam is not None:
+            return exam
+
+    order_exam_id = context.get('order', {}).get('exam_id')
+    if order_exam_id:
+        try:
+            from app.catalog.factory import get_exam_factory
+
+            return get_exam_factory().get_exam_by_id(order_exam_id)
+        except ValueError:
+            LOGGER.warning("Exam ID '%s' referenced in context but not found", order_exam_id)
+    return None
+
+
+def _seed_exam_metadata(context: Dict[str, Any], exam: ExamSpec) -> None:
+    order = context.setdefault('order', {})
+    order.setdefault('exam_id', exam.id)
+    order.setdefault('study_description', exam.description)
+    order.setdefault('modality', exam.modality)
+    order.setdefault('body_part', exam.body_part)
+    order.setdefault('laterality', getattr(exam.laterality, 'value', exam.laterality))
+    if exam.procedure_codes and 'procedure_codes' not in order:
+        order['procedure_codes'] = [code.dict() for code in exam.procedure_codes]
+    if exam.indication_template and 'reason_for_exam' not in order:
+        order['reason_for_exam'] = exam.indication_template
+
+
+def faker_study_description() -> str:
+    exam = get_current_exam()
+    if exam:
+        return exam.description
+    study_desc, _ = _random_study_and_modality()
+    return study_desc
+
+
+def faker_modality() -> str:
+    exam = get_current_exam()
+    if exam:
+        return exam.modality
+    _, modality = _random_study_and_modality()
+    return modality
+
+
+def faker_body_part() -> str:
+    exam = get_current_exam()
+    if exam:
+        return exam.body_part
+    return "BODY"
+
+
+def faker_laterality() -> str:
+    exam = get_current_exam()
+    if exam:
+        return getattr(exam.laterality, 'value', exam.laterality)
+    return ""
+
+
+def faker_procedure_code() -> str:
+    exam = get_current_exam()
+    if exam and exam.procedure_codes:
+        return exam.procedure_codes[0].code
+    return "99999"
+
+
+def faker_indication() -> str:
+    exam = get_current_exam()
+    if exam:
+        if exam.indication_template:
+            return exam.indication_template
+        return f"{exam.modality} {exam.body_part} exam"
+    return "Clinical indication not specified"
 
 def _generate_accession():
     return f"ACC{fake.random_number(digits=8, fix_len=True)}"
 
-def _generate_study_and_modality():
-    """Generates a realistic study description paired with appropriate modality."""
-    # Define realistic study description and modality pairs
-    study_modality_pairs = [
-        # CT Studies
-        ('CT HEAD W/O CONTRAST', 'CT'),
-        ('CT CHEST W/O CONTRAST', 'CT'),
-        ('CT ABDOMEN PELVIS W CONTRAST', 'CT'),
-        ('CT SPINE CERVICAL W/O CONTRAST', 'CT'),
-        ('CT SPINE LUMBAR W/O CONTRAST', 'CT'),
-        ('CT ANGIOGRAM HEAD AND NECK', 'CT'),
-        ('CT CHEST W CONTRAST', 'CT'),
-        
-        # MRI Studies  
-        ('MRI LUMBAR SPINE W/O CONTRAST', 'MR'),
-        ('MRI KNEE RIGHT W/O CONTRAST', 'MR'),
-        ('MRI BRAIN W/O CONTRAST', 'MR'),
-        ('MRI CERVICAL SPINE W/O CONTRAST', 'MR'),
-        ('MRI SHOULDER LEFT W/O CONTRAST', 'MR'),
-        ('MRI KNEE LEFT W/O CONTRAST', 'MR'),
-        ('MRI ANKLE RIGHT W/O CONTRAST', 'MR'),
-        
-        # X-Ray Studies
-        ('CHEST X-RAY 2 VIEWS', 'DX'),
-        ('X-RAY FOOT 3 VIEWS LEFT', 'DX'),
-        ('X-RAY HAND 3 VIEWS RIGHT', 'DX'),
-        ('X-RAY SPINE LUMBAR 2 VIEWS', 'DX'),
-        ('X-RAY PELVIS 1 VIEW', 'DX'),
-        ('X-RAY ABDOMEN 2 VIEWS', 'DX'),
-        
-        # Ultrasound Studies
-        ('ULTRASOUND ABDOMEN COMPLETE', 'US'),
-        ('ULTRASOUND PELVIS TRANSVAGINAL', 'US'),
-        ('ULTRASOUND CAROTID DUPLEX', 'US'),
-        ('ECHOCARDIOGRAM COMPLETE', 'US'),
-        ('ULTRASOUND RENAL', 'US'),
-        
-        # Mammography Studies
-        ('MAMMOGRAM SCREENING BILATERAL', 'MG'),
-        ('MAMMOGRAM DIAGNOSTIC BILATERAL', 'MG'),
-        ('MAMMOGRAM UNILATERAL LEFT', 'MG'),
-        
-        # Nuclear Medicine Studies
-        ('NUCLEAR MEDICINE BONE SCAN', 'NM'),
-        ('NUCLEAR MEDICINE CARDIAC STRESS', 'NM'),
-        ('NUCLEAR MEDICINE THYROID SCAN', 'NM'),
-        
-        # Computed Radiography Studies
-        ('CR CHEST PA', 'CR'),
-        ('CR ABDOMEN SUPINE', 'CR'),
-        ('CR PELVIS AP', 'CR'),
-    ]
-    
-    return fake.random_element(elements=study_modality_pairs)
-
 def _generate_and_cache_study_description(context: Dict[str, Any]) -> str:
     """Generate a study description and cache it in the context for reuse."""
-    if 'order' not in context:
-        context['order'] = {}
-    if 'study_description' not in context['order']:
-        # Generate paired study description and modality
-        study_desc, modality = _generate_study_and_modality()
-        context['order']['study_description'] = study_desc
-        context['order']['modality'] = modality
-    return context['order']['study_description']
+    exam = _resolve_exam_from_context(context)
+    if exam:
+        _seed_exam_metadata(context, exam)
+
+    order = context.setdefault('order', {})
+    if 'study_description' not in order:
+        study_desc, modality = _random_study_and_modality()
+        order['study_description'] = study_desc
+        order.setdefault('modality', modality)
+    return order['study_description']
 
 def _generate_and_cache_modality(context: Dict[str, Any]) -> str:
     """Generate a modality and cache it in the context for reuse."""
-    if 'order' not in context:
-        context['order'] = {}
-    if 'modality' not in context['order']:
-        # Generate paired study description and modality
-        study_desc, modality = _generate_study_and_modality()
-        context['order']['study_description'] = study_desc
-        context['order']['modality'] = modality
-    return context['order']['modality']
+    exam = _resolve_exam_from_context(context)
+    if exam:
+        _seed_exam_metadata(context, exam)
+
+    order = context.setdefault('order', {})
+    if 'modality' not in order:
+        study_desc, modality = _random_study_and_modality()
+        order.setdefault('study_description', study_desc)
+        order['modality'] = modality
+    return order['modality']
 
 def _generate_and_cache_accession(context: Dict[str, Any]) -> str:
     """Generate an accession number and cache it in the context for reuse."""
@@ -168,6 +288,10 @@ def _safe_eval_call_params(args_str: str) -> Tuple[list, dict]:
 
 
 def process_faker_string(template_string: str, context: Dict[str, Any]) -> str:
+    exam = _resolve_exam_from_context(context)
+    if exam:
+        _seed_exam_metadata(context, exam)
+
     def replacer(match):
         cue = match.group(1)
         

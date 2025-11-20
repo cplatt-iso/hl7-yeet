@@ -46,7 +46,7 @@ This feature track replaces the ad-hoc Faker string generation with a structured
 | [EXAMGEN-4.0](EXAMGEN-4.0-Runner-Integration.md) | SimulationRunner Integration | In Progress | EXAMGEN-2.2 |
 | [EXAMGEN-4.1](EXAMGEN-4.1-Faker-Parser-Refactor.md) | Faker Parser Refactor | Not Started | EXAMGEN-4.0 |
 | [EXAMGEN-4.2](EXAMGEN-4.2-DICOM-Generator-Update.md) | DICOM Generator Update | Not Started | EXAMGEN-4.0 |
-| [EXAMGEN-5.0](EXAMGEN-5.0-Template-Migration.md) | HL7 Template Migration | Not Started | EXAMGEN-4.1 |
+| [EXAMGEN-5.0](EXAMGEN-5.0-Template-Migration.md) | HL7 Template Migration | In Progress | EXAMGEN-4.1 |
 | [EXAMGEN-5.1](EXAMGEN-5.1-Template-Linting.md) | Template Linting & CI Checks | Not Started | EXAMGEN-5.0 |
 | [EXAMGEN-6.0](EXAMGEN-6.0-Validation-Guard.md) | Pre-Generation Validation Guard | Not Started | EXAMGEN-4.2 |
 | [EXAMGEN-7.0](EXAMGEN-7.0-Testing-Strategy.md) | Testing Strategy & Regression Suite | Not Started | EXAMGEN-6.0 |

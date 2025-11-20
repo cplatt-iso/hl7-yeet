@@ -19,7 +19,7 @@ from .. import crud, models
 from ..catalog.factory import get_exam_factory
 from ..exam_spec import ExamSpec, Laterality
 from .rabbitmq_client import get_rabbitmq_publisher, is_rabbitmq_enabled
-from .faker_parser import process_faker_string
+from .faker_parser import clear_exam_context, process_faker_string, set_current_exam
 from .dicom_generator import create_study_files
 from .dicom_actions import perform_c_store, perform_dmwl_find, perform_mpps_action
 from .metrics import emit_metric
@@ -671,7 +671,13 @@ class SimulationRunner:
             'ScheduledEnd': scheduled_end,
         })
 
-        generated_message = process_faker_string(gen_template.content, self.run_context)
+        exam_for_template = exam_spec or self._get_active_exam_spec()
+        if exam_for_template:
+            set_current_exam(exam_for_template)
+        try:
+            generated_message = process_faker_string(gen_template.content, self.run_context)
+        finally:
+            clear_exam_context()
         normalized_message = generated_message.replace('\n', '\r').strip()
         self.run_context['last_hl7_message'] = normalized_message
         
